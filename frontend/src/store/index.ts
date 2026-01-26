@@ -1,35 +1,59 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+interface CardData {
+  clientId: string
+  cardId: string
+  qrCode: string
+  tenantId: string
+}
+
 interface ClientState {
+  // Current active card
   clientId: string | null
   cardId: string | null
   qrCode: string | null
   tenantId: string | null
-  setClientData: (data: {
-    clientId: string
-    cardId: string
-    qrCode: string
-    tenantId: string
-  }) => void
+  // All saved cards
+  savedCards: CardData[]
+  setClientData: (data: CardData) => void
   clearClientData: () => void
+  addCard: (data: CardData) => void
+  getAllCards: () => CardData[]
+  getCard: (qrCode: string) => CardData | undefined
 }
 
 export const useClientStore = create<ClientState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       clientId: null,
       cardId: null,
       qrCode: null,
       tenantId: null,
-      setClientData: (data: { clientId: string; cardId: string; qrCode: string; tenantId: string }) => set(data),
+      savedCards: [],
+      setClientData: (data: CardData) => {
+        set(data)
+        // Also add to saved cards if not already there
+        const existing = get().savedCards.find(c => c.qrCode === data.qrCode)
+        if (!existing) {
+          set({ savedCards: [...get().savedCards, data] })
+        }
+      },
       clearClientData: () =>
         set({
           clientId: null,
           cardId: null,
           qrCode: null,
           tenantId: null
-        })
+        }),
+      addCard: (data: CardData) => {
+        const existing = get().savedCards.find(c => c.qrCode === data.qrCode)
+        if (!existing) {
+          set({ savedCards: [...get().savedCards, data] })
+        }
+      },
+      getAllCards: () => get().savedCards,
+      getCard: (qrCode: string) => get().savedCards.find(c => c.qrCode === qrCode)
     }),
     {
       name: 'fidelix-client-storage'

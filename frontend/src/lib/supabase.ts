@@ -173,5 +173,16 @@ export const api = {
       .limit(limit)
     if (error) throw error
     return data
+  },
+
+  // Get tenant info
+  async getTenant(tenantId: string): Promise<Tenant> {
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('*')
+      .eq('id', tenantId)
+      .single()
+    if (error) throw error
+    return data
   }
 }

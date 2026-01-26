@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 // Pages
 import ClientCard from './pages/client/ClientCard'
+import ClientWallet from './pages/client/ClientWallet'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminScanner from './pages/admin/AdminScanner'
@@ -93,8 +94,10 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
     <BrowserRouter>
       <Routes>
         {/* Client routes (public) */}
-        <Route path="/" element={<ClientCard />} />
+        <Route path="/" element={<ClientWallet />} />
+        <Route path="/wallet" element={<ClientWallet />} />
         <Route path="/card/:qrCode" element={<ClientCard />} />
+        <Route path="/card/new" element={<ClientCard />} />
 
         {/* Admin routes (protected) */}
         <Route path="/admin" element={<Navigate to="/admin/login" replace />} />

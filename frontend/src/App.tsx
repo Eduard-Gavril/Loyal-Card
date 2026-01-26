@@ -1,0 +1,114 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useAuthStore } from './store'
+import { useEffect, useState } from 'react'
+
+// Pages
+import ClientCard from './pages/client/ClientCard'
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminScanner from './pages/admin/AdminScanner'
+
+function App() {
+  const { session } = useAuthStore()
+  const [isConfigured, setIsConfigured] = useState(true)
+
+  useEffect(() => {
+    // Check if Supabase is configured
+    const url = import.meta.env.VITE_SUPABASE_URL || ''
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+    setIsConfigured(url && key && !url.includes('placeholder'))
+  }, [])
+
+  // Show setup instructions if not configured
+  if (!isConfigured) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">🚀 Fidelix</h1>
+            <p className="text-gray-600">Piattaforma Loyalty Digitale</p>
+          </div>
+
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-yellow-900 mb-3">⚙️ Configurazione Richiesta</h2>
+            <p className="text-yellow-800 mb-4">
+              Prima di utilizzare Fidelix, devi configurare Supabase.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-bold text-gray-900 mb-2">📝 Step 1: Crea progetto Supabase</h3>
+              <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1 ml-2">
+                <li>Vai su <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">supabase.com</a></li>
+                <li>Crea un nuovo progetto (gratuito)</li>
+                <li>Copia URL e Anon Key dal dashboard</li>
+              </ol>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-bold text-gray-900 mb-2">🗄️ Step 2: Setup Database</h3>
+              <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1 ml-2">
+                <li>Nel Supabase Dashboard → SQL Editor</li>
+                <li>Copia il contenuto di <code className="bg-gray-200 px-1 rounded">supabase/migrations/20260126_initial_schema.sql</code></li>
+                <li>Esegui la query</li>
+                <li>(Opzionale) Esegui anche <code className="bg-gray-200 px-1 rounded">supabase/seed.sql</code> per dati demo</li>
+              </ol>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-bold text-gray-900 mb-2">🔧 Step 3: Configura Frontend</h3>
+              <p className="text-sm text-gray-700 mb-2">
+                Modifica il file <code className="bg-gray-200 px-1 rounded">frontend/.env</code>:
+              </p>
+              <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">
+{`VITE_SUPABASE_URL=https://[tuo-project].supabase.co
+VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
+              </pre>
+            </div>
+
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                ℹ️ Dopo aver configurato, ricarica questa pagina
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center">
+            <a 
+              href="https://github.com/yourusername/fidelix" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              📖 Documentazione completa su GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Client routes (public) */}
+        <Route path="/" element={<ClientCard />} />
+        <Route path="/card/:qrCode" element={<ClientCard />} />
+
+        {/* Admin routes (protected) */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin/dashboard"
+          element={session ? <AdminDashboard /> : <Navigate to="/admin/login" />}
+        />
+        <Route
+          path="/admin/scan"
+          element={session ? <AdminScanner /> : <Navigate to="/admin/login" />}
+        />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
+export default App

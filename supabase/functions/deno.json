@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["deno.window"],
+    "strict": true,
+    "noImplicitAny": true
+  }
+}

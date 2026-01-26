@@ -12,14 +12,13 @@ interface Stats {
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  const { user, tenantId, role, clearAuth } = useAuthStore()
+  const { user, tenantId, clearAuth } = useAuthStore()
   const [stats, setStats] = useState<Stats>({
     totalScans: 0,
     totalClients: 0,
     totalRewards: 0,
     scansToday: 0
   })
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadStats()

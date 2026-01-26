@@ -16,7 +16,7 @@ function App() {
     // Check if Supabase is configured
     const url = import.meta.env.VITE_SUPABASE_URL || ''
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-    setIsConfigured(url && key && !url.includes('placeholder'))
+    setIsConfigured(!!(url && key && !url.includes('placeholder')))
   }, [])
 
   // Show setup instructions if not configured

@@ -6,6 +6,7 @@ interface CardData {
   cardId: string
   qrCode: string
   tenantId: string
+  customName?: string
 }
 
 interface ClientState {
@@ -21,6 +22,7 @@ interface ClientState {
   addCard: (data: CardData) => void
   getAllCards: () => CardData[]
   getCard: (qrCode: string) => CardData | undefined
+  updateCardName: (qrCode: string, customName: string) => void
 }
 
 export const useClientStore = create<ClientState>()(
@@ -53,7 +55,13 @@ export const useClientStore = create<ClientState>()(
         }
       },
       getAllCards: () => get().savedCards,
-      getCard: (qrCode: string) => get().savedCards.find(c => c.qrCode === qrCode)
+      getCard: (qrCode: string) => get().savedCards.find(c => c.qrCode === qrCode),
+      updateCardName: (qrCode: string, customName: string) => {
+        const cards = get().savedCards.map(card => 
+          card.qrCode === qrCode ? { ...card, customName } : card
+        )
+        set({ savedCards: cards })
+      }
     }),
     {
       name: 'fidelix-client-storage'

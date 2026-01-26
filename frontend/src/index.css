@@ -47,3 +47,22 @@ body {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500;
   }
 }
+/* QR Scanner Styles */
+#qr-reader {
+  width: 100% !important;
+}
+
+#qr-reader video {
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 0.5rem;
+}
+
+#qr-reader__dashboard_section {
+  padding: 1rem 0 !important;
+}
+
+#qr-reader__dashboard_section button {
+  @apply bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors !important;
+  border: none !important;
+}

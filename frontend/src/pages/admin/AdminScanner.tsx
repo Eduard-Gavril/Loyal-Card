@@ -42,7 +42,12 @@ export default function AdminScanner() {
       {
         fps: 10,
         qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0
+        aspectRatio: 1.0,
+        rememberLastUsedCamera: true,
+        // Prefer rear camera on mobile
+        videoConstraints: {
+          facingMode: { ideal: "environment" }
+        }
       },
       false
     )
@@ -51,10 +56,13 @@ export default function AdminScanner() {
       (decodedText) => {
         setScannedQR(decodedText)
         setScanning(false)
-        scanner.clear()
+        scanner.clear().catch(err => console.error('Error clearing scanner:', err))
       },
-      () => {
-        // Ignore continuous scan errors
+      (errorMessage) => {
+        // Ignore continuous scan errors (noise)
+        if (!errorMessage.includes('No MultiFormat Readers')) {
+          console.debug('QR scan error:', errorMessage)
+        }
       }
     )
   }
@@ -108,8 +116,16 @@ export default function AdminScanner() {
         {/* Scanner */}
         {scanning && (
           <div className="card mb-6">
-            <h2 className="text-xl font-bold mb-4">Inquadra il QR code del cliente</h2>
+            <div className="mb-4">
+              <h2 className="text-xl font-bold mb-2">📸 Inquadra il QR code</h2>
+              <p className="text-sm text-gray-600">
+                Posiziona il QR code del cliente al centro del riquadro
+              </p>
+            </div>
             <div id="qr-reader" className="w-full"></div>
+            <div className="mt-4 text-sm text-gray-500">
+              💡 Consenti l'accesso alla fotocamera quando richiesto
+            </div>
           </div>
         )}
 

@@ -329,9 +329,9 @@ ALTER TABLE reward_redemptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- Helper function: get tenant_id for current user
-CREATE OR REPLACE FUNCTION auth.get_user_tenant_id()
+CREATE OR REPLACE FUNCTION public.get_user_tenant_id()
 RETURNS UUID AS $$
-  SELECT tenant_id FROM admins WHERE user_id = auth.uid() LIMIT 1;
+  SELECT tenant_id FROM public.admins WHERE user_id = auth.uid() LIMIT 1;
 $$ LANGUAGE sql SECURITY DEFINER;
 
 -- TENANTS: Owner can manage their own tenant
@@ -347,7 +347,7 @@ CREATE POLICY "owners_manage_own_tenant" ON tenants
 -- STORES: Admin can manage stores in their tenant
 CREATE POLICY "admins_manage_tenant_stores" ON stores
   FOR ALL TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 -- ADMINS: Owner can manage admins in their tenant
 CREATE POLICY "owners_manage_tenant_admins" ON admins
@@ -362,27 +362,27 @@ CREATE POLICY "owners_manage_tenant_admins" ON admins
 -- PRODUCTS: Admin can manage products in their tenant
 CREATE POLICY "admins_manage_tenant_products" ON products
   FOR ALL TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 -- PRODUCT CATEGORIES: Admin can manage categories in their tenant
 CREATE POLICY "admins_manage_tenant_categories" ON product_categories
   FOR ALL TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 -- REWARD RULES: Admin can manage rules in their tenant
 CREATE POLICY "admins_manage_tenant_rules" ON reward_rules
   FOR ALL TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 -- CARDS: Admin can view/manage cards in their tenant
 CREATE POLICY "admins_manage_tenant_cards" ON cards
   FOR ALL TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 -- SCAN EVENTS: Admin can view events in their tenant, insert via function only
 CREATE POLICY "admins_view_tenant_scan_events" ON scan_events
   FOR SELECT TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 CREATE POLICY "service_role_insert_scan_events" ON scan_events
   FOR INSERT TO service_role
@@ -391,12 +391,12 @@ CREATE POLICY "service_role_insert_scan_events" ON scan_events
 -- REWARD REDEMPTIONS: Admin can view/insert in their tenant
 CREATE POLICY "admins_manage_tenant_redemptions" ON reward_redemptions
   FOR ALL TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 -- AUDIT LOGS: Admin can view their tenant logs
 CREATE POLICY "admins_view_tenant_audit_logs" ON audit_logs
   FOR SELECT TO authenticated
-  USING (tenant_id = auth.get_user_tenant_id());
+  USING (tenant_id = public.get_user_tenant_id());
 
 -- CLIENTS: Public read for client data (needed for anonymous flow)
 -- Actual security is in card QR validation

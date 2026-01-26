@@ -97,6 +97,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
         <Route path="/card/:qrCode" element={<ClientCard />} />
 
         {/* Admin routes (protected) */}
+        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
           path="/admin/dashboard"

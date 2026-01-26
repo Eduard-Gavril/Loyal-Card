@@ -110,7 +110,7 @@ export interface ScanEvent {
 
 // API helper functions
 export const api = {
-  // Generate anonymous client ID
+  // Generate anonymous client ID via Edge Function
   async generateClientId(tenantId: string) {
     const { data, error } = await supabase.functions.invoke('generate-client-id', {
       body: { tenant_id: tenantId }

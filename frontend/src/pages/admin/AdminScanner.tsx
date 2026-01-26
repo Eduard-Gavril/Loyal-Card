@@ -20,9 +20,9 @@ export default function AdminScanner() {
     initScanner()
 
     return () => {
-      // Cleanup scanner
-      const scanner = Html5QrcodeScanner.getCameras()
-      // TODO: proper cleanup
+      // Cleanup scanner on unmount
+      const elem = document.getElementById('qr-reader')
+      if (elem) elem.innerHTML = ''
     }
   }, [])
 
@@ -53,7 +53,7 @@ export default function AdminScanner() {
         setScanning(false)
         scanner.clear()
       },
-      (error) => {
+      () => {
         // Ignore continuous scan errors
       }
     )

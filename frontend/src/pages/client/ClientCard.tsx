@@ -118,15 +118,50 @@ export default function ClientCard() {
         <div className="card mb-6">
           <div className="text-center">
             <h2 className="text-xl font-bold mb-4">Il tuo QR Code</h2>
-            {qrDataUrl && (
-              <div className="flex justify-center mb-4">
-                <img src={qrDataUrl} alt="QR Code" className="w-64 h-64" />
+            {qrDataUrl ? (
+              <>
+                <div className="flex justify-center mb-4">
+                  <img src={qrDataUrl} alt="QR Code" className="w-64 h-64" />
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  Mostra questo codice alla cassa per accumulare premi
+                </p>
+                <p className="text-xs text-gray-500 font-mono">{qrCode}</p>
+              </>
+            ) : (
+              <div>
+                <p className="text-gray-600 mb-4">
+                  Non hai ancora una carta fedeltà
+                </p>
+                <button
+                  onClick={async () => {
+                    setLoading(true)
+                    try {
+                      const result = await api.generateClientId(DEMO_TENANT_ID)
+                      if (result.success) {
+                        setClientData({
+                          clientId: result.client_id,
+                          cardId: result.card_id,
+                          qrCode: result.qr_code,
+                          tenantId: DEMO_TENANT_ID
+                        })
+                        const cardData = await api.getCardByQR(result.qr_code)
+                        setCard(cardData)
+                        window.location.reload()
+                      }
+                    } catch (error) {
+                      console.error('Error generating card:', error)
+                      alert('Errore durante la generazione della carta')
+                    } finally {
+                      setLoading(false)
+                    }
+                  }}
+                  className="bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+                >
+                  Genera la tua Carta Fedeltà
+                </button>
               </div>
             )}
-            <p className="text-sm text-gray-600 mb-4">
-              Mostra questo codice alla cassa per accumulare premi
-            </p>
-            <p className="text-xs text-gray-500 font-mono">{qrCode}</p>
           </div>
 
           {/* Add to Wallet buttons */}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import { useAuthStore } from '@/store'
 import { api, Product, Card, RewardRule } from '@/lib/supabase'
+import DarkVeil from '@/components/DarkVeil'
 
 export default function AdminScanner() {
   const navigate = useNavigate()
@@ -167,62 +168,72 @@ export default function AdminScanner() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl shadow-lg border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center gap-4">
-          <button
-            onClick={() => navigate('/admin/dashboard')}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-300 hover:shadow-md"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Indietro
-          </button>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
-            Scansiona QR Code
-          </h1>
-        </div>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 z-0">
+        <DarkVeil hueShift={280} speed={0.3} warpAmount={0.1} />
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-10">
-        {/* Scanner */}
-        {scanning && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-3 text-gray-900 flex items-center gap-2">
-                <span className="text-3xl">📸</span>
-                Inquadra il QR code
-              </h2>
-              <p className="text-gray-600">
-                Posiziona il QR code del cliente al centro del riquadro
-              </p>
-            </div>
-            <div id="qr-reader" className="w-full rounded-xl overflow-hidden"></div>
-            <div className="mt-6 flex items-center gap-2 text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <span className="text-xl">💡</span>
-              <span>Consenti l'accesso alla fotocamera quando richiesto</span>
-            </div>
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+
+      {/* Content */}
+      <div className="relative z-20">
+        {/* Header */}
+        <header className="pt-6 px-6">
+          <div className="max-w-7xl mx-auto flex items-center gap-4">
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Indietro
+            </button>
+            <h1 className="text-4xl font-bold text-white tracking-tight">
+              Scansiona QR Code
+            </h1>
           </div>
-        )}
+        </header>
 
-        {!scanning && (
-          <div>
-            {/* QR Code scanned info */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50 mb-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
-                <span className="text-green-500">✓</span>
-                QR Code Scansionato
-              </h2>
-              <p className="text-sm text-gray-600 font-mono bg-gray-100 p-4 rounded-xl border border-gray-200">
-                {scannedQR}
-              </p>
+        <div className="max-w-2xl mx-auto px-6 py-10">
+          {/* Scanner */}
+          {scanning && (
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold mb-3 text-white flex items-center gap-2">
+                  <span className="text-4xl">📸</span>
+                  Inquadra il QR code
+                </h2>
+                <p className="text-gray-200">
+                  Posiziona il QR code del cliente al centro del riquadro
+                </p>
             </div>
+              <div id="qr-reader" className="w-full rounded-xl overflow-hidden"></div>
+              <div className="mt-6 flex items-center gap-2 text-sm text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
+                <span className="text-xl">💡</span>
+                <span>Consenti l'accesso alla fotocamera quando richiesto</span>
+              </div>
+            </div>
+          )}
 
-            {/* Mode selector */}
-            {!result && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50">
+          {!scanning && (
+            <div>
+              {/* QR Code scanned info */}
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6">
+                <h2 className="text-3xl font-bold mb-4 text-white flex items-center gap-2">
+                  <span className="text-green-400">✓</span>
+                  QR Code Scansionato
+                </h2>
+                <p className="text-sm text-gray-200 font-mono bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/10">
+                  {scannedQR}
+                </p>
+              </div>
+
+              {/* Mode selector */}
+              {!result && (
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
                 <div className="flex gap-3 mb-8">
                   <button
                     onClick={() => setMode('scan')}
@@ -255,10 +266,10 @@ export default function AdminScanner() {
                 {/* Product selection (scan mode) */}
                 {mode === 'scan' && (
                   <div>
-                    <h2 className="text-xl font-bold mb-4 text-gray-900">Seleziona il prodotto acquistato</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-white">Seleziona il prodotto acquistato</h2>
                     
                     {products.length === 0 ? (
-                      <p className="text-gray-600">Nessun prodotto disponibile</p>
+                      <p className="text-gray-200">Nessun prodotto disponibile</p>
                     ) : (
                       <div className="space-y-3">
                         {products.map((product) => (
@@ -267,11 +278,11 @@ export default function AdminScanner() {
                             onClick={() => setSelectedProduct(product.id)}
                             className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
                               selectedProduct === product.id
-                                ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20 scale-[1.02]'
-                                : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                                ? 'border-primary-400 bg-primary-500/20 shadow-lg shadow-primary-500/30 scale-[1.02]'
+                                : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
                             }`}
                           >
-                            <div className="font-semibold text-gray-900">{product.name}</div>
+                            <div className="font-semibold text-white">{product.name}</div>
                             {product.description && (
                               <div className="text-sm text-gray-600 mt-1">{product.description}</div>
                             )}
@@ -312,15 +323,15 @@ export default function AdminScanner() {
                 {/* Reward redemption (redeem mode) */}
                 {mode === 'redeem' && (
                   <div>
-                    <h2 className="text-xl font-bold mb-4 text-gray-900">Seleziona il premio da riscattare</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-white">Seleziona il premio da riscattare</h2>
                     
                     {!card || !card.loyalty_state || Object.keys(card.loyalty_state).length === 0 ? (
-                      <p className="text-gray-600">Nessun premio disponibile per questa card</p>
+                      <p className="text-gray-200">Nessun premio disponibile per questa card</p>
                     ) : rules.filter(rule => {
                         const state = card.loyalty_state[rule.id]
                         return state && state.rewards > 0
                       }).length === 0 ? (
-                      <div className="text-center py-8 text-gray-600 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                      <div className="text-center py-8 text-gray-200 bg-white/5 rounded-xl border-2 border-dashed border-white/20">
                         <span className="text-4xl mb-2 block">🎁</span>
                         Nessun premio disponibile per questa card
                       </div>
@@ -339,14 +350,14 @@ export default function AdminScanner() {
                                 onClick={() => setSelectedRule(rule.id)}
                                 className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
                                   selectedRule === rule.id
-                                    ? 'border-yellow-500 bg-yellow-50 shadow-lg shadow-yellow-500/20 scale-[1.02]'
-                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                                    ? 'border-yellow-400 bg-yellow-500/20 shadow-lg shadow-yellow-500/30 scale-[1.02]'
+                                    : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
                                 }`}
                               >
                                 <div className="flex justify-between items-start">
                                   <div>
-                                    <div className="font-semibold text-gray-900">{rule.name}</div>
-                                    <div className="text-sm text-gray-600 mt-2 flex items-center gap-2">
+                                    <div className="font-semibold text-white">{rule.name}</div>
+                                    <div className="text-sm text-gray-300 mt-2 flex items-center gap-2">
                                       <span>Premi disponibili:</span>
                                       <span className="font-bold text-yellow-600 text-lg">{state.rewards}</span>
                                     </div>
@@ -388,37 +399,37 @@ export default function AdminScanner() {
 
             {/* Success/Result message */}
             {result && (
-              <div className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border-2 ${result.redeemed ? 'border-yellow-300' : 'border-green-300'}`}>
-                <h2 className={`text-3xl font-bold mb-6 ${result.redeemed ? 'text-yellow-800' : 'text-green-800'}`}>
+              <div className={`bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border-2 ${result.redeemed ? 'border-yellow-400/50' : 'border-green-400/50'}`}>
+                <h2 className={`text-4xl font-bold mb-6 ${result.redeemed ? 'text-yellow-300' : 'text-green-300'}`}>
                   {result.redeemed ? '🎁 Premio Riscattato!' : '✓ Acquisto Registrato!'}
                 </h2>
 
                 {result.redeemed ? (
                   <div>
-                    <p className="text-yellow-700 text-lg mb-3">
+                    <p className="text-yellow-200 text-lg mb-3">
                       {result.message}
                     </p>
                     {result.remaining_rewards !== undefined && (
-                      <p className="text-sm text-yellow-600 bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+                      <p className="text-sm text-yellow-200 bg-yellow-500/20 rounded-xl p-4 border border-yellow-400/30">
                         Premi rimanenti: <span className="font-bold text-xl">{result.remaining_rewards}</span>
                       </p>
                     )}
                   </div>
                 ) : result.reward_earned ? (
-                  <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-2 border-yellow-300 p-6 rounded-xl mb-6">
-                    <p className="text-2xl font-bold text-yellow-900 mb-3 flex items-center gap-2">
+                  <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-2 border-yellow-400/50 p-6 rounded-xl mb-6">
+                    <p className="text-2xl font-bold text-yellow-300 mb-3 flex items-center gap-2">
                       <span className="text-3xl">🎉</span>
                       Premio Guadagnato!
                     </p>
-                    <p className="text-yellow-800 text-lg mb-2">
+                    <p className="text-yellow-200 text-lg mb-2">
                       {result.reward_earned.rule_name}
                     </p>
-                    <p className="text-sm text-yellow-700 bg-yellow-200/50 rounded-lg p-3">
+                    <p className="text-sm text-yellow-200 bg-yellow-500/30 rounded-lg p-3">
                       {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? 'premio' : 'premi'} disponibile per il cliente
                     </p>
                   </div>
                 ) : (
-                  <p className="text-green-700 text-lg mb-6 bg-green-50 rounded-xl p-4 border border-green-200">
+                  <p className="text-green-200 text-lg mb-6 bg-green-500/20 rounded-xl p-4 border border-green-400/30">
                     ✓ Punti aggiunti alla card del cliente
                   </p>
                 )}
@@ -433,6 +444,7 @@ export default function AdminScanner() {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   )

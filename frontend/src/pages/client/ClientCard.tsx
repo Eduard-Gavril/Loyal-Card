@@ -93,9 +93,19 @@ export default function ClientCard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
-        <DarkVeil hueShift={200} speed={0.4} />
-        <div className="relative z-10 text-white text-xl font-semibold animate-pulse">Caricamento...</div>
+      <div className="relative min-h-screen overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 z-0">
+          <DarkVeil hueShift={200} speed={0.4} />
+        </div>
+        
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+        
+        {/* Loading text centered */}
+        <div className="relative z-20 min-h-screen flex items-center justify-center">
+          <div className="text-white text-2xl font-semibold animate-pulse">Caricamento...</div>
+        </div>
       </div>
     )
   }

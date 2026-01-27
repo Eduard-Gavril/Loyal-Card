@@ -121,11 +121,32 @@ export const api = {
 
   // Register scan
   async registerScan(qrCode: string, productId: string) {
-    const { data, error } = await supabase.functions.invoke('register-scan', {
-      body: { qr_code: qrCode, product_id: productId }
+    // Use fetch directly to get full error response
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/register-scan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token}`,
+        'apikey': supabaseAnonKey
+      },
+      body: JSON.stringify({ qr_code: qrCode, product_id: productId })
     })
-    if (error) throw error
-    return data
+    
+    const responseData = await response.json()
+    
+    if (!response.ok) {
+      // Return the full error response including debug info
+      throw {
+        message: responseData.error || 'Request failed',
+        status: response.status,
+        debug: responseData.debug,
+        fullResponse: responseData
+      }
+    }
+    
+    return responseData
   },
 
   // Get card by QR code

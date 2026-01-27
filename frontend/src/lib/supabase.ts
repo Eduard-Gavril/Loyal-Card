@@ -124,11 +124,15 @@ export const api = {
     // Use fetch directly to get full error response
     const { data: { session } } = await supabase.auth.getSession()
     
+    if (!session) {
+      throw { message: 'Not authenticated', status: 401 }
+    }
+    
     const response = await fetch(`${supabaseUrl}/functions/v1/register-scan`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session?.access_token}`,
+        'Authorization': `Bearer ${session.access_token}`,
         'apikey': supabaseAnonKey
       },
       body: JSON.stringify({ qr_code: qrCode, product_id: productId })

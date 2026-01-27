@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store'
+import DarkVeil from '@/components/DarkVeil'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -52,17 +53,41 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
+    <div className="relative min-h-screen overflow-hidden flex items-center justify-center px-4">
+      {/* Animated background */}
+      <div className="absolute inset-0 z-0">
+        <DarkVeil
+          hueShift={280}
+          noiseIntensity={0.02}
+          scanlineIntensity={0}
+          speed={0.3}
+          scanlineFrequency={0}
+          warpAmount={0.1}
+        />
+      </div>
+
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-transparent to-blue-900/40 z-10"></div>
+
+      <div className="relative z-20 max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">Fidelix</h1>
-          <p className="text-gray-600 mt-2">Admin Login</p>
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Torna alla home
+          </button>
+          <h1 className="text-5xl font-bold text-white mb-2">Fidelix</h1>
+          <p className="text-white/70 text-lg">Admin Portal</p>
         </div>
 
-        <div className="card">
-          <form onSubmit={handleLogin} className="space-y-4">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
                 Email
               </label>
               <input
@@ -70,7 +95,7 @@ export default function AdminLogin() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
                 placeholder="admin@example.com"
                 required
                 disabled={loading}
@@ -78,7 +103,7 @@ export default function AdminLogin() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
                 Password
               </label>
               <input
@@ -86,7 +111,7 @@ export default function AdminLogin() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="input"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
                 placeholder="••••••••"
                 required
                 disabled={loading}
@@ -94,7 +119,7 @@ export default function AdminLogin() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-red-500/20 backdrop-blur-sm border border-red-500/50 text-red-100 px-4 py-3 rounded-xl">
                 {error}
               </div>
             )}
@@ -102,15 +127,24 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
             >
-              {loading ? 'Login in corso...' : 'Login'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Login in corso...
+                </span>
+              ) : 'Accedi al Pannello'}
             </button>
           </form>
         </div>
 
-        <div className="text-center mt-4 text-sm text-gray-600">
-          <p>Demo: test@example.com / password123</p>
+        <div className="text-center mt-6 text-sm text-white/60 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+          <p>💡 Demo credentials</p>
+          <p className="font-mono mt-1">cafenescu@admin.test / admin123</p>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { useAuthStore } from './store'
 import { useEffect, useState } from 'react'
 
 // Pages
+import LandingPage from './pages/LandingPage'
 import ClientCard from './pages/client/ClientCard'
 import ClientWallet from './pages/client/ClientWallet'
 import AdminLogin from './pages/admin/AdminLogin'
@@ -93,9 +94,12 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing page */}
+        <Route path="/" element={<LandingPage />} />
+        
         {/* Client routes (public) */}
-        <Route path="/" element={<ClientWallet />} />
         <Route path="/wallet" element={<ClientWallet />} />
+        <Route path="/card" element={<ClientCard />} />
         <Route path="/card/:qrCode" element={<ClientCard />} />
         <Route path="/card/new" element={<ClientCard />} />
 

@@ -167,95 +167,116 @@ export default function AdminScanner() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button onClick={() => navigate('/admin/dashboard')} className="text-primary-600">
-            ← Indietro
+      <div className="bg-white/80 backdrop-blur-xl shadow-lg border-b border-gray-200/50">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center gap-4">
+          <button
+            onClick={() => navigate('/admin/dashboard')}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-300 hover:shadow-md"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Indietro
           </button>
-          <h1 className="text-2xl font-bold">Scansiona QR Code</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
+            Scansiona QR Code
+          </h1>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-6 py-10">
         {/* Scanner */}
         {scanning && (
-          <div className="card mb-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-bold mb-2">📸 Inquadra il QR code</h2>
-              <p className="text-sm text-gray-600">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-3 text-gray-900 flex items-center gap-2">
+                <span className="text-3xl">📸</span>
+                Inquadra il QR code
+              </h2>
+              <p className="text-gray-600">
                 Posiziona il QR code del cliente al centro del riquadro
               </p>
             </div>
-            <div id="qr-reader" className="w-full"></div>
-            <div className="mt-4 text-sm text-gray-500">
-              💡 Consenti l'accesso alla fotocamera quando richiesto
+            <div id="qr-reader" className="w-full rounded-xl overflow-hidden"></div>
+            <div className="mt-6 flex items-center gap-2 text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <span className="text-xl">💡</span>
+              <span>Consenti l'accesso alla fotocamera quando richiesto</span>
             </div>
           </div>
         )}
 
-        {/* Scanned result */}
-        {scannedQR && !scanning && (
-          <div className="space-y-6">
-            <div className="card">
-              <h2 className="text-xl font-bold mb-4">✓ QR Code Scansionato</h2>
-              <p className="text-sm text-gray-600 font-mono bg-gray-100 p-3 rounded">
+        {!scanning && (
+          <div>
+            {/* QR Code scanned info */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50 mb-6">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                QR Code Scansionato
+              </h2>
+              <p className="text-sm text-gray-600 font-mono bg-gray-100 p-4 rounded-xl border border-gray-200">
                 {scannedQR}
               </p>
             </div>
 
             {/* Mode selector */}
             {!result && (
-              <div className="card">
-                <div className="flex gap-2 mb-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50">
+                <div className="flex gap-3 mb-8">
                   <button
                     onClick={() => setMode('scan')}
-                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                    className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
                       mode === 'scan'
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/50'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    📦 Registra Acquisto
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="text-xl">📦</span>
+                      Registra Acquisto
+                    </span>
                   </button>
                   <button
                     onClick={() => setMode('redeem')}
-                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                    className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
                       mode === 'redeem'
-                        ? 'bg-yellow-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/50'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    🎁 Riscatta Premio
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="text-xl">🎁</span>
+                      Riscatta Premio
+                    </span>
                   </button>
                 </div>
 
                 {/* Product selection (scan mode) */}
                 {mode === 'scan' && (
                   <div>
-                    <h2 className="text-xl font-bold mb-4">Seleziona il prodotto acquistato</h2>
+                    <h2 className="text-xl font-bold mb-4 text-gray-900">Seleziona il prodotto acquistato</h2>
                     
                     {products.length === 0 ? (
                       <p className="text-gray-600">Nessun prodotto disponibile</p>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {products.map((product) => (
                           <button
                             key={product.id}
                             onClick={() => setSelectedProduct(product.id)}
-                            className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                            className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
                               selectedProduct === product.id
-                                ? 'border-primary-500 bg-primary-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20 scale-[1.02]'
+                                : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                             }`}
                           >
-                            <div className="font-semibold">{product.name}</div>
+                            <div className="font-semibold text-gray-900">{product.name}</div>
                             {product.description && (
-                              <div className="text-sm text-gray-600">{product.description}</div>
+                              <div className="text-sm text-gray-600 mt-1">{product.description}</div>
                             )}
                             {product.price && (
-                              <div className="text-sm font-bold text-primary-600 mt-1">
+                              <div className="text-sm font-bold text-primary-600 mt-2">
                                 €{product.price.toFixed(2)}
                               </div>
                             )}
@@ -265,20 +286,23 @@ export default function AdminScanner() {
                     )}
 
                     {error && (
-                      <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                      <div className="mt-4 bg-red-50 border-2 border-red-200 text-red-700 px-5 py-4 rounded-xl">
                         <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
                       </div>
                     )}
 
-                    <div className="mt-6 flex gap-3">
+                    <div className="mt-8 flex gap-3">
                       <button
                         onClick={handleRegisterScan}
                         disabled={!selectedProduct || processing}
-                        className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                       >
                         {processing ? 'Registrazione...' : 'Conferma Acquisto'}
                       </button>
-                      <button onClick={resetScanner} className="btn-secondary">
+                      <button
+                        onClick={resetScanner}
+                        className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
+                      >
                         Annulla
                       </button>
                     </div>
@@ -288,7 +312,7 @@ export default function AdminScanner() {
                 {/* Reward redemption (redeem mode) */}
                 {mode === 'redeem' && (
                   <div>
-                    <h2 className="text-xl font-bold mb-4">Seleziona il premio da riscattare</h2>
+                    <h2 className="text-xl font-bold mb-4 text-gray-900">Seleziona il premio da riscattare</h2>
                     
                     {!card || !card.loyalty_state || Object.keys(card.loyalty_state).length === 0 ? (
                       <p className="text-gray-600">Nessun premio disponibile per questa card</p>
@@ -296,9 +320,12 @@ export default function AdminScanner() {
                         const state = card.loyalty_state[rule.id]
                         return state && state.rewards > 0
                       }).length === 0 ? (
-                      <p className="text-gray-600">Nessun premio disponibile per questa card</p>
+                      <div className="text-center py-8 text-gray-600 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                        <span className="text-4xl mb-2 block">🎁</span>
+                        Nessun premio disponibile per questa card
+                      </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {rules
                           .filter(rule => {
                             const state = card.loyalty_state[rule.id]
@@ -310,19 +337,21 @@ export default function AdminScanner() {
                               <button
                                 key={rule.id}
                                 onClick={() => setSelectedRule(rule.id)}
-                                className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                                className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
                                   selectedRule === rule.id
-                                    ? 'border-yellow-500 bg-yellow-50'
-                                    : 'border-gray-200 hover:border-gray-300'
+                                    ? 'border-yellow-500 bg-yellow-50 shadow-lg shadow-yellow-500/20 scale-[1.02]'
+                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                                 }`}
                               >
                                 <div className="flex justify-between items-start">
                                   <div>
-                                    <div className="font-semibold">{rule.name}</div>
-                                    <div className="text-sm text-gray-600 mt-1">
-                                      Premi disponibili: <span className="font-bold text-yellow-600">{state.rewards}</span>
+                                    <div className="font-semibold text-gray-900">{rule.name}</div>
+                                    <div className="text-sm text-gray-600 mt-2 flex items-center gap-2">
+                                      <span>Premi disponibili:</span>
+                                      <span className="font-bold text-yellow-600 text-lg">{state.rewards}</span>
                                     </div>
                                   </div>
+
                                   <div className="text-2xl">🎁</div>
                                 </div>
                               </button>
@@ -332,20 +361,23 @@ export default function AdminScanner() {
                     )}
 
                     {error && (
-                      <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                      <div className="mt-4 bg-red-50 border-2 border-red-200 text-red-700 px-5 py-4 rounded-xl">
                         <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
                       </div>
                     )}
 
-                    <div className="mt-6 flex gap-3">
+                    <div className="mt-8 flex gap-3">
                       <button
                         onClick={handleRedeemReward}
                         disabled={!selectedRule || processing}
-                        className="flex-1 py-3 px-4 rounded-lg font-semibold bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="flex-1 py-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 shadow-lg shadow-yellow-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                       >
                         {processing ? 'Riscatto...' : 'Conferma Riscatto'}
                       </button>
-                      <button onClick={resetScanner} className="btn-secondary">
+                      <button
+                        onClick={resetScanner}
+                        className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
+                      >
                         Annulla
                       </button>
                     </div>
@@ -354,43 +386,47 @@ export default function AdminScanner() {
               </div>
             )}
 
-            {/* Success result */}
-            {result && result.success && (
-              <div className={`card border-2 ${result.redeemed ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`}>
-                <h2 className={`text-2xl font-bold mb-4 ${result.redeemed ? 'text-yellow-800' : 'text-green-800'}`}>
+            {/* Success/Result message */}
+            {result && (
+              <div className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border-2 ${result.redeemed ? 'border-yellow-300' : 'border-green-300'}`}>
+                <h2 className={`text-3xl font-bold mb-6 ${result.redeemed ? 'text-yellow-800' : 'text-green-800'}`}>
                   {result.redeemed ? '🎁 Premio Riscattato!' : '✓ Acquisto Registrato!'}
                 </h2>
 
                 {result.redeemed ? (
                   <div>
-                    <p className="text-yellow-700 mb-2">
+                    <p className="text-yellow-700 text-lg mb-3">
                       {result.message}
                     </p>
                     {result.remaining_rewards !== undefined && (
-                      <p className="text-sm text-yellow-600">
-                        Premi rimanenti: {result.remaining_rewards}
+                      <p className="text-sm text-yellow-600 bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+                        Premi rimanenti: <span className="font-bold text-xl">{result.remaining_rewards}</span>
                       </p>
                     )}
                   </div>
                 ) : result.reward_earned ? (
-                  <div className="bg-yellow-100 border-2 border-yellow-300 p-4 rounded-lg mb-4">
-                    <p className="text-xl font-bold text-yellow-900 mb-2">
-                      🎉 Premio Guadagnato!
+                  <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-2 border-yellow-300 p-6 rounded-xl mb-6">
+                    <p className="text-2xl font-bold text-yellow-900 mb-3 flex items-center gap-2">
+                      <span className="text-3xl">🎉</span>
+                      Premio Guadagnato!
                     </p>
-                    <p className="text-yellow-800">
+                    <p className="text-yellow-800 text-lg mb-2">
                       {result.reward_earned.rule_name}
                     </p>
-                    <p className="text-sm text-yellow-700 mt-2">
+                    <p className="text-sm text-yellow-700 bg-yellow-200/50 rounded-lg p-3">
                       {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? 'premio' : 'premi'} disponibile per il cliente
                     </p>
                   </div>
                 ) : (
-                  <p className="text-green-700 mb-4">
-                    Punti aggiunti alla card del cliente
+                  <p className="text-green-700 text-lg mb-6 bg-green-50 rounded-xl p-4 border border-green-200">
+                    ✓ Punti aggiunti alla card del cliente
                   </p>
                 )}
 
-                <button onClick={resetScanner} className="btn-primary w-full">
+                <button
+                  onClick={resetScanner}
+                  className="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
+                >
                   Scansiona Nuovo Cliente
                 </button>
               </div>

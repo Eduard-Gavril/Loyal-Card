@@ -34,6 +34,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     // Get JWT token from header
     const authHeader = req.headers.get('Authorization')
+    
     if (!authHeader) {
       return new Response(
         JSON.stringify({ success: false, error: 'Missing authorization header' }),
@@ -42,10 +43,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Initialize Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    // Debug: check environment variables
+    if (!supabaseUrl || !supabaseKey) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Missing environment variables',
+          debug: {
+            hasUrl: !!supabaseUrl,
+            hasKey: !!supabaseKey,
+            urlPrefix: supabaseUrl?.substring(0, 30) || 'missing'
+          }
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseKey)
 
     // Verify admin user from JWT
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
@@ -54,7 +71,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     if (authError || !user) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid authentication' }),
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid authentication', 
+          debug: {
+            authError: authError?.message,
+            hasUser: !!user
+          }
+        }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -69,7 +93,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     if (adminError || !admin) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Admin not found or inactive' }),
+        JSON.stringify({ 
+          success: false, 
+          error: 'Admin not found or inactive',
+          debug: {
+            adminError: adminError?.message,
+            adminErrorCode: adminError?.code,
+            userId: user.id,
+            hasAdmin: !!admin
+          }
+        }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }

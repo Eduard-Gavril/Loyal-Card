@@ -45,7 +45,6 @@ secret = ""
 
 [edge_runtime]
 enabled = true
-port = 54325
 
 [analytics]
 enabled = false

@@ -86,11 +86,6 @@ export default function ClientCard() {
     return card.loyalty_state[ruleId]
   }
 
-  const getProgressPercentage = (rule: RewardRule) => {
-    const progress = getRuleProgress(rule.id)
-    return Math.min((progress.count / rule.buy_count) * 100, 100)
-  }
-
   // Detect device for wallet buttons
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
   const isAndroid = /Android/.test(navigator.userAgent)
@@ -190,11 +185,13 @@ export default function ClientCard() {
           ) : (
             rules.map((rule) => {
               const progress = getRuleProgress(rule.id)
-              const percentage = getProgressPercentage(rule)
+              
+              // Create array for stamp visualization
+              const stamps = Array.from({ length: rule.buy_count }, (_, i) => i < progress.count)
               
               return (
                 <div key={rule.id} className="card">
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="font-bold text-lg">{rule.name}</h3>
                       {rule.description && (
@@ -202,41 +199,52 @@ export default function ClientCard() {
                       )}
                     </div>
                     {progress.rewards > 0 && (
-                      <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                        {progress.rewards} 🎁
+                      <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                        <span>{progress.rewards}</span>
+                        <span>🎁</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Progress bar */}
-                  <div className="relative pt-1">
-                    <div className="flex mb-2 items-center justify-between">
-                      <div>
-                        <span className="text-xs font-semibold inline-block text-primary-600">
-                          {progress.count} / {rule.buy_count}
+                  {/* Stamps visualization */}
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-semibold text-gray-700">
+                        {progress.count} su {rule.buy_count} acquisti
+                      </span>
+                      {progress.count > 0 && progress.count < rule.buy_count && (
+                        <span className="text-xs text-primary-600 font-semibold">
+                          Ancora {rule.buy_count - progress.count}!
                         </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-semibold inline-block text-primary-600">
-                          {Math.round(percentage)}%
-                        </span>
-                      </div>
+                      )}
                     </div>
-                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                      <div
-                        style={{ width: `${percentage}%` }}
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500 transition-all duration-500"
-                      />
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {stamps.map((isFilled, index) => (
+                        <div
+                          key={index}
+                          className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
+                            isFilled
+                              ? 'bg-primary-500 text-white scale-100'
+                              : 'bg-gray-200 text-gray-400 scale-95'
+                          }`}
+                        >
+                          {isFilled ? '✓' : '○'}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
                   {progress.rewards > 0 && (
-                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-800 font-semibold">
-                        ✨ Hai {progress.rewards} {progress.rewards === 1 ? 'premio' : 'premi'} disponibile!
-                      </p>
-                      <p className="text-xs text-green-700 mt-1">
-                        Mostra questa card alla cassa per riscattarlo
+                    <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">🎉</span>
+                        <p className="text-sm text-green-900 font-bold">
+                          {progress.rewards} {progress.rewards === 1 ? 'premio' : 'premi'} disponibile!
+                        </p>
+                      </div>
+                      <p className="text-xs text-green-700">
+                        Mostra questa card alla cassa per riscattare il tuo premio
                       </p>
                     </div>
                   )}

@@ -31,6 +31,12 @@ export default function AdminScanner() {
     }
   }, [])
 
+  useEffect(() => {
+    if (scannedQR) {
+      loadCardInfo(scannedQR)
+    }
+  }, [scannedQR])
+
   const loadProducts = async () => {
     if (!tenantId) return
     try {
@@ -60,22 +66,6 @@ export default function AdminScanner() {
     }
   }
 
-  useEffect(() => {
-    if (scannedQR) {
-      loadCardInfo(scannedQR)
-    }
-  }, [scannedQR])
-
-  const loadProducts = async () => {
-    if (!tenantId) return
-    try {
-      const data = await api.getProducts(tenantId)
-      setProducts(data)
-    } catch (err) {
-      console.error('Error loading products:', err)
-    }
-  }
-
   const initScanner = () => {
     const scanner = new Html5QrcodeScanner(
       'qr-reader',
@@ -84,7 +74,6 @@ export default function AdminScanner() {
         qrbox: { width: 250, height: 250 },
         aspectRatio: 1.0,
         rememberLastUsedCamera: true,
-        // Prefer rear camera on mobile
         videoConstraints: {
           facingMode: { ideal: "environment" }
         }
@@ -99,7 +88,6 @@ export default function AdminScanner() {
         scanner.clear().catch(err => console.error('Error clearing scanner:', err))
       },
       (errorMessage) => {
-        // Ignore continuous scan errors (noise)
         if (!errorMessage.includes('No MultiFormat Readers')) {
           console.debug('QR scan error:', errorMessage)
         }
@@ -121,7 +109,6 @@ export default function AdminScanner() {
       
       if (data.success) {
         setResult(data)
-        // Reload card to update loyalty state
         await loadCardInfo(scannedQR)
       } else {
         const errorMsg = data.error || 'Errore durante la registrazione'
@@ -156,7 +143,6 @@ export default function AdminScanner() {
           remaining_rewards: data.remaining_rewards,
           redeemed: true
         })
-        // Reload card to update loyalty state
         await loadCardInfo(scannedQR)
       } else {
         setError(data.error || 'Errore durante il riscatto')
@@ -171,6 +157,9 @@ export default function AdminScanner() {
   const resetScanner = () => {
     setScannedQR('')
     setSelectedProduct('')
+    setSelectedRule('')
+    setCard(null)
+    setMode('scan')
     setResult(null)
     setError('')
     setScanning(true)
@@ -214,11 +203,6 @@ export default function AdminScanner() {
               <p className="text-sm text-gray-600 font-mono bg-gray-100 p-3 rounded">
                 {scannedQR}
               </p>
-              {card && (
-                <div className="mt-3 text-sm text-gray-600">
-                  Cliente: {card.client_name || 'N/A'}
-                </div>
-              )}
             </div>
 
             {/* Mode selector */}
@@ -251,56 +235,53 @@ export default function AdminScanner() {
                 {mode === 'scan' && (
                   <div>
                     <h2 className="text-xl font-bold mb-4">Seleziona il prodotto acquistato</h2>
-                {mode === 'scan' && (
-                  <div>
-                    <h2 className="text-xl font-bold mb-4">Seleziona il prodotto acquistato</h2>
-                
-                {products.length === 0 ? (
-                  <p className="text-gray-600">Nessun prodotto disponibile</p>
-                ) : (
-                  <div className="space-y-2">
-                    {products.map((product) => (
+                    
+                    {products.length === 0 ? (
+                      <p className="text-gray-600">Nessun prodotto disponibile</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {products.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => setSelectedProduct(product.id)}
+                            className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                              selectedProduct === product.id
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="font-semibold">{product.name}</div>
+                            {product.description && (
+                              <div className="text-sm text-gray-600">{product.description}</div>
+                            )}
+                            {product.price && (
+                              <div className="text-sm font-bold text-primary-600 mt-1">
+                                €{product.price.toFixed(2)}
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
+                      </div>
+                    )}
+
+                    <div className="mt-6 flex gap-3">
                       <button
-                        key={product.id}
-                        onClick={() => setSelectedProduct(product.id)}
-                        className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
-                          selectedProduct === product.id
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        onClick={handleRegisterScan}
+                        disabled={!selectedProduct || processing}
+                        className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <div className="font-semibold">{product.name}</div>
-                        {product.description && (
-                          <div className="text-sm text-gray-600">{product.description}</div>
-                        )}
-                        {product.price && (
-                          <div className="text-sm font-bold text-primary-600 mt-1">
-                            €{product.price.toFixed(2)}
-                          </div>
-                        )}
+                        {processing ? 'Registrazione...' : 'Conferma Acquisto'}
                       </button>
-                    ))}
-                  </div>
-                )}
-
-                {error && (
-                  <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
-                  </div>
-                )}
-
-                <div className="mt-6 flex gap-3">
-                  <button
-                    onClick={handleRegisterScan}
-                    disabled={!selectedProduct || processing}
-                    className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {processing ? 'Registrazione...' : 'Conferma Acquisto'}
-                  </button>
-                  <button onClick={resetScanner} className="btn-secondary">
-                    Annulla
-                  </button>
-                </div>
+                      <button onClick={resetScanner} className="btn-secondary">
+                        Annulla
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -310,6 +291,11 @@ export default function AdminScanner() {
                     <h2 className="text-xl font-bold mb-4">Seleziona il premio da riscattare</h2>
                     
                     {!card || !card.loyalty_state || Object.keys(card.loyalty_state).length === 0 ? (
+                      <p className="text-gray-600">Nessun premio disponibile per questa card</p>
+                    ) : rules.filter(rule => {
+                        const state = card.loyalty_state[rule.id]
+                        return state && state.rewards > 0
+                      }).length === 0 ? (
                       <p className="text-gray-600">Nessun premio disponibile per questa card</p>
                     ) : (
                       <div className="space-y-2">

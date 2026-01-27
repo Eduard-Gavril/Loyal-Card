@@ -82,10 +82,16 @@ export default function AdminScanner() {
       if (data.success) {
         setResult(data)
       } else {
-        setError(data.error || 'Errore durante la registrazione')
+        // Show full error with debug info
+        const errorMsg = data.error || 'Errore durante la registrazione'
+        const debugInfo = data.debug ? `\n\nDebug: ${JSON.stringify(data.debug, null, 2)}` : ''
+        setError(errorMsg + debugInfo)
       }
     } catch (err: any) {
-      setError(err.message || 'Errore di rete')
+      // Show full error details
+      const errorMsg = err.message || 'Errore di rete'
+      const errorDetails = err.debug ? `\n\nDebug: ${JSON.stringify(err.debug, null, 2)}` : ''
+      setError(errorMsg + errorDetails + `\n\nFull error: ${JSON.stringify(err, null, 2)}`)
     } finally {
       setProcessing(false)
     }
@@ -174,7 +180,7 @@ export default function AdminScanner() {
 
                 {error && (
                   <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    {error}
+                    <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
                   </div>
                 )}
 

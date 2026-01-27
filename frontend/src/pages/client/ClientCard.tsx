@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
 import { api, Card as CardType, RewardRule } from '@/lib/supabase'
+import DarkVeil from '@/components/DarkVeil'
 
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111' // TODO: Make dynamic
 
@@ -92,36 +93,52 @@ export default function ClientCard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-        <div className="text-white text-xl">Caricamento...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
+        <DarkVeil hueShift={200} speed={0.4} />
+        <div className="relative z-10 text-white text-xl font-semibold animate-pulse">Caricamento...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-500 to-primary-700 pb-20">
-      {/* Header */}
-      <div className="bg-white shadow-lg">
-        <div className="max-w-2xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Fidelix</h1>
-          <p className="text-gray-600">La tua carta fedeltà digitale</p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden pb-20">
+      {/* Animated background */}
+      <div className="absolute inset-0 z-0">
+        <DarkVeil hueShift={200} speed={0.4} />
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* QR Code Card */}
-        <div className="card mb-6">
-          <div className="text-center">
-            <h2 className="text-xl font-bold mb-4">Il tuo QR Code</h2>
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+      
+      {/* Content */}
+      <div className="relative z-20">
+        {/* Header */}
+        <header className="pt-6 px-4">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-4xl font-bold text-white tracking-tight mb-1">Fidelix</h1>
+            <p className="text-gray-200">La tua carta fedeltà digitale</p>
+          </div>
+        </header>
+
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          {/* QR Code Card */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold mb-4 text-white flex items-center justify-center gap-2">
+                <span className="text-4xl">📱</span>
+                Il tuo QR Code
+              </h2>
             {qrDataUrl ? (
               <>
                 <div className="flex justify-center mb-4">
-                  <img src={qrDataUrl} alt="QR Code" className="w-64 h-64" />
+                  <div className="bg-white p-6 rounded-2xl shadow-2xl">
+                    <img src={qrDataUrl} alt="QR Code" className="w-64 h-64" />
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  Mostra questo codice alla cassa per accumulare premi
+                <p className="text-sm text-gray-200 mb-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
+                  💡 Mostra questo codice alla cassa per accumulare premi
                 </p>
-                <p className="text-xs text-gray-500 font-mono">{qrCode}</p>
+                <p className="text-xs text-gray-300 font-mono bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg inline-block border border-white/10">{qrCode}</p>
               </>
             ) : (
               <div>
@@ -162,24 +179,27 @@ export default function ClientCard() {
           {/* Add to Wallet buttons */}
           <div className="mt-6 space-y-3">
             {isIOS && (
-              <button className="w-full bg-black text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-                <span>🍎</span> Aggiungi ad Apple Wallet
+              <button className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+                <span className="text-2xl">🍎</span> Aggiungi ad Apple Wallet
               </button>
             )}
             {isAndroid && (
-              <button className="w-full bg-black text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-                <span>📱</span> Aggiungi a Google Wallet
+              <button className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+                <span className="text-2xl">📱</span> Aggiungi a Google Wallet
               </button>
             )}
           </div>
         </div>
 
         {/* Loyalty Progress */}
-        <div className="space-y-4">
-          <h2 className="text-white text-xl font-bold">I tuoi premi</h2>
+        <div className="space-y-4 px-4 max-w-2xl mx-auto">
+          <h2 className="text-white text-3xl font-bold flex items-center gap-2">
+            <span className="text-4xl">🎁</span>
+            I tuoi premi
+          </h2>
           
           {rules.length === 0 ? (
-            <div className="card text-center text-gray-600">
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 text-center text-gray-200">
               Nessun programma fedeltà attivo
             </div>
           ) : (
@@ -190,18 +210,18 @@ export default function ClientCard() {
               const stamps = Array.from({ length: rule.buy_count }, (_, i) => i < progress.count)
               
               return (
-                <div key={rule.id} className="card">
+                <div key={rule.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="font-bold text-lg">{rule.name}</h3>
+                      <h3 className="font-bold text-xl text-white">{rule.name}</h3>
                       {rule.description && (
-                        <p className="text-sm text-gray-600">{rule.description}</p>
+                        <p className="text-sm text-gray-300 mt-1">{rule.description}</p>
                       )}
                     </div>
                     {progress.rewards > 0 && (
-                      <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                      <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg shadow-yellow-500/50">
                         <span>{progress.rewards}</span>
-                        <span>🎁</span>
+                        <span className="text-lg">🎁</span>
                       </div>
                     )}
                   </div>
@@ -209,11 +229,11 @@ export default function ClientCard() {
                   {/* Stamps visualization */}
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-semibold text-gray-700">
+                      <span className="text-sm font-semibold text-gray-200">
                         {progress.count} su {rule.buy_count} acquisti
                       </span>
                       {progress.count > 0 && progress.count < rule.buy_count && (
-                        <span className="text-xs text-primary-600 font-semibold">
+                        <span className="text-xs text-primary-300 font-semibold">
                           Ancora {rule.buy_count - progress.count}!
                         </span>
                       )}
@@ -225,8 +245,8 @@ export default function ClientCard() {
                           key={index}
                           className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
                             isFilled
-                              ? 'bg-primary-500 text-white scale-100'
-                              : 'bg-gray-200 text-gray-400 scale-95'
+                              ? 'bg-primary-500 text-white scale-100 shadow-lg shadow-primary-500/50'
+                              : 'bg-white/10 border border-white/20 text-gray-400 scale-95'
                           }`}
                         >
                           {isFilled ? '✓' : '○'}
@@ -255,16 +275,20 @@ export default function ClientCard() {
         </div>
 
         {/* Info section */}
-        <div className="card mt-6 bg-gray-50">
-          <h3 className="font-bold mb-2">ℹ️ Come funziona</h3>
-          <ul className="text-sm text-gray-700 space-y-1">
-            <li>• Mostra il QR code alla cassa</li>
-            <li>• Accumula punti ad ogni acquisto</li>
-            <li>• I premi sono specifici per prodotto</li>
-            <li>• Aggiungi al Wallet per accesso rapido</li>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 mt-6">
+          <h3 className="font-bold mb-3 text-lg flex items-center gap-2 text-white">
+            <span className="text-2xl">💡</span>
+            Come funziona
+          </h3>
+          <ul className="text-sm text-gray-200 space-y-2">
+            <li className="flex items-center gap-2">📱 Mostra il QR code alla cassa</li>
+            <li className="flex items-center gap-2">⭐ Accumula punti ad ogni acquisto</li>
+            <li className="flex items-center gap-2">🎯 I premi sono specifici per prodotto</li>
+            <li className="flex items-center gap-2">💳 Aggiungi al Wallet per accesso rapido</li>
           </ul>
         </div>
       </div>
+    </div>
     </div>
   )
 }

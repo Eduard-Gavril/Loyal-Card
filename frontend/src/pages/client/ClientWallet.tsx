@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
+import DarkVeil from '@/components/DarkVeil'
 
 interface SavedCard {
   clientId: string
@@ -104,35 +105,40 @@ export default function ClientWallet() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-        <div className="text-white text-xl">Caricamento...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
+        <DarkVeil hueShift={260} speed={0.4} />
+        <div className="relative z-10 text-white text-xl font-semibold animate-pulse">Caricamento...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-4">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 relative overflow-hidden">
+      <DarkVeil hueShift={260} speed={0.4} />
+      
+      <div className="max-w-lg mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-8 mt-8">
-          <h1 className="text-4xl font-bold text-white mb-2">💳 Le Tue Carte</h1>
-          <p className="text-white/80">Scegli la carta da mostrare</p>
+          <h1 className="text-5xl font-bold text-white mb-3 flex items-center justify-center gap-3">
+            <span>💳</span> Le Tue Carte
+          </h1>
+          <p className="text-white/80 text-lg">Scegli la carta da mostrare</p>
         </div>
 
         {/* Cards List */}
         {cards.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-            <div className="text-6xl mb-4">🎴</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-10 text-center border border-white/50">
+            <div className="text-7xl mb-6">🎴</div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
               Nessuna carta
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-700 mb-8 text-lg leading-relaxed">
               Non hai ancora nessuna carta fedeltà.<br />
               Chiedi al negozio di scansionare il tuo QR!
             </p>
             <button
               onClick={handleAddNewCard}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
             >
               Crea Nuova Carta
             </button>
@@ -142,7 +148,7 @@ export default function ClientWallet() {
             {cards.map((card) => (
               <div
                 key={card.cardId}
-                className="w-full bg-white rounded-2xl shadow-xl p-6"
+                className="w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/50 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
                 style={{ borderLeft: `6px solid ${card.brandColor}` }}
               >
                 {editingCard === card.qrCode ? (
@@ -152,20 +158,20 @@ export default function ClientWallet() {
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="w-full px-4 py-2 border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500"
+                      className="w-full px-4 py-3 border-2 border-primary-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-400 bg-white"
                       placeholder="Nome carta"
                       autoFocus
                     />
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <button
                         onClick={() => handleSaveEdit(card.qrCode)}
-                        className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                        className="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-4 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50"
                       >
                         ✓ Salva
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                        className="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300"
                       >
                         ✕ Annulla
                       </button>
@@ -266,7 +272,7 @@ export default function ClientWallet() {
             {/* Add New Card Button */}
             <button
               onClick={handleAddNewCard}
-              className="w-full bg-white/20 backdrop-blur-sm border-2 border-white/40 rounded-2xl p-6 hover:bg-white/30 transition-colors cursor-pointer"
+              className="w-full bg-white/10 backdrop-blur-sm border-2 border-white/40 rounded-2xl p-6 hover:bg-white/20 hover:border-white/60 transition-all duration-300 cursor-pointer hover:scale-[1.02] shadow-lg hover:shadow-xl"
             >
               <div className="flex items-center justify-center gap-3 text-white">
                 <svg
@@ -282,16 +288,19 @@ export default function ClientWallet() {
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                <span className="text-lg font-semibold">Aggiungi Nuova Carta</span>
+                <span className="text-xl font-bold">Aggiungi Nuova Carta</span>
               </div>
             </button>
           </div>
         )}
 
         {/* Footer Info */}
-        <div className="mt-8 text-center text-white/60 text-sm">
-          <p>💡 Ogni carta è specifica per un negozio</p>
-          <p className="mt-1">Accumula punti separatamente in ogni esercizio</p>
+        <div className="mt-8 text-center text-white/70 text-sm bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4">
+          <p className="flex items-center justify-center gap-2">
+            <span className="text-lg">💡</span>
+            Ogni carta è specifica per un negozio
+          </p>
+          <p className="mt-2">Accumula punti separatamente in ogni esercizio</p>
         </div>
       </div>
     </div>

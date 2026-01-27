@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import { useAuthStore } from '@/store'
-import { api, Product } from '@/lib/supabase'
+import { api, Product, Card, RewardRule } from '@/lib/supabase'
 
 export default function AdminScanner() {
   const navigate = useNavigate()
   const { tenantId } = useAuthStore()
   const [scannedQR, setScannedQR] = useState<string>('')
+  const [card, setCard] = useState<Card | null>(null)
+  const [rules, setRules] = useState<RewardRule[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [selectedProduct, setSelectedProduct] = useState<string>('')
+  const [mode, setMode] = useState<'scan' | 'redeem'>('scan')
+  const [selectedRule, setSelectedRule] = useState<string>('')
   const [scanning, setScanning] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [result, setResult] = useState<any>(null)
@@ -17,6 +21,7 @@ export default function AdminScanner() {
 
   useEffect(() => {
     loadProducts()
+    loadRewardRules()
     initScanner()
 
     return () => {
@@ -25,6 +30,41 @@ export default function AdminScanner() {
       if (elem) elem.innerHTML = ''
     }
   }, [])
+
+  const loadProducts = async () => {
+    if (!tenantId) return
+    try {
+      const data = await api.getProducts(tenantId)
+      setProducts(data)
+    } catch (err) {
+      console.error('Error loading products:', err)
+    }
+  }
+
+  const loadRewardRules = async () => {
+    if (!tenantId) return
+    try {
+      const data = await api.getRewardRules(tenantId)
+      setRules(data)
+    } catch (err) {
+      console.error('Error loading reward rules:', err)
+    }
+  }
+
+  const loadCardInfo = async (qrCode: string) => {
+    try {
+      const cardData = await api.getCardByQR(qrCode)
+      setCard(cardData)
+    } catch (err) {
+      console.error('Error loading card:', err)
+    }
+  }
+
+  useEffect(() => {
+    if (scannedQR) {
+      loadCardInfo(scannedQR)
+    }
+  }, [scannedQR])
 
   const loadProducts = async () => {
     if (!tenantId) return
@@ -81,17 +121,48 @@ export default function AdminScanner() {
       
       if (data.success) {
         setResult(data)
+        // Reload card to update loyalty state
+        await loadCardInfo(scannedQR)
       } else {
-        // Show full error with debug info
         const errorMsg = data.error || 'Errore durante la registrazione'
         const debugInfo = data.debug ? `\n\nDebug: ${JSON.stringify(data.debug, null, 2)}` : ''
         setError(errorMsg + debugInfo)
       }
     } catch (err: any) {
-      // Show full error details
       const errorMsg = err.message || 'Errore di rete'
       const errorDetails = err.debug ? `\n\nDebug: ${JSON.stringify(err.debug, null, 2)}` : ''
       setError(errorMsg + errorDetails + `\n\nFull error: ${JSON.stringify(err, null, 2)}`)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleRedeemReward = async () => {
+    if (!selectedRule || !scannedQR) {
+      setError('Seleziona un premio da riscattare')
+      return
+    }
+
+    setProcessing(true)
+    setError('')
+
+    try {
+      const data = await api.redeemReward(scannedQR, selectedRule)
+      
+      if (data.success) {
+        setResult({
+          success: true,
+          message: data.message,
+          remaining_rewards: data.remaining_rewards,
+          redeemed: true
+        })
+        // Reload card to update loyalty state
+        await loadCardInfo(scannedQR)
+      } else {
+        setError(data.error || 'Errore durante il riscatto')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Errore durante il riscatto')
     } finally {
       setProcessing(false)
     }
@@ -143,12 +214,46 @@ export default function AdminScanner() {
               <p className="text-sm text-gray-600 font-mono bg-gray-100 p-3 rounded">
                 {scannedQR}
               </p>
+              {card && (
+                <div className="mt-3 text-sm text-gray-600">
+                  Cliente: {card.client_name || 'N/A'}
+                </div>
+              )}
             </div>
 
-            {/* Product selection */}
+            {/* Mode selector */}
             {!result && (
               <div className="card">
-                <h2 className="text-xl font-bold mb-4">Seleziona il prodotto acquistato</h2>
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => setMode('scan')}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                      mode === 'scan'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    📦 Registra Acquisto
+                  </button>
+                  <button
+                    onClick={() => setMode('redeem')}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                      mode === 'redeem'
+                        ? 'bg-yellow-500 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    🎁 Riscatta Premio
+                  </button>
+                </div>
+
+                {/* Product selection (scan mode) */}
+                {mode === 'scan' && (
+                  <div>
+                    <h2 className="text-xl font-bold mb-4">Seleziona il prodotto acquistato</h2>
+                {mode === 'scan' && (
+                  <div>
+                    <h2 className="text-xl font-bold mb-4">Seleziona il prodotto acquistato</h2>
                 
                 {products.length === 0 ? (
                   <p className="text-gray-600">Nessun prodotto disponibile</p>
@@ -196,17 +301,92 @@ export default function AdminScanner() {
                     Annulla
                   </button>
                 </div>
+                  </div>
+                )}
+
+                {/* Reward redemption (redeem mode) */}
+                {mode === 'redeem' && (
+                  <div>
+                    <h2 className="text-xl font-bold mb-4">Seleziona il premio da riscattare</h2>
+                    
+                    {!card || !card.loyalty_state || Object.keys(card.loyalty_state).length === 0 ? (
+                      <p className="text-gray-600">Nessun premio disponibile per questa card</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {rules
+                          .filter(rule => {
+                            const state = card.loyalty_state[rule.id]
+                            return state && state.rewards > 0
+                          })
+                          .map((rule) => {
+                            const state = card.loyalty_state[rule.id]
+                            return (
+                              <button
+                                key={rule.id}
+                                onClick={() => setSelectedRule(rule.id)}
+                                className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                                  selectedRule === rule.id
+                                    ? 'border-yellow-500 bg-yellow-50'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <div className="font-semibold">{rule.name}</div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                      Premi disponibili: <span className="font-bold text-yellow-600">{state.rewards}</span>
+                                    </div>
+                                  </div>
+                                  <div className="text-2xl">🎁</div>
+                                </div>
+                              </button>
+                            )
+                          })}
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
+                      </div>
+                    )}
+
+                    <div className="mt-6 flex gap-3">
+                      <button
+                        onClick={handleRedeemReward}
+                        disabled={!selectedRule || processing}
+                        className="flex-1 py-3 px-4 rounded-lg font-semibold bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {processing ? 'Riscatto...' : 'Conferma Riscatto'}
+                      </button>
+                      <button onClick={resetScanner} className="btn-secondary">
+                        Annulla
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Success result */}
             {result && result.success && (
-              <div className="card bg-green-50 border-2 border-green-200">
-                <h2 className="text-2xl font-bold text-green-800 mb-4">
-                  ✓ Acquisto Registrato!
+              <div className={`card border-2 ${result.redeemed ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`}>
+                <h2 className={`text-2xl font-bold mb-4 ${result.redeemed ? 'text-yellow-800' : 'text-green-800'}`}>
+                  {result.redeemed ? '🎁 Premio Riscattato!' : '✓ Acquisto Registrato!'}
                 </h2>
 
-                {result.reward_earned ? (
+                {result.redeemed ? (
+                  <div>
+                    <p className="text-yellow-700 mb-2">
+                      {result.message}
+                    </p>
+                    {result.remaining_rewards !== undefined && (
+                      <p className="text-sm text-yellow-600">
+                        Premi rimanenti: {result.remaining_rewards}
+                      </p>
+                    )}
+                  </div>
+                ) : result.reward_earned ? (
                   <div className="bg-yellow-100 border-2 border-yellow-300 p-4 rounded-lg mb-4">
                     <p className="text-xl font-bold text-yellow-900 mb-2">
                       🎉 Premio Guadagnato!

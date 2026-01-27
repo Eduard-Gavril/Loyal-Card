@@ -33,96 +33,63 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Get JWT token from header
+    // Get auth token from request
     const authHeader = req.headers.get('Authorization')
     
     if (!authHeader) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Missing authorization header',
-          debug: {
-            headers: Object.fromEntries(req.headers.entries())
-          }
-        }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Extract user ID from JWT (already validated by Supabase)
-    const jwt = authHeader.replace('Bearer ', '')
-    const parts = jwt.split('.')
-    if (parts.length !== 3) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid JWT format',
-          debug: {
-            jwtLength: jwt.length,
-            jwtPrefix: jwt.substring(0, 20),
-            parts: parts.length
-          }
+          error: 'Missing authorization header'
         }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
     
-    // Decode JWT payload (no verification needed, Supabase already did it)
-    let payload
+    // Decode JWT to get user_id (JWT already validated by Supabase gateway)
+    const jwt = authHeader.replace('Bearer ', '')
+    const parts = jwt.split('.')
+    
+    if (parts.length !== 3) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid JWT format'
+        }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Decode base64 payload (Deno compatible)
+    let userId: string
     try {
-      payload = JSON.parse(atob(parts[1]))
+      const base64Payload = parts[1]
+      // Deno-compatible base64 decode
+      const jsonPayload = atob(base64Payload)
+      const payload = JSON.parse(jsonPayload)
+      userId = payload.sub
+      
+      if (!userId) {
+        throw new Error('No sub in JWT')
+      }
     } catch (err) {
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: 'Failed to decode JWT',
-          debug: {
-            decodeError: err.message
-          }
+          debug: { error: String(err) }
         }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
     
-    const userId = payload.sub
+    // Create Supabase client with service role
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    if (!userId) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'No user ID in JWT',
-          debug: {
-            payload: payload
-          }
-        }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    
-    // Debug: check environment variables
-    if (!supabaseUrl || !supabaseKey) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Missing environment variables',
-          debug: {
-            hasUrl: !!supabaseUrl,
-            hasKey: !!supabaseKey,
-            urlPrefix: supabaseUrl?.substring(0, 30) || 'missing'
-          }
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-    
-    const supabaseClient = createClient(supabaseUrl, supabaseKey)
-
-    // Get admin info using the extracted user ID
-    const { data: admin, error: adminError } = await supabaseClient
+    // Get admin info
+    const { data: admin, error: adminError } = await supabase
       .from('admins')
       .select('id, tenant_id, role, store_id')
       .eq('user_id', userId)
@@ -156,7 +123,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Find card by QR code
-    const { data: card, error: cardError } = await supabaseClient
+    const { data: card, error: cardError } = await supabase
       .from('cards')
       .select('id, client_id, tenant_id, loyalty_state, active')
       .eq('qr_code', qr_code)
@@ -178,7 +145,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Verify product exists and belongs to tenant
-    const { data: product, error: productError } = await supabaseClient
+    const { data: product, error: productError } = await supabase
       .from('products')
       .select('id, name, category_id, tenant_id')
       .eq('id', product_id)
@@ -194,7 +161,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Find applicable reward rule
-    const { data: rules, error: rulesError } = await supabaseClient
+    const { data: rules, error: rulesError } = await supabase
       .from('reward_rules')
       .select('*')
       .eq('tenant_id', admin.tenant_id)
@@ -236,7 +203,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Update card
-    const { error: updateError } = await supabaseClient
+    const { error: updateError } = await supabase
       .from('cards')
       .update({
         loyalty_state: loyaltyState,
@@ -249,7 +216,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Create scan event
-    const { error: eventError } = await supabaseClient
+    const { error: eventError } = await supabase
       .from('scan_events')
       .insert({
         tenant_id: admin.tenant_id,

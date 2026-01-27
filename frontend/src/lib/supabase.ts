@@ -143,6 +143,24 @@ export const api = {
     return data
   },
 
+  // Redeem reward
+  async redeemReward(qrCode: string, rewardRuleId: string) {
+    const { data, error } = await supabase.functions.invoke('redeem-reward', {
+      body: { qr_code: qrCode, reward_rule_id: rewardRuleId }
+    })
+    
+    if (error) {
+      const errorDetails = {
+        message: error.message || 'Failed to redeem reward',
+        name: error.name,
+        fullError: error
+      }
+      throw errorDetails
+    }
+    
+    return data
+  },
+
   // Get card by QR code
   async getCardByQR(qrCode: string) {
     const { data, error } = await supabase

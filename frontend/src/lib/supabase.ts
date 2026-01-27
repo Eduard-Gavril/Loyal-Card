@@ -121,40 +121,26 @@ export const api = {
 
   // Register scan
   async registerScan(qrCode: string, productId: string) {
-    // Refresh session to get valid token
-    const { data: { session }, error: sessionError } = await supabase.auth.refreshSession()
-    
-    if (sessionError || !session) {
-      throw { 
-        message: 'Session expired - please login again', 
-        status: 401,
-        debug: { sessionError: sessionError?.message }
-      }
-    }
-    
-    const response = await fetch(`${supabaseUrl}/functions/v1/register-scan`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': supabaseAnonKey
-      },
-      body: JSON.stringify({ qr_code: qrCode, product_id: productId })
+    // Use supabase.functions.invoke which handles auth automatically
+    const { data, error } = await supabase.functions.invoke('register-scan', {
+      body: { qr_code: qrCode, product_id: productId }
     })
     
-    const responseData = await response.json()
-    
-    if (!response.ok) {
-      // Return the full error response including debug info
-      throw {
-        message: responseData.error || 'Request failed',
-        status: response.status,
-        debug: responseData.debug,
-        fullResponse: responseData
+    if (error) {
+      // Extract all error details
+      const errorDetails = {
+        message: error.message || 'Request failed',
+        name: error.name,
+        // @ts-ignore
+        status: error.context?.status || error.status,
+        // @ts-ignore  
+        body: error.context?.body,
+        fullError: error
       }
+      throw errorDetails
     }
     
-    return responseData
+    return data
   },
 
   // Get card by QR code

@@ -38,7 +38,63 @@ Deno.serve(async (req: Request): Promise<Response> => {
     
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Missing authorization header' }),
+        JSON.stringify({ 
+          success: false, 
+          error: 'Missing authorization header',
+          debug: {
+            headers: Object.fromEntries(req.headers.entries())
+          }
+        }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Extract user ID from JWT (already validated by Supabase)
+    const jwt = authHeader.replace('Bearer ', '')
+    const parts = jwt.split('.')
+    if (parts.length !== 3) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid JWT format',
+          debug: {
+            jwtLength: jwt.length,
+            jwtPrefix: jwt.substring(0, 20),
+            parts: parts.length
+          }
+        }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Decode JWT payload (no verification needed, Supabase already did it)
+    let payload
+    try {
+      payload = JSON.parse(atob(parts[1]))
+    } catch (err) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to decode JWT',
+          debug: {
+            decodeError: err.message
+          }
+        }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const userId = payload.sub
+    
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'No user ID in JWT',
+          debug: {
+            payload: payload
+          }
+        }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -65,30 +121,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
     
     const supabaseClient = createClient(supabaseUrl, supabaseKey)
 
-    // Verify admin user from JWT
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
-
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid authentication', 
-          debug: {
-            authError: authError?.message,
-            hasUser: !!user
-          }
-        }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Get admin info
+    // Get admin info using the extracted user ID
     const { data: admin, error: adminError } = await supabaseClient
       .from('admins')
       .select('id, tenant_id, role, store_id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('active', true)
       .single()
 
@@ -100,7 +137,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           debug: {
             adminError: adminError?.message,
             adminErrorCode: adminError?.code,
-            userId: user.id,
+            userId: userId,
             hasAdmin: !!admin
           }
         }),

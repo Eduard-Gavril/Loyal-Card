@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5QrcodeScanner } from 'html5-qrcode'
-import { useAuthStore } from '@/store'
+import { useAuthStore, useClientStore } from '@/store'
 import { api, Product, Card, RewardRule } from '@/lib/supabase'
 import DarkVeil from '@/components/DarkVeil'
+import LanguageSelector from '@/components/LanguageSelector'
+import { getTranslation } from '@/lib/i18n'
 
 export default function AdminScanner() {
   const navigate = useNavigate()
   const { tenantId } = useAuthStore()
+  const { language } = useClientStore()
+  const t = getTranslation(language)
   const [scannedQR, setScannedQR] = useState<string>('')
   const [card, setCard] = useState<Card | null>(null)
   const [rules, setRules] = useState<RewardRule[]>([])
@@ -189,11 +193,12 @@ export default function AdminScanner() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Indietro
+              {t.admin.scanner.back}
             </button>
-            <h1 className="text-4xl font-bold text-white tracking-tight">
-              Scansiona QR Code
+            <h1 className="text-4xl font-bold text-white tracking-tight flex-1">
+              {t.admin.scanner.title}
             </h1>
+            <LanguageSelector />
           </div>
         </header>
 
@@ -204,16 +209,16 @@ export default function AdminScanner() {
               <div className="mb-6">
                 <h2 className="text-3xl font-bold mb-3 text-white flex items-center gap-2">
                   <span className="text-4xl">📸</span>
-                  Inquadra il QR code
+                  {t.admin.scanner.frameQR}
                 </h2>
                 <p className="text-gray-200">
-                  Posiziona il QR code del cliente al centro del riquadro
+                  {t.admin.scanner.frameDesc}
                 </p>
             </div>
               <div id="qr-reader" className="w-full rounded-xl overflow-hidden"></div>
               <div className="mt-6 flex items-center gap-2 text-sm text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
                 <span className="text-xl">💡</span>
-                <span>Consenti l'accesso alla fotocamera quando richiesto</span>
+                <span>{t.admin.scanner.cameraInfo}</span>
               </div>
             </div>
           )}
@@ -224,7 +229,7 @@ export default function AdminScanner() {
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6">
                 <h2 className="text-3xl font-bold mb-4 text-white flex items-center gap-2">
                   <span className="text-green-400">✓</span>
-                  QR Code Scansionato
+                  {t.admin.scanner.qrScanned}
                 </h2>
                 <p className="text-sm text-gray-200 font-mono bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/10">
                   {scannedQR}
@@ -245,7 +250,7 @@ export default function AdminScanner() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="text-xl">📦</span>
-                      Registra Acquisto
+                      {t.admin.scanner.registerPurchase}
                     </span>
                   </button>
                   <button
@@ -258,7 +263,7 @@ export default function AdminScanner() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="text-xl">🎁</span>
-                      Riscatta Premio
+                      {t.admin.scanner.redeemReward}
                     </span>
                   </button>
                 </div>
@@ -266,10 +271,10 @@ export default function AdminScanner() {
                 {/* Product selection (scan mode) */}
                 {mode === 'scan' && (
                   <div>
-                    <h2 className="text-2xl font-bold mb-4 text-white">Seleziona il prodotto acquistato</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-white">{t.admin.scanner.selectProduct}</h2>
                     
                     {products.length === 0 ? (
-                      <p className="text-gray-200">Nessun prodotto disponibile</p>
+                      <p className="text-gray-200">{t.admin.scanner.noProducts}</p>
                     ) : (
                       <div className="space-y-3">
                         {products.map((product) => (
@@ -308,13 +313,13 @@ export default function AdminScanner() {
                         disabled={!selectedProduct || processing}
                         className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                       >
-                        {processing ? 'Registrazione...' : 'Conferma Acquisto'}
+                        {processing ? t.admin.scanner.registering : t.admin.scanner.confirmPurchase}
                       </button>
                       <button
                         onClick={resetScanner}
                         className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
                       >
-                        Annulla
+                        {t.admin.scanner.cancel}
                       </button>
                     </div>
                   </div>
@@ -323,17 +328,17 @@ export default function AdminScanner() {
                 {/* Reward redemption (redeem mode) */}
                 {mode === 'redeem' && (
                   <div>
-                    <h2 className="text-2xl font-bold mb-4 text-white">Seleziona il premio da riscattare</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-white">{t.admin.scanner.selectReward}</h2>
                     
                     {!card || !card.loyalty_state || Object.keys(card.loyalty_state).length === 0 ? (
-                      <p className="text-gray-200">Nessun premio disponibile per questa card</p>
+                      <p className="text-gray-200">{t.admin.scanner.noRewards}</p>
                     ) : rules.filter(rule => {
                         const state = card.loyalty_state[rule.id]
                         return state && state.rewards > 0
                       }).length === 0 ? (
                       <div className="text-center py-8 text-gray-200 bg-white/5 rounded-xl border-2 border-dashed border-white/20">
                         <span className="text-4xl mb-2 block">🎁</span>
-                        Nessun premio disponibile per questa card
+                        {t.admin.scanner.noRewards}
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -358,7 +363,7 @@ export default function AdminScanner() {
                                   <div>
                                     <div className="font-semibold text-white">{rule.name}</div>
                                     <div className="text-sm text-gray-300 mt-2 flex items-center gap-2">
-                                      <span>Premi disponibili:</span>
+                                      <span>{t.admin.scanner.availableRewards}:</span>
                                       <span className="font-bold text-yellow-600 text-lg">{state.rewards}</span>
                                     </div>
                                   </div>
@@ -383,13 +388,13 @@ export default function AdminScanner() {
                         disabled={!selectedRule || processing}
                         className="flex-1 py-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 shadow-lg shadow-yellow-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                       >
-                        {processing ? 'Riscatto...' : 'Conferma Riscatto'}
+                        {processing ? t.admin.scanner.redeeming : t.admin.scanner.confirmRedeem}
                       </button>
                       <button
                         onClick={resetScanner}
                         className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
                       >
-                        Annulla
+                        {t.admin.scanner.cancel}
                       </button>
                     </div>
                   </div>
@@ -401,7 +406,7 @@ export default function AdminScanner() {
             {result && (
               <div className={`bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border-2 ${result.redeemed ? 'border-yellow-400/50' : 'border-green-400/50'}`}>
                 <h2 className={`text-4xl font-bold mb-6 ${result.redeemed ? 'text-yellow-300' : 'text-green-300'}`}>
-                  {result.redeemed ? '🎁 Premio Riscattato!' : '✓ Acquisto Registrato!'}
+                  {result.redeemed ? `🎁 ${t.admin.scanner.rewardRedeemed}` : `✓ ${t.admin.scanner.purchaseRegistered}`}
                 </h2>
 
                 {result.redeemed ? (
@@ -411,7 +416,7 @@ export default function AdminScanner() {
                     </p>
                     {result.remaining_rewards !== undefined && (
                       <p className="text-sm text-yellow-200 bg-yellow-500/20 rounded-xl p-4 border border-yellow-400/30">
-                        Premi rimanenti: <span className="font-bold text-xl">{result.remaining_rewards}</span>
+                        {t.admin.scanner.remainingRewards}: <span className="font-bold text-xl">{result.remaining_rewards}</span>
                       </p>
                     )}
                   </div>
@@ -419,7 +424,7 @@ export default function AdminScanner() {
                   <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-2 border-yellow-400/50 p-6 rounded-xl mb-6">
                     <p className="text-2xl font-bold text-yellow-300 mb-3 flex items-center gap-2">
                       <span className="text-3xl">🎉</span>
-                      Premio Guadagnato!
+                      {t.admin.scanner.rewardEarned}
                     </p>
                     <p className="text-yellow-200 text-lg mb-2">
                       {result.reward_earned.rule_name}
@@ -430,7 +435,7 @@ export default function AdminScanner() {
                   </div>
                 ) : (
                   <p className="text-green-200 text-lg mb-6 bg-green-500/20 rounded-xl p-4 border border-green-400/30">
-                    ✓ Punti aggiunti alla card del cliente
+                    ✓ {t.admin.scanner.pointsAdded}
                   </p>
                 )}
 
@@ -438,7 +443,7 @@ export default function AdminScanner() {
                   onClick={resetScanner}
                   className="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
                 >
-                  Scansiona Nuovo Cliente
+                  {t.admin.scanner.scanNewClient}
                 </button>
               </div>
             )}

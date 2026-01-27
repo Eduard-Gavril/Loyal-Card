@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/store'
+import { useAuthStore, useClientStore } from '@/store'
 import DarkVeil from '@/components/DarkVeil'
+import LanguageSelector from '@/components/LanguageSelector'
+import { getTranslation } from '@/lib/i18n'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
+  const { language } = useClientStore()
+  const t = getTranslation(language)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -78,17 +82,20 @@ export default function AdminLogin() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Torna alla home
+            {t.admin.login.backHome}
           </button>
-          <h1 className="text-5xl font-bold text-white mb-2">Fidelix</h1>
-          <p className="text-white/70 text-lg">Admin Portal</p>
+          <div className="mb-2">
+            <LanguageSelector />
+          </div>
+          <h1 className="text-5xl font-bold text-white mb-3">{t.admin.login.title}</h1>
+          <p className="text-gray-300 text-lg">{t.admin.login.subtitle}</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
-                Email
+                {t.admin.login.email}
               </label>
               <input
                 id="email"
@@ -104,7 +111,7 @@ export default function AdminLogin() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
-                Password
+                {t.admin.login.password}
               </label>
               <input
                 id="password"
@@ -135,15 +142,15 @@ export default function AdminLogin() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Login in corso...
+                  {t.admin.login.loggingIn}
                 </span>
-              ) : 'Accedi al Pannello'}
+              ) : t.admin.login.loginButton}
             </button>
           </form>
         </div>
 
         <div className="text-center mt-6 text-sm text-white/60 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-          <p>💡 Demo credentials</p>
+          <p>💡 {t.admin.login.demoCredentials}:</p>
           <p className="font-mono mt-1">cafenescu@admin.test / admin123</p>
         </div>
       </div>

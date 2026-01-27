@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { Language } from '@/lib/i18n'
 
 interface CardData {
   clientId: string
@@ -23,6 +24,9 @@ interface ClientState {
   getAllCards: () => CardData[]
   getCard: (qrCode: string) => CardData | undefined
   updateCardName: (qrCode: string, customName: string) => void
+  // Language
+  language: Language
+  setLanguage: (lang: Language) => void
 }
 
 export const useClientStore = create<ClientState>()(
@@ -61,7 +65,10 @@ export const useClientStore = create<ClientState>()(
           card.qrCode === qrCode ? { ...card, customName } : card
         )
         set({ savedCards: cards })
-      }
+      },
+      // Language
+      language: 'en',
+      setLanguage: (lang: Language) => set({ language: lang })
     }),
     {
       name: 'fidelix-client-storage'

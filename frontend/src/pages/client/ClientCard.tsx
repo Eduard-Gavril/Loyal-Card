@@ -4,12 +4,15 @@ import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
 import { api, Card as CardType, RewardRule } from '@/lib/supabase'
 import DarkVeil from '@/components/DarkVeil'
+import LanguageSelector from '@/components/LanguageSelector'
+import { getTranslation } from '@/lib/i18n'
 
 const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111' // TODO: Make dynamic
 
 export default function ClientCard() {
   const { qrCode: urlQrCode } = useParams()
-  const { clientId, cardId, qrCode, tenantId, setClientData } = useClientStore()
+  const { clientId, cardId, qrCode, tenantId, setClientData, language } = useClientStore()
+  const t = getTranslation(language)
   
   const [loading, setLoading] = useState(true)
   const [card, setCard] = useState<CardType | null>(null)
@@ -104,7 +107,7 @@ export default function ClientCard() {
         
         {/* Loading text centered */}
         <div className="relative z-20 min-h-screen flex items-center justify-center">
-          <div className="text-white text-2xl font-semibold animate-pulse">Caricamento...</div>
+          <div className="text-white text-2xl font-semibold animate-pulse">{t.card.loading}</div>
         </div>
       </div>
     )
@@ -124,9 +127,12 @@ export default function ClientCard() {
       <div className="relative z-20">
         {/* Header */}
         <header className="pt-6 px-4">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-4xl font-bold text-white tracking-tight mb-1">Fidelix</h1>
-            <p className="text-gray-200">La tua carta fedeltà digitale</p>
+          <div className="max-w-2xl mx-auto flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold text-white tracking-tight mb-1">{t.card.title}</h1>
+              <p className="text-gray-200">{t.card.subtitle}</p>
+            </div>
+            <LanguageSelector />
           </div>
         </header>
 
@@ -136,7 +142,7 @@ export default function ClientCard() {
             <div className="text-center">
               <h2 className="text-3xl font-bold mb-4 text-white flex items-center justify-center gap-2">
                 <span className="text-4xl">📱</span>
-                Il tuo QR Code
+                {t.card.qrTitle}
               </h2>
             {qrDataUrl ? (
               <>
@@ -146,7 +152,7 @@ export default function ClientCard() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-200 mb-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-                  💡 Mostra questo codice alla cassa per accumulare premi
+                  {t.card.qrInfo}
                 </p>
                 <p className="text-xs text-gray-300 font-mono bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg inline-block border border-white/10">{qrCode}</p>
               </>
@@ -190,12 +196,12 @@ export default function ClientCard() {
           <div className="mt-6 space-y-3">
             {isIOS && (
               <button className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                <span className="text-2xl">🍎</span> Aggiungi ad Apple Wallet
+                <span className="text-2xl">🍎</span> {t.card.addAppleWallet}
               </button>
             )}
             {isAndroid && (
               <button className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                <span className="text-2xl">📱</span> Aggiungi a Google Wallet
+                <span className="text-2xl">📱</span> {t.card.addGoogleWallet}
               </button>
             )}
           </div>
@@ -205,12 +211,12 @@ export default function ClientCard() {
         <div className="space-y-4 px-4 max-w-2xl mx-auto">
           <h2 className="text-white text-3xl font-bold flex items-center gap-2">
             <span className="text-4xl">🎁</span>
-            I tuoi premi
+            {t.card.yourRewards}
           </h2>
           
           {rules.length === 0 ? (
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 text-center text-gray-200">
-              Nessun programma fedeltà attivo
+              {t.card.noProgram}
             </div>
           ) : (
             rules.map((rule) => {
@@ -240,11 +246,11 @@ export default function ClientCard() {
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm font-semibold text-gray-200">
-                        {progress.count} su {rule.buy_count} acquisti
+                        {progress.count} {t.card.of} {rule.buy_count} {t.card.purchases}
                       </span>
                       {progress.count > 0 && progress.count < rule.buy_count && (
                         <span className="text-xs text-primary-300 font-semibold">
-                          Ancora {rule.buy_count - progress.count}!
+                          {t.card.onlyMore} {rule.buy_count - progress.count}{t.card.moreNeeded}
                         </span>
                       )}
                     </div>
@@ -288,13 +294,13 @@ export default function ClientCard() {
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 mt-6">
           <h3 className="font-bold mb-3 text-lg flex items-center gap-2 text-white">
             <span className="text-2xl">💡</span>
-            Come funziona
+            {t.card.howItWorks}
           </h3>
           <ul className="text-sm text-gray-200 space-y-2">
-            <li className="flex items-center gap-2">📱 Mostra il QR code alla cassa</li>
-            <li className="flex items-center gap-2">⭐ Accumula punti ad ogni acquisto</li>
-            <li className="flex items-center gap-2">🎯 I premi sono specifici per prodotto</li>
-            <li className="flex items-center gap-2">💳 Aggiungi al Wallet per accesso rapido</li>
+            <li className="flex items-center gap-2">{t.card.howStep1}</li>
+            <li className="flex items-center gap-2">{t.card.howStep2}</li>
+            <li className="flex items-center gap-2">{t.card.howStep3}</li>
+            <li className="flex items-center gap-2">{t.card.howStep4}</li>
           </ul>
         </div>
       </div>

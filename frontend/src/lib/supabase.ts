@@ -121,11 +121,15 @@ export const api = {
 
   // Register scan
   async registerScan(qrCode: string, productId: string) {
-    // Use fetch directly to get full error response
-    const { data: { session } } = await supabase.auth.getSession()
+    // Refresh session to get valid token
+    const { data: { session }, error: sessionError } = await supabase.auth.refreshSession()
     
-    if (!session) {
-      throw { message: 'Not authenticated', status: 401 }
+    if (sessionError || !session) {
+      throw { 
+        message: 'Session expired - please login again', 
+        status: 401,
+        debug: { sessionError: sessionError?.message }
+      }
     }
     
     const response = await fetch(`${supabaseUrl}/functions/v1/register-scan`, {

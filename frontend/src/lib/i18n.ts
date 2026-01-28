@@ -10,6 +10,7 @@ export const translations = {
       subtitle: 'Forget plastic cards. Earn points, get rewards and bring your loyalty into the future.',
       getCard: 'Get your Card',
       learnMore: 'Learn More',
+      backToTop: 'Back to Top',
     },
     stats: {
       digital: '100% Digital',
@@ -152,6 +153,7 @@ export const translations = {
       subtitle: 'Uită de cardurile de plastic. Acumulează puncte, câștigă premii și adu-ți fidelitatea în viitor.',
       getCard: 'Obține Cardul',
       learnMore: 'Află Mai Mult',
+      backToTop: 'Înapoi Sus',
     },
     stats: {
       digital: '100% Digital',

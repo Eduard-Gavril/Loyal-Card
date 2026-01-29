@@ -18,6 +18,44 @@ export default function ClientCard() {
   const [card, setCard] = useState<CardType | null>(null)
   const [rules, setRules] = useState<RewardRule[]>([])
   const [qrDataUrl, setQrDataUrl] = useState<string>('')
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [showInstallButton, setShowInstallButton] = useState(false)
+
+  // PWA install prompt handler
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setShowInstallButton(true)
+    }
+
+    window.addEventListener('beforeinstallprompt', handler)
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false)
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      // Fallback for iOS - show instructions
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        alert('Per aggiungere alla schermata home su iOS:\n\n1. Tocca il pulsante Condividi\n2. Scorri e tocca "Aggiungi a Home"\n3. Tocca "Aggiungi"')
+      }
+      return
+    }
+
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null)
+      setShowInstallButton(false)
+    }
+  }
 
   // Initialize client or load existing
   useEffect(() => {
@@ -89,10 +127,6 @@ export default function ClientCard() {
     }
     return card.loyalty_state[ruleId]
   }
-
-  // Detect device for wallet buttons
-  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
-  const isAndroid = /Android/.test(navigator.userAgent)
 
   if (loading) {
     return (
@@ -192,19 +226,20 @@ export default function ClientCard() {
             )}
           </div>
 
-          {/* Add to Wallet buttons */}
-          <div className="mt-6 space-y-3">
-            {isIOS && (
-              <button className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                <span className="text-2xl">🍎</span> {t.card.addAppleWallet}
+          {/* Add to Home Screen button */}
+          {showInstallButton && (
+            <div className="mt-6">
+              <button 
+                onClick={handleInstallClick}
+                className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Aggiungi a Schermata Home
               </button>
-            )}
-            {isAndroid && (
-              <button className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                <span className="text-2xl">📱</span> {t.card.addGoogleWallet}
-              </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Loyalty Progress */}

@@ -160,6 +160,13 @@ export default function AdminScanner() {
   }
 
   const resetScanner = () => {
+    // Clean up existing scanner first
+    const qrReaderElem = document.getElementById('qr-reader')
+    if (qrReaderElem) {
+      qrReaderElem.innerHTML = ''
+    }
+
+    // Reset all state
     setScannedQR('')
     setSelectedProduct('')
     setSelectedRule('')
@@ -168,7 +175,11 @@ export default function AdminScanner() {
     setResult(null)
     setError('')
     setScanning(true)
-    initScanner()
+    
+    // Reinitialize scanner after a short delay to ensure cleanup is complete
+    setTimeout(() => {
+      initScanner()
+    }, 100)
   }
 
   return (

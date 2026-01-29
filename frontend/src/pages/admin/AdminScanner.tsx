@@ -17,9 +17,11 @@ export default function AdminScanner() {
   const [rules, setRules] = useState<RewardRule[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [selectedProduct, setSelectedProduct] = useState<string>('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [mode, setMode] = useState<'scan' | 'redeem'>('scan')
   const [selectedRule, setSelectedRule] = useState<string>('')
   const [scanning, setScanning] = useState(true)
+  const [cameraPermission, setCameraPermission] = useState<'pending' | 'granted' | 'denied'>('pending')
   const [processing, setProcessing] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string>('')
@@ -72,6 +74,89 @@ export default function AdminScanner() {
   }
 
   const initScanner = () => {
+    // Check if scanner is already initialized
+    const existingScanner = document.getElementById('qr-reader')
+    if (existingScanner && existingScanner.children.length > 0) {
+      console.log('Scanner already initialized, skipping...')
+      return
+    }
+
+    // Remove any existing style elements for the scanner
+    const existingStyles = document.querySelectorAll('style[data-scanner-style]')
+    existingStyles.forEach(style => style.remove())
+
+    // Add custom styles to QR scanner
+    const style = document.createElement('style')
+    style.setAttribute('data-scanner-style', 'true')
+    style.innerHTML = `
+      #qr-reader {
+        border: none !important;
+      }
+      #qr-reader__header_message {
+        color: white !important;
+        padding: 12px !important;
+      }
+      #qr-reader__camera_selection {
+        background: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        color: white !important;
+      }
+      #qr-reader__camera_selection select {
+        background: rgba(0, 0, 0, 0.3) !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+      }
+      #qr-reader__scan_region {
+        border: 2px solid rgba(139, 92, 246, 0.5) !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+      }
+      #qr-reader video {
+        border-radius: 12px !important;
+      }
+      #qr-reader__dashboard_section {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+      }
+      #qr-reader__dashboard_section button {
+        background: linear-gradient(to right, rgb(139, 92, 246), rgb(124, 58, 237)) !important;
+        color: white !important;
+        border: none !important;
+        padding: 12px 24px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s !important;
+        margin: 8px 4px !important;
+      }
+      #qr-reader__dashboard_section button:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.5) !important;
+      }
+      #qr-reader__dashboard_section_csr button {
+        background: linear-gradient(to right, rgb(139, 92, 246), rgb(124, 58, 237)) !important;
+        color: white !important;
+        border: none !important;
+        padding: 12px 24px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s !important;
+        margin: 8px !important;
+      }
+      #qr-reader__dashboard_section_csr button:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.5) !important;
+      }
+    `
+    document.head.appendChild(style)
+
     const scanner = new Html5QrcodeScanner(
       'qr-reader',
       {
@@ -88,11 +173,15 @@ export default function AdminScanner() {
 
     scanner.render(
       (decodedText) => {
+        setCameraPermission('granted')
         setScannedQR(decodedText)
         setScanning(false)
         scanner.clear().catch(err => console.error('Error clearing scanner:', err))
       },
       (errorMessage) => {
+        if (errorMessage.includes('Permission')) {
+          setCameraPermission('denied')
+        }
         if (!errorMessage.includes('No MultiFormat Readers')) {
           console.debug('QR scan error:', errorMessage)
         }
@@ -166,21 +255,54 @@ export default function AdminScanner() {
       qrReaderElem.innerHTML = ''
     }
 
+    // Remove scanner styles
+    const existingStyles = document.querySelectorAll('style[data-scanner-style]')
+    existingStyles.forEach(style => style.remove())
+
     // Reset all state
     setScannedQR('')
     setSelectedProduct('')
+    setSelectedCategory('')
     setSelectedRule('')
     setCard(null)
     setMode('scan')
     setResult(null)
     setError('')
     setScanning(true)
+    setCameraPermission('pending')
     
     // Reinitialize scanner after a short delay to ensure cleanup is complete
     setTimeout(() => {
       initScanner()
-    }, 100)
+    }, 150)
   }
+
+  // Macro categories mapping
+  const macroCategories = {
+    espresso: { name: '☕ Espresso', emoji: '☕', types: ['espresso'] },
+    milk: { name: '🥛 Cappuccini & Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] },
+    chocolate: { name: '🍫 Cioccolata & Tè', emoji: '🍫', types: ['chocolate', 'tea'] },
+    specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] }
+  }
+
+  // Group products by macro category
+  const getProductsByCategory = (categoryKey: string) => {
+    const category = macroCategories[categoryKey as keyof typeof macroCategories]
+    if (!category) return []
+    
+    return products.filter(product => {
+      const type = product.metadata?.type?.toLowerCase()
+      return type && category.types.includes(type)
+    })
+  }
+
+  // Check if we should show macro categories (more than 8 products)
+  const shouldShowMacroCategories = products.length > 8
+
+  // Get available categories (categories that have products)
+  const availableCategories = Object.entries(macroCategories).filter(([key]) => 
+    getProductsByCategory(key).length > 0
+  )
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -225,12 +347,34 @@ export default function AdminScanner() {
                 <p className="text-gray-200">
                   {t.admin.scanner.frameDesc}
                 </p>
-            </div>
-              <div id="qr-reader" className="w-full rounded-xl overflow-hidden"></div>
-              <div className="mt-6 flex items-center gap-2 text-sm text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-                <span className="text-xl">💡</span>
-                <span>{t.admin.scanner.cameraInfo}</span>
               </div>
+              
+              {/* Camera Permission Denied Warning */}
+              {cameraPermission === 'denied' && (
+                <div className="mb-6 bg-red-500/20 border-2 border-red-400/50 rounded-xl p-6 text-center">
+                  <div className="text-4xl mb-3">🚫</div>
+                  <h3 className="text-xl font-bold text-red-200 mb-2">Permesso Fotocamera Negato</h3>
+                  <p className="text-red-100 text-sm mb-4">
+                    Per scannerizzare i codici QR, devi consentire l'accesso alla fotocamera nelle impostazioni del browser.
+                  </p>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-300"
+                  >
+                    Riprova
+                  </button>
+                </div>
+              )}
+
+              <div id="qr-reader" className="w-full rounded-xl overflow-hidden"></div>
+              
+              {/* Info box - only show when permission is pending */}
+              {cameraPermission === 'pending' && (
+                <div className="mt-6 flex items-center gap-3 text-sm text-gray-200 bg-gradient-to-r from-primary-500/20 to-primary-600/20 backdrop-blur-sm border border-primary-400/30 rounded-xl p-4">
+                  <span className="text-2xl">💡</span>
+                  <span className="flex-1">{t.admin.scanner.cameraInfo}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -282,34 +426,77 @@ export default function AdminScanner() {
                 {/* Product selection (scan mode) */}
                 {mode === 'scan' && (
                   <div>
-                    <h2 className="text-2xl font-bold mb-4 text-white">{t.admin.scanner.selectProduct}</h2>
-                    
-                    {products.length === 0 ? (
-                      <p className="text-gray-200">{t.admin.scanner.noProducts}</p>
-                    ) : (
-                      <div className="space-y-3">
-                        {products.map((product) => (
-                          <button
-                            key={product.id}
-                            onClick={() => setSelectedProduct(product.id)}
-                            className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
-                              selectedProduct === product.id
-                                ? 'border-primary-400 bg-primary-500/20 shadow-lg shadow-primary-500/30 scale-[1.02]'
-                                : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
-                            }`}
-                          >
-                            <div className="font-semibold text-white">{product.name}</div>
-                            {product.description && (
-                              <div className="text-sm text-gray-600 mt-1">{product.description}</div>
-                            )}
-                            {product.price && (
-                              <div className="text-sm font-bold text-primary-600 mt-2">
-                                €{product.price.toFixed(2)}
+                    {/* Show macro categories if more than 8 products */}
+                    {shouldShowMacroCategories && !selectedCategory ? (
+                      <>
+                        <h2 className="text-2xl font-bold mb-4 text-white">Seleziona Categoria</h2>
+                        <div className="grid grid-cols-2 gap-3">
+                          {availableCategories.map(([key, category]) => (
+                            <button
+                              key={key}
+                              onClick={() => setSelectedCategory(key)}
+                              className="p-6 rounded-xl border-2 border-white/20 hover:border-primary-400 hover:bg-primary-500/10 bg-white/5 transition-all duration-300 hover:shadow-lg hover:scale-105"
+                            >
+                              <div className="text-4xl mb-2">{category.emoji}</div>
+                              <div className="font-semibold text-white text-sm">
+                                {category.name.replace(/^[^\s]+\s/, '')}
                               </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                              <div className="text-xs text-gray-300 mt-1">
+                                {getProductsByCategory(key).length} prodotti
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-2xl font-bold text-white">
+                            {selectedCategory 
+                              ? macroCategories[selectedCategory as keyof typeof macroCategories]?.name 
+                              : t.admin.scanner.selectProduct}
+                          </h2>
+                          {shouldShowMacroCategories && selectedCategory && (
+                            <button
+                              onClick={() => {
+                                setSelectedCategory('')
+                                setSelectedProduct('')
+                              }}
+                              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
+                            >
+                              ← Indietro
+                            </button>
+                          )}
+                        </div>
+                        
+                        {(shouldShowMacroCategories && selectedCategory ? getProductsByCategory(selectedCategory) : products).length === 0 ? (
+                          <p className="text-gray-200">{t.admin.scanner.noProducts}</p>
+                        ) : (
+                          <div className="space-y-3">
+                            {(shouldShowMacroCategories && selectedCategory ? getProductsByCategory(selectedCategory) : products).map((product) => (
+                              <button
+                                key={product.id}
+                                onClick={() => setSelectedProduct(product.id)}
+                                className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
+                                  selectedProduct === product.id
+                                    ? 'border-primary-400 bg-primary-500/20 shadow-lg shadow-primary-500/30 scale-[1.02]'
+                                    : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
+                                }`}
+                              >
+                                <div className="font-semibold text-white">{product.name}</div>
+                                {product.description && (
+                                  <div className="text-sm text-gray-300 mt-1">{product.description}</div>
+                                )}
+                                {product.price && (
+                                  <div className="text-sm font-bold text-primary-300 mt-2">
+                                    €{product.price.toFixed(2)}
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {error && (
@@ -318,21 +505,23 @@ export default function AdminScanner() {
                       </div>
                     )}
 
-                    <div className="mt-8 flex gap-3">
-                      <button
-                        onClick={handleRegisterScan}
-                        disabled={!selectedProduct || processing}
-                        className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-                      >
-                        {processing ? t.admin.scanner.registering : t.admin.scanner.confirmPurchase}
-                      </button>
-                      <button
-                        onClick={resetScanner}
-                        className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
-                      >
-                        {t.admin.scanner.cancel}
-                      </button>
-                    </div>
+                    {(!shouldShowMacroCategories || selectedCategory) && (
+                      <div className="mt-8 flex gap-3">
+                        <button
+                          onClick={handleRegisterScan}
+                          disabled={!selectedProduct || processing}
+                          className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                        >
+                          {processing ? t.admin.scanner.registering : t.admin.scanner.confirmPurchase}
+                        </button>
+                        <button
+                          onClick={resetScanner}
+                          className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
+                        >
+                          {t.admin.scanner.cancel}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

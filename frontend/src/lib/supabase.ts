@@ -59,6 +59,7 @@ export interface Product {
   description?: string
   image_url?: string
   price?: number
+  metadata?: { type?: string; [key: string]: any }
   active: boolean
   created_at: string
   updated_at: string

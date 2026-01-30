@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 // Pages
 import LandingPage from './pages/LandingPage'
+import TenantSelector from './pages/TenantSelector'
 import ClientCard from './pages/client/ClientCard'
 import ClientWallet from './pages/client/ClientWallet'
 import AdminLogin from './pages/admin/AdminLogin'
@@ -96,6 +97,9 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
       <Routes>
         {/* Landing page */}
         <Route path="/" element={<LandingPage />} />
+        
+        {/* Tenant selection */}
+        <Route path="/select-tenant" element={<TenantSelector />} />
         
         {/* Client routes (public) */}
         <Route path="/wallet" element={<ClientWallet />} />

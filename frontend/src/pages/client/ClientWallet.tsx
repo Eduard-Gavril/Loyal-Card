@@ -19,7 +19,7 @@ interface SavedCard {
 
 export default function ClientWallet() {
   const navigate = useNavigate()
-  const { getAllCards, updateCardName } = useClientStore()
+  const { clientId, getAllCards, updateCardName } = useClientStore()
   const [cards, setCards] = useState<SavedCard[]>([])
   const [loading, setLoading] = useState(true)
   const [editingCard, setEditingCard] = useState<string | null>(null)
@@ -30,50 +30,54 @@ export default function ClientWallet() {
   }, [])
 
   const loadCards = async () => {
+    setLoading(true)
     try {
-      const savedCards = getAllCards()
+      if (!clientId) {
+        console.log('No clientId found')
+        setCards([])
+        setLoading(false)
+        return
+      }
+
+      // Get ALL cards for this client from database
+      const allCards = await api.getCardsByClient(clientId)
+      console.log('Found cards for client:', allCards)
       
-      // Fetch full card data with loyalty state
+      // Fetch tenant details for each card
       const cardsWithDetails = await Promise.all(
-        savedCards.map(async (card) => {
+        allCards.map(async (cardData) => {
           try {
-            // Get card data with loyalty state
-            const cardData = await api.getCardByQR(card.qrCode)
-            const tenant = await api.getTenant(card.tenantId)
+            const tenant = await api.getTenant(cardData.tenant_id)
             
-            // Count total stamps across all products/categories
+            // Count total stamps/points
             const loyaltyState = cardData.loyalty_state || {}
             const totalStamps = Object.values(loyaltyState).reduce(
-              (sum: number, count: any) => sum + (typeof count === 'number' ? count : 0), 
+              (sum: number, state: any) => sum + (state?.count || 0), 
               0
             )
             
             return {
-              ...card,
+              clientId: cardData.client_id,
+              cardId: cardData.id,
+              qrCode: cardData.qr_code,
+              tenantId: cardData.tenant_id,
               tenantName: tenant.name,
               tenantLogo: tenant.logo_url,
               brandColor: tenant.brand_color,
               loyaltyState,
-              totalStamps,
-              customName: card.customName
+              totalStamps
             }
           } catch (error) {
-            console.error('Error loading card:', error)
-            return {
-              ...card,
-              tenantName: 'Negozio',
-              brandColor: '#6366f1',
-              loyaltyState: {},
-              totalStamps: 0,
-              customName: card.customName
-            }
+            console.error('Error loading card details:', error)
+            return null
           }
         })
       )
 
-      setCards(cardsWithDetails)
+      setCards(cardsWithDetails.filter(c => c !== null) as SavedCard[])
     } catch (error) {
       console.error('Error loading cards:', error)
+      setCards([])
     } finally {
       setLoading(false)
     }
@@ -84,7 +88,7 @@ export default function ClientWallet() {
   }
 
   const handleAddNewCard = () => {
-    navigate('/card/new')
+    navigate('/select-tenant')
   }
 
   const handleStartEdit = (card: SavedCard) => {

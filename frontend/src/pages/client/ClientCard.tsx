@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
 import { api, Card as CardType, RewardRule } from '@/lib/supabase'
@@ -7,12 +7,15 @@ import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 
-const DEMO_TENANT_ID = '11111111-1111-1111-1111-111111111111' // TODO: Make dynamic
-
 export default function ClientCard() {
   const { qrCode: urlQrCode } = useParams()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { clientId, cardId, qrCode, tenantId, setClientData, language } = useClientStore()
   const t = getTranslation(language)
+  
+  // Get tenant from URL if present (fallback)
+  const urlTenantId = searchParams.get('tenant')
   
   const [loading, setLoading] = useState(true)
   const [card, setCard] = useState<CardType | null>(null)
@@ -61,8 +64,14 @@ export default function ClientCard() {
   useEffect(() => {
     async function init() {
       try {
-        // If URL has QR code, use it
+        // Use tenantId from store or URL parameter
+        const activeTenantId = tenantId || urlTenantId
+        
+        console.log('🚀 Init with:', { clientId, tenantId, urlTenantId, activeTenantId, urlQrCode })
+        
+        // CASO 1: QR code nell'URL (link condiviso)
         if (urlQrCode) {
+          console.log('📱 Loading card from shared URL')
           const cardData = await api.getCardByQR(urlQrCode)
           setCard(cardData)
           setClientData({
@@ -71,33 +80,89 @@ export default function ClientCard() {
             qrCode: cardData.qr_code,
             tenantId: cardData.tenant_id
           })
+          
+          // Load rules
+          const rulesData = await api.getRewardRules(cardData.tenant_id)
+          setRules(rulesData)
+          setLoading(false)
+          return
         }
-        // If localStorage has data, load card
-        else if (clientId && cardId && qrCode) {
-          const cardData = await api.getCardByQR(qrCode)
-          setCard(cardData)
+        
+        // CASO 2: Nessun negozio selezionato → vai a selezionare
+        if (!activeTenantId) {
+          console.log('❌ No tenant selected (store:', tenantId, 'url:', urlTenantId, '), redirecting')
+          navigate('/select-tenant')
+          return
         }
-        // New user - generate client ID
-        else {
-          const result = await api.generateClientId(DEMO_TENANT_ID)
+        
+        console.log('✅ Tenant selected:', activeTenantId)
+        
+        // CASO 3: Ha selezionato un negozio
+        // Controlla se ha già una card per questo negozio
+        if (clientId) {
+          console.log('� Has clientId:', clientId, 'checking for tenant:', activeTenantId)
+          const existingCard = await api.getCardByClientAndTenant(clientId, activeTenantId)
+          
+          if (existingCard) {
+            // Ha già una card per questo negozio
+            console.log('✅ REUSING EXISTING CARD:', {
+              qr: existingCard.qr_code,
+              cardId: existingCard.id,
+              clientId: existingCard.client_id,
+              tenantId: existingCard.tenant_id
+            })
+            setCard(existingCard)
+            setClientData({
+              clientId: existingCard.client_id,
+              cardId: existingCard.id,
+              qrCode: existingCard.qr_code,
+              tenantId: existingCard.tenant_id
+            })
+          } else {
+            // Non ha una card per questo negozio, creala riusando il client
+            console.log('📝 NO CARD FOUND - Creating new card with SAME clientId:', clientId)
+            const result = await api.generateClientId(activeTenantId, clientId)
+            console.log('📝 Result from generateClientId:', result)
+            if (result.success) {
+              console.log('✅ NEW CARD CREATED:', {
+                qr: result.qr_code,
+                cardId: result.card_id,
+                clientId: result.client_id,
+                tenantId: activeTenantId
+              })
+              setClientData({
+                clientId: result.client_id,
+                cardId: result.card_id,
+                qrCode: result.qr_code,
+                tenantId: activeTenantId
+              })
+              const cardData = await api.getCardByQR(result.qr_code)
+              setCard(cardData)
+            }
+          }
+        } else {
+          // Utente completamente nuovo - crea client e card
+          console.log('🆕 New user, creating client and card')
+          const result = await api.generateClientId(activeTenantId)
           if (result.success) {
+            console.log('✅ Client and card created:', result.qr_code)
             setClientData({
               clientId: result.client_id,
               cardId: result.card_id,
               qrCode: result.qr_code,
-              tenantId: DEMO_TENANT_ID
+              tenantId: activeTenantId
             })
-            // Load the newly created card
             const cardData = await api.getCardByQR(result.qr_code)
             setCard(cardData)
           }
         }
-
-        // Load reward rules
-        const rulesData = await api.getRewardRules(tenantId || DEMO_TENANT_ID)
+        
+        // Load reward rules for this tenant
+        const rulesData = await api.getRewardRules(activeTenantId)
         setRules(rulesData)
+        
       } catch (error) {
-        console.error('Error initializing:', error)
+        console.error('❌ Error:', error)
       } finally {
         setLoading(false)
       }
@@ -192,35 +257,14 @@ export default function ClientCard() {
               </>
             ) : (
               <div>
-                <p className="text-gray-600 mb-4">
-                  Non hai ancora una carta fedeltà
+                <p className="text-gray-200 mb-4">
+                  Non hai ancora una carta fedeltà per questo negozio
                 </p>
                 <button
-                  onClick={async () => {
-                    setLoading(true)
-                    try {
-                      const result = await api.generateClientId(DEMO_TENANT_ID)
-                      if (result.success) {
-                        setClientData({
-                          clientId: result.client_id,
-                          cardId: result.card_id,
-                          qrCode: result.qr_code,
-                          tenantId: DEMO_TENANT_ID
-                        })
-                        const cardData = await api.getCardByQR(result.qr_code)
-                        setCard(cardData)
-                        window.location.reload()
-                      }
-                    } catch (error) {
-                      console.error('Error generating card:', error)
-                      alert('Errore durante la generazione della carta')
-                    } finally {
-                      setLoading(false)
-                    }
-                  }}
+                  onClick={() => navigate('/select-tenant')}
                   className="bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
                 >
-                  Genera la tua Carta Fedeltà
+                  Seleziona un negozio
                 </button>
               </div>
             )}

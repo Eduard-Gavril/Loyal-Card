@@ -23,8 +23,18 @@ export interface Tenant {
   logo_url?: string
   brand_color: string
   active: boolean
+  latitude?: number
+  longitude?: number
+  address?: string
+  city?: string
+  postal_code?: string
+  metadata?: any
   created_at: string
   updated_at: string
+}
+
+export interface TenantWithDistance extends Tenant {
+  distance_km: number
 }
 
 export interface Client {
@@ -112,9 +122,12 @@ export interface ScanEvent {
 // API helper functions
 export const api = {
   // Generate anonymous client ID via Edge Function
-  async generateClientId(tenantId: string) {
+  async generateClientId(tenantId: string, existingClientId?: string) {
     const { data, error } = await supabase.functions.invoke('generate-client-id', {
-      body: { tenant_id: tenantId }
+      body: { 
+        tenant_id: tenantId,
+        client_id: existingClientId // Pass existing client_id if user already has cards
+      }
     })
     if (error) throw error
     return data
@@ -173,6 +186,37 @@ export const api = {
     return data
   },
 
+  // Get card by client ID and tenant ID
+  async getCardByClientAndTenant(clientId: string, tenantId: string) {
+    console.log('🔍 Searching card with:', { clientId, tenantId })
+    const { data, error } = await supabase
+      .from('cards')
+      .select('*, clients(*)')
+      .eq('client_id', clientId)
+      .eq('tenant_id', tenantId)
+      .single()
+    
+    if (error) {
+      console.log('❌ Card search error:', error.code, error.message)
+      // If not found, return null instead of throwing
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
+    console.log('✅ Card found:', data)
+    return data
+  },
+
+  // Get all cards for a client
+  async getCardsByClient(clientId: string) {
+    const { data, error } = await supabase
+      .from('cards')
+      .select('*, clients(*)')
+      .eq('client_id', clientId)
+      .eq('active', true)
+    if (error) throw error
+    return data || []
+  },
+
   // Get products for tenant
   async getProducts(tenantId: string) {
     const { data, error } = await supabase
@@ -218,5 +262,28 @@ export const api = {
       .single()
     if (error) throw error
     return data
+  },
+
+  // Get all active tenants
+  async getAllTenants(): Promise<Tenant[]> {
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('*')
+      .eq('active', true)
+      .order('name')
+    if (error) throw error
+    return data || []
+  },
+
+  // Get nearest tenants by geolocation
+  async getNearestTenants(latitude: number, longitude: number, maxResults: number = 5): Promise<TenantWithDistance[]> {
+    const { data, error } = await supabase
+      .rpc('get_nearest_tenants', {
+        user_lat: latitude,
+        user_lon: longitude,
+        max_results: maxResults
+      })
+    if (error) throw error
+    return data || []
   }
 }

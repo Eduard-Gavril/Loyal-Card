@@ -16,10 +16,14 @@ interface ClientState {
   cardId: string | null
   qrCode: string | null
   tenantId: string | null
+  // Tenant info for selection
+  tenantName: string | null
+  tenantSlug: string | null
   // All saved cards
   savedCards: CardData[]
   setClientData: (data: CardData) => void
   clearClientData: () => void
+  setTenantData: (data: { tenantId: string; tenantName: string; tenantSlug: string }) => void
   addCard: (data: CardData) => void
   getAllCards: () => CardData[]
   getCard: (qrCode: string) => CardData | undefined
@@ -36,6 +40,8 @@ export const useClientStore = create<ClientState>()(
       cardId: null,
       qrCode: null,
       tenantId: null,
+      tenantName: null,
+      tenantSlug: null,
       savedCards: [],
       setClientData: (data: CardData) => {
         set(data)
@@ -50,8 +56,11 @@ export const useClientStore = create<ClientState>()(
           clientId: null,
           cardId: null,
           qrCode: null,
-          tenantId: null
+          tenantId: null,
+          tenantName: null,
+          tenantSlug: null
         }),
+      setTenantData: (data) => set(data),
       addCard: (data: CardData) => {
         const existing = get().savedCards.find(c => c.qrCode === data.qrCode)
         if (!existing) {

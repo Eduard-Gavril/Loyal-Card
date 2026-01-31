@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useClientStore } from '@/store'
-import { getTranslation } from '@/lib/i18n'
 import { api, TenantWithDistance, Tenant } from '@/lib/supabase'
 
 export default function TenantSelector() {
   const navigate = useNavigate()
-  const { language, setTenantData } = useClientStore()
+  const { setTenantData } = useClientStore()
   
   const [loading, setLoading] = useState(true)
   const [locationLoading, setLocationLoading] = useState(false)

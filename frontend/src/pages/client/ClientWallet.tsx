@@ -19,7 +19,7 @@ interface SavedCard {
 
 export default function ClientWallet() {
   const navigate = useNavigate()
-  const { clientId, updateCardName } = useClientStore()
+  const { clientId, updateCardName, getAllCards } = useClientStore()
   const [cards, setCards] = useState<SavedCard[]>([])
   const [loading, setLoading] = useState(true)
   const [editingCard, setEditingCard] = useState<string | null>(null)
@@ -43,6 +43,10 @@ export default function ClientWallet() {
       const allCards = await api.getCardsByClient(clientId)
       console.log('Found cards for client:', allCards)
       
+      // Get saved cards from store (with customName)
+      const savedCards = getAllCards()
+      console.log('Saved cards from store:', savedCards)
+      
       // Fetch tenant details for each card
       const cardsWithDetails = await Promise.all(
         allCards.map(async (cardData) => {
@@ -58,6 +62,9 @@ export default function ClientWallet() {
               0
             )
             
+            // Get customName from store if available
+            const savedCard = savedCards.find(c => c.qrCode === cardData.qr_code)
+            
             return {
               clientId: cardData.client_id,
               cardId: cardData.id,
@@ -67,10 +74,13 @@ export default function ClientWallet() {
               tenantLogo: tenant.logo_url,
               brandColor: tenant.brand_color,
               loyaltyState,
-              totalStamps
+              totalStamps,
+              customName: savedCard?.customName
             }
           } catch (error) {
             console.error('Error loading card details for tenant:', cardData.tenant_id, error)
+            // Get customName from store if available
+            const savedCard = savedCards.find(c => c.qrCode === cardData.qr_code)
             // Return card even if tenant fetch fails, with fallback values
             return {
               clientId: cardData.client_id,
@@ -84,7 +94,8 @@ export default function ClientWallet() {
               totalStamps: Object.values(cardData.loyalty_state || {}).reduce(
                 (sum: number, state: any) => sum + (state?.count || 0), 
                 0
-              )
+              ),
+              customName: savedCard?.customName
             }
           }
         })

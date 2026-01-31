@@ -11,7 +11,7 @@ export default function ClientCard() {
   const { qrCode: urlQrCode } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { clientId, qrCode, tenantId, setClientData, language } = useClientStore()
+  const { clientId, qrCode, tenantId, tenantName, setClientData, language } = useClientStore()
   const t = getTranslation(language)
   
   // Get tenant from URL if present (fallback)
@@ -78,7 +78,8 @@ export default function ClientCard() {
             clientId: cardData.client_id,
             cardId: cardData.id,
             qrCode: cardData.qr_code,
-            tenantId: cardData.tenant_id
+            tenantId: cardData.tenant_id,
+            customName: tenantName || undefined
           })
           
           // Load rules
@@ -116,7 +117,8 @@ export default function ClientCard() {
               clientId: existingCard.client_id,
               cardId: existingCard.id,
               qrCode: existingCard.qr_code,
-              tenantId: existingCard.tenant_id
+              tenantId: existingCard.tenant_id,
+              customName: tenantName || undefined
             })
           } else {
             // Non ha una card per questo negozio, creala riusando il client
@@ -134,7 +136,8 @@ export default function ClientCard() {
                 clientId: result.client_id,
                 cardId: result.card_id,
                 qrCode: result.qr_code,
-                tenantId: activeTenantId
+                tenantId: activeTenantId,
+                customName: tenantName || undefined
               })
               const cardData = await api.getCardByQR(result.qr_code)
               setCard(cardData)
@@ -150,7 +153,8 @@ export default function ClientCard() {
               clientId: result.client_id,
               cardId: result.card_id,
               qrCode: result.qr_code,
-              tenantId: activeTenantId
+              tenantId: activeTenantId,
+              customName: tenantName || undefined
             })
             const cardData = await api.getCardByQR(result.qr_code)
             setCard(cardData)

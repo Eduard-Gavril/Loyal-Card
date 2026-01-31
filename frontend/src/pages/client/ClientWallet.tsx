@@ -27,13 +27,13 @@ export default function ClientWallet() {
 
   useEffect(() => {
     loadCards()
-  }, [])
+  }, [clientId])
 
   const loadCards = async () => {
     setLoading(true)
     try {
       if (!clientId) {
-        console.log('No clientId found')
+        console.log('No clientId found - new user')
         setCards([])
         setLoading(false)
         return
@@ -47,7 +47,9 @@ export default function ClientWallet() {
       const cardsWithDetails = await Promise.all(
         allCards.map(async (cardData) => {
           try {
+            console.log('Loading tenant for card:', cardData.tenant_id)
             const tenant = await api.getTenant(cardData.tenant_id)
+            console.log('Tenant loaded successfully:', tenant)
             
             // Count total stamps/points
             const loyaltyState = cardData.loyalty_state || {}
@@ -68,12 +70,27 @@ export default function ClientWallet() {
               totalStamps
             }
           } catch (error) {
-            console.error('Error loading card details:', error)
-            return null
+            console.error('Error loading card details for tenant:', cardData.tenant_id, error)
+            // Return card even if tenant fetch fails, with fallback values
+            return {
+              clientId: cardData.client_id,
+              cardId: cardData.id,
+              qrCode: cardData.qr_code,
+              tenantId: cardData.tenant_id,
+              tenantName: 'Negozio',
+              tenantLogo: undefined,
+              brandColor: '#6366f1',
+              loyaltyState: cardData.loyalty_state || {},
+              totalStamps: Object.values(cardData.loyalty_state || {}).reduce(
+                (sum: number, state: any) => sum + (state?.count || 0), 
+                0
+              )
+            }
           }
         })
       )
 
+      console.log('Cards with details:', cardsWithDetails)
       setCards(cardsWithDetails.filter(c => c !== null) as SavedCard[])
     } catch (error) {
       console.error('Error loading cards:', error)
@@ -110,7 +127,9 @@ export default function ClientWallet() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
-        <DarkVeil hueShift={260} speed={0.4} />
+        <div className="absolute inset-0 z-0">
+          <DarkVeil hueShift={260} speed={0.4} />
+        </div>
         <div className="relative z-10 text-white text-xl font-semibold animate-pulse">Caricamento...</div>
       </div>
     )
@@ -118,7 +137,9 @@ export default function ClientWallet() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 relative overflow-hidden">
-      <DarkVeil hueShift={260} speed={0.4} />
+      <div className="absolute inset-0 z-0">
+        <DarkVeil hueShift={260} speed={0.4} />
+      </div>
       
       <div className="max-w-lg mx-auto relative z-10">
         {/* Header */}
@@ -132,19 +153,31 @@ export default function ClientWallet() {
         {/* Cards List */}
         {cards.length === 0 ? (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-10 text-center border border-white/50">
-            <div className="text-7xl mb-6">🎴</div>
+            <div className="text-7xl mb-6">👋</div>
             <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Nessuna carta
+              {!clientId ? 'Benvenuto!' : 'Nessuna carta'}
             </h2>
             <p className="text-gray-700 mb-8 text-lg leading-relaxed">
-              Non hai ancora nessuna carta fedeltà.<br />
-              Chiedi al negozio di scansionare il tuo QR!
+              {!clientId ? (
+                <>
+                  Inizia subito a collezionare punti fedeltà!<br />
+                  Seleziona il tuo negozio preferito e crea la tua prima carta digitale.
+                </>
+              ) : (
+                <>
+                  Non hai ancora nessuna carta fedeltà.<br />
+                  Crea una nuova carta per iniziare a collezionare punti!
+                </>
+              )}
             </p>
             <button
               onClick={handleAddNewCard}
-              className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
+              className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 mx-auto"
             >
-              Crea Nuova Carta
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Crea Prima Carta
             </button>
           </div>
         ) : (

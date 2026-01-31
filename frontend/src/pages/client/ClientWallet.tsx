@@ -19,7 +19,7 @@ interface SavedCard {
 
 export default function ClientWallet() {
   const navigate = useNavigate()
-  const { clientId, getAllCards, updateCardName } = useClientStore()
+  const { clientId, updateCardName } = useClientStore()
   const [cards, setCards] = useState<SavedCard[]>([])
   const [loading, setLoading] = useState(true)
   const [editingCard, setEditingCard] = useState<string | null>(null)

@@ -9,7 +9,6 @@ import { api, TenantWithDistance, Tenant } from '@/lib/supabase'
 export default function TenantSelector() {
   const navigate = useNavigate()
   const { language, setTenantData } = useClientStore()
-  const t = getTranslation(language)
   
   const [loading, setLoading] = useState(true)
   const [locationLoading, setLocationLoading] = useState(false)

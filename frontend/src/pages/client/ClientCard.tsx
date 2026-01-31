@@ -11,7 +11,7 @@ export default function ClientCard() {
   const { qrCode: urlQrCode } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { clientId, cardId, qrCode, tenantId, setClientData, language } = useClientStore()
+  const { clientId, qrCode, tenantId, setClientData, language } = useClientStore()
   const t = getTranslation(language)
   
   // Get tenant from URL if present (fallback)

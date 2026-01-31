@@ -135,41 +135,84 @@ export const api = {
 
   // Register scan
   async registerScan(qrCode: string, productId: string) {
-    // Use supabase.functions.invoke which handles auth automatically
-    const { data, error } = await supabase.functions.invoke('register-scan', {
-      body: { qr_code: qrCode, product_id: productId }
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    console.log('🔐 Auth check before register-scan:', {
+      hasSession: !!session,
+      userId: session?.user?.id,
+      email: session?.user?.email,
+      accessToken: session?.access_token ? 'Present' : 'Missing'
     })
     
-    if (error) {
-      // Extract all error details
-      const errorDetails = {
-        message: error.message || 'Request failed',
-        name: error.name,
-        // @ts-ignore
-        status: error.context?.status || error.status,
-        // @ts-ignore  
-        body: error.context?.body,
-        fullError: error
-      }
-      throw errorDetails
+    if (!session) {
+      throw new Error('Not authenticated - please login again')
     }
     
+    // Get Supabase URL and anon key
+    const supabaseUrl = supabase.supabaseUrl
+    const anonKey = supabase.supabaseKey
+    
+    // Make direct fetch call with explicit headers
+    const response = await fetch(`${supabaseUrl}/functions/v1/register-scan`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': anonKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ qr_code: qrCode, product_id: productId })
+    })
+    
+    const data = await response.json()
+    
+    if (!response.ok) {
+      console.error('❌ register-scan error:', data)
+      throw {
+        message: data.error || 'Request failed',
+        name: 'FunctionsHttpError',
+        status: response.status,
+        body: data,
+        fullError: data
+      }
+    }
+    
+    console.log('✅ register-scan success:', data)
     return data
   },
 
   // Redeem reward
   async redeemReward(qrCode: string, rewardRuleId: string) {
-    const { data, error } = await supabase.functions.invoke('redeem-reward', {
-      body: { qr_code: qrCode, reward_rule_id: rewardRuleId }
+    // Get session for auth
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session) {
+      throw new Error('Not authenticated - please login again')
+    }
+    
+    // Get Supabase URL and anon key
+    const supabaseUrl = supabase.supabaseUrl
+    const anonKey = supabase.supabaseKey
+    
+    // Make direct fetch call with explicit headers
+    const response = await fetch(`${supabaseUrl}/functions/v1/redeem-reward`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': anonKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ qr_code: qrCode, reward_rule_id: rewardRuleId })
     })
     
-    if (error) {
-      const errorDetails = {
-        message: error.message || 'Failed to redeem reward',
-        name: error.name,
-        fullError: error
+    const data = await response.json()
+    
+    if (!response.ok) {
+      throw {
+        message: data.error || 'Failed to redeem reward',
+        name: 'FunctionsHttpError',
+        fullError: data
       }
-      throw errorDetails
     }
     
     return data

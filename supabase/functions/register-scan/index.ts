@@ -186,18 +186,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
         loyaltyState[ruleId] = { count: 0, rewards: 0 }
       }
 
-      // Increment counter
-      loyaltyState[ruleId].count += 1
+      // Increment counter (only if no pending rewards)
+      // If there are pending rewards, don't add more stamps until they redeem
+      if (loyaltyState[ruleId].rewards === 0) {
+        loyaltyState[ruleId].count += 1
 
-      // Check if reward threshold reached
-      if (loyaltyState[ruleId].count >= rule.buy_count) {
-        loyaltyState[ruleId].rewards += rule.reward_count
-        loyaltyState[ruleId].count = 0 // Reset counter
-        
-        rewardEarned = {
-          rule_id: ruleId,
-          rule_name: rule.name,
-          reward_count: rule.reward_count
+        // Check if reward threshold reached
+        if (loyaltyState[ruleId].count >= rule.buy_count) {
+          loyaltyState[ruleId].rewards += rule.reward_count
+          // DON'T reset counter - leave it at buy_count so customer sees full stamps
+          // Counter will be reset when reward is redeemed
+          
+          rewardEarned = {
+            rule_id: ruleId,
+            rule_name: rule.name,
+            reward_count: rule.reward_count
+          }
         }
       }
     }

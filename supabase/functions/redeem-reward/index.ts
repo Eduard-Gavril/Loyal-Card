@@ -89,9 +89,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
-    // Redeem reward: decrement reward count
+    // Redeem reward: decrement reward count and reset counter
     loyaltyState[reward_rule_id] = {
-      count: ruleState.count,
+      count: 0,  // Reset counter when reward is redeemed
       rewards: ruleState.rewards - 1
     }
 

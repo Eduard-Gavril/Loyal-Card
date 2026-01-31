@@ -149,12 +149,12 @@ export const api = {
       throw new Error('Not authenticated - please login again')
     }
     
-    // Get Supabase URL and anon key
-    const supabaseUrl = supabase.supabaseUrl
-    const anonKey = supabase.supabaseKey
+    // Get Supabase URL and anon key from env
+    const functionUrl = import.meta.env.VITE_SUPABASE_URL
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
     
     // Make direct fetch call with explicit headers
-    const response = await fetch(`${supabaseUrl}/functions/v1/register-scan`, {
+    const response = await fetch(`${functionUrl}/functions/v1/register-scan`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.access_token}`,
@@ -190,12 +190,12 @@ export const api = {
       throw new Error('Not authenticated - please login again')
     }
     
-    // Get Supabase URL and anon key
-    const supabaseUrl = supabase.supabaseUrl
-    const anonKey = supabase.supabaseKey
+    // Get Supabase URL and anon key from env
+    const functionUrl = import.meta.env.VITE_SUPABASE_URL
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
     
     // Make direct fetch call with explicit headers
-    const response = await fetch(`${supabaseUrl}/functions/v1/redeem-reward`, {
+    const response = await fetch(`${functionUrl}/functions/v1/redeem-reward`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.access_token}`,

@@ -10,6 +10,9 @@ import ClientWallet from './pages/client/ClientWallet'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminScanner from './pages/admin/AdminScanner'
+import AdminReports from './pages/admin/AdminReports'
+import AdminRewards from './pages/admin/AdminRewards'
+import AdminSettings from './pages/admin/AdminSettings'
 
 function App() {
   const { session } = useAuthStore()
@@ -117,6 +120,18 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
         <Route
           path="/admin/scan"
           element={session ? <AdminScanner /> : <Navigate to="/admin/login" />}
+        />
+        <Route
+          path="/admin/reports"
+          element={session ? <AdminReports /> : <Navigate to="/admin/login" />}
+        />
+        <Route
+          path="/admin/rewards"
+          element={session ? <AdminRewards /> : <Navigate to="/admin/login" />}
+        />
+        <Route
+          path="/admin/settings"
+          element={session ? <AdminSettings /> : <Navigate to="/admin/login" />}
         />
       </Routes>
     </BrowserRouter>

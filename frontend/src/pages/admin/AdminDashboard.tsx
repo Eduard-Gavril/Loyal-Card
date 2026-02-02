@@ -13,6 +13,15 @@ interface Stats {
   scansToday: number
 }
 
+interface RecentScan {
+  id: string
+  scanned_at: string
+  reward_applied: boolean
+  product_name: string
+  product_emoji: string
+  client_id: string
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const { user, tenantId, clearAuth } = useAuthStore()
@@ -24,9 +33,12 @@ export default function AdminDashboard() {
     totalRewards: 0,
     scansToday: 0
   })
+  const [recentScans, setRecentScans] = useState<RecentScan[]>([])
+  const [loadingActivity, setLoadingActivity] = useState(true)
 
   useEffect(() => {
     loadStats()
+    loadRecentActivity()
   }, [tenantId])
 
   const loadStats = async () => {
@@ -69,6 +81,56 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error loading stats:', error)
     }
+  }
+
+  const loadRecentActivity = async () => {
+    if (!tenantId) return
+    setLoadingActivity(true)
+
+    try {
+      const { data } = await supabase
+        .from('scan_events')
+        .select(`
+          id,
+          scanned_at,
+          reward_applied,
+          products (name, metadata),
+          cards (client_id)
+        `)
+        .eq('tenant_id', tenantId)
+        .order('scanned_at', { ascending: false })
+        .limit(10)
+
+      if (data) {
+        const scans: RecentScan[] = data.map((scan: any) => ({
+          id: scan.id,
+          scanned_at: scan.scanned_at,
+          reward_applied: scan.reward_applied,
+          product_name: scan.products?.name || 'Unknown',
+          product_emoji: scan.products?.metadata?.emoji || '☕',
+          client_id: scan.cards?.client_id?.substring(0, 8) || '???'
+        }))
+        setRecentScans(scans)
+      }
+    } catch (error) {
+      console.error('Error loading recent activity:', error)
+    } finally {
+      setLoadingActivity(false)
+    }
+  }
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return language === 'ro' ? 'Acum' : 'Just now'
+    if (diffMins < 60) return language === 'ro' ? `${diffMins} min în urmă` : `${diffMins}m ago`
+    if (diffHours < 24) return language === 'ro' ? `${diffHours}h în urmă` : `${diffHours}h ago`
+    return language === 'ro' ? `${diffDays}z în urmă` : `${diffDays}d ago`
   }
 
   const handleLogout = async () => {
@@ -160,19 +222,28 @@ export default function AdminDashboard() {
                 {t.admin.dashboard.scanQR}
               </span>
             </button>
-            <button className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm">
+            <button
+              onClick={() => navigate('/admin/reports')}
+              className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
+            >
               <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
                 <span className="text-3xl">📊</span>
                 {t.admin.dashboard.viewReports}
               </span>
             </button>
-            <button className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm">
+            <button
+              onClick={() => navigate('/admin/rewards')}
+              className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
+            >
               <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
                 <span className="text-3xl">🎁</span>
                 {t.admin.dashboard.manageRewards}
               </span>
             </button>
-            <button className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm">
+            <button
+              onClick={() => navigate('/admin/settings')}
+              className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
+            >
               <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
                 <span className="text-3xl">⚙️</span>
                 {t.admin.dashboard.settings}
@@ -183,12 +254,66 @@ export default function AdminDashboard() {
 
           {/* Recent Activity */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mt-10">
-            <h2 className="text-3xl font-bold mb-6 text-white">{t.admin.dashboard.recentActivity}</h2>
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🚧</div>
-              <p className="text-gray-200 text-lg">{t.admin.dashboard.inDevelopment}</p>
-              <p className="text-gray-300 text-sm mt-2">{t.admin.dashboard.comingSoon}</p>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-white">{t.admin.dashboard.recentActivity}</h2>
+              <button
+                onClick={loadRecentActivity}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                title={language === 'ro' ? 'Reîmprospătează' : 'Refresh'}
+              >
+                <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
             </div>
+            
+            {loadingActivity ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 mx-auto border-2 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
+              </div>
+            ) : recentScans.length > 0 ? (
+              <div className="space-y-3">
+                {recentScans.map((scan) => (
+                  <div
+                    key={scan.id}
+                    className="flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors border border-white/10"
+                  >
+                    {/* Product emoji */}
+                    <div className="text-3xl">{scan.product_emoji}</div>
+                    
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-medium">{scan.product_name}</span>
+                        {scan.reward_applied && (
+                          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-300 text-xs font-medium rounded-full flex items-center gap-1">
+                            🎁 {language === 'ro' ? 'Premiu' : 'Reward'}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-400 text-sm">
+                        {language === 'ro' ? 'Client' : 'Client'} #{scan.client_id}
+                      </p>
+                    </div>
+                    
+                    {/* Time */}
+                    <div className="text-right">
+                      <span className="text-gray-300 text-sm">{formatTimeAgo(scan.scanned_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📭</div>
+                <p className="text-gray-300 text-lg">
+                  {language === 'ro' ? 'Nicio activitate recentă' : 'No recent activity'}
+                </p>
+                <p className="text-gray-400 text-sm mt-2">
+                  {language === 'ro' ? 'Scanările vor apărea aici' : 'Scans will appear here'}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -84,9 +84,6 @@ export default function AdminLogin() {
             </svg>
             {t.admin.login.backHome}
           </button>
-          <div className="mb-2">
-            <LanguageSelector />
-          </div>
           <h1 className="text-5xl font-bold text-white mb-3">{t.admin.login.title}</h1>
           <p className="text-gray-300 text-lg">{t.admin.login.subtitle}</p>
         </div>
@@ -149,9 +146,9 @@ export default function AdminLogin() {
           </form>
         </div>
 
-        <div className="text-center mt-6 text-sm text-white/60 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-          <p>💡 {t.admin.login.demoCredentials}:</p>
-          <p className="font-mono mt-1">cafenescu@admin.test / admin123</p>
+        {/* Language selector bottom right */}
+        <div className="flex justify-end mt-4">
+          <LanguageSelector />
         </div>
       </div>
     </div>

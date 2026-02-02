@@ -37,6 +37,63 @@ export const translations = {
       info2: 'Earn points separately at each business',
     },
 
+    // For Who Section
+    forWho: {
+      title: 'Who is Fidelix for?',
+      businesses: {
+        title: 'For Businesses',
+        subtitle: 'Build customer loyalty without physical cards, apps, or high costs',
+        benefit1: 'No physical cards to print',
+        benefit2: 'No app for customers to download',
+        benefit3: 'Real-time analytics dashboard',
+        benefit4: 'Works with any smartphone',
+      },
+      customers: {
+        title: 'For Customers',
+        subtitle: 'Collect points with your phone, without downloading anything',
+        benefit1: 'No registration required',
+        benefit2: 'All cards in one place',
+        benefit3: 'Never lose your points',
+        benefit4: 'Works offline too',
+      },
+    },
+
+    // FAQ Section
+    faq: {
+      title: 'Frequently Asked Questions',
+      q1: 'Does it cost anything?',
+      a1: 'For customers, Fidelix is completely free. Businesses can start with a generous free tier.',
+      q2: 'Do I need to download an app?',
+      a2: 'No! Fidelix works directly from your browser. No app to install, no storage space used.',
+      q3: 'How do I get my loyalty card?',
+      a3: 'Simply visit the store and ask them to scan your QR code. Your card is created automatically.',
+      q4: 'Is my data safe?',
+      a4: 'Absolutely. We are GDPR compliant and we never sell your data. Your information is encrypted and secure.',
+      q5: 'What if I change my phone?',
+      a5: 'Your cards are linked to your browser. You can easily transfer them or access them from any device.',
+      q6: 'Can I use it at any store?',
+      a6: 'Fidelix works at any participating store. Each store has its own loyalty program.',
+      q7: 'How do rewards work?',
+      a7: 'Each purchase earns you points. When you reach the goal, you unlock rewards that you can redeem at checkout.',
+      q8: 'What if the store closes?',
+      a8: 'Your points history is always saved. If a store closes, you can still view your past rewards.',
+    },
+
+    // Footer
+    footerNav: {
+      company: 'Company',
+      about: 'About Us',
+      careers: 'Careers',
+      contact: 'Contact',
+      legal: 'Legal',
+      privacy: 'Privacy Policy',
+      terms: 'Terms of Service',
+      cookies: 'Cookie Policy',
+      social: 'Follow Us',
+      copyright: '© 2026 Fidelix. All rights reserved.',
+      tagline: 'Digital loyalty made simple.',
+    },
+
     // Client Card
     card: {
       title: 'Fidelix',
@@ -178,6 +235,63 @@ export const translations = {
     footer: {
       info1: '💡 Fiecare card este specific unui magazin',
       info2: 'Acumulează puncte separat la fiecare unitate',
+    },
+
+    // For Who Section
+    forWho: {
+      title: 'Pentru cine este Fidelix?',
+      businesses: {
+        title: 'Pentru Afaceri',
+        subtitle: 'Fidelizează clienții fără carduri fizice, aplicații sau costuri ridicate',
+        benefit1: 'Fără carduri fizice de printat',
+        benefit2: 'Fără aplicație de descărcat',
+        benefit3: 'Dashboard cu analize în timp real',
+        benefit4: 'Funcționează cu orice smartphone',
+      },
+      customers: {
+        title: 'Pentru Clienți',
+        subtitle: 'Acumulează puncte cu telefonul, fără să descarci nimic',
+        benefit1: 'Fără înregistrare necesară',
+        benefit2: 'Toate cardurile într-un singur loc',
+        benefit3: 'Nu îți mai pierzi punctele',
+        benefit4: 'Funcționează și offline',
+      },
+    },
+
+    // FAQ Section
+    faq: {
+      title: 'Întrebări Frecvente',
+      q1: 'Costă ceva?',
+      a1: 'Pentru clienți, Fidelix este complet gratuit. Afacerile pot începe cu un plan generos gratuit.',
+      q2: 'Trebuie să descarc o aplicație?',
+      a2: 'Nu! Fidelix funcționează direct din browser. Fără aplicație de instalat, fără spațiu ocupat.',
+      q3: 'Cum îmi obțin cardul de fidelitate?',
+      a3: 'Vizitează magazinul și roagă-i să scaneze codul tău QR. Cardul se creează automat.',
+      q4: 'Datele mele sunt în siguranță?',
+      a4: 'Absolut. Suntem conformi GDPR și nu vindem niciodată datele tale. Informațiile tale sunt criptate și securizate.',
+      q5: 'Ce se întâmplă dacă îmi schimb telefonul?',
+      a5: 'Cardurile tale sunt legate de browser. Le poți transfera ușor sau accesa de pe orice dispozitiv.',
+      q6: 'Pot să-l folosesc la orice magazin?',
+      a6: 'Fidelix funcționează la orice magazin participant. Fiecare magazin are propriul program de fidelitate.',
+      q7: 'Cum funcționează premiile?',
+      a7: 'Fiecare achiziție îți aduce puncte. Când atingi obiectivul, deblochezi premii pe care le poți răscumpăra la casă.',
+      q8: 'Ce se întâmplă dacă magazinul se închide?',
+      a8: 'Istoricul tău de puncte este întotdeauna salvat. Dacă un magazin se închide, poți vedea în continuare premiile anterioare.',
+    },
+
+    // Footer
+    footerNav: {
+      company: 'Companie',
+      about: 'Despre Noi',
+      careers: 'Cariere',
+      contact: 'Contact',
+      legal: 'Legal',
+      privacy: 'Politica de Confidențialitate',
+      terms: 'Termeni și Condiții',
+      cookies: 'Politica de Cookie-uri',
+      social: 'Urmărește-ne',
+      copyright: '© 2026 Fidelix. Toate drepturile rezervate.',
+      tagline: 'Fidelizare digitală simplificată.',
     },
 
     // Client Card

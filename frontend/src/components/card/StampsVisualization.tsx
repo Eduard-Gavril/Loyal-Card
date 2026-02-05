@@ -4,6 +4,7 @@ interface StampsVisualizationProps {
   rewardIcon?: string
   rewardName?: string
   size?: 'sm' | 'md' | 'lg'
+  t: any
 }
 
 export default function StampsVisualization({
@@ -11,7 +12,8 @@ export default function StampsVisualization({
   totalStamps,
   rewardIcon = '🎁',
   rewardName,
-  size = 'md'
+  size = 'md',
+  t
 }: StampsVisualizationProps) {
   const sizeClasses = {
     sm: 'w-6 h-6 text-sm',
@@ -54,9 +56,9 @@ export default function StampsVisualization({
       </div>
       
       <div className="text-center mt-3 text-white/70 text-sm">
-        {currentStamps} / {totalStamps} timbri
+        {currentStamps} / {totalStamps} {t.clientCard.stamps}
         {currentStamps >= totalStamps && (
-          <span className="ml-2 text-green-400 font-medium">🎉 Premio sbloccato!</span>
+          <span className="ml-2 text-green-400 font-medium">{t.clientCard.rewardUnlocked}</span>
         )}
       </div>
     </div>

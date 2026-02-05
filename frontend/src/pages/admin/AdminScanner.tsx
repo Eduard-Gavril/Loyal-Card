@@ -174,7 +174,7 @@ export default function AdminScanner() {
   // Process all cart items
   const handleRegisterCart = async () => {
     if (cart.length === 0 || !scannedQR) {
-      setError('Aggiungi almeno un prodotto al carrello')
+      setError(t.scanner.addAtLeastOne)
       return
     }
 
@@ -190,7 +190,7 @@ export default function AdminScanner() {
         for (let i = 0; i < item.quantity; i++) {
           const data = await api.registerScan(scannedQR, item.productId)
           if (!data.success) {
-            throw new Error(data.error || 'Errore durante la registrazione')
+            throw new Error(data.error || t.scanner.registrationError)
           }
           lastResult = data
           allResults.push(data)
@@ -219,7 +219,7 @@ export default function AdminScanner() {
       setCart([])
       setShowConfirmation(false)
     } catch (err: any) {
-      const errorMsg = err.message || 'Errore di rete'
+      const errorMsg = err.message || t.scanner.networkError
       setError(errorMsg)
     } finally {
       setProcessing(false)
@@ -228,7 +228,7 @@ export default function AdminScanner() {
 
   const handleRedeemReward = async () => {
     if (!selectedRule || !scannedQR) {
-      setError('Seleziona un premio da riscattare')
+      setError(t.scanner.selectRewardToRedeem)
       return
     }
 
@@ -247,10 +247,10 @@ export default function AdminScanner() {
         })
         await loadCardInfo(scannedQR)
       } else {
-        setError(data.error || 'Errore durante il riscatto')
+        setError(data.error || t.scanner.redemptionError)
       }
     } catch (err: any) {
-      setError(err.message || 'Errore durante il riscatto')
+      setError(err.message || t.scanner.redemptionError)
     } finally {
       setProcessing(false)
     }
@@ -489,7 +489,7 @@ export default function AdminScanner() {
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">🛒</span>
                             <div>
-                              <span className="font-semibold text-white">{getTotalItems()} prodotti nel carrello</span>
+                              <span className="font-semibold text-white">{getTotalItems()} {t.scanner.productsInCart}</span>
                               <div className="text-xs text-gray-300 mt-1">
                                 {cart.map(item => `${item.productName} x${item.quantity}`).join(', ')}
                               </div>
@@ -499,7 +499,7 @@ export default function AdminScanner() {
                             onClick={() => setShowConfirmation(true)}
                             className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-lg transition-all duration-300"
                           >
-                            Conferma →
+                            {t.scanner.confirm} →
                           </button>
                         </div>
                       </div>
@@ -508,7 +508,7 @@ export default function AdminScanner() {
                     {/* Show macro categories if more than 8 products */}
                     {shouldShowMacroCategories && !selectedCategory ? (
                       <>
-                        <h2 className="text-2xl font-bold mb-4 text-white">Seleziona Categoria</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-white">{t.scanner.selectCategory}</h2>
                         <div className="grid grid-cols-2 gap-3">
                           {availableCategories.map(([key, category]) => (
                             <button
@@ -521,7 +521,7 @@ export default function AdminScanner() {
                                 {category.name.replace(/^[^\s]+\s/, '')}
                               </div>
                               <div className="text-xs text-gray-300 mt-1">
-                                {getProductsByCategory(key).length} prodotti
+                                {getProductsByCategory(key).length} {t.scanner.products}
                               </div>
                             </button>
                           ))}
@@ -534,7 +534,7 @@ export default function AdminScanner() {
                               onClick={() => setShowConfirmation(true)}
                               className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
                             >
-                              Procedi con {getTotalItems()} prodotti →
+                              {t.scanner.proceedWith} {getTotalItems()} {t.scanner.products} →
                             </button>
                           </div>
                         )}
@@ -554,7 +554,7 @@ export default function AdminScanner() {
                               }}
                               className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
                             >
-                              ← Altre categorie
+                              {t.scanner.otherCategories}
                             </button>
                           )}
                         </div>
@@ -612,7 +612,7 @@ export default function AdminScanner() {
                                           onClick={() => addToCart(product.id)}
                                           className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-all duration-200"
                                         >
-                                          + Aggiungi
+                                          + {t.scanner.add}
                                         </button>
                                       )}
                                     </div>
@@ -638,14 +638,14 @@ export default function AdminScanner() {
                             onClick={() => setShowConfirmation(true)}
                             className="flex-1 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
                           >
-                            Conferma {getTotalItems()} prodotti →
+                            {t.scanner.confirm} {getTotalItems()} {t.scanner.products} →
                           </button>
                         ) : (
                           <button
                             disabled
                             className="flex-1 py-4 bg-gray-500/50 text-gray-300 font-semibold rounded-xl cursor-not-allowed"
                           >
-                            Seleziona prodotti
+                            {t.scanner.selectProducts}
                           </button>
                         )}
                         <button
@@ -665,13 +665,13 @@ export default function AdminScanner() {
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                         <span className="text-2xl">🛒</span>
-                        Riepilogo Ordine
+                        {t.scanner.orderSummary}
                       </h2>
                       <button
                         onClick={() => setShowConfirmation(false)}
                         className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
                       >
-                        ← Modifica
+                        {t.scanner.edit}
                       </button>
                     </div>
 
@@ -722,12 +722,12 @@ export default function AdminScanner() {
                     {/* Total summary */}
                     <div className="p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl mb-6">
                       <div className="flex justify-between items-center text-white">
-                        <span className="font-semibold">Totale prodotti:</span>
+                        <span className="font-semibold">{t.scanner.totalProducts}</span>
                         <span className="text-2xl font-bold">{getTotalItems()}</span>
                       </div>
                       {cart.some(item => item.price) && (
                         <div className="flex justify-between items-center text-primary-200 mt-2">
-                          <span>Totale prezzo:</span>
+                          <span>{t.scanner.totalPrice}</span>
                           <span className="font-bold">
                             €{cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0).toFixed(2)}
                           </span>
@@ -750,10 +750,10 @@ export default function AdminScanner() {
                         {processing ? (
                           <span className="flex items-center justify-center gap-2">
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            Registrazione in corso...
+                            {t.scanner.registering}
                           </span>
                         ) : (
-                          `✓ Conferma ${getTotalItems()} prodotti`
+                          `✓ ${t.scanner.confirmProducts} ${getTotalItems()} ${t.scanner.products}`
                         )}
                       </button>
                       <button
@@ -869,7 +869,7 @@ export default function AdminScanner() {
                       <div className="bg-green-500/20 border-2 border-green-400/50 p-4 rounded-xl mb-4">
                         <p className="text-green-200 text-lg font-semibold flex items-center gap-2">
                           <span className="text-2xl">📦</span>
-                          {result.totalItemsProcessed} prodotti registrati con successo!
+                          {result.totalItemsProcessed} {t.scanner.products} {t.scanner.success}
                         </p>
                       </div>
                     )}
@@ -884,7 +884,7 @@ export default function AdminScanner() {
                           {result.reward_earned.rule_name}
                         </p>
                         <p className="text-sm text-yellow-200 bg-yellow-500/30 rounded-lg p-3">
-                          {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? 'premio' : 'premi'} disponibile per il cliente
+                          {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? t.scanner.rewardAvailableFor : t.scanner.rewardsAvailableFor}
                         </p>
                       </div>
                     ) : !result.multipleItems && (

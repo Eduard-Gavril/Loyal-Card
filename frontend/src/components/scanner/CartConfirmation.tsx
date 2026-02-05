@@ -31,13 +31,13 @@ export default function CartConfirmation({
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
           <span className="text-2xl">🛒</span>
-          Riepilogo Ordine
+          {t.scanner.orderSummary}
         </h2>
         <button
           onClick={onBack}
           className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
         >
-          ← Modifica
+          {t.scanner.edit}
         </button>
       </div>
 
@@ -88,12 +88,12 @@ export default function CartConfirmation({
       {/* Total summary */}
       <div className="p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl mb-6">
         <div className="flex justify-between items-center text-white">
-          <span className="font-semibold">Totale prodotti:</span>
+          <span className="font-semibold">{t.scanner.totalProducts}</span>
           <span className="text-2xl font-bold">{getTotalItems()}</span>
         </div>
         {cart.some(item => item.price) && (
           <div className="flex justify-between items-center text-primary-200 mt-2">
-            <span>Totale prezzo:</span>
+            <span>{t.scanner.totalPrice}</span>
             <span className="font-bold">
               €{getTotalPrice().toFixed(2)}
             </span>
@@ -116,10 +116,10 @@ export default function CartConfirmation({
           {processing ? (
             <span className="flex items-center justify-center gap-2">
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              Registrazione in corso...
+              {t.scanner.registering}
             </span>
           ) : (
-            `✓ Conferma ${getTotalItems()} prodotti`
+            `✓ ${t.scanner.confirmProducts} ${getTotalItems()} ${t.scanner.products}`
           )}
         </button>
         <button

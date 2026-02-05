@@ -46,7 +46,7 @@ export default function ClientCard() {
     if (!deferredPrompt) {
       // Fallback for iOS - show instructions
       if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-        alert('Per aggiungere alla schermata home su iOS:\n\n1. Tocca il pulsante Condividi\n2. Scorri e tocca "Aggiungi a Home"\n3. Tocca "Aggiungi"')
+        alert(t.clientCard.iosInstallInstructions)
       }
       return
     }
@@ -276,12 +276,23 @@ export default function ClientCard() {
       <div className="relative z-20">
         {/* Header */}
         <header className="pt-6 px-4">
-          <div className="max-w-2xl mx-auto flex justify-between items-center">
+          <div className="max-w-2xl mx-auto">
+            {/* Top row with back button and language selector */}
+            <div className="flex justify-between items-center mb-4">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+              >
+                <span className="text-xl">←</span>
+                <span>{t.wallet.back}</span>
+              </button>
+              <LanguageSelector />
+            </div>
+            {/* Title */}
             <div>
               <h1 className="text-4xl font-bold text-white tracking-tight mb-1">{t.card.title}</h1>
               <p className="text-gray-200">{t.card.subtitle}</p>
             </div>
-            <LanguageSelector />
           </div>
         </header>
 
@@ -308,13 +319,13 @@ export default function ClientCard() {
             ) : (
               <div>
                 <p className="text-gray-200 mb-4">
-                  Non hai ancora una carta fedeltà per questo negozio
+                  {t.clientCard.noCardYet}
                 </p>
                 <button
                   onClick={() => navigate('/select-tenant')}
                   className="bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
                 >
-                  Seleziona un negozio
+                  {t.clientCard.selectStore}
                 </button>
               </div>
             )}
@@ -331,7 +342,7 @@ export default function ClientCard() {
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Aggiungi a Schermata Home
+                {t.clientCard.addToHomeScreen}
               </button>
             </div>
           )}
@@ -404,11 +415,11 @@ export default function ClientCard() {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">🎉</span>
                           <p className="text-sm text-green-900 font-bold">
-                            {progress.rewards} {progress.rewards === 1 ? 'premio' : 'premi'} disponibile!
+                            {progress.rewards} {progress.rewards === 1 ? t.clientCard.rewardAvailable : t.clientCard.rewardsAvailable}
                           </p>
                         </div>
                         <p className="text-xs text-green-700">
-                          Mostra questa card alla cassa per riscattare il tuo premio
+                          {t.clientCard.showCardToRedeem}
                         </p>
                       </div>
                     )}
@@ -471,11 +482,11 @@ export default function ClientCard() {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">🎉</span>
                           <p className="text-sm text-green-900 font-bold">
-                            {item.rewards} {item.rewards === 1 ? 'premio' : 'premi'} disponibile!
+                            {item.rewards} {item.rewards === 1 ? t.clientCard.rewardAvailable : t.clientCard.rewardsAvailable}
                           </p>
                         </div>
                         <p className="text-xs text-green-700">
-                          Mostra questa card alla cassa per riscattare il tuo premio
+                          {t.clientCard.showCardToRedeem}
                         </p>
                       </div>
                     )}

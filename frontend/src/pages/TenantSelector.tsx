@@ -4,10 +4,12 @@ import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useClientStore } from '@/store'
 import { api, TenantWithDistance, Tenant } from '@/lib/supabase'
+import { getTranslation } from '@/lib/i18n'
 
 export default function TenantSelector() {
   const navigate = useNavigate()
-  const { setTenantData } = useClientStore()
+  const { setTenantData, language } = useClientStore()
+  const t = getTranslation(language)
   
   const [loading, setLoading] = useState(true)
   const [locationLoading, setLocationLoading] = useState(false)
@@ -152,7 +154,7 @@ export default function TenantSelector() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Indietro
+              {t.admin.scanner.back}
             </button>
             <LanguageSelector />
           </div>
@@ -162,12 +164,12 @@ export default function TenantSelector() {
           {/* Title section */}
           <div className="text-center mb-8">
             <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-              Scegli il tuo negozio
+              {t.tenantSelector.chooseStore}
             </h1>
             <p className="text-lg sm:text-xl text-gray-200">
               {userLocation 
-                ? '📍 Negozi più vicini a te' 
-                : '🏪 Tutti i negozi disponibili'}
+                ? '📍 ' + (language === 'ro' ? 'Magazine aproape de tine' : 'Stores near you')
+                : t.tenantSelector.allStores}
             </p>
           </div>
 
@@ -176,7 +178,7 @@ export default function TenantSelector() {
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 mb-6">
               <div className="flex items-center gap-3 text-white">
                 <div className="animate-spin">📍</div>
-                <span>Ricerca della tua posizione...</span>
+                <span>{t.tenantSelector.searchingLocation}</span>
               </div>
             </div>
           )}
@@ -187,7 +189,7 @@ export default function TenantSelector() {
               <div className="flex items-start gap-3 text-sm">
                 <span className="text-2xl">📍</span>
                 <div className="flex-1 text-blue-100">
-                  <p className="font-semibold mb-1">Posizione rilevata</p>
+                  <p className="font-semibold mb-1">{language === 'ro' ? 'Locație detectată' : 'Location detected'}</p>
                   <p className="text-xs">Lat: {userLocation.lat.toFixed(6)}, Lon: {userLocation.lon.toFixed(6)}</p>
                 </div>
               </div>
@@ -200,14 +202,14 @@ export default function TenantSelector() {
                 <span className="text-3xl">⚠️</span>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-yellow-200 mb-2">
-                    Posizione non disponibile
+                    {t.tenantSelector.locationUnavailable}
                   </h3>
                   <p className="text-yellow-100 text-sm mb-3">{locationError}</p>
                   <button
                     onClick={requestLocation}
                     className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all duration-300 text-sm font-semibold"
                   >
-                    Riprova
+                    {t.tenantSelector.retry}
                   </button>
                 </div>
               </div>
@@ -219,7 +221,7 @@ export default function TenantSelector() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="🔍 Cerca per nome, città o indirizzo..."
+                placeholder={t.tenantSelector.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
@@ -230,13 +232,13 @@ export default function TenantSelector() {
           {/* Tenants list */}
           {loading ? (
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-12 border border-white/20 text-center">
-              <div className="animate-pulse text-white text-xl">Caricamento negozi...</div>
+              <div className="animate-pulse text-white text-xl">{t.tenantSelector.loadingStores}</div>
             </div>
           ) : filteredTenants.length === 0 ? (
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-12 border border-white/20 text-center">
               <span className="text-5xl mb-4 block">🔍</span>
-              <p className="text-white text-xl">Nessun negozio trovato</p>
-              <p className="text-gray-300 mt-2">Prova a modificare la ricerca</p>
+              <p className="text-white text-xl">{t.tenantSelector.noStoresFound}</p>
+              <p className="text-gray-300 mt-2">{t.tenantSelector.tryDifferentSearch}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -315,11 +317,11 @@ export default function TenantSelector() {
               <span className="text-2xl">💡</span>
               <div className="flex-1">
                 <p className="font-semibold text-white mb-1">
-                  Come funziona?
+                  {t.card.howItWorks}
                 </p>
                 <p>
-                  Seleziona il negozio in cui vuoi utilizzare la carta fedeltà. 
-                  Ogni negozio ha il proprio sistema di premi personalizzato.
+                  {t.tenantSelector.selectStore}
+                  {' '}{t.tenantSelector.eachStoreHasRewards}
                 </p>
               </div>
             </div>

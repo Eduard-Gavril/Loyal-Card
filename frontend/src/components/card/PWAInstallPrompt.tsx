@@ -67,10 +67,10 @@ export default function PWAInstallPrompt({ t }: PWAInstallPromptProps) {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-white font-semibold text-sm">
-              {t.client.card.installApp || 'Installa App'}
+              {t.clientCard?.installApp || 'Install App'}
             </h3>
             <p className="text-white/70 text-xs mt-0.5">
-              {t.client.card.installDescription || 'Aggiungi alla schermata home per un accesso rapido'}
+              {t.clientCard?.installDescription || 'Add to home screen for quick access'}
             </p>
           </div>
           <div className="flex-shrink-0 flex gap-2">
@@ -84,7 +84,7 @@ export default function PWAInstallPrompt({ t }: PWAInstallPromptProps) {
               onClick={handleInstall}
               className="px-4 py-2 bg-white text-primary-600 font-semibold text-sm rounded-lg hover:bg-white/90 transition-all"
             >
-              {t.client.card.install || 'Installa'}
+              {t.clientCard?.install || 'Install'}
             </button>
           </div>
         </div>

@@ -36,7 +36,7 @@ export default function LoyaltyProgressCard({
         {hasRewards && (
           <div className="bg-green-500/20 border border-green-400/50 rounded-full px-3 py-1">
             <span className="text-green-300 text-sm font-medium">
-              🎁 {rewardsEarned} {t.client.card.rewardsAvailable || 'premi'}
+              🎁 {rewardsEarned} {t.clientCard?.rewardsAvailableLabel || t.card?.rewards || 'rewards'}
             </span>
           </div>
         )}
@@ -76,10 +76,10 @@ export default function LoyaltyProgressCard({
       {/* Stats */}
       <div className="flex justify-between items-center text-sm">
         <span className="text-white/60">
-          {currentStamps} / {stampsRequired} {t.client.card.stamps || 'timbri'}
+          {currentStamps} / {stampsRequired} {t.clientCard?.stamps || t.card?.stamps || 'stamps'}
         </span>
         <span className="text-white/60">
-          {stampsRequired - currentStamps} {t.client.card.toNextReward || 'al premio'}
+          {stampsRequired - currentStamps} {t.clientCard?.toNextReward || 'to next reward'}
         </span>
       </div>
 
@@ -89,7 +89,7 @@ export default function LoyaltyProgressCard({
           onClick={onCollectReward}
           className="w-full mt-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:scale-105"
         >
-          🎁 {t.client.card.collectReward || 'Ritira Premio'}
+          🎁 {t.clientCard?.collectReward || 'Collect Reward'}
         </button>
       )}
     </div>

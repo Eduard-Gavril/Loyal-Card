@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
 import DarkVeil from '@/components/DarkVeil'
+import LanguageSelector from '@/components/LanguageSelector'
+import { getTranslation } from '@/lib/i18n'
 
 interface SavedCard {
   clientId: string
@@ -19,7 +21,8 @@ interface SavedCard {
 
 export default function ClientWallet() {
   const navigate = useNavigate()
-  const { clientId, updateCardName, getAllCards } = useClientStore()
+  const { clientId, updateCardName, getAllCards, language } = useClientStore()
+  const t = getTranslation(language)
   const [cards, setCards] = useState<SavedCard[]>([])
   const [loading, setLoading] = useState(true)
   const [editingCard, setEditingCard] = useState<string | null>(null)
@@ -87,7 +90,7 @@ export default function ClientWallet() {
               cardId: cardData.id,
               qrCode: cardData.qr_code,
               tenantId: cardData.tenant_id,
-              tenantName: 'Negozio',
+              tenantName: t.wallet.store,
               tenantLogo: undefined,
               brandColor: '#6366f1',
               loyaltyState: cardData.loyalty_state || {},
@@ -141,7 +144,7 @@ export default function ClientWallet() {
         <div className="absolute inset-0 z-0">
           <DarkVeil hueShift={260} speed={0.4} />
         </div>
-        <div className="relative z-10 text-white text-xl font-semibold animate-pulse">Caricamento...</div>
+        <div className="relative z-10 text-white text-xl font-semibold animate-pulse">{t.wallet.loading}</div>
       </div>
     )
   }
@@ -153,12 +156,26 @@ export default function ClientWallet() {
       </div>
       
       <div className="max-w-lg mx-auto relative z-10">
-        {/* Header */}
-        <div className="text-center mb-8 mt-8">
+        {/* Header with Back button */}
+        <div className="flex justify-between items-center mt-4 mb-4">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            {t.wallet.back}
+          </button>
+          <LanguageSelector />
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-white mb-3 flex items-center justify-center gap-3">
-            <span>💳</span> Le Tue Carte
+            <span>💳</span> {t.wallet.title}
           </h1>
-          <p className="text-white/80 text-lg">Scegli la carta da mostrare</p>
+          <p className="text-white/80 text-lg">{t.wallet.subtitle}</p>
         </div>
 
         {/* Cards List */}
@@ -166,20 +183,10 @@ export default function ClientWallet() {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-10 text-center border border-white/50">
             <div className="text-7xl mb-6">👋</div>
             <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              {!clientId ? 'Benvenuto!' : 'Nessuna carta'}
+              {!clientId ? t.wallet.welcome : t.wallet.noCards}
             </h2>
-            <p className="text-gray-700 mb-8 text-lg leading-relaxed">
-              {!clientId ? (
-                <>
-                  Inizia subito a collezionare punti fedeltà!<br />
-                  Seleziona il tuo negozio preferito e crea la tua prima carta digitale.
-                </>
-              ) : (
-                <>
-                  Non hai ancora nessuna carta fedeltà.<br />
-                  Crea una nuova carta per iniziare a collezionare punti!
-                </>
-              )}
+            <p className="text-gray-700 mb-8 text-lg leading-relaxed whitespace-pre-line">
+              {!clientId ? t.wallet.startCollecting : t.wallet.noCardsYet}
             </p>
             <button
               onClick={handleAddNewCard}
@@ -188,7 +195,7 @@ export default function ClientWallet() {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Crea Prima Carta
+              {t.wallet.createFirstCard}
             </button>
           </div>
         ) : (
@@ -207,7 +214,7 @@ export default function ClientWallet() {
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       className="w-full px-4 py-3 border-2 border-primary-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-400 bg-white"
-                      placeholder="Nome carta"
+                      placeholder={t.wallet.cardNamePlaceholder}
                       autoFocus
                     />
                     <div className="flex gap-3">
@@ -215,13 +222,13 @@ export default function ClientWallet() {
                         onClick={() => handleSaveEdit(card.qrCode)}
                         className="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-4 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50"
                       >
-                        ✓ Salva
+                        ✓ {t.wallet.save}
                       </button>
                       <button
                         onClick={handleCancelEdit}
                         className="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300"
                       >
-                        ✕ Annulla
+                        ✕ {t.wallet.cancel}
                       </button>
                     </div>
                   </div>
@@ -269,11 +276,11 @@ export default function ClientWallet() {
                               )}
                             </div>
                             <span className="text-xs text-gray-500">
-                              {card.totalStamps} {card.totalStamps === 1 ? 'timbro' : 'timbri'}
+                              {card.totalStamps} {card.totalStamps === 1 ? t.wallet.stamp : t.wallet.stamps}
                             </span>
                           </div>
                         ) : (
-                          <p className="text-xs text-gray-400 italic">Nessun timbro</p>
+                          <p className="text-xs text-gray-400 italic">{t.wallet.noStamps}</p>
                         )}
                       </div>
 
@@ -296,7 +303,7 @@ export default function ClientWallet() {
                     <button
                       onClick={() => handleStartEdit(card)}
                       className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                      title="Rinomina carta"
+                      title={t.wallet.renameCard}
                     >
                       <svg
                         className="w-5 h-5"
@@ -336,7 +343,7 @@ export default function ClientWallet() {
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                <span className="text-xl font-bold">Aggiungi Nuova Carta</span>
+                <span className="text-xl font-bold">{t.wallet.addNew}</span>
               </div>
             </button>
           </div>
@@ -346,9 +353,9 @@ export default function ClientWallet() {
         <div className="mt-8 text-center text-white/70 text-sm bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4">
           <p className="flex items-center justify-center gap-2">
             <span className="text-lg">💡</span>
-            Ogni carta è specifica per un negozio
+            {t.wallet.cardSpecificInfo}
           </p>
-          <p className="mt-2">Accumula punti separatamente in ogni esercizio</p>
+          <p className="mt-2">{t.wallet.earnPointsSeparately}</p>
         </div>
       </div>
     </div>

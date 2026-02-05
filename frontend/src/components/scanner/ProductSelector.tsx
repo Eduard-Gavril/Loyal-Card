@@ -60,7 +60,7 @@ export default function ProductSelector({
             <div className="flex items-center gap-3">
               <span className="text-2xl">🛒</span>
               <div>
-                <span className="font-semibold text-white">{getTotalItems()} prodotti nel carrello</span>
+                <span className="font-semibold text-white">{getTotalItems()} {t.scanner.productsInCart}</span>
                 <div className="text-xs text-gray-300 mt-1">
                   {cart.map(item => `${item.productName} x${item.quantity}`).join(', ')}
                 </div>
@@ -70,7 +70,7 @@ export default function ProductSelector({
               onClick={onProceedToConfirmation}
               className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-lg transition-all duration-300"
             >
-              Conferma →
+              {t.scanner.confirm} →
             </button>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default function ProductSelector({
       {/* Show macro categories if more than 8 products */}
       {shouldShowMacroCategories && !selectedCategory ? (
         <>
-          <h2 className="text-2xl font-bold mb-4 text-white">Seleziona Categoria</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">{t.scanner.selectCategory}</h2>
           <div className="grid grid-cols-2 gap-3">
             {availableCategories.map(([key, category]) => (
               <button
@@ -92,7 +92,7 @@ export default function ProductSelector({
                   {category.name.replace(/^[^\s]+\s/, '')}
                 </div>
                 <div className="text-xs text-gray-300 mt-1">
-                  {getProductsByCategory(key).length} prodotti
+                  {getProductsByCategory(key).length} {t.scanner.products}
                 </div>
               </button>
             ))}
@@ -105,7 +105,7 @@ export default function ProductSelector({
                 onClick={onProceedToConfirmation}
                 className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
               >
-                Procedi con {getTotalItems()} prodotti →
+                {t.scanner.proceedWith} {getTotalItems()} {t.scanner.products} →
               </button>
             </div>
           )}
@@ -123,7 +123,7 @@ export default function ProductSelector({
                 onClick={() => onSelectCategory('')}
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
               >
-                ← Altre categorie
+                {t.scanner.otherCategories}
               </button>
             )}
           </div>
@@ -181,7 +181,7 @@ export default function ProductSelector({
                             onClick={() => onAddToCart(product.id)}
                             className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-all duration-200"
                           >
-                            + Aggiungi
+                            + {t.scanner.add}
                           </button>
                         )}
                       </div>
@@ -201,14 +201,14 @@ export default function ProductSelector({
               onClick={onProceedToConfirmation}
               className="flex-1 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
             >
-              Conferma {getTotalItems()} prodotti →
+              {t.scanner.confirm} {getTotalItems()} {t.scanner.products} →
             </button>
           ) : (
             <button
               disabled
               className="flex-1 py-4 bg-gray-500/50 text-gray-300 font-semibold rounded-xl cursor-not-allowed"
             >
-              Seleziona prodotti
+              {t.scanner.selectProducts}
             </button>
           )}
           <button

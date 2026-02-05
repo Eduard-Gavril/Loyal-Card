@@ -31,14 +31,14 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">🚀 Fidelix</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">🚀 LoyalCard</h1>
             <p className="text-gray-600">Piattaforma Loyalty Digitale</p>
           </div>
 
           <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-6">
             <h2 className="text-xl font-bold text-yellow-900 mb-3">⚙️ Configurazione Richiesta</h2>
             <p className="text-yellow-800 mb-4">
-              Prima di utilizzare Fidelix, devi configurare Supabase.
+              Prima di utilizzare LoyalCard, devi configurare Supabase.
             </p>
           </div>
 
@@ -82,7 +82,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
 
           <div className="mt-6 text-center">
             <a 
-              href="https://github.com/yourusername/fidelix" 
+              href="https://github.com/yourusername/loyalcard" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-sm text-gray-500 hover:text-gray-700"

@@ -304,7 +304,7 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-3 gap-8 mb-12 text-center">
             {/* Brand */}
             <div>
-              <h4 className="text-2xl font-bold mb-4">Fidelix</h4>
+              <h4 className="text-2xl font-bold mb-4">LoyalCard</h4>
               <p className="text-gray-400 mb-4">{t.footerNav.tagline}</p>
               <div className="flex gap-4 justify-center">
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">

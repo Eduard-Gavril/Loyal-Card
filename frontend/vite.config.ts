@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Fidelix - Loyalty Platform',
-        short_name: 'Fidelix',
+        name: 'LoyalCard - Loyalty Platform',
+        short_name: 'LoyalCard',
         description: 'Digital loyalty platform without native app',
         theme_color: '#000000',
         background_color: '#ffffff',

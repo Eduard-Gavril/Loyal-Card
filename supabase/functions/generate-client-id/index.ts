@@ -129,7 +129,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Generate unique QR code using crypto.randomUUID()
     const cardUuid = crypto.randomUUID()
-    const qr_code = `FIDELIX-${cardUuid.split('-')[0].toUpperCase()}`
+    const qr_code = `LOYALCARD-${cardUuid.split('-')[0].toUpperCase()}`
 
     // Create new card for this tenant
     const { data: card, error: cardError } = await supabaseClient

@@ -80,7 +80,7 @@ export const useClientStore = create<ClientState>()(
       setLanguage: (lang: Language) => set({ language: lang })
     }),
     {
-      name: 'fidelix-client-storage'
+      name: 'loyalcard-client-storage'
     }
   )
 )
@@ -112,7 +112,7 @@ export const useAuthStore = create<AuthState>()(
         })
     }),
     {
-      name: 'fidelix-auth-storage'
+      name: 'loyalcard-auth-storage'
     }
   )
 )

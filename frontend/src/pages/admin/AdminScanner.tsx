@@ -7,6 +7,14 @@ import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 
+// Cart item interface for multiple product selection
+interface CartItem {
+  productId: string
+  productName: string
+  quantity: number
+  price?: number
+}
+
 export default function AdminScanner() {
   const navigate = useNavigate()
   const { tenantId } = useAuthStore()
@@ -26,6 +34,10 @@ export default function AdminScanner() {
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string>('')
   const scannerRef = useRef<Html5Qrcode | null>(null)
+  
+  // Cart state for multiple product selection
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
   useEffect(() => {
     loadProducts()
@@ -113,6 +125,109 @@ export default function AdminScanner() {
     }
   }
 
+  // Add product to cart
+  const addToCart = (productId: string) => {
+    const product = products.find(p => p.id === productId)
+    if (!product) return
+
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.productId === productId)
+      if (existingItem) {
+        return prevCart.map(item =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      }
+      return [...prevCart, {
+        productId,
+        productName: product.name,
+        quantity: 1,
+        price: product.price
+      }]
+    })
+    setSelectedProduct('')
+  }
+
+  // Update quantity in cart
+  const updateCartQuantity = (productId: string, delta: number) => {
+    setCart(prevCart => {
+      const item = prevCart.find(i => i.productId === productId)
+      if (!item) return prevCart
+      
+      const newQty = item.quantity + delta
+      if (newQty <= 0) {
+        return prevCart.filter(i => i.productId !== productId)
+      }
+      return prevCart.map(i =>
+        i.productId === productId ? { ...i, quantity: newQty } : i
+      )
+    })
+  }
+
+  // Remove item from cart
+  const removeFromCart = (productId: string) => {
+    setCart(prevCart => prevCart.filter(item => item.productId !== productId))
+  }
+
+  // Get total items in cart
+  const getTotalItems = () => cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  // Process all cart items
+  const handleRegisterCart = async () => {
+    if (cart.length === 0 || !scannedQR) {
+      setError('Aggiungi almeno un prodotto al carrello')
+      return
+    }
+
+    setProcessing(true)
+    setError('')
+
+    try {
+      let lastResult: any = null
+      let allResults: any[] = []
+      
+      // Register each item in the cart
+      for (const item of cart) {
+        for (let i = 0; i < item.quantity; i++) {
+          const data = await api.registerScan(scannedQR, item.productId)
+          if (!data.success) {
+            throw new Error(data.error || 'Errore durante la registrazione')
+          }
+          lastResult = data
+          allResults.push(data)
+        }
+      }
+      
+      // Combine results - check if any resulted in a reward
+      const rewardResults = allResults.filter(r => r.reward_earned)
+      
+      if (rewardResults.length > 0) {
+        // Show the last reward earned
+        setResult({
+          ...lastResult,
+          totalItemsProcessed: getTotalItems(),
+          multipleItems: true
+        })
+      } else {
+        setResult({
+          ...lastResult,
+          totalItemsProcessed: getTotalItems(),
+          multipleItems: true
+        })
+      }
+      
+      await loadCardInfo(scannedQR)
+      setCart([])
+      setShowConfirmation(false)
+    } catch (err: any) {
+      const errorMsg = err.message || 'Errore di rete'
+      setError(errorMsg)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   const handleRegisterScan = async () => {
     if (!selectedProduct || !scannedQR) {
       setError('Seleziona un prodotto')
@@ -193,6 +308,8 @@ export default function AdminScanner() {
     setError('')
     setScanning(true)
     setCameraPermission('granted')
+    setCart([])
+    setShowConfirmation(false)
     
     // Reinitialize scanner after a short delay
     setTimeout(() => {
@@ -395,8 +512,31 @@ export default function AdminScanner() {
                 </div>
 
                 {/* Product selection (scan mode) */}
-                {mode === 'scan' && (
+                {mode === 'scan' && !showConfirmation && (
                   <div>
+                    {/* Cart summary badge */}
+                    {cart.length > 0 && (
+                      <div className="mb-4 p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">🛒</span>
+                            <div>
+                              <span className="font-semibold text-white">{getTotalItems()} prodotti nel carrello</span>
+                              <div className="text-xs text-gray-300 mt-1">
+                                {cart.map(item => `${item.productName} x${item.quantity}`).join(', ')}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setShowConfirmation(true)}
+                            className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-lg transition-all duration-300"
+                          >
+                            Conferma →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Show macro categories if more than 8 products */}
                     {shouldShowMacroCategories && !selectedCategory ? (
                       <>
@@ -418,6 +558,18 @@ export default function AdminScanner() {
                             </button>
                           ))}
                         </div>
+                        
+                        {/* Show proceed button if cart has items */}
+                        {cart.length > 0 && (
+                          <div className="mt-6">
+                            <button
+                              onClick={() => setShowConfirmation(true)}
+                              className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
+                            >
+                              Procedi con {getTotalItems()} prodotti →
+                            </button>
+                          </div>
+                        )}
                       </>
                     ) : (
                       <>
@@ -435,7 +587,7 @@ export default function AdminScanner() {
                               }}
                               className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
                             >
-                              ← Indietro
+                              ← Altre categorie
                             </button>
                           )}
                         </div>
@@ -444,27 +596,63 @@ export default function AdminScanner() {
                           <p className="text-gray-200">{t.admin.scanner.noProducts}</p>
                         ) : (
                           <div className="space-y-3">
-                            {(shouldShowMacroCategories && selectedCategory ? getProductsByCategory(selectedCategory) : products).map((product) => (
-                              <button
-                                key={product.id}
-                                onClick={() => setSelectedProduct(product.id)}
-                                className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
-                                  selectedProduct === product.id
-                                    ? 'border-primary-400 bg-primary-500/20 shadow-lg shadow-primary-500/30 scale-[1.02]'
-                                    : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
-                                }`}
-                              >
-                                <div className="font-semibold text-white">{product.name}</div>
-                                {product.description && (
-                                  <div className="text-sm text-gray-300 mt-1">{product.description}</div>
-                                )}
-                                {product.price && (
-                                  <div className="text-sm font-bold text-primary-300 mt-2">
-                                    €{product.price.toFixed(2)}
+                            {(shouldShowMacroCategories && selectedCategory ? getProductsByCategory(selectedCategory) : products).map((product) => {
+                              const cartItem = cart.find(item => item.productId === product.id)
+                              return (
+                                <div
+                                  key={product.id}
+                                  className={`w-full p-5 rounded-xl border-2 transition-all duration-300 ${
+                                    cartItem
+                                      ? 'border-primary-400 bg-primary-500/20 shadow-lg shadow-primary-500/30'
+                                      : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                      <div className="font-semibold text-white">{product.name}</div>
+                                      {product.description && (
+                                        <div className="text-sm text-gray-300 mt-1">{product.description}</div>
+                                      )}
+                                      {product.price && (
+                                        <div className="text-sm font-bold text-primary-300 mt-2">
+                                          €{product.price.toFixed(2)}
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Quantity controls */}
+                                    <div className="flex items-center gap-2">
+                                      {cartItem ? (
+                                        <>
+                                          <button
+                                            onClick={() => updateCartQuantity(product.id, -1)}
+                                            className="w-10 h-10 flex items-center justify-center bg-red-500/20 hover:bg-red-500/40 text-white rounded-lg transition-all duration-200 text-xl font-bold"
+                                          >
+                                            −
+                                          </button>
+                                          <span className="w-10 text-center text-white font-bold text-lg">
+                                            {cartItem.quantity}
+                                          </span>
+                                          <button
+                                            onClick={() => updateCartQuantity(product.id, 1)}
+                                            className="w-10 h-10 flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-white rounded-lg transition-all duration-200 text-xl font-bold"
+                                          >
+                                            +
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <button
+                                          onClick={() => addToCart(product.id)}
+                                          className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-all duration-200"
+                                        >
+                                          + Aggiungi
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
-                                )}
-                              </button>
-                            ))}
+                                </div>
+                              )
+                            })}
                           </div>
                         )}
                       </>
@@ -478,13 +666,21 @@ export default function AdminScanner() {
 
                     {(!shouldShowMacroCategories || selectedCategory) && (
                       <div className="mt-8 flex gap-3">
-                        <button
-                          onClick={handleRegisterScan}
-                          disabled={!selectedProduct || processing}
-                          className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-                        >
-                          {processing ? t.admin.scanner.registering : t.admin.scanner.confirmPurchase}
-                        </button>
+                        {cart.length > 0 ? (
+                          <button
+                            onClick={() => setShowConfirmation(true)}
+                            className="flex-1 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
+                          >
+                            Conferma {getTotalItems()} prodotti →
+                          </button>
+                        ) : (
+                          <button
+                            disabled
+                            className="flex-1 py-4 bg-gray-500/50 text-gray-300 font-semibold rounded-xl cursor-not-allowed"
+                          >
+                            Seleziona prodotti
+                          </button>
+                        )}
                         <button
                           onClick={resetScanner}
                           className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
@@ -493,6 +689,114 @@ export default function AdminScanner() {
                         </button>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Cart confirmation screen */}
+                {mode === 'scan' && showConfirmation && (
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                        <span className="text-2xl">🛒</span>
+                        Riepilogo Ordine
+                      </h2>
+                      <button
+                        onClick={() => setShowConfirmation(false)}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
+                      >
+                        ← Modifica
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 mb-6">
+                      {cart.map((item) => (
+                        <div
+                          key={item.productId}
+                          className="p-4 bg-white/5 border-2 border-white/20 rounded-xl"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="font-semibold text-white">{item.productName}</div>
+                              {item.price && (
+                                <div className="text-sm text-primary-300 mt-1">
+                                  €{item.price.toFixed(2)} × {item.quantity} = €{(item.price * item.quantity).toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => updateCartQuantity(item.productId, -1)}
+                                className="w-8 h-8 flex items-center justify-center bg-red-500/20 hover:bg-red-500/40 text-white rounded-lg transition-all duration-200 text-lg font-bold"
+                              >
+                                −
+                              </button>
+                              <span className="w-8 text-center text-white font-bold">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateCartQuantity(item.productId, 1)}
+                                className="w-8 h-8 flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-white rounded-lg transition-all duration-200 text-lg font-bold"
+                              >
+                                +
+                              </button>
+                              <button
+                                onClick={() => removeFromCart(item.productId)}
+                                className="w-8 h-8 flex items-center justify-center bg-red-500/30 hover:bg-red-500/50 text-red-200 rounded-lg transition-all duration-200 ml-2"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Total summary */}
+                    <div className="p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl mb-6">
+                      <div className="flex justify-between items-center text-white">
+                        <span className="font-semibold">Totale prodotti:</span>
+                        <span className="text-2xl font-bold">{getTotalItems()}</span>
+                      </div>
+                      {cart.some(item => item.price) && (
+                        <div className="flex justify-between items-center text-primary-200 mt-2">
+                          <span>Totale prezzo:</span>
+                          <span className="font-bold">
+                            €{cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0).toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {error && (
+                      <div className="mb-4 bg-red-50 border-2 border-red-200 text-red-700 px-5 py-4 rounded-xl">
+                        <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleRegisterCart}
+                        disabled={cart.length === 0 || processing}
+                        className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                      >
+                        {processing ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Registrazione in corso...
+                          </span>
+                        ) : (
+                          `✓ Conferma ${getTotalItems()} prodotti`
+                        )}
+                      </button>
+                      <button
+                        onClick={resetScanner}
+                        disabled={processing}
+                        className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md disabled:opacity-50"
+                      >
+                        {t.admin.scanner.cancel}
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -591,23 +895,37 @@ export default function AdminScanner() {
                       </p>
                     )}
                   </div>
-                ) : result.reward_earned ? (
-                  <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-2 border-yellow-400/50 p-6 rounded-xl mb-6">
-                    <p className="text-2xl font-bold text-yellow-300 mb-3 flex items-center gap-2">
-                      <span className="text-3xl">🎉</span>
-                      {t.admin.scanner.rewardEarned}
-                    </p>
-                    <p className="text-yellow-200 text-lg mb-2">
-                      {result.reward_earned.rule_name}
-                    </p>
-                    <p className="text-sm text-yellow-200 bg-yellow-500/30 rounded-lg p-3">
-                      {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? 'premio' : 'premi'} disponibile per il cliente
-                    </p>
-                  </div>
                 ) : (
-                  <p className="text-green-200 text-lg mb-6 bg-green-500/20 rounded-xl p-4 border border-green-400/30">
-                    ✓ {t.admin.scanner.pointsAdded}
-                  </p>
+                  <div>
+                    {/* Show multi-item success message */}
+                    {result.multipleItems && (
+                      <div className="bg-green-500/20 border-2 border-green-400/50 p-4 rounded-xl mb-4">
+                        <p className="text-green-200 text-lg font-semibold flex items-center gap-2">
+                          <span className="text-2xl">📦</span>
+                          {result.totalItemsProcessed} prodotti registrati con successo!
+                        </p>
+                      </div>
+                    )}
+                    
+                    {result.reward_earned ? (
+                      <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-2 border-yellow-400/50 p-6 rounded-xl mb-6">
+                        <p className="text-2xl font-bold text-yellow-300 mb-3 flex items-center gap-2">
+                          <span className="text-3xl">🎉</span>
+                          {t.admin.scanner.rewardEarned}
+                        </p>
+                        <p className="text-yellow-200 text-lg mb-2">
+                          {result.reward_earned.rule_name}
+                        </p>
+                        <p className="text-sm text-yellow-200 bg-yellow-500/30 rounded-lg p-3">
+                          {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? 'premio' : 'premi'} disponibile per il cliente
+                        </p>
+                      </div>
+                    ) : !result.multipleItems && (
+                      <p className="text-green-200 text-lg mb-6 bg-green-500/20 rounded-xl p-4 border border-green-400/30">
+                        ✓ {t.admin.scanner.pointsAdded}
+                      </p>
+                    )}
+                  </div>
                 )}
 
                 <button

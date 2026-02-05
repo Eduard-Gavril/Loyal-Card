@@ -73,6 +73,8 @@ export default function ClientCard() {
         if (urlQrCode) {
           console.log('📱 Loading card from shared URL')
           const cardData = await api.getCardByQR(urlQrCode)
+          console.log('📦 Card loaded:', cardData)
+          console.log('🏪 Tenant ID from card:', cardData.tenant_id)
           setCard(cardData)
           setClientData({
             clientId: cardData.client_id,
@@ -83,8 +85,14 @@ export default function ClientCard() {
           })
           
           // Load rules
-          const rulesData = await api.getRewardRules(cardData.tenant_id)
-          setRules(rulesData)
+          console.log('📋 Loading rules for tenant:', cardData.tenant_id)
+          try {
+            const rulesData = await api.getRewardRules(cardData.tenant_id)
+            console.log('📋 Rules loaded:', rulesData)
+            setRules(rulesData || [])
+          } catch (ruleError) {
+            console.error('❌ Error loading rules:', ruleError)
+          }
           setLoading(false)
           return
         }
@@ -216,15 +224,53 @@ export default function ClientCard() {
     )
   }
 
+  // Filter rules to show only those with at least some progress or rewards
+  const activeRules = rules.filter((rule) => {
+    const progress = getRuleProgress(rule.id)
+    return progress.count > 0 || progress.rewards > 0
+  })
+
+  // Fallback: If rules couldn't be loaded but we have loyalty_state, create display data from it
+  const hasLoyaltyProgress = card?.loyalty_state && Object.keys(card.loyalty_state).length > 0
+  const loyaltyProgressFromState = hasLoyaltyProgress 
+    ? Object.entries(card!.loyalty_state)
+        .filter(([_, state]) => state.count > 0 || state.rewards > 0)
+        .map(([ruleId, state]) => {
+          // Try to find matching rule for name, otherwise use a generic name
+          const matchingRule = rules.find(r => r.id === ruleId)
+          return {
+            id: ruleId,
+            name: matchingRule?.name || 'Programma Fedeltà',
+            description: matchingRule?.description,
+            buy_count: matchingRule?.buy_count || 6, // Default to 6 if unknown
+            count: state.count,
+            rewards: state.rewards
+          }
+        })
+    : []
+
+  // Use activeRules if available, otherwise fall back to loyalty_state data
+  const displayProgress = loyaltyProgressFromState
+
+  // Debug log
+  console.log('🎯 ClientCard Debug:', {
+    card: card,
+    loyalty_state: card?.loyalty_state,
+    rules: rules.map(r => ({ id: r.id, name: r.name })),
+    activeRules: activeRules.map(r => ({ id: r.id, name: r.name })),
+    loyaltyProgressFromState,
+    hasLoyaltyProgress
+  })
+
   return (
-    <div className="relative min-h-screen overflow-hidden pb-20">
-      {/* Animated background */}
-      <div className="absolute inset-0 z-0">
+    <div className="relative min-h-screen overflow-auto">
+      {/* Animated background - fixed to cover entire viewport */}
+      <div className="fixed inset-0 z-0">
         <DarkVeil hueShift={200} speed={0.4} />
       </div>
 
-      {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+      {/* Overlay gradient - also fixed */}
+      <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
       
       {/* Content */}
       <div className="relative z-20">
@@ -272,6 +318,7 @@ export default function ClientCard() {
                 </button>
               </div>
             )}
+            </div>
           </div>
 
           {/* Add to Home Screen button */}
@@ -290,91 +337,157 @@ export default function ClientCard() {
           )}
         </div>
 
-        {/* Loyalty Progress */}
-        <div className="space-y-4 px-4 max-w-2xl mx-auto">
-          <h2 className="text-white text-3xl font-bold flex items-center gap-2">
-            <span className="text-4xl">🎁</span>
-            {t.card.yourRewards}
-          </h2>
+        {/* Loyalty Progress - Show if there are active rules OR loyalty progress from state */}
+        {(activeRules.length > 0 || displayProgress.length > 0) && (
+          <div className="space-y-4 px-4 max-w-2xl mx-auto">
+            <h2 className="text-white text-3xl font-bold flex items-center gap-2">
+              <span className="text-4xl">🎁</span>
+              {t.card.yourRewards}
+            </h2>
           
-          {rules.length === 0 ? (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 text-center text-gray-200">
-              {t.card.noProgram}
-            </div>
-          ) : (
-            rules.map((rule) => {
-              const progress = getRuleProgress(rule.id)
-              
-              // Create array for stamp visualization
-              const stamps = Array.from({ length: rule.buy_count }, (_, i) => i < progress.count)
-              
-              return (
-                <div key={rule.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-bold text-xl text-white">{rule.name}</h3>
-                      {rule.description && (
-                        <p className="text-sm text-gray-300 mt-1">{rule.description}</p>
+            {/* Use activeRules if available, otherwise use displayProgress from loyalty_state */}
+            {activeRules.length > 0 ? (
+              activeRules.map((rule) => {
+                const progress = getRuleProgress(rule.id)
+                
+                // Create array for stamp visualization
+                const stamps = Array.from({ length: rule.buy_count }, (_, i) => i < progress.count)
+                
+                return (
+                  <div key={rule.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-bold text-xl text-white">{rule.name}</h3>
+                        {rule.description && (
+                          <p className="text-sm text-gray-300 mt-1">{rule.description}</p>
+                        )}
+                      </div>
+                      {progress.rewards > 0 && (
+                        <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg shadow-yellow-500/50">
+                          <span>{progress.rewards}</span>
+                          <span className="text-lg">🎁</span>
+                        </div>
                       )}
                     </div>
+
+                    {/* Stamps visualization */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-sm font-semibold text-gray-200">
+                          {progress.count} {t.card.of} {rule.buy_count} {t.card.purchases}
+                        </span>
+                        {progress.count > 0 && progress.count < rule.buy_count && (
+                          <span className="text-xs text-primary-300 font-semibold">
+                            {t.card.onlyMore} {rule.buy_count - progress.count}{t.card.moreNeeded}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {stamps.map((isFilled, index) => (
+                          <div
+                            key={index}
+                            className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
+                              isFilled
+                                ? 'bg-primary-500 text-white scale-100 shadow-lg shadow-primary-500/50'
+                                : 'bg-white/10 border border-white/20 text-gray-400 scale-95'
+                            }`}
+                          >
+                            {isFilled ? '✓' : '○'}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     {progress.rewards > 0 && (
-                      <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg shadow-yellow-500/50">
-                        <span>{progress.rewards}</span>
-                        <span className="text-lg">🎁</span>
+                      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">🎉</span>
+                          <p className="text-sm text-green-900 font-bold">
+                            {progress.rewards} {progress.rewards === 1 ? 'premio' : 'premi'} disponibile!
+                          </p>
+                        </div>
+                        <p className="text-xs text-green-700">
+                          Mostra questa card alla cassa per riscattare il tuo premio
+                        </p>
                       </div>
                     )}
                   </div>
-
-                  {/* Stamps visualization */}
-                  <div className="mb-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-semibold text-gray-200">
-                        {progress.count} {t.card.of} {rule.buy_count} {t.card.purchases}
-                      </span>
-                      {progress.count > 0 && progress.count < rule.buy_count && (
-                        <span className="text-xs text-primary-300 font-semibold">
-                          {t.card.onlyMore} {rule.buy_count - progress.count}{t.card.moreNeeded}
-                        </span>
+                )
+              })
+            ) : (
+              // Fallback: show progress from loyalty_state when rules can't be loaded
+              displayProgress.map((item) => {
+                const stamps = Array.from({ length: item.buy_count }, (_, i) => i < item.count)
+                
+                return (
+                  <div key={item.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-bold text-xl text-white">{item.name}</h3>
+                        {item.description && (
+                          <p className="text-sm text-gray-300 mt-1">{item.description}</p>
+                        )}
+                      </div>
+                      {item.rewards > 0 && (
+                        <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg shadow-yellow-500/50">
+                          <span>{item.rewards}</span>
+                          <span className="text-lg">🎁</span>
+                        </div>
                       )}
                     </div>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {stamps.map((isFilled, index) => (
-                        <div
-                          key={index}
-                          className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
-                            isFilled
-                              ? 'bg-primary-500 text-white scale-100 shadow-lg shadow-primary-500/50'
-                              : 'bg-white/10 border border-white/20 text-gray-400 scale-95'
-                          }`}
-                        >
-                          {isFilled ? '✓' : '○'}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
 
-                  {progress.rewards > 0 && (
-                    <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl">🎉</span>
-                        <p className="text-sm text-green-900 font-bold">
-                          {progress.rewards} {progress.rewards === 1 ? 'premio' : 'premi'} disponibile!
+                    {/* Stamps visualization */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-sm font-semibold text-gray-200">
+                          {item.count} {t.card.of} {item.buy_count} {t.card.purchases}
+                        </span>
+                        {item.count > 0 && item.count < item.buy_count && (
+                          <span className="text-xs text-primary-300 font-semibold">
+                            {t.card.onlyMore} {item.buy_count - item.count}{t.card.moreNeeded}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {stamps.map((isFilled, index) => (
+                          <div
+                            key={index}
+                            className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
+                              isFilled
+                                ? 'bg-primary-500 text-white scale-100 shadow-lg shadow-primary-500/50'
+                                : 'bg-white/10 border border-white/20 text-gray-400 scale-95'
+                            }`}
+                          >
+                            {isFilled ? '✓' : '○'}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {item.rewards > 0 && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">🎉</span>
+                          <p className="text-sm text-green-900 font-bold">
+                            {item.rewards} {item.rewards === 1 ? 'premio' : 'premi'} disponibile!
+                          </p>
+                        </div>
+                        <p className="text-xs text-green-700">
+                          Mostra questa card alla cassa per riscattare il tuo premio
                         </p>
                       </div>
-                      <p className="text-xs text-green-700">
-                        Mostra questa card alla cassa per riscattare il tuo premio
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )
-            })
-          )}
-        </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
+        )}
 
         {/* Info section */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 mt-6">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 mt-6 mx-4 max-w-2xl lg:mx-auto mb-8">
           <h3 className="font-bold mb-3 text-lg flex items-center gap-2 text-white">
             <span className="text-2xl">💡</span>
             {t.card.howItWorks}
@@ -387,7 +500,6 @@ export default function ClientCard() {
           </ul>
         </div>
       </div>
-    </div>
     </div>
   )
 }

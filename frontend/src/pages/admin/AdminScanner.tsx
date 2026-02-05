@@ -24,7 +24,6 @@ export default function AdminScanner() {
   const [card, setCard] = useState<Card | null>(null)
   const [rules, setRules] = useState<RewardRule[]>([])
   const [products, setProducts] = useState<Product[]>([])
-  const [selectedProduct, setSelectedProduct] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [mode, setMode] = useState<'scan' | 'redeem'>('scan')
   const [selectedRule, setSelectedRule] = useState<string>('')
@@ -146,7 +145,6 @@ export default function AdminScanner() {
         price: product.price
       }]
     })
-    setSelectedProduct('')
   }
 
   // Update quantity in cart
@@ -228,35 +226,6 @@ export default function AdminScanner() {
     }
   }
 
-  const handleRegisterScan = async () => {
-    if (!selectedProduct || !scannedQR) {
-      setError('Seleziona un prodotto')
-      return
-    }
-
-    setProcessing(true)
-    setError('')
-
-    try {
-      const data = await api.registerScan(scannedQR, selectedProduct)
-      
-      if (data.success) {
-        setResult(data)
-        await loadCardInfo(scannedQR)
-      } else {
-        const errorMsg = data.error || 'Errore durante la registrazione'
-        const debugInfo = data.debug ? `\n\nDebug: ${JSON.stringify(data.debug, null, 2)}` : ''
-        setError(errorMsg + debugInfo)
-      }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Errore di rete'
-      const errorDetails = err.debug ? `\n\nDebug: ${JSON.stringify(err.debug, null, 2)}` : ''
-      setError(errorMsg + errorDetails + `\n\nFull error: ${JSON.stringify(err, null, 2)}`)
-    } finally {
-      setProcessing(false)
-    }
-  }
-
   const handleRedeemReward = async () => {
     if (!selectedRule || !scannedQR) {
       setError('Seleziona un premio da riscattare')
@@ -299,7 +268,6 @@ export default function AdminScanner() {
 
     // Reset all state
     setScannedQR('')
-    setSelectedProduct('')
     setSelectedCategory('')
     setSelectedRule('')
     setCard(null)
@@ -583,7 +551,6 @@ export default function AdminScanner() {
                             <button
                               onClick={() => {
                                 setSelectedCategory('')
-                                setSelectedProduct('')
                               }}
                               className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
                             >

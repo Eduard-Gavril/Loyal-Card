@@ -325,6 +325,7 @@ export const translations = {
     recovery: {
       title: 'Recover Your Cards',
       subtitle: 'Enter the email you used to protect your account',
+      dashboardDesc: 'Have an existing account? Recover it here.',
       emailLabel: 'Recovery Email',
       emailPlaceholder: 'your@email.com',
       sendButton: 'Send Recovery Link',
@@ -670,6 +671,7 @@ export const translations = {
     recovery: {
       title: 'Recuperează-ți Cardurile',
       subtitle: 'Introdu emailul pe care l-ai folosit pentru a-ți proteja contul',
+      dashboardDesc: 'Ai deja un cont? Recuperează-l aici.',
       emailLabel: 'Email de Recuperare',
       emailPlaceholder: 'email@exemplu.com',
       sendButton: 'Trimite Link de Recuperare',

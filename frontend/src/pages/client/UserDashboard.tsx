@@ -195,8 +195,8 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            {/* Protection Banner - only show if client exists and has no email */}
-            {clientId && !hasEmail && !loading && (
+            {/* Protection Banner - only show if client has cards but no email */}
+            {clientId && cardCount > 0 && !hasEmail && !loading && (
               <div className="mb-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/30">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -207,20 +207,12 @@ export default function UserDashboard() {
                   <div className="flex-1">
                     <h4 className="text-yellow-200 font-semibold mb-1">{t.protection.title}</h4>
                     <p className="text-yellow-100/80 text-sm mb-3">{t.protection.description}</p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setShowEmailModal(true)}
-                        className="px-4 py-2 bg-yellow-500 text-black text-sm font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
-                      >
-                        {t.protection.addEmail}
-                      </button>
-                      <button
-                        onClick={() => navigate('/recovery')}
-                        className="px-4 py-2 bg-white/10 text-white text-sm font-semibold rounded-lg hover:bg-white/20 transition-colors"
-                      >
-                        {t.protection.recoverAccount}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setShowEmailModal(true)}
+                      className="px-4 py-2 bg-yellow-500 text-black text-sm font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
+                    >
+                      {t.protection.addEmail}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -271,6 +263,24 @@ export default function UserDashboard() {
                   <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+
+              {/* Recover Account - always visible for users who need to restore their data */}
+              <button
+                onClick={() => navigate('/recovery')}
+                className="w-full bg-white/5 backdrop-blur-sm rounded-xl p-4 text-left hover:bg-white/10 transition-all duration-300 border border-white/10 group"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white/80 mb-1">{t.recovery.title}</h3>
+                    <p className="text-gray-400 text-sm">{t.recovery.dashboardDesc}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                     </svg>
                   </div>
                 </div>

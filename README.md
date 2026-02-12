@@ -1,166 +1,200 @@
-# Fidelix - Piattaforma Loyalty Digitale
+# Fidelix - Digital Loyalty Platform
 
-**Motore di loyalty senza app nativa, basato su web app + QR code + Wallet integration**
+A modern, app-less digital loyalty platform built with React PWA + QR codes + Supabase.
 
-## 🎯 Obiettivo
+## Overview
 
-Piattaforma SaaS multi-tenant per programmi fedeltà digitali che:
-- Riduce l'attrito per il cliente (no login obbligatorio)
-- È affidabile per il business
-- Scala facilmente a più attività
-- È vendibile come servizio
+Fidelix is a multi-tenant SaaS platform for digital loyalty programs that:
 
-## 🔑 Concetto Chiave
+- **Zero friction for customers** - No login or app download required
+- **Product-based rewards** - Track purchases per product/category (e.g., "Buy 5 espressos, get 1 free")
+- **Simple for businesses** - Admin scans customer QR to record purchases
+- **Multi-tenant architecture** - One platform serves multiple independent businesses
 
-**Loyalty per prodotto/categoria, non per cliente globale**
+## How It Works
 
-Esempio:
-- 5 espresso → 6° espresso gratis
-- 5 cappuccini → 6° cappuccino gratis
-- Premi non intercambiabili tra categorie
+### Customer Experience
+1. Visit the website and get an instant digital loyalty card (no signup)
+2. Show your QR code when making a purchase
+3. Staff scans your QR and selects the product you bought
+4. Your loyalty counter updates automatically
+5. When you reach the threshold, claim your free reward!
 
-## 👥 Attori
+### Admin/Staff Experience
+1. Login to the admin panel
+2. Use the built-in QR scanner to scan customer cards
+3. Select purchased products (supports cart with multiple items)
+4. System automatically tracks loyalty progress and rewards
+5. Redeem rewards when customers earn them
 
-1. **Cliente finale** - esperienza senza login
-2. **Admin/Staff** - gestione via web app autenticata
-3. **Piattaforma SaaS** - multi-tenant
+## Key Features
 
-## 🏗️ Architettura
+- **Anonymous Client System** - Customers get a persistent client ID stored in browser, no registration needed
+- **Multi-card Wallet** - Customers can have loyalty cards from multiple businesses
+- **Product/Category Rules** - Flexible loyalty rules tied to specific products or categories
+- **Real-time Updates** - Instant loyalty state updates via Supabase
+- **Geolocation** - Find nearby participating businesses
+- **PWA Support** - Installable on mobile devices
+- **Multi-language** - Internationalization support
+
+## Tech Stack
 
 ### Frontend
-- React PWA mobile-first
-- Scanner QR via WebRTC
-- No logica sensibile lato client
+- **React 18** with TypeScript
+- **Vite** for fast development and building
+- **TailwindCSS** for styling
+- **Zustand** for state management
+- **html5-qrcode** for QR scanning via WebRTC
+- **React Router** for navigation
+- **PWA** with vite-plugin-pwa
 
 ### Backend (Supabase)
-- PostgreSQL con Row Level Security
-- Auth per admin/staff
-- Edge Functions per logica business
-- Storage per asset e pass
+- **PostgreSQL** with Row Level Security (RLS)
+- **Supabase Auth** for admin authentication
+- **Edge Functions** (Deno) for business logic:
+  - `generate-client-id` - Creates anonymous clients and cards
+  - `register-scan` - Records purchases and updates loyalty state
+  - `redeem-reward` - Processes reward redemptions
 
-### Integrazioni
-- Apple Wallet (.pkpass)
-- Google Wallet (Loyalty Objects)
+### Deployment
+- **Netlify** for frontend hosting
+- **Supabase** cloud for backend
 
-## 📱 Flusso Operativo
-
-1. Cliente mostra QR (web o Wallet)
-2. Admin scansiona QR dalla web app
-3. Admin seleziona prodotto acquistato
-4. Backend registra ScanEvent
-5. Motore loyalty aggiorna contatore
-6. Se soglia raggiunta → premio disponibile
-7. Wallet aggiornato via push (se presente)
-
-## 🔐 Sicurezza
-
-- Admin autenticato con JWT + ruoli
-- QR validato lato backend
-- Rate limiting
-- Isolamento multi-tenant con RLS
-- Audit log obbligatorio
-
-## 💰 Monetizzazione
-
-- Freemium (limiti scansioni/clienti)
-- Abbonamento mensile
-- White-label per catene
-- Billing basato su eventi scan
-
-## 📂 Struttura Progetto
+## Project Structure
 
 ```
 fidelix/
-├── supabase/           # Configurazione Supabase
-│   ├── migrations/     # Schema DB
-│   ├── functions/      # Edge Functions
-│   └── config.toml     # Config
-├── frontend/           # React PWA
+├── frontend/                # React PWA application
 │   ├── src/
-│   │   ├── admin/      # Interfaccia admin
-│   │   ├── client/     # Card cliente
-│   │   └── components/ # Componenti comuni
-├── docs/               # Documentazione
-└── scripts/            # Utility
+│   │   ├── components/      # Reusable UI components
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── lib/             # Supabase client & utilities
+│   │   ├── pages/           # Page components
+│   │   │   ├── admin/       # Admin dashboard, scanner, reports
+│   │   │   └── client/      # Customer card & wallet views
+│   │   ├── store/           # Zustand state stores
+│   │   └── types/           # TypeScript types
+│   └── ...config files
+├── supabase/
+│   ├── functions/           # Edge Functions (Deno)
+│   │   ├── generate-client-id/
+│   │   ├── register-scan/
+│   │   └── redeem-reward/
+│   └── config.toml
+├── docs/                    # Additional documentation
+└── netlify.toml             # Netlify deployment config
 ```
 
-## 🚀 Quick Start
+## Getting Started
 
-### Prerequisiti
+### Prerequisites
 - Node.js 18+
-- Supabase CLI
-- Account Supabase
+- A Supabase account (free tier works)
+- Supabase CLI (optional, for local development)
 
 ### Setup
 
 ```bash
-# Clone repository
+# Clone the repository
 git clone <repo-url>
 cd Fidelix
 
-# Install Supabase CLI
-npm install -g supabase
-
-# Setup Supabase
-supabase init
-supabase start
-
-# Install dependencies
+# Install frontend dependencies
 cd frontend
 npm install
 
-# Start development
+# Create environment file
+cp .env.example .env
+# Edit .env with your Supabase credentials
+
+# Start development server
 npm run dev
 ```
 
-## 📊 Modello Dati Principale
+### Supabase Configuration
 
-- **Tenant** - business/attività
-- **Store** - punto vendita (opzionale)
-- **Admin** - utenti con ruoli
-- **Client** - cliente anonimo (globale)
-- **Product** - prodotto venduto
-- **ProductCategory** - categoria prodotti
-- **Card** - card loyalty del cliente
-- **ScanEvent** - evento scan (immutabile)
-- **RewardRule** - regole configurabili
+1. **Create a Supabase Project**
+   - Go to [supabase.com](https://supabase.com) and create a new project
+   - Copy your project URL and anon key from Project Settings > API
 
-## 🎯 Roadmap
+2. **Configure Environment Variables**
+   Edit `frontend/.env`:
+   ```
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
 
-### MVP (Fase 1)
-- [ ] Schema DB multi-tenant
-- [ ] Auth admin
-- [ ] Generazione Client ID anonimo
-- [ ] QR code dinamico
-- [ ] Scan e registrazione eventi
-- [ ] Motore loyalty base (buy X get Y)
-- [ ] Dashboard admin essenziale
+3. **Setup Database**
+   - In Supabase Dashboard, go to SQL Editor
+   - Run the migration scripts from `supabase/migrations/` to create the schema
 
-### Fase 2
-- [ ] Apple Wallet integration
-- [ ] Google Wallet integration
-- [ ] Recovery opzionale (email/telefono)
-- [ ] White-label base
+4. **Deploy Edge Functions**
+   ```bash
+   supabase functions deploy generate-client-id
+   supabase functions deploy register-scan
+   supabase functions deploy redeem-reward
+   ```
 
-### Fase 3
-- [ ] Analytics avanzate
-- [ ] Billing automatico
-- [ ] Multi-store per tenant
-- [ ] Export dati
+## Data Model
 
-## 🛠️ Stack Tecnologico
+| Table | Description |
+|-------|-------------|
+| **tenants** | Businesses using the platform |
+| **stores** | Physical locations (optional, for multi-store tenants) |
+| **admins** | Staff/owner accounts with roles |
+| **clients** | Anonymous customers (global, cross-tenant) |
+| **cards** | Loyalty cards linking clients to tenants |
+| **products** | Items sold by tenants |
+| **product_categories** | Product groupings |
+| **reward_rules** | Loyalty rules (e.g., buy 5 get 1 free) |
+| **scan_events** | Immutable log of all scans |
 
-- **Frontend**: React 18, TypeScript, TailwindCSS, PWA
-- **Backend**: Supabase (PostgreSQL + Edge Functions)
-- **Auth**: Supabase Auth + JWT
-- **Wallet**: Apple PassKit, Google Wallet API
-- **Scanner**: html5-qrcode / ZXing
-- **Deploy**: Vercel (frontend) + Supabase (backend)
+## Routes
 
-## 📄 Licenza
+### Public (Customer)
+- `/` - Landing page
+- `/select-tenant` - Choose a business to get a card
+- `/wallet` - View all your loyalty cards
+- `/card/:qrCode` - View specific card
 
-Proprietario - Fidelix © 2026
+### Protected (Admin)
+- `/admin/login` - Admin authentication
+- `/admin/dashboard` - Overview and stats
+- `/admin/scan` - QR scanner and product selection
+- `/admin/reports` - Transaction history
+- `/admin/rewards` - Manage reward rules
+- `/admin/settings` - Business settings
 
----
+## Security
 
-**Nota**: Questo è il punto zero del progetto. Architettura progettata per essere configurabile, non custom per singolo cliente.
+- **Row Level Security (RLS)** - All database queries are tenant-isolated
+- **JWT Authentication** - Admin actions require valid session tokens
+- **Backend Validation** - All business logic runs on Edge Functions
+- **No Sensitive Client Logic** - Frontend only handles display
+
+## Deployment
+
+### Netlify (Frontend)
+The project includes `netlify.toml` for automatic deployment:
+- Build command: `npm run build`
+- Publish directory: `frontend/dist`
+- SPA redirects configured
+
+### Supabase (Backend)
+- Database and Auth are managed via Supabase dashboard
+- Edge Functions deploy via Supabase CLI
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Documentation
+
+- [Architecture Details](docs/ARCHITECTURE.md)
+- [API Reference](docs/API.md)
+- [Setup Guide](docs/SETUP.md)
+- [Roadmap](docs/ROADMAP.md)
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.

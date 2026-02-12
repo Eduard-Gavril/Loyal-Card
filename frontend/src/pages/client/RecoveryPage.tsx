@@ -9,7 +9,7 @@ import { getTranslation } from '@/lib/i18n'
 export default function RecoveryPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { clientId, setClientData, language } = useClientStore()
+  const { clientId, setClientData, replaceAllCards, language } = useClientStore()
   const t = getTranslation(language)
   
   const [email, setEmail] = useState('')
@@ -72,18 +72,27 @@ export default function RecoveryPage() {
       if (result.success) {
         // Update local storage with recovered client_id
         if (result.client_id) {
-          // Get the first card to set client data
+          // Get all cards for the recovered client and replace local data
           const cards = await api.getCardsByClient(result.client_id)
           if (cards && cards.length > 0) {
-            setClientData({
+            // Replace all saved cards with the recovered ones
+            const recoveredCards = cards.map(card => ({
               clientId: result.client_id,
-              cardId: cards[0].id,
-              qrCode: cards[0].qr_code,
-              tenantId: cards[0].tenant_id
-            })
+              cardId: card.id,
+              qrCode: card.qr_code,
+              tenantId: card.tenant_id
+            }))
+            replaceAllCards(recoveredCards)
+            
+            // Set first card as active
+            setClientData(recoveredCards[0])
           }
           
-          setSuccess(t.recovery.accountRecovered.replace('{count}', result.cards_count || '0'))
+          // Show how many cards were merged/transferred
+          const mergeInfo = result.cards_merged > 0 || result.cards_transferred > 0 
+            ? ` (${result.cards_merged || 0} merged, ${result.cards_transferred || 0} transferred)`
+            : ''
+          setSuccess(t.recovery.accountRecovered.replace('{count}', result.cards_count || '0') + mergeInfo)
           
           // Redirect to dashboard after 2 seconds
           setTimeout(() => {

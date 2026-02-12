@@ -147,58 +147,83 @@ Deno.serve(async (req: Request): Promise<Response> => {
         )
       }
 
-      // Get all cards for the recovered client
-      const { data: cards, error: cardsError } = await supabaseClient
+      // Get all cards for the recovered (original) client
+      const { data: originalCards, error: cardsError } = await supabaseClient
         .from('cards')
         .select('*')
         .eq('client_id', recoveredClientId)
 
-      // If new_client_id is provided, merge the accounts
-      if (new_client_id && new_client_id !== recoveredClientId) {
-        // Transfer all cards from recovered client to new client
-        if (cards && cards.length > 0) {
-          const { error: updateError } = await supabaseClient
-            .from('cards')
-            .update({ client_id: new_client_id })
-            .eq('client_id', recoveredClientId)
+      let cardsFromNewClient = 0
+      let cardsMerged = 0
 
-          if (updateError) {
-            console.error('Error transferring cards:', updateError)
+      // If new_client_id is provided and different, merge NEW client's cards INTO the ORIGINAL
+      if (new_client_id && new_client_id !== recoveredClientId) {
+        // Get cards from the new (temporary) client
+        const { data: newCards } = await supabaseClient
+          .from('cards')
+          .select('*')
+          .eq('client_id', new_client_id)
+
+        if (newCards && newCards.length > 0) {
+          for (const newCard of newCards) {
+            // Check if original client already has a card for this tenant
+            const existingCard = originalCards?.find(c => c.tenant_id === newCard.tenant_id)
+
+            if (existingCard) {
+              // MERGE: Add stamps from new card to existing card
+              // Get tenant to know max stamps
+              const { data: tenant } = await supabaseClient
+                .from('tenants')
+                .select('stamps_required')
+                .eq('id', newCard.tenant_id)
+                .single()
+
+              const maxStamps = tenant?.stamps_required || 10
+              const mergedStamps = Math.min(existingCard.current_stamps + newCard.current_stamps, maxStamps)
+              const mergedRewards = existingCard.rewards_available + newCard.rewards_available
+
+              await supabaseClient
+                .from('cards')
+                .update({ 
+                  current_stamps: mergedStamps,
+                  rewards_available: mergedRewards
+                })
+                .eq('id', existingCard.id)
+
+              // Delete the duplicate card from new client
+              await supabaseClient
+                .from('cards')
+                .delete()
+                .eq('id', newCard.id)
+
+              cardsMerged++
+            } else {
+              // NO CONFLICT: Transfer the card to original client
+              await supabaseClient
+                .from('cards')
+                .update({ client_id: recoveredClientId })
+                .eq('id', newCard.id)
+
+              cardsFromNewClient++
+            }
           }
         }
 
-        // Copy email to new client if not already set
-        const { data: newClient } = await supabaseClient
-          .from('clients')
-          .select('email')
-          .eq('id', new_client_id)
-          .single()
-
-        if (newClient && !newClient.email && recoveredClient.email) {
-          await supabaseClient
-            .from('clients')
-            .update({ email: recoveredClient.email })
-            .eq('id', new_client_id)
-        }
-
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: 'Account recovered and merged',
-            client_id: new_client_id,
-            cards_recovered: cards?.length || 0
-          }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        // Optionally delete the temporary new client record
+        // (keeping it for now in case there are other references)
       }
 
-      // Just return the recovered client_id (user will use this)
+      // Return the ORIGINAL client_id (the one with the email)
+      // The frontend should replace its stored client_id with this one
       return new Response(
         JSON.stringify({ 
           success: true, 
-          client_id: recoveredClientId,
+          message: 'Account recovered successfully',
+          client_id: recoveredClientId,  // Always return the original!
           email: recoveredClient.email,
-          cards_count: cards?.length || 0
+          cards_count: (originalCards?.length || 0) + cardsFromNewClient,
+          cards_merged: cardsMerged,
+          cards_transferred: cardsFromNewClient
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )

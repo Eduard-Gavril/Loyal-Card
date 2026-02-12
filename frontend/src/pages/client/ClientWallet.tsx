@@ -124,7 +124,7 @@ export default function ClientWallet() {
 
   const handleStartEdit = (card: SavedCard) => {
     setEditingCard(card.qrCode)
-    setEditName(card.customName || 'Fidelix Card')
+    setEditName(card.customName || card.tenantName)
   }
 
   const handleSaveEdit = (qrCode: string) => {
@@ -256,10 +256,10 @@ export default function ClientWallet() {
                       
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-800">
-                          {card.customName || 'Fidelix Card'}
+                          {card.customName || card.tenantName}
                         </h3>
                         <p className="text-gray-500 text-sm mb-2">
-                          {card.tenantName} • #{card.qrCode.slice(-6).toUpperCase()}
+                          {t.wallet.store} • #{card.qrCode.slice(-6).toUpperCase()}
                         </p>
                         
                         {/* Progress Indicator */}

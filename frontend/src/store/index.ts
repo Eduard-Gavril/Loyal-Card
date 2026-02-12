@@ -28,6 +28,7 @@ interface ClientState {
   getAllCards: () => CardData[]
   getCard: (qrCode: string) => CardData | undefined
   updateCardName: (qrCode: string, customName: string) => void
+  replaceAllCards: (cards: CardData[]) => void
   // Language
   language: Language
   setLanguage: (lang: Language) => void
@@ -73,6 +74,9 @@ export const useClientStore = create<ClientState>()(
         const cards = get().savedCards.map(card => 
           card.qrCode === qrCode ? { ...card, customName } : card
         )
+        set({ savedCards: cards })
+      },
+      replaceAllCards: (cards: CardData[]) => {
         set({ savedCards: cards })
       },
       // Language

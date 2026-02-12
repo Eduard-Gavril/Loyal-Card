@@ -16,6 +16,14 @@ export default function UserDashboard() {
   const [totalRewards, setTotalRewards] = useState(0)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
+  
+  // Email protection state
+  const [hasEmail, setHasEmail] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [emailSuccess, setEmailSuccess] = useState(false)
+  const [savingEmail, setSavingEmail] = useState(false)
 
   // PWA install prompt handler
   useEffect(() => {
@@ -62,9 +70,14 @@ export default function UserDashboard() {
         setCardCount(0)
         setTotalStamps(0)
         setTotalRewards(0)
+        setHasEmail(false)
         setLoading(false)
         return
       }
+
+      // Check if client has email
+      const client = await api.getClient(clientId)
+      setHasEmail(!!client?.email)
 
       const allCards = await api.getCardsByClient(clientId)
       setCardCount(allCards.length)
@@ -86,6 +99,30 @@ export default function UserDashboard() {
       console.error('Error loading stats:', error)
     }
     setLoading(false)
+  }
+
+  const handleLinkEmail = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!clientId || !email) return
+
+    setSavingEmail(true)
+    setEmailError('')
+
+    try {
+      const result = await api.linkEmail(clientId, email)
+      if (result.success) {
+        setEmailSuccess(true)
+        setHasEmail(true)
+        setTimeout(() => {
+          setShowEmailModal(false)
+          setEmailSuccess(false)
+        }, 2000)
+      }
+    } catch (err: any) {
+      setEmailError(err.message || t.protection.linkError)
+    } finally {
+      setSavingEmail(false)
+    }
   }
 
   return (
@@ -157,6 +194,49 @@ export default function UserDashboard() {
                 <div className="text-xs sm:text-sm text-gray-300">{t.userDashboard.rewardsEarned}</div>
               </div>
             </div>
+
+            {/* Protection Banner - only show if client exists and has no email */}
+            {clientId && !hasEmail && !loading && (
+              <div className="mb-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/30">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-yellow-200 font-semibold mb-1">{t.protection.title}</h4>
+                    <p className="text-yellow-100/80 text-sm mb-3">{t.protection.description}</p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowEmailModal(true)}
+                        className="px-4 py-2 bg-yellow-500 text-black text-sm font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
+                      >
+                        {t.protection.addEmail}
+                      </button>
+                      <button
+                        onClick={() => navigate('/recovery')}
+                        className="px-4 py-2 bg-white/10 text-white text-sm font-semibold rounded-lg hover:bg-white/20 transition-colors"
+                      >
+                        {t.protection.recoverAccount}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Protected Badge - show if email is linked */}
+            {clientId && hasEmail && !loading && (
+              <div className="mb-6 bg-green-500/10 backdrop-blur-sm rounded-xl p-3 border border-green-500/30 flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <span className="text-green-200 text-sm">{t.protection.accountProtected}</span>
+              </div>
+            )}
 
             {/* Action Cards */}
             <div className="space-y-4">
@@ -250,6 +330,85 @@ export default function UserDashboard() {
           </div>
         </main>
       </div>
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-white/20 shadow-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">{t.protection.modalTitle}</h3>
+              <button
+                onClick={() => {
+                  setShowEmailModal(false)
+                  setEmailError('')
+                  setEmail('')
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {emailSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-green-200 text-lg">{t.protection.emailLinked}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleLinkEmail} className="space-y-4">
+                <p className="text-gray-300 text-sm">{t.protection.modalDescription}</p>
+                
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">
+                    {t.protection.emailLabel}
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t.protection.emailPlaceholder}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                    required
+                  />
+                </div>
+
+                {emailError && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
+                    {emailError}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEmailModal(false)
+                      setEmailError('')
+                      setEmail('')
+                    }}
+                    className="flex-1 px-4 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-colors"
+                  >
+                    {t.wallet.cancel}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEmail}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50"
+                  >
+                    {savingEmail ? '...' : t.protection.saveEmail}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

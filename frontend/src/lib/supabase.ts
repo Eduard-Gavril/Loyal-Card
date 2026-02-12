@@ -328,5 +328,46 @@ export const api = {
       })
     if (error) throw error
     return data || []
+  },
+
+  // Link email to client for recovery
+  async linkEmail(clientId: string, email: string) {
+    const { data, error } = await supabase.functions.invoke('link-email', {
+      body: { client_id: clientId, email }
+    })
+    if (error) throw error
+    return data
+  },
+
+  // Get client by ID
+  async getClient(clientId: string): Promise<Client | null> {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', clientId)
+      .single()
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
+    return data
+  },
+
+  // Request account recovery
+  async requestRecovery(email: string) {
+    const { data, error } = await supabase.functions.invoke('recover-client', {
+      body: { action: 'request', email }
+    })
+    if (error) throw error
+    return data
+  },
+
+  // Verify recovery token and get client_id
+  async verifyRecovery(token: string, newClientId?: string) {
+    const { data, error } = await supabase.functions.invoke('recover-client', {
+      body: { action: 'verify', token, new_client_id: newClientId }
+    })
+    if (error) throw error
+    return data
   }
 }

@@ -8,6 +8,7 @@ import TenantSelector from './pages/TenantSelector'
 import ClientCard from './pages/client/ClientCard'
 import ClientWallet from './pages/client/ClientWallet'
 import UserDashboard from './pages/client/UserDashboard'
+import RecoveryPage from './pages/client/RecoveryPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminScanner from './pages/admin/AdminScanner'
@@ -111,6 +112,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
         <Route path="/card" element={<ClientCard />} />
         <Route path="/card/:qrCode" element={<ClientCard />} />
         <Route path="/card/new" element={<ClientCard />} />
+        <Route path="/recovery" element={<RecoveryPage />} />
 
         {/* Admin routes (protected) */}
         <Route path="/admin" element={<Navigate to="/admin/login" replace />} />

@@ -213,7 +213,7 @@ export default function ClientWallet() {
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-primary-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-400 bg-white"
+                      className="w-full px-4 py-3 border-2 border-primary-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-400 bg-white text-gray-900"
                       placeholder={t.wallet.cardNamePlaceholder}
                       autoFocus
                     />

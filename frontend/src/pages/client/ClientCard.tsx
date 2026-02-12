@@ -280,7 +280,7 @@ export default function ClientCard() {
             {/* Top row with back button and language selector */}
             <div className="flex justify-between items-center mb-4">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
                 className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
               >
                 <span className="text-xl">←</span>

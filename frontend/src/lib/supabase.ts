@@ -359,6 +359,9 @@ export const api = {
       body: { action: 'request', email }
     })
     if (error) throw error
+    if (data && !data.success) {
+      throw new Error(data.error || 'Recovery request failed')
+    }
     return data
   },
 
@@ -368,6 +371,9 @@ export const api = {
       body: { action: 'verify', token, new_client_id: newClientId }
     })
     if (error) throw error
+    if (data && !data.success) {
+      throw new Error(data.error || 'Recovery verification failed')
+    }
     return data
   }
 }

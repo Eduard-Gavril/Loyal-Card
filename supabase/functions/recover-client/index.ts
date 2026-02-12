@@ -64,38 +64,52 @@ Deno.serve(async (req: Request): Promise<Response> => {
         )
       }
 
-      // Find client by email
-      const { data: client, error: clientError } = await supabaseClient
+      // Find client by email (check both old and new clients)
+      const { data: clients, error: clientError } = await supabaseClient
         .from('clients')
         .select('id, email')
         .eq('email', email.toLowerCase())
-        .single()
 
-      if (clientError || !client) {
-        // Don't reveal if email exists or not for security
+      if (clientError || !clients || clients.length === 0) {
+        // Email not found - be clear about it in demo mode
         return new Response(
           JSON.stringify({ 
-            success: true, 
-            message: 'If an account exists with this email, you will receive recovery instructions.' 
+            success: false, 
+            error: 'No account found with this email. Make sure you have previously linked an email to your account.'
           }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
+      // Find the client with the most cards (in case email exists on multiple clients after merge)
+      let bestClient = clients[0]
+      let maxCards = 0
+
+      for (const client of clients) {
+        const { count } = await supabaseClient
+          .from('cards')
+          .select('*', { count: 'exact', head: true })
+          .eq('client_id', client.id)
+        
+        if (count && count > maxCards) {
+          maxCards = count
+          bestClient = client
+        }
+      }
+
       // Generate recovery token
-      const recoveryToken = generateRecoveryToken(client.id, secret)
+      const recoveryToken = generateRecoveryToken(bestClient.id, secret)
       
-      // In a real app, you would send this via email
-      // For now, we return it directly (for demo purposes)
+      // DEMO MODE: Return token directly
       // In production: integrate with email service (SendGrid, Resend, etc.)
       
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: 'Recovery token generated',
-          // Remove this in production - only for demo!
           recovery_token: recoveryToken,
-          recovery_url: `?recovery=${recoveryToken}`
+          recovery_url: `?recovery=${recoveryToken}`,
+          cards_count: maxCards
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )

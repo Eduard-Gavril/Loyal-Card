@@ -206,7 +206,8 @@ export default function UserDashboard() {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-yellow-200 font-semibold mb-1">{t.protection.title}</h4>
-                    <p className="text-yellow-100/80 text-sm mb-3">{t.protection.description}</p>
+                    <p className="text-yellow-100/80 text-sm mb-2">{t.protection.description}</p>
+                    <p className="text-red-300 text-sm font-medium mb-3">{t.protection.warning}</p>
                     <button
                       onClick={() => setShowEmailModal(true)}
                       className="px-4 py-2 bg-yellow-500 text-black text-sm font-semibold rounded-lg hover:bg-yellow-400 transition-colors"

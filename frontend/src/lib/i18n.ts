@@ -309,6 +309,7 @@ export const translations = {
     protection: {
       title: 'Protect your cards',
       description: 'Add your email to recover your cards if you clear browser data or change devices.',
+      warning: '⚠️ Accounts without email are deleted on the 1st of each month. Add your email now to avoid losing your cards!',
       addEmail: 'Add Email',
       recoverAccount: 'Recover Account',
       accountProtected: 'Your cards are protected with email recovery',
@@ -655,6 +656,7 @@ export const translations = {
     protection: {
       title: 'Protejează-ți cardurile',
       description: 'Adaugă emailul tău pentru a-ți recupera cardurile dacă ștergi datele browserului sau schimbi dispozitivul.',
+      warning: '⚠️ Conturile fără email sunt șterse în prima zi a fiecărei luni. Adaugă emailul acum pentru a nu-ți pierde cardurile!',
       addEmail: 'Adaugă Email',
       recoverAccount: 'Recuperează Contul',
       accountProtected: 'Cardurile tale sunt protejate cu recuperare prin email',

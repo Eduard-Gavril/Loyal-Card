@@ -148,7 +148,7 @@ export default function TenantSelector() {
         <header className="pt-6 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto flex justify-between items-center">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
               className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

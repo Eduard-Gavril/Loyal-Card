@@ -330,6 +330,27 @@ export const api = {
     return data || []
   },
 
+  // Get product usage statistics for tenant
+  async getProductUsageStats(tenantId: string): Promise<Record<string, number>> {
+    const { data, error } = await supabase
+      .from('scan_events')
+      .select('product_id')
+      .eq('tenant_id', tenantId)
+    
+    if (error) {
+      console.error('Error loading product stats:', error)
+      return {}
+    }
+    
+    // Count occurrences
+    const stats: Record<string, number> = {}
+    data?.forEach(event => {
+      stats[event.product_id] = (stats[event.product_id] || 0) + 1
+    })
+    
+    return stats
+  },
+
   // Link email to client for recovery
   async linkEmail(clientId: string, email: string) {
     const { data, error } = await supabase.functions.invoke('link-email', {

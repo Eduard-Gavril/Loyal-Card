@@ -37,10 +37,15 @@ export default function AdminScanner() {
   // Cart state for multiple product selection
   const [cart, setCart] = useState<CartItem[]>([])
   const [showConfirmation, setShowConfirmation] = useState(false)
+  
+  // Keyboard shortcuts and filtering
+  const [searchFilter, setSearchFilter] = useState<string>('')
+  const [productStats, setProductStats] = useState<Record<string, number>>({})
 
   useEffect(() => {
     loadProducts()
     loadRewardRules()
+    loadProductStats()
     // Don't auto-init scanner, wait for user to request camera permission
 
     return () => {
@@ -57,6 +62,66 @@ export default function AdminScanner() {
     }
   }, [scannedQR])
 
+  // Keyboard shortcuts handler
+  useEffect(() => {
+    if (!scannedQR || scanning || result || mode !== 'scan' || showConfirmation) return
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if typing in input fields
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      
+      const key = e.key.toLowerCase()
+      
+      // Number keys: add product by position (1-9)
+      if (/^[1-9]$/.test(key)) {
+        e.preventDefault()
+        const index = parseInt(key) - 1
+        const filteredProducts = getFilteredProducts()
+        if (index < filteredProducts.length) {
+          addToCart(filteredProducts[index].id)
+        }
+        return
+      }
+      
+      // Letter keys: append to search filter
+      if (/^[a-z ]$/i.test(key)) {
+        e.preventDefault()
+        setSearchFilter(prev => prev + key)
+        return
+      }
+      
+      // Backspace: remove last character from search
+      if (key === 'backspace') {
+        e.preventDefault()
+        setSearchFilter(prev => prev.slice(0, -1))
+        return
+      }
+      
+      // Enter: proceed to confirmation if cart has items
+      if (key === 'enter' && cart.length > 0) {
+        e.preventDefault()
+        setShowConfirmation(true)
+        return
+      }
+      
+      // Escape: clear search or cancel
+      if (key === 'escape') {
+        e.preventDefault()
+        if (searchFilter) {
+          setSearchFilter('')
+        } else if (cart.length > 0) {
+          setCart([])
+        } else {
+          resetScanner()
+        }
+        return
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [scannedQR, scanning, result, mode, showConfirmation, cart, searchFilter, products, selectedCategory])
+
   const loadProducts = async () => {
     if (!tenantId) return
     try {
@@ -64,6 +129,16 @@ export default function AdminScanner() {
       setProducts(data)
     } catch (err) {
       console.error('Error loading products:', err)
+    }
+  }
+
+  const loadProductStats = async () => {
+    if (!tenantId) return
+    try {
+      const stats = await api.getProductUsageStats(tenantId)
+      setProductStats(stats)
+    } catch (err) {
+      console.error('Error loading product stats:', err)
     }
   }
 
@@ -278,6 +353,7 @@ export default function AdminScanner() {
     setCameraPermission('granted')
     setCart([])
     setShowConfirmation(false)
+    setSearchFilter('')
     
     // Reinitialize scanner after a short delay
     setTimeout(() => {
@@ -312,15 +388,38 @@ export default function AdminScanner() {
     getProductsByCategory(key).length > 0
   )
 
+  // Filter and sort products by usage frequency
+  const getFilteredProducts = () => {
+    let filteredProducts = shouldShowMacroCategories && selectedCategory 
+      ? getProductsByCategory(selectedCategory) 
+      : products
+    
+    // Apply search filter
+    if (searchFilter) {
+      filteredProducts = filteredProducts.filter(product => 
+        product.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        product.id.toLowerCase().includes(searchFilter.toLowerCase())
+      )
+    }
+    
+    // Sort by usage frequency (most used first)
+    return filteredProducts.sort((a, b) => {
+      const aCount = productStats[a.id] || 0
+      const bCount = productStats[b.id] || 0
+      return bCount - aCount // Descending order
+    })
+  }
+
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 z-0">
         <DarkVeil hueShift={280} speed={0.3} warpAmount={0.1} />
       </div>
 
       {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
 
       {/* Content */}
       <div className="relative z-20">
@@ -551,6 +650,7 @@ export default function AdminScanner() {
                             <button
                               onClick={() => {
                                 setSelectedCategory('')
+                                setSearchFilter('')
                               }}
                               className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
                             >
@@ -558,13 +658,41 @@ export default function AdminScanner() {
                             </button>
                           )}
                         </div>
+
+                        {/* Search input field */}
+                        <div className="mb-4">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={searchFilter}
+                              onChange={(e) => setSearchFilter(e.target.value)}
+                              placeholder={language === 'ro' ? 'Caută produs...' : 'Search product...'}
+                              className="w-full px-4 py-3 pl-12 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
+                            />
+                            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            {searchFilter && (
+                              <button
+                                onClick={() => setSearchFilter('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </div>
                         
-                        {(shouldShowMacroCategories && selectedCategory ? getProductsByCategory(selectedCategory) : products).length === 0 ? (
-                          <p className="text-gray-200">{t.admin.scanner.noProducts}</p>
+                        {getFilteredProducts().length === 0 ? (
+                          <p className="text-gray-200">{searchFilter ? `Nessun prodotto trovato per "${searchFilter}"` : t.admin.scanner.noProducts}</p>
                         ) : (
                           <div className="space-y-3">
-                            {(shouldShowMacroCategories && selectedCategory ? getProductsByCategory(selectedCategory) : products).map((product) => {
+                            {getFilteredProducts().map((product) => {
                               const cartItem = cart.find(item => item.productId === product.id)
+                              const usageCount = productStats[product.id] || 0
+                              
                               return (
                                 <div
                                   key={product.id}
@@ -574,15 +702,22 @@ export default function AdminScanner() {
                                       : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
                                   }`}
                                 >
-                                  <div className="flex items-center justify-between">
+                                  <div className="flex items-center justify-between gap-3">
                                     <div className="flex-1">
-                                      <div className="font-semibold text-white">{product.name}</div>
+                                      <div className="flex items-center gap-2">
+                                        <div className="font-semibold text-white">{product.name}</div>
+                                        {usageCount > 0 && (
+                                          <span className="text-xs bg-green-500/30 text-green-200 px-2 py-1 rounded-full">
+                                            ⭐ {usageCount}
+                                          </span>
+                                        )}
+                                      </div>
                                       {product.description && (
                                         <div className="text-sm text-gray-300 mt-1">{product.description}</div>
                                       )}
                                       {product.price && (
                                         <div className="text-sm font-bold text-primary-300 mt-2">
-                                          €{product.price.toFixed(2)}
+                                          {product.price.toFixed(2)} RON
                                         </div>
                                       )}
                                     </div>

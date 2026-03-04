@@ -366,13 +366,29 @@ export default function AdminScanner() {
     espresso: { name: '☕ Espresso', emoji: '☕', types: ['espresso'] },
     milk: { name: '🥛 Cappuccini & Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] },
     chocolate: { name: '🍫 Cioccolata & Tè', emoji: '🍫', types: ['chocolate', 'tea'] },
-    specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] }
+    specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] },
+    other: { name: '📦 General', emoji: '📦', types: [] } // Catch-all for products without type
   }
 
   // Group products by macro category
   const getProductsByCategory = (categoryKey: string) => {
     const category = macroCategories[categoryKey as keyof typeof macroCategories]
     if (!category) return []
+    
+    // Special case for "other" - products without type or with unmatched type
+    if (categoryKey === 'other') {
+      return products.filter(product => {
+        const type = product.metadata?.type?.toLowerCase()
+        if (!type) return true // No type = show in "other"
+        
+        // Check if type matches any existing category
+        const matchesAnyCategory = Object.entries(macroCategories)
+          .filter(([key]) => key !== 'other')
+          .some(([_, cat]) => cat.types.includes(type))
+        
+        return !matchesAnyCategory // Show in "other" if doesn't match any category
+      })
+    }
     
     return products.filter(product => {
       const type = product.metadata?.type?.toLowerCase()
@@ -388,9 +404,12 @@ export default function AdminScanner() {
     getProductsByCategory(key).length > 0
   )
 
+  // Fallback: if no categories have products, disable macro categories
+  const useMacroCategories = shouldShowMacroCategories && availableCategories.length > 0
+
   // Filter and sort products by usage frequency
   const getFilteredProducts = () => {
-    let filteredProducts = shouldShowMacroCategories && selectedCategory 
+    let filteredProducts = useMacroCategories && selectedCategory 
       ? getProductsByCategory(selectedCategory) 
       : products
     
@@ -605,7 +624,7 @@ export default function AdminScanner() {
                     )}
 
                     {/* Show macro categories if more than 8 products */}
-                    {shouldShowMacroCategories && !selectedCategory ? (
+                    {useMacroCategories && !selectedCategory ? (
                       <>
                         <h2 className="text-2xl font-bold mb-4 text-white">{t.scanner.selectCategory}</h2>
                         <div className="grid grid-cols-2 gap-3">
@@ -646,7 +665,7 @@ export default function AdminScanner() {
                               ? macroCategories[selectedCategory as keyof typeof macroCategories]?.name 
                               : t.admin.scanner.selectProduct}
                           </h2>
-                          {shouldShowMacroCategories && selectedCategory && (
+                          {useMacroCategories && selectedCategory && (
                             <button
                               onClick={() => {
                                 setSelectedCategory('')
@@ -766,7 +785,7 @@ export default function AdminScanner() {
                       </div>
                     )}
 
-                    {(!shouldShowMacroCategories || selectedCategory) && (
+                    {(!useMacroCategories || selectedCategory) && (
                       <div className="mt-8 flex gap-3">
                         {cart.length > 0 ? (
                           <button

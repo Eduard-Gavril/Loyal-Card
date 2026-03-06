@@ -363,11 +363,11 @@ export default function AdminScanner() {
 
   // Macro categories mapping
   const macroCategories = {
-    espresso: { name: '☕ Espresso', emoji: '☕', types: ['espresso'] },
-    milk: { name: '🥛 Cappuccini & Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] },
-    chocolate: { name: '🍫 Cioccolata & Tè', emoji: '🍫', types: ['chocolate', 'tea'] },
-    specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] },
-    other: { name: '📦 General', emoji: '📦', types: [] } // Catch-all for products without type
+    espresso: { name: '☕ Espresso', emoji: '☕', types: ['espresso'] as string[] },
+    milk: { name: '🥛 Cappuccini & Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] as string[] },
+    chocolate: { name: '🍫 Cioccolata & Tè', emoji: '🍫', types: ['chocolate', 'tea'] as string[] },
+    specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] as string[] },
+    other: { name: '📦 General', emoji: '📦', types: [] as string[] } // Catch-all for products without type
   }
 
   // Group products by macro category

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store'
 import { useEffect, useState } from 'react'
+import { AutoUpdateToast } from './components/AutoUpdateToast'
 
 // Pages
 import LandingPage from './pages/LandingPage'
@@ -99,6 +100,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
 
   return (
     <BrowserRouter>
+      <AutoUpdateToast />
       <Routes>
         {/* Landing page */}
         <Route path="/" element={<LandingPage />} />

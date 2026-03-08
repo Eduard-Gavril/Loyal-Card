@@ -144,6 +144,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
+    // Check if more than 31 days passed since last scan (fitness rule)
+    // If yes, reset all stamps on the card
+    // NOTE: Change DAYS_THRESHOLD to 0 for testing (minutes instead of days)
+    const DAYS_THRESHOLD = 31 // Change to 0 for testing with minutes
+    const TIME_DIVISOR = DAYS_THRESHOLD === 0 ? (1000 * 60) : (1000 * 60 * 60 * 24) // minutes or days
+    
+    let cardNeedsReset = false
+    if (card.last_scan_at) {
+      const lastScanDate = new Date(card.last_scan_at)
+      const now = new Date()
+      const timeDifference = Math.floor((now.getTime() - lastScanDate.getTime()) / TIME_DIVISOR)
+      
+      const threshold = DAYS_THRESHOLD === 0 ? 2 : DAYS_THRESHOLD // 2 minutes for testing, 31 days for production
+      
+      if (timeDifference > threshold) {
+        cardNeedsReset = true
+      }
+    }
+
     // Verify product exists and belongs to tenant
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -174,6 +193,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Apply loyalty logic
     let loyaltyState = card.loyalty_state || {}
+    
+    // Reset loyalty state if more than 31 days passed (fitness rule)
+    if (cardNeedsReset) {
+      loyaltyState = {}
+    }
+    
     let rewardEarned = null
 
     if (rules && rules.length > 0) {

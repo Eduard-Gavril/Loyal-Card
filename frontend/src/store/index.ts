@@ -80,7 +80,7 @@ export const useClientStore = create<ClientState>()(
         set({ savedCards: cards })
       },
       // Language
-      language: 'en',
+      language: 'ro',
       setLanguage: (lang: Language) => set({ language: lang })
     }),
     {

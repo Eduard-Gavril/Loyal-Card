@@ -125,7 +125,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Find card by QR code
     const { data: card, error: cardError } = await supabase
       .from('cards')
-      .select('id, client_id, tenant_id, loyalty_state, active')
+      .select('id, client_id, tenant_id, loyalty_state, active, last_scan_at')
       .eq('qr_code', qr_code)
       .eq('tenant_id', admin.tenant_id) // Security: same tenant
       .single()

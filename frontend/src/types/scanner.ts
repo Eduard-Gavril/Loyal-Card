@@ -58,6 +58,10 @@ export interface ScanResult {
     rule_name: string
     reward_count: number
   }
+  milestone_reached?: {
+    count: number
+    message: string
+  }
   remaining_rewards?: number
   redeemed?: boolean
   totalItemsProcessed?: number

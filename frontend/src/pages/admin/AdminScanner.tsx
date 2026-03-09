@@ -1041,6 +1041,16 @@ export default function AdminScanner() {
                           {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? t.scanner.rewardAvailableFor : t.scanner.rewardsAvailableFor}
                         </p>
                       </div>
+                    ) : result.milestone_reached ? (
+                      <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border-2 border-orange-400/50 p-6 rounded-xl mb-6">
+                        <p className="text-2xl font-bold text-orange-300 mb-3 flex items-center gap-2">
+                          <span className="text-3xl">⭐</span>
+                          Traguardo Raggiunto!
+                        </p>
+                        <p className="text-orange-200 text-lg">
+                          {result.milestone_reached.message}
+                        </p>
+                      </div>
                     ) : !result.multipleItems && (
                       <p className="text-green-200 text-lg mb-6 bg-green-500/20 rounded-xl p-4 border border-green-400/30">
                         ✓ {t.admin.scanner.pointsAdded}

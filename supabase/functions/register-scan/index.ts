@@ -18,6 +18,10 @@ interface RegisterScanResponse {
     rule_name: string
     reward_count: number
   }
+  milestone_reached?: {
+    count: number
+    message: string
+  }
   error?: string
 }
 
@@ -122,10 +126,19 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
+    // Get tenant info to check if it's FitGym (for 31-day rule)
+    const { data: tenant } = await supabase
+      .from('tenants')
+      .select('slug')
+      .eq('id', admin.tenant_id)
+      .single()
+    
+    const isFitGym = tenant?.slug === 'fitgym'
+
     // Find card by QR code
     const { data: card, error: cardError } = await supabase
       .from('cards')
-      .select('id, client_id, tenant_id, loyalty_state, active')
+      .select('id, client_id, tenant_id, loyalty_state, active, last_scan_at')
       .eq('qr_code', qr_code)
       .eq('tenant_id', admin.tenant_id) // Security: same tenant
       .single()
@@ -142,6 +155,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
         JSON.stringify({ success: false, error: 'Card is inactive' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // FitGym only: Check if more than 31 days passed since last scan
+    // If yes, reset all stamps on the card
+    let cardNeedsReset = false
+    
+    if (isFitGym && card.last_scan_at) {
+      const lastScanDate = new Date(card.last_scan_at)
+      const now = new Date()
+      const daysDifference = Math.floor((now.getTime() - lastScanDate.getTime()) / (1000 * 60 * 60 * 24))
+      
+      if (daysDifference > 31) {
+        cardNeedsReset = true
+      }
     }
 
     // Verify product exists and belongs to tenant
@@ -174,7 +201,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Apply loyalty logic
     let loyaltyState = card.loyalty_state || {}
+    
+    // FitGym only: Reset loyalty state if card needs reset (31+ days inactive)
+    if (cardNeedsReset) {
+      loyaltyState = {}
+    }
+    
     let rewardEarned = null
+    let milestoneReached = null
 
     if (rules && rules.length > 0) {
       // Use first matching rule (can be enhanced with priority)
@@ -190,6 +224,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // If there are pending rewards, don't add more stamps until they redeem
       if (loyaltyState[ruleId].rewards === 0) {
         loyaltyState[ruleId].count += 1
+
+        // FitGym milestone: When reaching 6 stamps, notify about 50% discount on next scan
+        if (isFitGym && loyaltyState[ruleId].count === 6) {
+          milestoneReached = {
+            count: 6,
+            message: 'Prossimo abbonamento con SCONTO 50%! 🎉'
+          }
+        }
 
         // Check if reward threshold reached
         if (loyaltyState[ruleId].count >= rule.buy_count) {
@@ -248,7 +290,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         client_id: card.client_id,
         loyalty_state: loyaltyState
       },
-      reward_earned: rewardEarned || undefined
+      reward_earned: rewardEarned || undefined,
+      milestone_reached: milestoneReached || undefined
     }
 
     return new Response(

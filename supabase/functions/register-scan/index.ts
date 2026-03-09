@@ -112,6 +112,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
+    // Get tenant info to check if it's FitGym (for 31-day rule)
+    const { data: tenant } = await supabase
+      .from('tenants')
+      .select('name, slug')
+      .eq('id', admin.tenant_id)
+      .single()
+    
+    const isFitGym = tenant?.slug === 'fitgym' || tenant?.name?.toLowerCase().includes('fitgym')
+
     // Parse request
     const { qr_code, product_id }: RegisterScanRequest = await req.json()
 
@@ -144,22 +153,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
-    // Check if more than 31 days passed since last scan (fitness rule)
+    // Check if more than 31 days passed since last scan (FitGym rule only)
     // If yes, reset all stamps on the card
     // NOTE: Change DAYS_THRESHOLD to 0 for testing (minutes instead of days)
-    const DAYS_THRESHOLD = 31 // Change to 0 for testing with minutes
-    const TIME_DIVISOR = DAYS_THRESHOLD === 0 ? (1000 * 60) : (1000 * 60 * 60 * 24) // minutes or days
-    
     let cardNeedsReset = false
-    if (card.last_scan_at) {
-      const lastScanDate = new Date(card.last_scan_at)
-      const now = new Date()
-      const timeDifference = Math.floor((now.getTime() - lastScanDate.getTime()) / TIME_DIVISOR)
+    
+    if (isFitGym) {
+      const DAYS_THRESHOLD = 31 // Change to 0 for testing with minutes
+      const TIME_DIVISOR = DAYS_THRESHOLD === 0 ? (1000 * 60) : (1000 * 60 * 60 * 24) // minutes or days
       
-      const threshold = DAYS_THRESHOLD === 0 ? 2 : DAYS_THRESHOLD // 2 minutes for testing, 31 days for production
-      
-      if (timeDifference > threshold) {
-        cardNeedsReset = true
+      if (card.last_scan_at) {
+        const lastScanDate = new Date(card.last_scan_at)
+        const now = new Date()
+        const timeDifference = Math.floor((now.getTime() - lastScanDate.getTime()) / TIME_DIVISOR)
+        
+        const threshold = DAYS_THRESHOLD === 0 ? 2 : DAYS_THRESHOLD // 2 minutes for testing, 31 days for production
+        
+        if (timeDifference > threshold) {
+          cardNeedsReset = true
+        }
       }
     }
 
@@ -194,7 +206,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Apply loyalty logic
     let loyaltyState = card.loyalty_state || {}
     
-    // Reset loyalty state if more than 31 days passed (fitness rule)
+    // Reset loyalty state if more than 31 days passed (FitGym only)
     if (cardNeedsReset) {
       loyaltyState = {}
     }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
-import { normalizePhoneNumber, isValidPhoneNumber } from '@/lib/phoneUtils'
+import { isValidPhoneNumber } from '@/lib/phoneUtils'
 import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
@@ -71,7 +71,7 @@ export default function UserDashboard() {
         setCardCount(0)
         setTotalStamps(0)
         setTotalRewards(0)
-        setHasEmail(false)
+        setHasPhone(false)
         setLoading(false)
         return
       }

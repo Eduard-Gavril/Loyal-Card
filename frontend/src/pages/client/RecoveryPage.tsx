@@ -261,7 +261,7 @@ export default function RecoveryPage() {
 
             {/* Info */}
             <p className="text-center text-gray-400 text-sm mt-6">
-              {t.recovery.noEmail}{' '}
+              {t.recovery.noPhone}{' '}
               <button
                 onClick={() => navigate('/dashboard')}
                 className="text-primary-400 hover:text-primary-300"

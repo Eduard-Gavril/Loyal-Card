@@ -1,9 +1,10 @@
 // @deno-types="https://esm.sh/@supabase/supabase-js@2.39.3/dist/module/index.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { normalizePhoneNumber, isValidPhoneNumber } from '../_shared/phoneUtils.ts'
 
 interface RecoverClientRequest {
   action: 'request' | 'verify'
-  email?: string      // For 'request' action
+  phone?: string      // For 'request' action
   token?: string      // For 'verify' action
   new_client_id?: string // For 'verify' action - the new client_id to merge into
 }
@@ -53,35 +54,45 @@ Deno.serve(async (req: Request): Promise<Response> => {
     )
     
     const secret = Deno.env.get('RECOVERY_SECRET') || 'default-recovery-secret'
-    const { action, email, token, new_client_id }: RecoverClientRequest = await req.json()
+    const { action, phone, token, new_client_id }: RecoverClientRequest = await req.json()
 
     // ACTION: REQUEST - Generate recovery token and return it
     if (action === 'request') {
-      if (!email) {
+      if (!phone) {
         return new Response(
-          JSON.stringify({ success: false, error: 'Email is required' }),
+          JSON.stringify({ success: false, error: 'Phone number is required' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
-      // Find client by email (check both old and new clients)
+      // Validate and normalize phone number
+      if (!isValidPhoneNumber(phone)) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Invalid phone number format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const normalizedPhone = normalizePhoneNumber(phone)
+
+      // Find client by phone (check both old and new clients)
       const { data: clients, error: clientError } = await supabaseClient
         .from('clients')
-        .select('id, email')
-        .eq('email', email.toLowerCase())
+        .select('id, phone')
+        .eq('phone', normalizedPhone)
 
       if (clientError || !clients || clients.length === 0) {
-        // Email not found - be clear about it in demo mode
+        // Phone not found - be clear about it in demo mode
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'No account found with this email. Make sure you have previously linked an email to your account.'
+            error: 'No account found with this phone number. Make sure you have previously linked a phone number to your account.'
           }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
-      // Find the client with the most cards (in case email exists on multiple clients after merge)
+      // Find the client with the most cards (in case phone exists on multiple clients after merge)
       let bestClient = clients[0]
       let maxCards = 0
 
@@ -101,7 +112,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const recoveryToken = generateRecoveryToken(bestClient.id, secret)
       
       // DEMO MODE: Return token directly
-      // In production: integrate with email service (SendGrid, Resend, etc.)
+      // In production: integrate with SMS service (Twilio, etc.)
       
       return new Response(
         JSON.stringify({ 
@@ -203,14 +214,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
                 .from('cards')
                 .update({ client_id: recoveredClientId })
                 .eq('id', newCard.id)
-
-              cardsFromNewClient++
-            }
-          }
-        }
-
-        // Optionally delete the temporary new client record
-        // (keeping it for now in case there are other references)
+phone)
+      // The frontend should replace its stored client_id with this one
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Account recovered successfully',
+          client_id: recoveredClientId,  // Always return the original!
+          phone: recoveredClient.phone there are other references)
       }
 
       // Return the ORIGINAL client_id (the one with the email)

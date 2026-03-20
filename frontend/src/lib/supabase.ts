@@ -351,10 +351,10 @@ export const api = {
     return stats
   },
 
-  // Link email to client for recovery
-  async linkEmail(clientId: string, email: string) {
-    const { data, error } = await supabase.functions.invoke('link-email', {
-      body: { client_id: clientId, email }
+  // Link phone number to client for recovery
+  async linkPhone(clientId: string, phone: string) {
+    const { data, error } = await supabase.functions.invoke('link-phone', {
+      body: { client_id: clientId, phone }
     })
     if (error) throw error
     return data
@@ -375,9 +375,9 @@ export const api = {
   },
 
   // Request account recovery
-  async requestRecovery(email: string) {
+  async requestRecovery(phone: string) {
     const { data, error } = await supabase.functions.invoke('recover-client', {
-      body: { action: 'request', email }
+      body: { action: 'request', phone }
     })
     if (error) throw error
     if (data && !data.success) {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
+import { isValidPhoneNumber } from '@/lib/phoneUtils'
 import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
@@ -12,7 +13,7 @@ export default function RecoveryPage() {
   const { clientId, setClientData, replaceAllCards, language } = useClientStore()
   const t = getTranslation(language)
   
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -35,17 +36,24 @@ export default function RecoveryPage() {
     setError('')
     setSuccess('')
 
+    // Validate phone number
+    if (!isValidPhoneNumber(phone)) {
+      setError('Invalid phone number format. Please use format: +39 123 456 7890')
+      setLoading(false)
+      return
+    }
+
     try {
-      const result = await api.requestRecovery(email)
+      const result = await api.requestRecovery(phone)
       
       if (result.success) {
         // In demo mode, we show the token directly
-        // In production, this would just show "Check your email"
+        // In production, this would just show "Check your phone"
         if (result.recovery_token) {
           setSuccess(t.recovery.tokenGenerated)
           setRecoveryToken(result.recovery_token)
         } else {
-          setSuccess(t.recovery.checkEmail)
+          setSuccess(t.recovery.checkPhone)
         }
       }
     } catch (err: any) {
@@ -166,13 +174,13 @@ export default function RecoveryPage() {
                 <form onSubmit={handleRequestRecovery} className="space-y-4">
                   <div>
                     <label className="block text-white text-sm font-medium mb-2">
-                      {t.recovery.emailLabel}
+                      {t.recovery.phoneLabel}
                     </label>
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t.recovery.emailPlaceholder}
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder={t.recovery.phonePlaceholder}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
                       required
                     />

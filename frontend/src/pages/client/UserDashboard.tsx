@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
+import { normalizePhoneNumber, isValidPhoneNumber } from '@/lib/phoneUtils'
 import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
@@ -17,13 +18,13 @@ export default function UserDashboard() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
   
-  // Email protection state
-  const [hasEmail, setHasEmail] = useState(false)
-  const [showEmailModal, setShowEmailModal] = useState(false)
-  const [email, setEmail] = useState('')
-  const [emailError, setEmailError] = useState('')
-  const [emailSuccess, setEmailSuccess] = useState(false)
-  const [savingEmail, setSavingEmail] = useState(false)
+  // Phone protection state
+  const [hasPhone, setHasPhone] = useState(false)
+  const [showPhoneModal, setShowPhoneModal] = useState(false)
+  const [phone, setPhone] = useState('')
+  const [phoneError, setPhoneError] = useState('')
+  const [phoneSuccess, setPhoneSuccess] = useState(false)
+  const [savingPhone, setSavingPhone] = useState(false)
 
   // PWA install prompt handler
   useEffect(() => {
@@ -75,9 +76,9 @@ export default function UserDashboard() {
         return
       }
 
-      // Check if client has email
+      // Check if client has phone
       const client = await api.getClient(clientId)
-      setHasEmail(!!client?.email)
+      setHasPhone(!!client?.phone)
 
       const allCards = await api.getCardsByClient(clientId)
       setCardCount(allCards.length)
@@ -101,34 +102,40 @@ export default function UserDashboard() {
     setLoading(false)
   }
 
-  const handleLinkEmail = async (e: React.FormEvent) => {
+  const handleLinkPhone = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!clientId || !email) return
+    if (!clientId || !phone) return
 
-    setSavingEmail(true)
-    setEmailError('')
+    // Validate phone number
+    if (!isValidPhoneNumber(phone)) {
+      setPhoneError(t.protection.linkError + ' Invalid phone number format.')
+      return
+    }
+
+    setSavingPhone(true)
+    setPhoneError('')
 
     try {
-      const result = await api.linkEmail(clientId, email)
+      const result = await api.linkPhone(clientId, phone)
       if (result.success) {
-        setEmailSuccess(true)
-        setHasEmail(true)
+        setPhoneSuccess(true)
+        setHasPhone(true)
         setTimeout(() => {
-          setShowEmailModal(false)
-          setEmailSuccess(false)
+          setShowPhoneModal(false)
+          setPhoneSuccess(false)
         }, 2000)
       }
     } catch (err: any) {
-      setEmailError(err.message || t.protection.linkError)
+      setPhoneError(err.message || t.protection.linkError)
     } finally {
-      setSavingEmail(false)
+      setSavingPhone(false)
     }
   }
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden">
+    <div className="relative w-full min-h-screen">
       {/* Background */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 z-0">
         <DarkVeil
           hueShift={0}
           noiseIntensity={0}
@@ -140,7 +147,7 @@ export default function UserDashboard() {
       </div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 z-10"></div>
 
       {/* Content */}
       <div className="relative z-20 min-h-screen flex flex-col">
@@ -195,8 +202,8 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            {/* Protection Banner - only show if client has cards but no email */}
-            {clientId && cardCount > 0 && !hasEmail && !loading && (
+            {/* Protection Banner - only show if client has cards but no phone */}
+            {clientId && cardCount > 0 && !hasPhone && !loading && (
               <div className="mb-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/30">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -209,18 +216,18 @@ export default function UserDashboard() {
                     <p className="text-yellow-100/80 text-sm mb-2">{t.protection.description}</p>
                     <p className="text-red-300 text-sm font-medium mb-3">{t.protection.warning}</p>
                     <button
-                      onClick={() => setShowEmailModal(true)}
+                      onClick={() => setShowPhoneModal(true)}
                       className="px-4 py-2 bg-yellow-500 text-black text-sm font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
                     >
-                      {t.protection.addEmail}
+                      {t.protection.addPhone}
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Protected Badge - show if email is linked */}
-            {clientId && hasEmail && !loading && (
+            {/* Protected Badge - show if phone is linked */}
+            {clientId && hasPhone && !loading && (
               <div className="mb-6 bg-green-500/10 backdrop-blur-sm rounded-xl p-3 border border-green-500/30 flex items-center gap-3">
                 <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,17 +349,17 @@ export default function UserDashboard() {
         </main>
       </div>
 
-      {/* Email Modal */}
-      {showEmailModal && (
+      {/* Phone Modal */}
+      {showPhoneModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-white/20 shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-white">{t.protection.modalTitle}</h3>
               <button
                 onClick={() => {
-                  setShowEmailModal(false)
-                  setEmailError('')
-                  setEmail('')
+                  setShowPhoneModal(false)
+                  setPhoneError('')
+                  setPhone('')
                 }}
                 className="text-gray-400 hover:text-white"
               >
@@ -362,36 +369,36 @@ export default function UserDashboard() {
               </button>
             </div>
 
-            {emailSuccess ? (
+            {phoneSuccess ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="text-green-200 text-lg">{t.protection.emailLinked}</p>
+                <p className="text-green-200 text-lg">{t.protection.phoneLinked}</p>
               </div>
             ) : (
-              <form onSubmit={handleLinkEmail} className="space-y-4">
+              <form onSubmit={handleLinkPhone} className="space-y-4">
                 <p className="text-gray-300 text-sm">{t.protection.modalDescription}</p>
                 
                 <div>
                   <label className="block text-white text-sm font-medium mb-2">
-                    {t.protection.emailLabel}
+                    {t.protection.phoneLabel}
                   </label>
                   <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t.protection.emailPlaceholder}
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder={t.protection.phonePlaceholder}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
                     required
                   />
                 </div>
 
-                {emailError && (
+                {phoneError && (
                   <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
-                    {emailError}
+                    {phoneError}
                   </div>
                 )}
 
@@ -399,9 +406,9 @@ export default function UserDashboard() {
                   <button
                     type="button"
                     onClick={() => {
-                      setShowEmailModal(false)
-                      setEmailError('')
-                      setEmail('')
+                      setShowPhoneModal(false)
+                      setPhoneError('')
+                      setPhone('')
                     }}
                     className="flex-1 px-4 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-colors"
                   >
@@ -409,10 +416,10 @@ export default function UserDashboard() {
                   </button>
                   <button
                     type="submit"
-                    disabled={savingEmail}
+                    disabled={savingPhone}
                     className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50"
                   >
-                    {savingEmail ? '...' : t.protection.saveEmail}
+                    {savingPhone ? '...' : t.protection.savePhone}
                   </button>
                 </div>
               </form>

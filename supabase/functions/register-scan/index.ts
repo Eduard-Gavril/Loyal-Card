@@ -229,7 +229,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           if (isFitGym && loyaltyState[ruleId].count === 6 && rule.discount_percent === 50) {
             milestoneReached = {
               count: 6,
-              message: 'Prossimo abbonamento con SCONTO 50%! 🎉'
+              message: 'Next purchase 50% OFF! 🎉'
             }
           }
 

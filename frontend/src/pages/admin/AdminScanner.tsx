@@ -1045,7 +1045,7 @@ export default function AdminScanner() {
                       <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border-2 border-orange-400/50 p-6 rounded-xl mb-6">
                         <p className="text-2xl font-bold text-orange-300 mb-3 flex items-center gap-2">
                           <span className="text-3xl">⭐</span>
-                          Traguardo Raggiunto!
+                          {t.admin.scanner.milestoneReached}
                         </p>
                         <p className="text-orange-200 text-lg">
                           {result.milestone_reached.message}

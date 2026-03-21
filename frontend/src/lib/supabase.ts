@@ -106,6 +106,8 @@ export interface RewardRule {
   reward_count: number
   reward_product_id?: string
   reward_category_id?: string
+  reset_on_redeem?: boolean
+  discount_percent?: number
   active: boolean
   priority: number
   created_at: string
@@ -288,7 +290,7 @@ export const api = {
       .select('*')
       .eq('tenant_id', tenantId)
       .eq('active', true)
-      .order('priority', { ascending: false })
+      .order('priority', { ascending: true })  // Lower priority number = shown first
     if (error) throw error
     return data
   },

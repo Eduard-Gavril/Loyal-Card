@@ -375,8 +375,17 @@ export default function ClientCard() {
                       </div>
                       {progress.rewards > 0 && (
                         <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg shadow-yellow-500/50">
-                          <span>{progress.rewards}</span>
-                          <span className="text-lg">🎁</span>
+                          {rule.discount_percent ? (
+                            <>
+                              <span>{rule.discount_percent}% OFF</span>
+                              <span className="text-lg">💰</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>{progress.rewards}</span>
+                              <span className="text-lg">🎁</span>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
@@ -413,9 +422,12 @@ export default function ClientCard() {
                     {progress.rewards > 0 && (
                       <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">🎉</span>
+                          <span className="text-2xl">{rule.discount_percent ? '💰' : '🎉'}</span>
                           <p className="text-sm text-green-900 font-bold">
-                            {progress.rewards} {progress.rewards === 1 ? t.clientCard.rewardAvailable : t.clientCard.rewardsAvailable}
+                            {rule.discount_percent 
+                              ? `Sconto ${rule.discount_percent}% disponibile!`
+                              : `${progress.rewards} ${progress.rewards === 1 ? t.clientCard.rewardAvailable : t.clientCard.rewardsAvailable}`
+                            }
                           </p>
                         </div>
                         <p className="text-xs text-green-700">

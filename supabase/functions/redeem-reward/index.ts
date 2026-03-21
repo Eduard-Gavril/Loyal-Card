@@ -89,9 +89,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
-    // Redeem reward: decrement reward count and reset counter
+    // Load reward rule to check reset_on_redeem flag
+    const { data: rule, error: ruleError } = await supabase
+      .from('reward_rules')
+      .select('id, name, reset_on_redeem, discount_percent')
+      .eq('id', reward_rule_id)
+      .eq('tenant_id', admin.tenant_id)
+      .single()
+
+    if (ruleError || !rule) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Reward rule not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Redeem reward: decrement reward count
+    // Reset counter only if reset_on_redeem is true (default behavior)
+    const shouldResetCounter = rule.reset_on_redeem !== false // Default true if not specified
+    
     loyaltyState[reward_rule_id] = {
-      count: 0,  // Reset counter when reward is redeemed
+      count: shouldResetCounter ? 0 : ruleState.count,  // Reset only if flag is true
       rewards: ruleState.rewards - 1
     }
 

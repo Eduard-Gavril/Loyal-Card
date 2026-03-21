@@ -150,10 +150,27 @@ export default function AdminRewards() {
                             <div>
                               <h3 className="text-lg font-semibold text-white">
                                 {rule.name || getProductName(rule.product_id)}
+                                {rule.discount_percent && (
+                                  <span className="ml-2 text-sm bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-md">
+                                    {rule.discount_percent}% OFF
+                                  </span>
+                                )}
                               </h3>
                               <p className="text-gray-300 text-sm">
                                 {rule.description || (language === 'ro' ? 'Premiu gratis' : 'Free reward')}
                               </p>
+                              <div className="flex gap-2 mt-1">
+                                {rule.priority !== undefined && (
+                                  <span className="text-xs text-gray-400">
+                                    Priority: {rule.priority}
+                                  </span>
+                                )}
+                                {rule.reset_on_redeem === false && (
+                                  <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">
+                                    {language === 'ro' ? 'Non resetta' : 'No reset'}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           

@@ -187,13 +187,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
-    // Find applicable reward rule
+    // Find applicable reward rules (ordered by priority)
     const { data: rules, error: rulesError } = await supabase
       .from('reward_rules')
       .select('*')
       .eq('tenant_id', admin.tenant_id)
       .eq('active', true)
       .or(`product_id.eq.${product_id},category_id.eq.${product.category_id}`)
+      .order('priority', { ascending: true })
 
     if (rulesError) {
       throw new Error(`Failed to fetch rules: ${rulesError.message}`)
@@ -207,46 +208,49 @@ Deno.serve(async (req: Request): Promise<Response> => {
       loyaltyState = {}
     }
     
-    let rewardEarned = null
+    let rewardsEarned: any[] = []
     let milestoneReached = null
 
     if (rules && rules.length > 0) {
-      // Use first matching rule (can be enhanced with priority)
-      const rule = rules[0]
-      const ruleId = rule.id
+      // Apply ALL applicable rules (not just the first one)
+      for (const rule of rules) {
+        const ruleId = rule.id
 
-      // Initialize rule state if not exists
-      if (!loyaltyState[ruleId]) {
-        loyaltyState[ruleId] = { count: 0, rewards: 0 }
-      }
-
-      // Increment counter (only if no pending rewards)
-      // If there are pending rewards, don't add more stamps until they redeem
-      if (loyaltyState[ruleId].rewards === 0) {
-        loyaltyState[ruleId].count += 1
-
-        // FitGym milestone: When reaching 6 stamps, notify about 50% discount on next scan
-        if (isFitGym && loyaltyState[ruleId].count === 6) {
-          milestoneReached = {
-            count: 6,
-            message: 'Prossimo abbonamento con SCONTO 50%! 🎉'
-          }
+        // Initialize rule state if not exists
+        if (!loyaltyState[ruleId]) {
+          loyaltyState[ruleId] = { count: 0, rewards: 0 }
         }
 
-        // Check if reward threshold reached
-        if (loyaltyState[ruleId].count >= rule.buy_count) {
-          loyaltyState[ruleId].rewards += rule.reward_count
-          // DON'T reset counter - leave it at buy_count so customer sees full stamps
-          // Counter will be reset when reward is redeemed
-          
-          rewardEarned = {
-            rule_id: ruleId,
-            rule_name: rule.name,
-            reward_count: rule.reward_count
+        // Increment counter (only if no pending rewards for THIS specific rule)
+        if (loyaltyState[ruleId].rewards === 0) {
+          loyaltyState[ruleId].count += 1
+
+          // FitGym milestone: When reaching 6 stamps on a 50% discount rule
+          if (isFitGym && loyaltyState[ruleId].count === 6 && rule.discount_percent === 50) {
+            milestoneReached = {
+              count: 6,
+              message: 'Prossimo abbonamento con SCONTO 50%! 🎉'
+            }
+          }
+
+          // Check if reward threshold reached
+          if (loyaltyState[ruleId].count >= rule.buy_count) {
+            loyaltyState[ruleId].rewards += rule.reward_count
+            // DON'T reset counter here - will be reset in redeem-reward if reset_on_redeem=true
+            
+            rewardsEarned.push({
+              rule_id: ruleId,
+              rule_name: rule.name,
+              reward_count: rule.reward_count,
+              discount_percent: rule.discount_percent || null
+            })
           }
         }
       }
     }
+
+    // For backwards compatibility, use first reward as main reward_earned
+    const rewardEarned = rewardsEarned.length > 0 ? rewardsEarned[0] : null
 
     // Update card
     const { error: updateError } = await supabase

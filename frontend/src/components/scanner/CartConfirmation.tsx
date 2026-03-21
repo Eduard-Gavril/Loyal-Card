@@ -52,7 +52,7 @@ export default function CartConfirmation({
                 <div className="font-semibold text-white">{item.productName}</div>
                 {item.price && (
                   <div className="text-sm text-primary-300 mt-1">
-                    €{item.price.toFixed(2)} × {item.quantity} = €{(item.price * item.quantity).toFixed(2)}
+                    {item.price.toFixed(2)} RON × {item.quantity} = {(item.price * item.quantity).toFixed(2)} RON
                   </div>
                 )}
               </div>
@@ -95,7 +95,7 @@ export default function CartConfirmation({
           <div className="flex justify-between items-center text-primary-200 mt-2">
             <span>{t.scanner.totalPrice}</span>
             <span className="font-bold">
-              €{getTotalPrice().toFixed(2)}
+              {getTotalPrice().toFixed(2)} RON
             </span>
           </div>
         )}

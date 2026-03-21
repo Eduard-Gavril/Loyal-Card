@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase, Product, RewardRule } from '@/lib/supabase'
 import DarkVeil from '@/components/DarkVeil'
+import { getProductEmoji } from '@/lib/emojiUtils'
 
 export default function AdminRewards() {
   const navigate = useNavigate()
@@ -84,10 +85,10 @@ export default function AdminRewards() {
     return product?.name || 'Unknown'
   }
 
-  const getProductEmoji = (productId?: string) => {
+  const getProductEmojiById = (productId?: string) => {
     if (!productId) return '🏷️'
     const product = products.find(p => p.id === productId)
-    return product?.metadata?.emoji || '🎁'
+    return getProductEmoji(product?.name || 'Unknown', product?.metadata)
   }
 
   return (
@@ -145,7 +146,7 @@ export default function AdminRewards() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <span className="text-4xl">{getProductEmoji(rule.product_id)}</span>
+                            <span className="text-4xl">{getProductEmojiById(rule.product_id)}</span>
                             <div>
                               <h3 className="text-lg font-semibold text-white">
                                 {rule.name || getProductName(rule.product_id)}
@@ -250,7 +251,7 @@ export default function AdminRewards() {
                         key={product.id}
                         className="bg-white/5 rounded-xl p-4 border border-white/10 text-center hover:bg-white/10 transition-colors"
                       >
-                        <span className="text-3xl">{product.metadata?.emoji || '☕'}</span>
+                        <span className="text-3xl">{getProductEmoji(product.name, product.metadata)}</span>
                         <p className="text-white font-medium mt-2">{product.name}</p>
                         <p className="text-gray-400 text-sm">
                           {product.metadata?.type || 'product'}

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
+import { getProductEmoji } from '@/lib/emojiUtils'
 
 interface Stats {
   totalScans: number
@@ -107,7 +108,7 @@ export default function AdminDashboard() {
           scanned_at: scan.scanned_at,
           reward_applied: scan.reward_applied,
           product_name: scan.products?.name || 'Unknown',
-          product_emoji: scan.products?.metadata?.emoji || '☕',
+          product_emoji: getProductEmoji(scan.products?.name || 'Unknown', scan.products?.metadata),
           client_id: scan.cards?.client_id?.substring(0, 8) || '???'
         }))
         setRecentScans(scans)

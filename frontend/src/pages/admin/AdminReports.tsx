@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
 import DarkVeil from '@/components/DarkVeil'
+import { getProductEmoji } from '@/lib/emojiUtils'
 
 interface DailyStats {
   date: string
@@ -101,7 +102,7 @@ export default function AdminReports() {
           return {
             name: product?.name || 'Unknown',
             count,
-            emoji: product?.metadata?.emoji || '☕'
+            emoji: getProductEmoji(product?.name || 'Unknown', product?.metadata)
           }
         })
         .sort((a, b) => b.count - a.count)

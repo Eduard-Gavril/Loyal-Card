@@ -203,8 +203,11 @@ export default function ClientWallet() {
             {cards.map((card) => (
               <div
                 key={card.cardId}
-                className="w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/50 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
-                style={{ borderLeft: `6px solid ${card.brandColor}` }}
+                className="w-full bg-white/15 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:border-white/30 hover:bg-white/20 hover:scale-[1.02] transition-all duration-300"
+                style={{ 
+                  borderLeft: `4px solid ${card.brandColor}`,
+                  boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)`
+                }}
               >
                 {editingCard === card.qrCode ? (
                   // Edit Mode
@@ -213,7 +216,7 @@ export default function ClientWallet() {
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-primary-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-400 bg-white text-gray-900"
+                      className="w-full px-4 py-3 border-2 border-primary-400/50 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-400/50 bg-white/10 backdrop-blur-sm text-white placeholder-gray-400"
                       placeholder={t.wallet.cardNamePlaceholder}
                       autoFocus
                     />
@@ -226,7 +229,7 @@ export default function ClientWallet() {
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300"
+                        className="flex-1 bg-white/10 text-white px-4 py-3 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 backdrop-blur-sm"
                       >
                         ✕ {t.wallet.cancel}
                       </button>
@@ -243,22 +246,22 @@ export default function ClientWallet() {
                         <img
                           src={card.tenantLogo}
                           alt={card.tenantName}
-                          className="w-16 h-16 rounded-full object-cover"
+                          className="w-16 h-16 rounded-full object-cover ring-2 ring-white/20"
                         />
                       ) : (
                         <div
-                          className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
-                          style={{ backgroundColor: card.brandColor + '20' }}
+                          className="w-16 h-16 rounded-full flex items-center justify-center text-2xl ring-2 ring-white/20"
+                          style={{ backgroundColor: card.brandColor + '30' }}
                         >
                           🎴
                         </div>
                       )}
                       
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-800">
+                        <h3 className="text-xl font-bold text-white">
                           {card.customName || card.tenantName}
                         </h3>
-                        <p className="text-gray-500 text-sm mb-2">
+                        <p className="text-gray-300 text-sm mb-2">
                           {t.wallet.store} • #{card.qrCode.slice(-6).toUpperCase()}
                         </p>
                         
@@ -267,15 +270,15 @@ export default function ClientWallet() {
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1">
                               {[...Array(Math.min(card.totalStamps, 5))].map((_, i) => (
-                                <span key={i} className="text-yellow-500 text-lg">⭐</span>
+                                <span key={i} className="text-yellow-400 text-lg">⭐</span>
                               ))}
                               {card.totalStamps > 5 && (
-                                <span className="text-sm font-semibold text-gray-700">
+                                <span className="text-sm font-semibold text-white">
                                   +{card.totalStamps - 5}
                                 </span>
                               )}
                             </div>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-400">
                               {card.totalStamps} {card.totalStamps === 1 ? t.wallet.stamp : t.wallet.stamps}
                             </span>
                           </div>

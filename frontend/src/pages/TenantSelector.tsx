@@ -133,14 +133,14 @@ export default function TenantSelector() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen">
       {/* Animated background */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 z-0">
         <DarkVeil hueShift={180} speed={0.4} warpAmount={0.08} />
       </div>
 
       {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
 
       {/* Content */}
       <div className="relative z-20">
@@ -249,9 +249,21 @@ export default function TenantSelector() {
                   className="w-full bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:border-primary-400 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-primary-500/30 text-left"
                 >
                   <div className="flex items-start gap-4">
-                    {/* Icon */}
+                    {/* Logo or Icon */}
+                    {tenant.logo_url ? (
+                      <img
+                        src={tenant.logo_url}
+                        alt={tenant.name}
+                        className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                        onError={(e) => {
+                          // Fallback to icon if image fails to load
+                          e.currentTarget.style.display = 'none'
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                        }}
+                      />
+                    ) : null}
                     <div 
-                      className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl flex-shrink-0"
+                      className={`w-16 h-16 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 ${tenant.logo_url ? 'hidden' : ''}`}
                       style={{ backgroundColor: tenant.brand_color + '33' }}
                     >
                       {getTenantIcon(tenant)}

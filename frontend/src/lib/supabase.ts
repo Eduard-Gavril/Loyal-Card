@@ -12,7 +12,16 @@ if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
 
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder'
+  supabaseAnonKey || 'placeholder',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+    db: {
+      schema: 'public',
+    },
+  }
 )
 
 // Database types (can be generated with supabase gen types typescript)
@@ -298,12 +307,27 @@ export const api = {
 
   // Get tenant info
   async getTenant(tenantId: string): Promise<Tenant> {
+    console.log('🔍 Fetching tenant:', tenantId)
+    console.log('📡 Supabase URL:', supabaseUrl)
+    console.log('🔑 Has anon key:', !!supabaseAnonKey)
+    
     const { data, error } = await supabase
       .from('tenants')
       .select('*')
       .eq('id', tenantId)
       .single()
-    if (error) throw error
+    
+    if (error) {
+      console.error('❌ Supabase error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
+      throw error
+    }
+    
+    console.log('✅ Tenant loaded:', data)
     return data
   },
 

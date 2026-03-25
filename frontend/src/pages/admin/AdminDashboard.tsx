@@ -153,60 +153,60 @@ export default function AdminDashboard() {
       {/* Content */}
       <div className="relative z-20">
         {/* Header */}
-        <header className="pt-6 px-6">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <header className="pt-6 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-white tracking-tight">{t.admin.dashboard.title}</h1>
-              <p className="text-sm text-gray-200 mt-1 flex items-center gap-2">
+              <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">{t.admin.dashboard.title}</h1>
+              <p className="text-xs sm:text-sm text-gray-200 mt-1 flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                {user?.email}
+                <span className="truncate max-w-[200px] sm:max-w-none">{user?.email}</span>
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <LanguageSelector />
               <button
                 onClick={handleLogout}
-                className="px-6 py-3 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-medium rounded-xl transition-all duration-300 hover:shadow-lg border border-white/20 flex items-center gap-2"
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white text-sm sm:text-base font-medium rounded-xl transition-all duration-300 hover:shadow-lg border border-white/20 flex items-center gap-2"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                {t.admin.dashboard.logout}
+                <span className="hidden sm:inline">{t.admin.dashboard.logout}</span>
               </button>
             </div>
           </div>
         </header>
 
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
+            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsTotal}</h3>
-                <span className="text-3xl">📊</span>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsTotal}</h3>
+                <span className="text-2xl sm:text-3xl">📊</span>
               </div>
-              <p className="text-4xl font-bold text-white">{stats.totalScans}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalScans}</p>
             </div>
-            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
+            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsClients}</h3>
-                <span className="text-3xl">👥</span>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsClients}</h3>
+                <span className="text-2xl sm:text-3xl">👥</span>
               </div>
-              <p className="text-4xl font-bold text-white">{stats.totalClients}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalClients}</p>
             </div>
-            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
+            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsRewards}</h3>
-                <span className="text-3xl">🎁</span>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsRewards}</h3>
+                <span className="text-2xl sm:text-3xl">🎁</span>
               </div>
-              <p className="text-4xl font-bold text-white">{stats.totalRewards}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalRewards}</p>
             </div>
-            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
+            <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsToday}</h3>
-                <span className="text-3xl">⚡</span>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsToday}</h3>
+                <span className="text-2xl sm:text-3xl">⚡</span>
               </div>
-              <p className="text-4xl font-bold text-white">{stats.scansToday}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.scansToday}</p>
             </div>
           </div>
 

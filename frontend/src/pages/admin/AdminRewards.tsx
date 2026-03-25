@@ -104,24 +104,24 @@ export default function AdminRewards() {
       {/* Content */}
       <div className="relative z-20">
         {/* Header */}
-        <header className="pt-6 px-6">
-          <div className="max-w-7xl mx-auto flex items-center gap-4">
+        <header className="pt-6 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => navigate('/admin/dashboard')}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              {language === 'ro' ? 'Înapoi' : 'Back'}
+              <span className="hidden sm:inline">{language === 'ro' ? 'Înapoi' : 'Back'}</span>
             </button>
-            <h1 className="text-4xl font-bold text-white tracking-tight flex-1">
+            <h1 className="text-xl sm:text-4xl font-bold text-white tracking-tight flex-1">
               🎁 {language === 'ro' ? 'Gestionare Premii' : 'Manage Rewards'}
             </h1>
           </div>
         </header>
 
-        <div className="max-w-4xl mx-auto px-6 py-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
@@ -130,8 +130,8 @@ export default function AdminRewards() {
           ) : (
             <>
               {/* Reward Rules */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 mb-8">
-                <h2 className="text-2xl font-bold text-white mb-6">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20 mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                   {language === 'ro' ? 'Reguli Premii' : 'Reward Rules'}
                 </h2>
                 
@@ -140,26 +140,26 @@ export default function AdminRewards() {
                     {rewardRules.map((rule) => (
                       <div
                         key={rule.id}
-                        className={`bg-white/5 rounded-xl p-6 border transition-all duration-300 ${
+                        className={`bg-white/5 rounded-xl p-4 sm:p-6 border transition-all duration-300 ${
                           rule.active ? 'border-primary-400/50' : 'border-white/10 opacity-60'
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <span className="text-4xl">{getProductEmojiById(rule.product_id)}</span>
-                            <div>
-                              <h3 className="text-lg font-semibold text-white">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div className="flex items-start gap-3 sm:gap-4 flex-1">
+                            <span className="text-3xl sm:text-4xl flex-shrink-0">{getProductEmojiById(rule.product_id)}</span>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base sm:text-lg font-semibold text-white break-words">
                                 {rule.name || getProductName(rule.product_id)}
                                 {rule.discount_percent && (
-                                  <span className="ml-2 text-sm bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-md">
+                                  <span className="ml-2 text-xs sm:text-sm bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-md inline-block mt-1 sm:mt-0">
                                     {rule.discount_percent}% OFF
                                   </span>
                                 )}
                               </h3>
-                              <p className="text-gray-300 text-sm">
+                              <p className="text-gray-300 text-xs sm:text-sm mt-1">
                                 {rule.description || (language === 'ro' ? 'Premiu gratis' : 'Free reward')}
                               </p>
-                              <div className="flex gap-2 mt-1">
+                              <div className="flex flex-wrap gap-2 mt-2">
                                 {rule.priority !== undefined && (
                                   <span className="text-xs text-gray-400">
                                     Priority: {rule.priority}
@@ -174,16 +174,16 @@ export default function AdminRewards() {
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
                             {/* Scans required */}
-                            <div className="text-center">
+                            <div className="text-center flex-shrink-0">
                               {editingRule === rule.id ? (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 sm:gap-2">
                                   <input
                                     type="number"
                                     value={editValue}
                                     onChange={(e) => setEditValue(parseInt(e.target.value) || 0)}
-                                    className="w-16 px-2 py-1 bg-white/10 border border-white/30 rounded-lg text-white text-center"
+                                    className="w-14 sm:w-16 px-2 py-1 bg-white/10 border border-white/30 rounded-lg text-white text-center text-sm"
                                     min={1}
                                     max={50}
                                   />
@@ -191,7 +191,7 @@ export default function AdminRewards() {
                                     onClick={() => updateRewardRule(rule.id, editValue)}
                                     className="p-1 bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
                                   >
-                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                   </button>
@@ -199,7 +199,7 @@ export default function AdminRewards() {
                                     onClick={() => setEditingRule(null)}
                                     className="p-1 bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
                                   >
-                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                   </button>
@@ -212,11 +212,11 @@ export default function AdminRewards() {
                                   }}
                                   className="group"
                                 >
-                                  <span className="text-3xl font-bold text-white group-hover:text-primary-400 transition-colors">
+                                  <span className="text-2xl sm:text-3xl font-bold text-white group-hover:text-primary-400 transition-colors">
                                     {rule.buy_count}
                                   </span>
-                                  <p className="text-xs text-gray-400">
-                                    {language === 'ro' ? 'achiziții necesare' : 'purchases required'}
+                                  <p className="text-xs text-gray-400 whitespace-nowrap">
+                                    {language === 'ro' ? 'achiziții' : 'purchases'}
                                   </p>
                                 </button>
                               )}
@@ -225,13 +225,13 @@ export default function AdminRewards() {
                             {/* Toggle active */}
                             <button
                               onClick={() => toggleRuleActive(rule.id, !rule.active)}
-                              className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${
+                              className={`relative w-12 h-7 sm:w-14 sm:h-8 rounded-full transition-colors duration-300 flex-shrink-0 ${
                                 rule.active ? 'bg-green-500' : 'bg-gray-600'
                               }`}
                             >
                               <div
-                                className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 ${
-                                  rule.active ? 'translate-x-7' : 'translate-x-1'
+                                className={`absolute top-0.5 sm:top-1 w-6 h-6 sm:w-6 sm:h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${
+                                  rule.active ? 'translate-x-5 sm:translate-x-7' : 'translate-x-0.5 sm:translate-x-1'
                                 }`}
                               ></div>
                             </button>

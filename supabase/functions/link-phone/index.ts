@@ -1,10 +1,29 @@
 // @deno-types="https://esm.sh/@supabase/supabase-js@2.39.3/dist/module/index.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { normalizePhoneNumber, isValidPhoneNumber } from '../_shared/phoneUtils.ts'
 
 interface LinkPhoneRequest {
   client_id: string
   phone: string
+}
+
+// Phone utility functions (inlined to avoid deployment issues)
+function normalizePhoneNumber(phone: string): string {
+  let normalized = phone.replace(/[\s\-()\.]/g, '')
+  normalized = normalized.replace(/[^\d+]/g, '')
+  if (normalized.includes('+')) {
+    const digits = normalized.replace(/\+/g, '')
+    normalized = '+' + digits
+  }
+  return normalized
+}
+
+function isValidPhoneNumber(phone: string): boolean {
+  const normalized = normalizePhoneNumber(phone)
+  const digitCount = normalized.replace(/\D/g, '').length
+  if (digitCount < 7 || digitCount > 15) {
+    return false
+  }
+  return /^\+?\d{7,15}$/.test(normalized)
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {

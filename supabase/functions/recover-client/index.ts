@@ -1,12 +1,31 @@
 // @deno-types="https://esm.sh/@supabase/supabase-js@2.39.3/dist/module/index.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { normalizePhoneNumber, isValidPhoneNumber } from '../_shared/phoneUtils.ts'
 
 interface RecoverClientRequest {
   action: 'request' | 'verify'
   phone?: string      // For 'request' action
   token?: string      // For 'verify' action
   new_client_id?: string // For 'verify' action - the new client_id to merge into
+}
+
+// Phone utility functions (inlined to avoid deployment issues)
+function normalizePhoneNumber(phone: string): string {
+  let normalized = phone.replace(/[\s\-()\.]/g, '')
+  normalized = normalized.replace(/[^\d+]/g, '')
+  if (normalized.includes('+')) {
+    const digits = normalized.replace(/\+/g, '')
+    normalized = '+' + digits
+  }
+  return normalized
+}
+
+function isValidPhoneNumber(phone: string): boolean {
+  const normalized = normalizePhoneNumber(phone)
+  const digitCount = normalized.replace(/\D/g, '').length
+  if (digitCount < 7 || digitCount > 15) {
+    return false
+  }
+  return /^\+?\d{7,15}$/.test(normalized)
 }
 
 // Simple token generation using timestamp and random string
@@ -214,24 +233,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
                 .from('cards')
                 .update({ client_id: recoveredClientId })
                 .eq('id', newCard.id)
-phone)
-      // The frontend should replace its stored client_id with this one
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Account recovered successfully',
-          client_id: recoveredClientId,  // Always return the original!
-          phone: recoveredClient.phone there are other references)
+
+              cardsFromNewClient++
+            }
+          }
+
+          // Delete the temporary new client (optional, but clean)
+          await supabaseClient
+            .from('clients')
+            .delete()
+            .eq('id', new_client_id)
+        }
       }
 
-      // Return the ORIGINAL client_id (the one with the email)
+      // Return the ORIGINAL client_id (the one with the phone)
       // The frontend should replace its stored client_id with this one
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: 'Account recovered successfully',
           client_id: recoveredClientId,  // Always return the original!
-          email: recoveredClient.email,
+          phone: recoveredClient.phone,
           cards_count: (originalCards?.length || 0) + cardsFromNewClient,
           cards_merged: cardsMerged,
           cards_transferred: cardsFromNewClient

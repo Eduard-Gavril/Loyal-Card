@@ -1,11 +1,13 @@
 // @deno-types="https://esm.sh/@supabase/supabase-js@2.39.3/dist/module/index.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts'
 
 interface RecoverClientRequest {
   action: 'request' | 'verify'
-  phone?: string      // For 'request' action
-  token?: string      // For 'verify' action
-  new_client_id?: string // For 'verify' action - the new client_id to merge into
+  phone?: string          // For 'request' action
+  pin?: string            // For 'verify' action - 6-digit PIN
+  backup_code?: string    // For 'verify' action - alternative to PIN
+  new_client_id?: string  // For 'verify' action - the new client_id to merge into
 }
 
 // Phone utility functions (inlined to avoid deployment issues)
@@ -28,31 +30,47 @@ function isValidPhoneNumber(phone: string): boolean {
   return /^\+?\d{7,15}$/.test(normalized)
 }
 
-// Simple token generation using timestamp and random string
-function generateRecoveryToken(clientId: string, secret: string): string {
-  const timestamp = Date.now()
-  const expiresAt = timestamp + (24 * 60 * 60 * 1000) // 24 hours
-  const payload = `${clientId}:${expiresAt}`
+// Rate limiting check - prevent brute force
+const MAX_ATTEMPTS_PER_HOUR = 5
+
+async function checkRateLimit(supabase: any, clientId: string): Promise<boolean> {
+  const { data: client } = await supabase
+    .from('clients')
+    .select('recovery_attempts, last_recovery_attempt')
+    .eq('id', clientId)
+    .single()
+
+  if (!client) return true
+
+  const now = new Date()
+  const lastAttempt = client.last_recovery_attempt ? new Date(client.last_recovery_attempt) : null
   
-  // Simple encoding (in production, use proper JWT)
-  const encoded = btoa(payload)
-  return encoded
+  // Reset counter if more than 1 hour has passed
+  if (!lastAttempt || (now.getTime() - lastAttempt.getTime()) > 3600000) {
+    await supabase
+      .from('clients')
+      .update({ recovery_attempts: 0 })
+      .eq('id', clientId)
+    return true
+  }
+
+  return client.recovery_attempts < MAX_ATTEMPTS_PER_HOUR
 }
 
-function verifyRecoveryToken(token: string, secret: string): { clientId: string; valid: boolean } {
-  try {
-    const decoded = atob(token)
-    const [clientId, expiresAtStr] = decoded.split(':')
-    const expiresAt = parseInt(expiresAtStr, 10)
-    
-    if (Date.now() > expiresAt) {
-      return { clientId: '', valid: false }
-    }
-    
-    return { clientId, valid: true }
-  } catch {
-    return { clientId: '', valid: false }
-  }
+async function incrementAttempts(supabase: any, clientId: string) {
+  const { data: client } = await supabase
+    .from('clients')
+    .select('recovery_attempts')
+    .eq('id', clientId)
+    .single()
+
+  await supabase
+    .from('clients')
+    .update({ 
+      recovery_attempts: (client?.recovery_attempts || 0) + 1,
+      last_recovery_attempt: new Date().toISOString()
+    })
+    .eq('id', clientId)
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -72,10 +90,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
     
-    const secret = Deno.env.get('RECOVERY_SECRET') || 'default-recovery-secret'
-    const { action, phone, token, new_client_id }: RecoverClientRequest = await req.json()
+    const { action, phone, pin, backup_code, new_client_id }: RecoverClientRequest = await req.json()
 
-    // ACTION: REQUEST - Generate recovery token and return it
+    // ACTION: REQUEST - Check if phone exists (no token generation)
     if (action === 'request') {
       if (!phone) {
         return new Response(
@@ -94,24 +111,79 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
       const normalizedPhone = normalizePhoneNumber(phone)
 
-      // Find client by phone (check both old and new clients)
+      // Find client by phone
       const { data: clients, error: clientError } = await supabaseClient
         .from('clients')
-        .select('id, phone')
+        .select('id, phone, pin_hash')
         .eq('phone', normalizedPhone)
 
       if (clientError || !clients || clients.length === 0) {
-        // Phone not found - be clear about it in demo mode
+        // Phone not found
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'No account found with this phone number. Make sure you have previously linked a phone number to your account.'
+            error: 'No account found with this phone number.'
           }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
-      // Find the client with the most cards (in case phone exists on multiple clients after merge)
+      // Check if PIN is set
+      const hasPIN = clients[0].pin_hash !== null
+
+      if (!hasPIN) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'This account was registered without PIN security. Please contact support.'
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Phone exists and has PIN - proceed to verification step
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Phone number found. Please enter your PIN.',
+          phone_found: true
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ACTION: VERIFY - Verify PIN or backup code and merge accounts
+    if (action === 'verify') {
+      if (!phone) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Phone number is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      if (!pin && !backup_code) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'PIN or backup code is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const normalizedPhone = normalizePhoneNumber(phone)
+
+      // Find client by phone
+      const { data: clients, error: clientError } = await supabaseClient
+        .from('clients')
+        .select('id, phone, pin_hash, backup_codes')
+        .eq('phone', normalizedPhone)
+
+      if (clientError || !clients || clients.length === 0) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Phone number not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Find the client with the most cards
       let bestClient = clients[0]
       let maxCards = 0
 
@@ -127,41 +199,73 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
       }
 
-      // Generate recovery token
-      const recoveryToken = generateRecoveryToken(bestClient.id, secret)
-      
-      // DEMO MODE: Return token directly
-      // In production: integrate with SMS service (Twilio, etc.)
-      
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Recovery token generated',
-          recovery_token: recoveryToken,
-          recovery_url: `?recovery=${recoveryToken}`,
-          cards_count: maxCards
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+      const recoveredClientId = bestClient.id
 
-    // ACTION: VERIFY - Verify token and merge accounts
-    if (action === 'verify') {
-      if (!token) {
+      // Check rate limiting
+      const canAttempt = await checkRateLimit(supabaseClient, recoveredClientId)
+      if (!canAttempt) {
         return new Response(
-          JSON.stringify({ success: false, error: 'Token is required' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false, error: 'Too many recovery attempts. Please try again in 1 hour.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
-      const { clientId: recoveredClientId, valid } = verifyRecoveryToken(token, secret)
+      let authSuccess = false
+      let usedBackupCode = false
 
-      if (!valid || !recoveredClientId) {
+      // Verify PIN or backup code
+      if (pin) {
+        // Verify PIN
+        if (!bestClient.pin_hash) {
+          await incrementAttempts(supabaseClient, recoveredClientId)
+          return new Response(
+            JSON.stringify({ success: false, error: 'No PIN set for this account' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        authSuccess = await bcrypt.compare(pin, bestClient.pin_hash)
+      } else if (backup_code) {
+        // Verify backup code
+        if (!bestClient.backup_codes || bestClient.backup_codes.length === 0) {
+          await incrementAttempts(supabaseClient, recoveredClientId)
+          return new Response(
+            JSON.stringify({ success: false, error: 'No backup codes available' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Check each backup code
+        for (let i = 0; i < bestClient.backup_codes.length; i++) {
+          const isMatch = await bcrypt.compare(backup_code, bestClient.backup_codes[i])
+          if (isMatch) {
+            authSuccess = true
+            usedBackupCode = true
+            
+            // Remove used backup code
+            const newBackupCodes = bestClient.backup_codes.filter((_: string, idx: number) => idx !== i)
+            await supabaseClient
+              .from('clients')
+              .update({ backup_codes: newBackupCodes })
+              .eq('id', recoveredClientId)
+            break
+          }
+        }
+      }
+
+      if (!authSuccess) {
+        await incrementAttempts(supabaseClient, recoveredClientId)
         return new Response(
-          JSON.stringify({ success: false, error: 'Invalid or expired token' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false, error: 'Invalid PIN or backup code' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+
+      // Reset recovery attempts on success
+      await supabaseClient
+        .from('clients')
+        .update({ recovery_attempts: 0 })
+        .eq('id', recoveredClientId)
 
       // Get the recovered client data
       const { data: recoveredClient, error: clientError } = await supabaseClient
@@ -248,6 +352,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
       // Return the ORIGINAL client_id (the one with the phone)
       // The frontend should replace its stored client_id with this one
+      
+      // Get remaining backup codes count
+      const { data: updatedClient } = await supabaseClient
+        .from('clients')
+        .select('backup_codes')
+        .eq('id', recoveredClientId)
+        .single()
+
+      const remainingBackupCodes = updatedClient?.backup_codes?.length || 0
+
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -256,7 +370,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
           phone: recoveredClient.phone,
           cards_count: (originalCards?.length || 0) + cardsFromNewClient,
           cards_merged: cardsMerged,
-          cards_transferred: cardsFromNewClient
+          cards_transferred: cardsFromNewClient,
+          used_backup_code: usedBackupCode,
+          remaining_backup_codes: remainingBackupCodes
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )

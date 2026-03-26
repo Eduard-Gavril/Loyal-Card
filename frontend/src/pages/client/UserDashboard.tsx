@@ -22,9 +22,13 @@ export default function UserDashboard() {
   const [hasPhone, setHasPhone] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
   const [phone, setPhone] = useState('')
+  const [pin, setPin] = useState('')
+  const [confirmPin, setConfirmPin] = useState('')
   const [phoneError, setPhoneError] = useState('')
   const [phoneSuccess, setPhoneSuccess] = useState(false)
   const [savingPhone, setSavingPhone] = useState(false)
+  const [backupCodes, setBackupCodes] = useState<string[]>([])
+  const [showBackupCodes, setShowBackupCodes] = useState(false)
 
   // PWA install prompt handler
   useEffect(() => {
@@ -104,7 +108,7 @@ export default function UserDashboard() {
 
   const handleLinkPhone = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!clientId || !phone) return
+    if (!clientId || !phone || !pin) return
 
     // Validate phone number
     if (!isValidPhoneNumber(phone)) {
@@ -112,24 +116,45 @@ export default function UserDashboard() {
       return
     }
 
+    // Validate PIN (must be 6 digits)
+    if (!/^\d{6}$/.test(pin)) {
+      setPhoneError('PIN must be exactly 6 digits.')
+      return
+    }
+
+    // Check PIN confirmation
+    if (pin !== confirmPin) {
+      setPhoneError('PINs do not match.')
+      return
+    }
+
     setSavingPhone(true)
     setPhoneError('')
 
     try {
-      const result = await api.linkPhone(clientId, phone)
-      if (result.success) {
+      const result = await api.linkPhone(clientId, phone, pin)
+      if (result.success && result.backup_codes) {
+        setBackupCodes(result.backup_codes)
+        setShowBackupCodes(true)
         setPhoneSuccess(true)
         setHasPhone(true)
-        setTimeout(() => {
-          setShowPhoneModal(false)
-          setPhoneSuccess(false)
-        }, 2000)
+        // Don't close modal yet - show backup codes first
       }
     } catch (err: any) {
       setPhoneError(err.message || t.protection.linkError)
     } finally {
       setSavingPhone(false)
     }
+  }
+
+  const handleCloseBackupCodes = () => {
+    setShowBackupCodes(false)
+    setShowPhoneModal(false)
+    setPhoneSuccess(false)
+    setPhone('')
+    setPin('')
+    setConfirmPin('')
+    setBackupCodes([])
   }
 
   return (
@@ -369,7 +394,42 @@ export default function UserDashboard() {
               </button>
             </div>
 
-            {phoneSuccess ? (
+            {showBackupCodes ? (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-bold text-white mb-2">{t.protection.phoneLinked}</h4>
+                  <p className="text-yellow-300 text-sm mb-4">⚠️ Save these backup codes immediately!</p>
+                </div>
+
+                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 space-y-2">
+                  <p className="text-yellow-200 text-sm font-medium mb-3">
+                    🔑 Your Backup Codes ({backupCodes.length} remaining)
+                  </p>
+                  {backupCodes.map((code, idx) => (
+                    <div key={idx} className="bg-black/30 rounded-lg px-4 py-2 font-mono text-white text-center">
+                      {code}
+                    </div>
+                  ))}
+                  <p className="text-yellow-200 text-xs mt-3">
+                    • Each code can only be used once<br/>
+                    • Use these if you forget your PIN<br/>
+                    • Screenshot or write them down NOW
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleCloseBackupCodes}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all"
+                >
+                  I saved my codes - Continue
+                </button>
+              </div>
+            ) : phoneSuccess ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,6 +456,37 @@ export default function UserDashboard() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">
+                    🔒 Security PIN (6 digits)
+                  </label>
+                  <input
+                    type="password"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    maxLength={6}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 text-center text-2xl tracking-widest"
+                    required
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Choose a 6-digit PIN to protect your account</p>
+                </div>
+
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">
+                    Confirm PIN
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPin}
+                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    maxLength={6}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 text-center text-2xl tracking-widest"
+                    required
+                  />
+                </div>
+
                 {phoneError && (
                   <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
                     {phoneError}
@@ -409,6 +500,8 @@ export default function UserDashboard() {
                       setShowPhoneModal(false)
                       setPhoneError('')
                       setPhone('')
+                      setPin('')
+                      setConfirmPin('')
                     }}
                     className="flex-1 px-4 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-colors"
                   >

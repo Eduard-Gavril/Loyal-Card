@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
 import { isValidPhoneNumber } from '@/lib/phoneUtils'
@@ -9,26 +9,17 @@ import { getTranslation } from '@/lib/i18n'
 
 export default function RecoveryPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const { clientId, setClientData, replaceAllCards, language } = useClientStore()
   const t = getTranslation(language)
   
   const [phone, setPhone] = useState('')
+  const [pin, setPin] = useState('')
+  const [backupCode, setBackupCode] = useState('')
+  const [useBackupCode, setUseBackupCode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [mode, setMode] = useState<'request' | 'verify'>('request')
-  const [recoveryToken, setRecoveryToken] = useState('')
-
-  // Check for recovery token in URL
-  useEffect(() => {
-    const token = searchParams.get('token')
-    if (token) {
-      setRecoveryToken(token)
-      setMode('verify')
-      handleVerifyToken(token)
-    }
-  }, [searchParams])
 
   const handleRequestRecovery = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,7 +29,7 @@ export default function RecoveryPage() {
 
     // Validate phone number
     if (!isValidPhoneNumber(phone)) {
-      setError('Invalid phone number format. Please use format: +39 123 456 7890')
+      setError('Invalid phone number format. Please use format: +40 123 456 789')
       setLoading(false)
       return
     }
@@ -46,15 +37,9 @@ export default function RecoveryPage() {
     try {
       const result = await api.requestRecovery(phone)
       
-      if (result.success) {
-        // In demo mode, we show the token directly
-        // In production, this would just show "Check your phone"
-        if (result.recovery_token) {
-          setSuccess(t.recovery.tokenGenerated)
-          setRecoveryToken(result.recovery_token)
-        } else {
-          setSuccess(t.recovery.checkPhone)
-        }
+      if (result.success && result.phone_found) {
+        setMode('verify')
+        setSuccess(t.recovery.checkPhone || 'Phone found. Please enter your PIN.')
       }
     } catch (err: any) {
       setError(err.message || t.recovery.requestError)
@@ -63,10 +48,16 @@ export default function RecoveryPage() {
     }
   }
 
-  const handleVerifyToken = async (token?: string) => {
-    const tokenToVerify = token || recoveryToken
-    if (!tokenToVerify) {
-      setError(t.recovery.noToken)
+  const handleVerifyRecovery = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!useBackupCode && !pin) {
+      setError('Please enter your PIN')
+      return
+    }
+
+    if (useBackupCode && !backupCode) {
+      setError('Please enter a backup code')
       return
     }
 
@@ -75,7 +66,12 @@ export default function RecoveryPage() {
     setSuccess('')
 
     try {
-      const result = await api.verifyRecovery(tokenToVerify, clientId || undefined)
+      const result = await api.verifyRecovery(
+        phone,
+        useBackupCode ? undefined : pin,
+        useBackupCode ? backupCode : undefined,
+        clientId || undefined
+      )
       
       if (result.success) {
         // Update local storage with recovered client_id
@@ -96,8 +92,8 @@ export default function RecoveryPage() {
             setClientData(recoveredCards[0])
           }
           
-          // Show how many cards were merged/transferred
-          const mergeInfo = result.cards_merged > 0 || result.cards_transferred > 0 
+          // Show success with merge info
+          const mergeInfo = result.cards_merged > 0 || result.cards_transferred > 0
             ? ` (${result.cards_merged || 0} merged, ${result.cards_transferred || 0} transferred)`
             : ''
           setSuccess(t.recovery.accountRecovered.replace('{count}', result.cards_count || '0') + mergeInfo)
@@ -198,23 +194,6 @@ export default function RecoveryPage() {
                     </div>
                   )}
 
-                  {/* Demo: Show recovery token if generated */}
-                  {recoveryToken && (
-                    <div className="p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
-                      <p className="text-yellow-200 text-sm mb-2">{t.recovery.demoToken}:</p>
-                      <code className="text-xs text-yellow-100 break-all block bg-black/20 p-2 rounded">
-                        {recoveryToken}
-                      </code>
-                      <button
-                        type="button"
-                        onClick={() => handleVerifyToken(recoveryToken)}
-                        className="mt-3 w-full bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors"
-                      >
-                        {t.recovery.useToken}
-                      </button>
-                    </div>
-                  )}
-
                   <button
                     type="submit"
                     disabled={loading}
@@ -224,38 +203,94 @@ export default function RecoveryPage() {
                   </button>
                 </form>
               ) : (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    {loading ? (
-                      <div className="py-8">
-                        <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-white">{t.recovery.verifying}</p>
-                      </div>
-                    ) : error ? (
-                      <div className="py-4">
-                        <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm mb-4">
-                          {error}
-                        </div>
-                        <button
-                          onClick={() => setMode('request')}
-                          className="text-primary-400 hover:text-primary-300"
-                        >
-                          {t.recovery.tryAgain}
-                        </button>
-                      </div>
-                    ) : success ? (
-                      <div className="py-4">
-                        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <p className="text-green-200 text-lg">{success}</p>
-                        <p className="text-gray-400 text-sm mt-2">{t.recovery.redirecting}</p>
-                      </div>
-                    ) : null}
+                <form onSubmit={handleVerifyRecovery} className="space-y-4">
+                  <div className="text-center mb-4">
+                    <p className="text-white text-sm">
+                      Enter your 6-digit PIN to recover your account
+                    </p>
                   </div>
-                </div>
+
+                  {!useBackupCode ? (
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">
+                        PIN
+                      </label>
+                      <input
+                        type="password"
+                        value={pin}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '')
+                          if (value.length <= 6) setPin(value)
+                        }}
+                        placeholder="000000"
+                        maxLength={6}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-center text-2xl tracking-widest placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                        required
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">
+                        Backup Code
+                      </label>
+                      <input
+                        type="text"
+                        value={backupCode}
+                        onChange={(e) => {
+                          const value = e.target.value.toUpperCase()
+                          setBackupCode(value)
+                        }}
+                        placeholder="XXXX-XXXX"
+                        maxLength={9}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-center text-xl tracking-widest placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 font-mono"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
+                      {error}
+                    </div>
+                  )}
+
+                  {success && (
+                    <div className="p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-200 text-sm">
+                      {success}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? t.recovery.verifying : 'Verify'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setUseBackupCode(!useBackupCode)}
+                    className="w-full text-primary-400 hover:text-primary-300 text-sm"
+                  >
+                    {useBackupCode 
+                      ? 'Use PIN instead' 
+                      : 'Forgot PIN? Use backup code'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('request')
+                      setPin('')
+                      setBackupCode('')
+                      setUseBackupCode(false)
+                    }}
+                    className="w-full text-gray-400 hover:text-gray-300 text-sm"
+                  >
+                    Try different phone number
+                  </button>
+                </form>
               )}
             </div>
 

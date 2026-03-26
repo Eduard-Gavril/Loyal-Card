@@ -377,13 +377,16 @@ export const api = {
     return stats
   },
 
-  // Link phone number to client for recovery
-  async linkPhone(clientId: string, phone: string) {
+  // Link phone number to client for recovery (with PIN and backup codes)
+  async linkPhone(clientId: string, phone: string, pin: string) {
     const { data, error } = await supabase.functions.invoke('link-phone', {
-      body: { client_id: clientId, phone }
+      body: { client_id: clientId, phone, pin }
     })
     if (error) throw error
-    return data
+    if (data && !data.success) {
+      throw new Error(data.error || 'Failed to link phone')
+    }
+    return data  // Returns { success: true, backup_codes: ['XXX-XXX', ...] }
   },
 
   // Get client by ID
@@ -400,7 +403,7 @@ export const api = {
     return data
   },
 
-  // Request account recovery
+  // Request account recovery (checks if phone exists)
   async requestRecovery(phone: string) {
     const { data, error } = await supabase.functions.invoke('recover-client', {
       body: { action: 'request', phone }
@@ -412,10 +415,16 @@ export const api = {
     return data
   },
 
-  // Verify recovery token and get client_id
-  async verifyRecovery(token: string, newClientId?: string) {
+  // Verify recovery with PIN or backup code
+  async verifyRecovery(phone: string, pin?: string, backupCode?: string, newClientId?: string) {
     const { data, error } = await supabase.functions.invoke('recover-client', {
-      body: { action: 'verify', token, new_client_id: newClientId }
+      body: { 
+        action: 'verify', 
+        phone,
+        pin,
+        backup_code: backupCode,
+        new_client_id: newClientId 
+      }
     })
     if (error) throw error
     if (data && !data.success) {

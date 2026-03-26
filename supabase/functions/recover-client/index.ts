@@ -268,13 +268,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
         .eq('id', recoveredClientId)
 
       // Get the recovered client data
-      const { data: recoveredClient, error: clientError } = await supabaseClient
+      const { data: recoveredClient, error: recoveredClientError } = await supabaseClient
         .from('clients')
         .select('*')
         .eq('id', recoveredClientId)
         .single()
 
-      if (clientError || !recoveredClient) {
+      if (recoveredClientError || !recoveredClient) {
         return new Response(
           JSON.stringify({ success: false, error: 'Client not found' }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

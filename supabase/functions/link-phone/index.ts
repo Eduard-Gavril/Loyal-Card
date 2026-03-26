@@ -1,11 +1,85 @@
 // @deno-types="https://esm.sh/@supabase/supabase-js@2.39.3/dist/module/index.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts'
 
 interface LinkPhoneRequest {
   client_id: string
   phone: string
   pin: string  // 6-digit PIN
+}
+
+// Crypto utilities using Web Crypto API (works in Edge Functions)
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const passwordData = encoder.encode(password)
+  
+  const key = await crypto.subtle.importKey(
+    'raw',
+    passwordData,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits']
+  )
+  
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    key,
+    256
+  )
+  
+  const hashArray = new Uint8Array(derivedBits)
+  const combined = new Uint8Array(salt.length + hashArray.length)
+  combined.set(salt)
+  combined.set(hashArray, salt.length)
+  
+  // Convert to base64
+  return btoa(String.fromCharCode(...combined))
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  try {
+    const encoder = new TextEncoder()
+    const combined = Uint8Array.from(atob(hash), c => c.charCodeAt(0))
+    const salt = combined.slice(0, 16)
+    const storedHash = combined.slice(16)
+    
+    const passwordData = encoder.encode(password)
+    const key = await crypto.subtle.importKey(
+      'raw',
+      passwordData,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    )
+    
+    const derivedBits = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: 100000,
+        hash: 'SHA-256'
+      },
+      key,
+      256
+    )
+    
+    const hashArray = new Uint8Array(derivedBits)
+    
+    // Constant-time comparison
+    if (hashArray.length !== storedHash.length) return false
+    let result = 0
+    for (let i = 0; i < hashArray.length; i++) {
+      result |= hashArray[i] ^ storedHash[i]
+    }
+    return result === 0
+  } catch {
+    return false
+  }
 }
 
 // Phone utility functions (inlined to avoid deployment issues)
@@ -125,14 +199,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Hash the PIN
-    const pinHash = await bcrypt.hash(pin)
+    const pinHash = await hashPassword(pin)
 
     // Generate backup codes
     const plainBackupCodes = generateBackupCodes()
     
     // Hash backup codes for storage
     const hashedBackupCodes = await Promise.all(
-      plainBackupCodes.map(code => bcrypt.hash(code))
+      plainBackupCodes.map(code => hashPassword(code))
     )
 
     // Update client with phone, PIN, and backup codes

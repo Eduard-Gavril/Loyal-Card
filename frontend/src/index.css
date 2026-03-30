@@ -58,6 +58,15 @@ body {
   }
 }
 
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
 /* QR Scanner Styles */
 #qr-reader {
   width: 100% !important;

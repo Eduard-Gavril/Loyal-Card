@@ -80,6 +80,16 @@ export const translations = {
     },
 
     // Footer
+    // Menu
+    menu: {
+      title: 'Menu',
+      home: 'Home',
+      howItWorks: 'How It Works',
+      faq: 'FAQ',
+      footer: 'Footer',
+      admin: 'Admin',
+    },
+
     footerNav: {
       company: 'Company',
       about: 'About Us',
@@ -424,6 +434,16 @@ export const translations = {
       a7: 'Fiecare achiziție îți aduce puncte. Când atingi obiectivul, deblochezi premii pe care le poți răscumpăra la casă.',
       q8: 'Ce se întâmplă dacă magazinul se închide?',
       a8: 'Istoricul tău de puncte este întotdeauna salvat. Dacă un magazin se închide, poți vedea în continuare premiile anterioare.',
+    },
+
+    // Menu
+    menu: {
+      title: 'Meniu',
+      home: 'Acasă',
+      howItWorks: 'Cum Funcționează',
+      faq: 'Întrebări Frecvente',
+      footer: 'Footer',
+      admin: 'Admin',
     },
 
     // Footer

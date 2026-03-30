@@ -1,20 +1,32 @@
 import { useNavigate } from 'react-router-dom'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import DarkVeil from '@/components/DarkVeil'
-import LanguageSelector from '@/components/LanguageSelector'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 
 export default function LandingPage() {
   const navigate = useNavigate()
-  const { language } = useClientStore()
+  const { language, setLanguage } = useClientStore()
   const t = getTranslation(language)
   const containerRef = useRef<HTMLDivElement>(null)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  // Chiudi il menu quando si clicca fuori
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <div ref={containerRef} className="landing-page-container relative w-full min-h-screen overflow-y-auto overflow-x-hidden">
@@ -38,20 +50,157 @@ export default function LandingPage() {
         {/* Header */}
         <header className="pt-6 sm:pt-8 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white tracking-tight">
-              {t.appName}
-            </h1>
-            <div className="flex items-center gap-4">
-              <LanguageSelector />
-              <button
-                onClick={() => navigate('/admin/login')}
-                className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20"
-              >
-                Admin
-              </button>
+            <div className="flex items-center gap-1">
+              <img src="/logo.png" alt="Logo" className="h-20 w-auto -mr-8" />
+              <h1 className="text-3xl font-bold text-white tracking-tight">
+                {t.appName}
+              </h1>
             </div>
+            
+            {/* Menu Button */}
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="p-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20"
+              aria-label="Menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </header>
+
+        {/* Menu Slide-in Drawer */}
+        {menuOpen && (
+          <>
+            {/* Overlay */}
+            <div 
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              onClick={() => setMenuOpen(false)}
+            ></div>
+
+            {/* Drawer */}
+            <div 
+              ref={menuRef}
+              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col"
+              style={{ animation: 'slideInRight 0.3s ease-out' }}
+            >
+              {/* Header del Menu */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900">{t.menu.title}</h2>
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Language Toggle */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                   Language / Limba
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+                      language === 'en'
+                        ? 'bg-primary-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    🇬🇧 EN
+                  </button>
+                  <button
+                    onClick={() => setLanguage('ro')}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+                      language === 'ro'
+                        ? 'bg-primary-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    🇷🇴 RO
+                  </button>
+                </div>
+              </div>
+
+              {/* Menu Items */}
+              <nav className="flex-1 overflow-y-auto py-4">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false)
+                    scrollToTop()
+                  }}
+                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  <span className="text-lg">{t.menu.home}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMenuOpen(false)
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-lg">{t.menu.howItWorks}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMenuOpen(false)
+                    document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-lg">{t.menu.faq}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMenuOpen(false)
+                    document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                  <span className="text-lg">{t.menu.footer}</span>
+                </button>
+              </nav>
+
+              {/* Admin Button - In fondo */}
+              <div className="p-6 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false)
+                    navigate('/admin/login')
+                  }}
+                  className="w-full px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-3 font-semibold"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {t.menu.admin}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Hero Section */}
         <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
@@ -252,7 +401,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="relative z-30 bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+      <section id="faq" className="relative z-30 bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
             {t.faq.title}
@@ -299,7 +448,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-30 bg-gray-900 text-white py-12 sm:py-16 px-4 sm:px-6">
+      <footer id="footer" className="relative z-30 bg-gray-900 text-white py-12 sm:py-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto text-center">
           {/* Brand */}
           <h4 className="text-2xl font-bold mb-4">LoyalCard</h4>

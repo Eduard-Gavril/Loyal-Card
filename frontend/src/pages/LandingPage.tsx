@@ -58,11 +58,11 @@ export default function LandingPage() {
       {/* Content */}
       <div className="relative z-20 min-h-screen flex flex-col">
         {/* Header */}
-        <header className="pt-6 sm:pt-8 px-4 sm:px-6">
-          <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-1">
-              <img src="/logo.png" alt="Logo" className="h-20 w-auto -mr-8" />
-              <h1 className="text-3xl font-bold text-white tracking-tight">
+        <header className="pt-6 sm:pt-8 pl-0 pr-4 sm:px-6">
+          <div className="max-w-6xl sm:mx-auto flex justify-between items-center">
+            <div className="flex items-center gap-0 -ml-1">
+              <img src="/logo.png" alt="Logo" className="h-16 sm:h-20 w-auto -mr-6 sm:-mr-8" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 {t.appName}
               </h1>
             </div>
@@ -221,9 +221,9 @@ export default function LandingPage() {
         )}
 
         {/* Hero Section */}
-        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8">
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-2 sm:py-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-3 sm:mb-4 leading-tight">
               {t.hero.title}
               <br />
               <span className="bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
@@ -231,7 +231,7 @@ export default function LandingPage() {
               </span>
             </h2>
             
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
               {t.hero.subtitle}
             </p>
 
@@ -261,7 +261,7 @@ export default function LandingPage() {
         </main>
 
         {/* Stats */}
-        <div className="pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6">
+        <div className="pb-6 sm:pb-8 md:pb-10 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 text-center">
             <div className="p-3 sm:p-4 md:p-6 bg-white/5 backdrop-blur-sm rounded-lg sm:rounded-xl border border-white/10">
               <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">100%</div>

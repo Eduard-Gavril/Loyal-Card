@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store'
 import { useEffect, useState } from 'react'
 import { AutoUpdateToast } from './components/AutoUpdateToast'
+import CookieBanner from './components/CookieBanner'
 
 // Pages
 import LandingPage from './pages/LandingPage'
@@ -16,6 +17,8 @@ import AdminScanner from './pages/admin/AdminScanner'
 import AdminReports from './pages/admin/AdminReports'
 import AdminRewards from './pages/admin/AdminRewards'
 import AdminSettings from './pages/admin/AdminSettings'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import CookiePolicy from './pages/CookiePolicy'
 
 function App() {
   const { session } = useAuthStore()
@@ -101,6 +104,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
   return (
     <BrowserRouter>
       <AutoUpdateToast />
+      <CookieBanner />
       <Routes>
         {/* Landing page */}
         <Route path="/" element={<LandingPage />} />
@@ -115,6 +119,10 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
         <Route path="/card/:qrCode" element={<ClientCard />} />
         <Route path="/card/new" element={<ClientCard />} />
         <Route path="/recovery" element={<RecoveryPage />} />
+
+        {/* Legal pages */}
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
 
         {/* Admin routes (protected) */}
         <Route path="/admin" element={<Navigate to="/admin/login" replace />} />

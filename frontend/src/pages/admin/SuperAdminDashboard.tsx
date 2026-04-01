@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store'
 import { supabase } from '@/lib/supabase'
-import DarkVeil from '@/components/DarkVeil'
 
 interface GlobalStats {
   totalTenants: number

@@ -105,7 +105,7 @@ export const useAuthStore = create<AuthState>()(
       session: null,
       tenantId: null,
       role: null,
-      setAuth: (user: any, session: any, tenantId: string, role: 'owner' | 'staff') =>
+      setAuth: (user: any, session: any, tenantId: string | null, role: 'super_admin' | 'owner' | 'staff') =>
         set({ user, session, tenantId, role }),
       clearAuth: () =>
         set({

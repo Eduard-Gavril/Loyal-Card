@@ -356,6 +356,171 @@ export const translations = {
       noPhone: "Don't have a phone number linked?",
       createNew: 'Start fresh',
     },
+
+    // Privacy & Legal
+    privacy: {
+      title: 'Privacy Policy',
+      back: 'Back',
+      lastUpdated: 'Last Updated',
+      intro: {
+        title: '1. Introduction',
+        text: 'This Privacy Policy describes how LoyalCard ("we", "our") collects, uses and protects the personal data of users ("you", "your") in accordance with the General Data Protection Regulation (GDPR - EU 2016/679).'
+      },
+      controller: {
+        title: '2. Data Controller',
+        name: 'Name',
+        email: 'Email',
+        website: 'Website'
+      },
+      data: {
+        title: '3. Data Collected',
+        text: 'We collect the following personal data:',
+        identification: 'Identification data: Phone number (optional), Email (optional)',
+        usage: 'Usage data: Anonymous Client ID, Purchase history, Loyalty points',
+        technical: 'Technical data: Browser, Device, IP Address',
+        location: 'Geolocation: GPS coordinates (only if authorized)'
+      },
+      purpose: {
+        title: '4. Purpose of Processing',
+        text: 'Your data is used to:',
+        service: 'Provide the digital loyalty card service',
+        account: 'Manage your account and loyalty cards',
+        recovery: 'Recover access to your card via phone/email',
+        notifications: 'Send you notifications about earned rewards',
+        improve: 'Improve the service and prevent fraud',
+        legal: 'Comply with legal obligations'
+      },
+      legal: {
+        title: '5. Legal Basis',
+        text: 'Processing is based on:',
+        consent: 'Explicit consent: for phone/email (account recovery)',
+        contract: 'Contract execution: to provide the loyalty service',
+        legitimate: 'Legitimate interest: for anonymous statistics and security'
+      },
+      sharing: {
+        title: '6. Data Sharing',
+        text: 'Your data is only shared with:',
+        supabase: 'Supabase Inc.: Database hosting provider (USA, Privacy Shield certified)',
+        netlify: 'Netlify Inc.: Frontend hosting (USA)',
+        merchants: 'Merchants: Only loyalty data related to their cards',
+        noSale: 'We never sell your data to third parties.'
+      },
+      retention: {
+        title: '7. Data Retention',
+        text: 'Data is retained for the duration of service use and for 3 additional years after last access, then automatically deleted.'
+      },
+      rights: {
+        title: '8. Your Rights (GDPR)',
+        text: 'You have the right to:',
+        access: 'Access: Obtain a copy of your data',
+        rectification: 'Rectification: Correct inaccurate data',
+        erasure: 'Erasure: Delete your data ("right to be forgotten")',
+        portability: 'Portability: Receive data in standard format',
+        objection: 'Objection: Object to processing',
+        restriction: 'Restriction: Limit processing',
+        withdraw: 'Withdraw consent: Withdraw consent at any time',
+        contact: 'To exercise your rights, contact us at:'
+      },
+      security: {
+        title: '9. Security',
+        text: 'We use technical and organizational measures to protect your data:',
+        encryption: 'End-to-end encryption (HTTPS/TLS)',
+        rls: 'Database with Row Level Security (RLS)',
+        auth: 'Secure JWT authentication',
+        backup: 'Encrypted daily backups'
+      },
+      cookies: {
+        title: '10. Cookies',
+        text: 'We only use essential cookies (localStorage) to save your Client ID and preferences. See our',
+        link: 'Cookie Policy',
+        forDetails: 'for details.'
+      },
+      minors: {
+        title: '11. Minors',
+        text: 'The service is not intended for minors under 16. If you are a parent and believe your child has provided data, contact us for immediate deletion.'
+      },
+      changes: {
+        title: '12. Policy Changes',
+        text: 'We reserve the right to modify this policy. Changes will be published on this page with an updated date.'
+      },
+      contact: {
+        title: '13. Contact',
+        text: 'For privacy questions:',
+        email: 'Email',
+        complaints: 'Complaints: You can file a complaint with your country\'s Data Protection Authority.'
+      },
+      note: 'This privacy policy was generated for free and provides the basic information required by GDPR. For a legally binding custom document, consult a lawyer specialized in data protection.'
+    },
+
+    cookieBanner: {
+      title: '🍪 We Use Cookies',
+      description: 'We use essential cookies for site functionality and to save your preferences. No tracking cookies.',
+      privacyLink: 'Privacy Policy',
+      cookieLink: 'Cookie Policy',
+      acceptEssential: 'Essential Only',
+      acceptAll: 'Accept All'
+    },
+
+    cookiePolicy: {
+      title: 'Cookie Policy',
+      back: 'Back',
+      lastUpdated: 'Last Updated',
+      what: {
+        title: '1. What Are Cookies',
+        text: 'Cookies are small text files saved on your device when you visit a website. They are used to store preferences and improve user experience.'
+      },
+      used: {
+        title: '2. Cookies Used by LoyalCard',
+        essential: 'Essential Cookies (Always Active)',
+        essentialText: 'These cookies are necessary for basic site functionality:',
+        storage: 'loyalcard-client-storage',
+        storageDesc: 'Saves your Client ID and loyalty cards',
+        consent: 'loyalcard-cookie-consent',
+        consentDesc: 'Stores your cookie preferences',
+        auth: 'sb-*-auth-token',
+        authDesc: 'Admin session (Supabase)',
+        thirdParty: 'Third-Party Cookies',
+        noTracking: 'LoyalCard does NOT use tracking, analytics or advertising cookies from third parties.',
+        name: 'Name',
+        purpose: 'Purpose',
+        duration: 'Duration',
+        persistent: 'Persistent',
+        session: 'Session',
+        year: '1 year'
+      },
+      localStorage: {
+        title: '3. localStorage',
+        text: 'We use browser localStorage technology (similar to cookies) to save:',
+        clientId: 'Client ID: Your unique anonymous identifier',
+        cards: 'Saved cards: Your active loyalty cards',
+        language: 'Language preference: English or Romanian',
+        adminSession: 'Admin session: If you are an administrator'
+      },
+      manage: {
+        title: '4. How to Manage Cookies',
+        text: 'You can manage cookies via:',
+        browser: 'Browser Settings',
+        chrome: 'Chrome: Settings → Privacy → Cookies',
+        firefox: 'Firefox: Options → Privacy → Cookies',
+        safari: 'Safari: Preferences → Privacy',
+        edge: 'Edge: Settings → Privacy → Cookies',
+        banner: 'Cookie Banner',
+        bannerText: 'On first visit, you can choose to accept only essential cookies or all cookies. You can modify preferences by clearing site data from your browser.'
+      },
+      consequences: {
+        title: '5. Consequences of Refusal',
+        text: 'If you refuse essential cookies, the site will NOT work properly:',
+        noSave: 'You cannot save your loyalty card',
+        newCard: 'You will have to create a new card on each visit',
+        noLogin: 'Admins will not be able to login'
+      },
+      contact: {
+        title: '6. Contact',
+        text: 'For questions about cookies:',
+        email: 'Email'
+      },
+      privacyFirst: 'LoyalCard is designed to respect your privacy. We only use essential cookies to make the service work, without tracking or advertising.'
+    },
   },
 
   ro: {
@@ -711,6 +876,171 @@ export const translations = {
       tryAgain: 'Încearcă din nou',
       noPhone: 'Nu ai un telefon asociat?',
       createNew: 'Începe de la zero',
+    },
+
+    // Privacy & Legal
+    privacy: {
+      title: 'Politica de Confidențialitate',
+      back: 'Înapoi',
+      lastUpdated: 'Ultima Actualizare',
+      intro: {
+        title: '1. Introducere',
+        text: 'Această Politică de Confidențialitate descrie modul în care LoyalCard ("noi", "al nostru") colectează, utilizează și protejează datele personale ale utilizatorilor ("tu", "al tău") în conformitate cu Regulamentul General privind Protecția Datelor (GDPR - UE 2016/679).'
+      },
+      controller: {
+        title: '2. Operator de Date',
+        name: 'Nume',
+        email: 'Email',
+        website: 'Site Web'
+      },
+      data: {
+        title: '3. Date Colectate',
+        text: 'Colectăm următoarele date personale:',
+        identification: 'Date de identificare: Număr de telefon (opțional), Email (opțional)',
+        usage: 'Date de utilizare: ID Client anonim, Istoric achiziții, Puncte fidelitate',
+        technical: 'Date tehnice: Browser, Dispozitiv, Adresă IP',
+        location: 'Geolocalizare: Coordonate GPS (doar dacă este autorizat)'
+      },
+      purpose: {
+        title: '4. Scopul Prelucrării',
+        text: 'Datele tale sunt utilizate pentru:',
+        service: 'Furnizarea serviciului de card de fidelitate digital',
+        account: 'Gestionarea contului și cardurilor de fidelitate',
+        recovery: 'Recuperarea accesului la card prin telefon/email',
+        notifications: 'Trimiterea de notificări despre recompense câștigate',
+        improve: 'Îmbunătățirea serviciului și prevenirea fraudelor',
+        legal: 'Respectarea obligațiilor legale'
+      },
+      legal: {
+        title: '5. Bază Juridică',
+        text: 'Prelucrarea se bazează pe:',
+        consent: 'Consimțământ explicit: pentru telefon/email (recuperare cont)',
+        contract: 'Executare contract: pentru furnizarea serviciului de fidelitate',
+        legitimate: 'Interes legitim: pentru statistici anonime și securitate'
+      },
+      sharing: {
+        title: '6. Partajarea Datelor',
+        text: 'Datele tale sunt partajate doar cu:',
+        supabase: 'Supabase Inc.: Furnizor de hosting bază de date (SUA, certificat Privacy Shield)',
+        netlify: 'Netlify Inc.: Hosting frontend (SUA)',
+        merchants: 'Comercianți: Doar datele de fidelitate legate de cardurile lor',
+        noSale: 'Nu vindem niciodată datele tale către terțe părți.'
+      },
+      retention: {
+        title: '7. Păstrarea Datelor',
+        text: 'Datele sunt păstrate pe durata utilizării serviciului și pentru 3 ani suplimentari după ultimul acces, apoi sunt șterse automat.'
+      },
+      rights: {
+        title: '8. Drepturile Tale (GDPR)',
+        text: 'Ai dreptul la:',
+        access: 'Acces: Obține o copie a datelor tale',
+        rectification: 'Rectificare: Corectează datele inexacte',
+        erasure: 'Ștergere: Șterge datele tale ("dreptul de a fi uitat")',
+        portability: 'Portabilitate: Primește datele în format standard',
+        objection: 'Opoziție: Opune-te prelucrării',
+        restriction: 'Restricție: Limitează prelucrarea',
+        withdraw: 'Retragere consimțământ: Retrage consimțământul în orice moment',
+        contact: 'Pentru a-ți exercita drepturile, contactează-ne la:'
+      },
+      security: {
+        title: '9. Securitate',
+        text: 'Folosim măsuri tehnice și organizatorice pentru a-ți proteja datele:',
+        encryption: 'Criptare end-to-end (HTTPS/TLS)',
+        rls: 'Bază de date cu Row Level Security (RLS)',
+        auth: 'Autentificare securizată JWT',
+        backup: 'Backup-uri zilnice criptate'
+      },
+      cookies: {
+        title: '10. Cookie-uri',
+        text: 'Folosim doar cookie-uri esențiale (localStorage) pentru a salva ID-ul tău de Client și preferințele. Vezi',
+        link: 'Politica de Cookie-uri',
+        forDetails: 'pentru detalii.'
+      },
+      minors: {
+        title: '11. Minori',
+        text: 'Serviciul nu este destinat minorilor sub 16 ani. Dacă ești părinte și crezi că copilul tău a furnizat date, contactează-ne pentru ștergere imediată.'
+      },
+      changes: {
+        title: '12. Modificări ale Politicii',
+        text: 'Ne rezervăm dreptul de a modifica această politică. Modificările vor fi publicate pe această pagină cu o dată actualizată.'
+      },
+      contact: {
+        title: '13. Contact',
+        text: 'Pentru întrebări despre confidențialitate:',
+        email: 'Email',
+        complaints: 'Reclamații: Poți depune o plângere la Autoritatea de protecție a datelor din țara ta.'
+      },
+      note: 'Această politică de confidențialitate a fost generată gratuit și oferă informațiile de bază cerute de GDPR. Pentru un document legal personalizat, consultă un avocat specializat în protecția datelor.'
+    },
+
+    cookieBanner: {
+      title: '🍪 Folosim Cookie-uri',
+      description: 'Folosim cookie-uri esențiale pentru funcționarea site-ului și pentru a salva preferințele tale. Fără cookie-uri de urmărire.',
+      privacyLink: 'Politica de Confidențialitate',
+      cookieLink: 'Politica de Cookie-uri',
+      acceptEssential: 'Doar Esențiale',
+      acceptAll: 'Acceptă Toate'
+    },
+
+    cookiePolicy: {
+      title: 'Politica de Cookie-uri',
+      back: 'Înapoi',
+      lastUpdated: 'Ultima Actualizare',
+      what: {
+        title: '1. Ce Sunt Cookie-urile',
+        text: 'Cookie-urile sunt fișiere text mici salvate pe dispozitivul tău când vizitezi un site web. Sunt folosite pentru a memora preferințe și a îmbunătăți experiența utilizatorului.'
+      },
+      used: {
+        title: '2. Cookie-uri Folosite de LoyalCard',
+        essential: 'Cookie-uri Esențiale (Întotdeauna Active)',
+        essentialText: 'Aceste cookie-uri sunt necesare pentru funcționalitatea de bază a site-ului:',
+        storage: 'loyalcard-client-storage',
+        storageDesc: 'Salvează ID-ul tău de Client și cardurile de fidelitate',
+        consent: 'loyalcard-cookie-consent',
+        consentDesc: 'Memorează preferințele tale de cookie-uri',
+        auth: 'sb-*-auth-token',
+        authDesc: 'Sesiune admin (Supabase)',
+        thirdParty: 'Cookie-uri de Terțe Părți',
+        noTracking: 'LoyalCard NU folosește cookie-uri de urmărire, analiză sau publicitate de la terțe părți.',
+        name: 'Nume',
+        purpose: 'Scop',
+        duration: 'Durată',
+        persistent: 'Persistent',
+        session: 'Sesiune',
+        year: '1 an'
+      },
+      localStorage: {
+        title: '3. localStorage',
+        text: 'Folosim tehnologia localStorage a browserului (similară cu cookie-urile) pentru a salva:',
+        clientId: 'ID Client: Identificatorul tău unic anonim',
+        cards: 'Carduri salvate: Cardurile tale de fidelitate active',
+        language: 'Preferință limbă: Română sau Engleză',
+        adminSession: 'Sesiune admin: Dacă ești administrator'
+      },
+      manage: {
+        title: '4. Cum să Gestionezi Cookie-urile',
+        text: 'Poți gestiona cookie-urile prin:',
+        browser: 'Setări Browser',
+        chrome: 'Chrome: Settings → Privacy → Cookies',
+        firefox: 'Firefox: Options → Privacy → Cookies',
+        safari: 'Safari: Preferences → Privacy',
+        edge: 'Edge: Settings → Privacy → Cookies',
+        banner: 'Banner Cookie',
+        bannerText: 'La prima vizită, poți alege să accepți doar cookie-uri esențiale sau toate cookie-urile. Poți modifica preferințele ștergând datele site-ului din browser.'
+      },
+      consequences: {
+        title: '5. Consecințele Refuzului',
+        text: 'Dacă refuzi cookie-urile esențiale, site-ul NU va funcționa corect:',
+        noSave: 'Nu vei putea salva cardul de fidelitate',
+        newCard: 'Va trebui să creezi un card nou la fiecare vizită',
+        noLogin: 'Administratorii nu vor putea face login'
+      },
+      contact: {
+        title: '6. Contact',
+        text: 'Pentru întrebări despre cookie-uri:',
+        email: 'Email'
+      },
+      privacyFirst: 'LoyalCard este conceput să îți respecte confidențialitatea. Folosim doar cookie-uri esențiale pentru a face serviciul să funcționeze, fără urmărire sau publicitate.'
     },
   },
 }

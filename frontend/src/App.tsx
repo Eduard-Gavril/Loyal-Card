@@ -17,6 +17,7 @@ import AdminScanner from './pages/admin/AdminScanner'
 import AdminReports from './pages/admin/AdminReports'
 import AdminRewards from './pages/admin/AdminRewards'
 import AdminSettings from './pages/admin/AdminSettings'
+import SuperAdminDashboard from './pages/admin/SuperAdminDashboard'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import CookiePolicy from './pages/CookiePolicy'
 
@@ -146,6 +147,12 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
         <Route
           path="/admin/settings"
           element={session ? <AdminSettings /> : <Navigate to="/admin/login" />}
+        />
+
+        {/* Super Admin routes (protected) */}
+        <Route
+          path="/super-admin/dashboard"
+          element={session ? <SuperAdminDashboard /> : <Navigate to="/admin/login" />}
         />
       </Routes>
     </BrowserRouter>

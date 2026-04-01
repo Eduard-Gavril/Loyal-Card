@@ -46,8 +46,12 @@ export default function AdminLogin() {
       // Store auth data
       setAuth(authData.user, authData.session, admin.tenant_id, admin.role)
 
-      // Redirect to dashboard
-      navigate('/admin/dashboard')
+      // Redirect based on role
+      if (admin.role === 'super_admin') {
+        navigate('/super-admin/dashboard')
+      } else {
+        navigate('/admin/dashboard')
+      }
     } catch (err: any) {
       console.error('Login error:', err)
       setError(err.message || 'Login failed')

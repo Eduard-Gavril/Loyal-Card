@@ -188,12 +188,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Find applicable reward rules (ordered by priority)
+    // Build OR condition dynamically to avoid "null" string issue
+    let orCondition = `product_id.eq.${product_id}`
+    if (product.category_id) {
+      orCondition += `,category_id.eq.${product.category_id}`
+    }
+    
     const { data: rules, error: rulesError } = await supabase
       .from('reward_rules')
       .select('*')
       .eq('tenant_id', admin.tenant_id)
       .eq('active', true)
-      .or(`product_id.eq.${product_id},category_id.eq.${product.category_id}`)
+      .or(orCondition)
       .order('priority', { ascending: true })
 
     if (rulesError) {

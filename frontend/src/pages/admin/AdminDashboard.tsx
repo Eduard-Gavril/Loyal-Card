@@ -6,6 +6,7 @@ import DarkVeil from '@/components/DarkVeil'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 import { getProductEmoji } from '@/lib/emojiUtils'
+import * as XLSX from 'xlsx'
 
 interface Stats {
   totalScans: number
@@ -140,6 +141,113 @@ export default function AdminDashboard() {
     navigate('/admin/login')
   }
 
+  const downloadClientsExcel = async () => {
+    if (!tenantId) return
+
+    try {
+      // Get all cards for this tenant with client details using JOIN
+      const { data: cards, error: cardsError } = await supabase
+        .from('cards')
+        .select(`
+          id,
+          qr_code,
+          created_at,
+          last_scan_at,
+          loyalty_state,
+          client_id,
+          clients (
+            phone,
+            created_at
+          )
+        `)
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false })
+
+      console.log('Cards query result:', { cards, cardsError, tenantId })
+
+      if (cardsError) {
+        console.error('Error fetching cards:', cardsError)
+        alert(language === 'ro' ? `Eroare: ${cardsError.message}` : `Error: ${cardsError.message}`)
+        return
+      }
+
+      if (!cards || cards.length === 0) {
+        alert(language === 'ro' ? 'Nu există clienți de exportat' : 'No clients to export')
+        return
+      }
+
+      // Get scan events count for each card
+      const clientsData = await Promise.all(
+        cards.map(async (card: any) => {
+          // Count total scans for this card
+          const { count: totalScans } = await supabase
+            .from('scan_events')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenantId)
+            .eq('client_id', card.client_id)
+
+          // Count rewards received
+          const { count: rewardsCount } = await supabase
+            .from('scan_events')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenantId)
+            .eq('client_id', card.client_id)
+            .eq('reward_applied', true)
+
+          // Calculate total stamps from loyalty_state jsonb
+          let totalStamps = 0
+          if (card.loyalty_state && typeof card.loyalty_state === 'object') {
+            Object.values(card.loyalty_state).forEach((val: any) => {
+              if (val && typeof val === 'object' && val.count) {
+                totalStamps += val.count
+              }
+            })
+          }
+
+          return {
+            'QR Code': card.qr_code || 'N/A',
+            'Phone': card.clients?.phone || 'N/A',
+            'Card Registration': card.created_at ? new Date(card.created_at).toLocaleDateString() : 'N/A',
+            'Client Registration': card.clients?.created_at ? new Date(card.clients.created_at).toLocaleDateString() : 'N/A',
+            'Last Scan': card.last_scan_at ? new Date(card.last_scan_at).toLocaleDateString() : 'Never',
+            'Total Stamps': totalStamps,
+            'Total Scans': totalScans || 0,
+            'Rewards Received': rewardsCount || 0
+          }
+        })
+      )
+
+      // Create workbook and worksheet
+      const ws = XLSX.utils.json_to_sheet(clientsData)
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Clients')
+
+      // Auto-size columns
+      const colWidths = [
+        { wch: 20 }, // QR Code
+        { wch: 15 }, // Phone
+        { wch: 18 }, // Card Registration
+        { wch: 18 }, // Client Registration
+        { wch: 15 }, // Last Scan
+        { wch: 15 }, // Total Stamps
+        { wch: 12 }, // Total Scans
+        { wch: 18 }  // Rewards Received
+      ]
+      ws['!cols'] = colWidths
+
+      // Generate filename with current date
+      const date = new Date().toISOString().split('T')[0]
+      const filename = `LoyalCard_Clients_${date}.xlsx`
+
+      // Download
+      XLSX.writeFile(wb, filename)
+
+    } catch (error) {
+      console.error('Error exporting clients:', error)
+      alert(language === 'ro' ? 'Eroare la exportul datelor' : 'Error exporting data')
+    }
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
@@ -233,12 +341,21 @@ export default function AdminDashboard() {
               </span>
             </button>
             <button
-              onClick={() => navigate('/admin/rewards')}
+              onClick={() => navigate('/admin/products')}
               className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
             >
               <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
                 <span className="text-3xl">🎁</span>
                 {t.admin.dashboard.manageRewards}
+              </span>
+            </button>
+            <button
+              onClick={downloadClientsExcel}
+              className="group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400/40 py-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-600/40 hover:scale-105 active:scale-95"
+            >
+              <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
+                <span className="text-3xl">📥</span>
+                {language === 'ro' ? 'Download Report Excel' : 'Download Excel Report'}
               </span>
             </button>
             <button

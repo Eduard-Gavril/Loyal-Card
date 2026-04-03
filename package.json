@@ -1,5 +1,9 @@
 {
   "devDependencies": {
     "supabase": "^2.72.8"
+  },
+  "dependencies": {
+    "@types/xlsx": "^0.0.35",
+    "xlsx": "^0.18.5"
   }
 }

@@ -1,0 +1,22 @@
+# LoyalCard - Robots.txt
+# Allow all crawlers to index everything
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://loyalcard.net/sitemap.xml
+
+# Crawl-delay for politeness
+Crawl-delay: 1
+
+# Disallow admin pages from search engines
+Disallow: /admin/
+Disallow: /super-admin/
+
+# Allow public pages
+Allow: /
+Allow: /dashboard
+Allow: /card
+Allow: /privacy
+Allow: /cookie-policy

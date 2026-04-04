@@ -18,6 +18,42 @@ export default function LandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Update meta tags based on language
+  useEffect(() => {
+    const metaTags = {
+      en: {
+        title: 'LoyalCard - Digital Loyalty Card | Free Customer Rewards Program',
+        description: 'Free digital loyalty card platform for businesses. Create mobile loyalty programs, reward customers, and boost retention. No setup fees. Start in 2 minutes!',
+        keywords: 'digital loyalty card, customer rewards app, free loyalty program, digital punch card, mobile loyalty card'
+      },
+      ro: {
+        title: 'LoyalCard - Card de Fidelitate Digital | Program Loialitate Gratuit',
+        description: 'Platformă gratuită de carduri de fidelitate digitale pentru afaceri. Creează programe de loialitate mobile, recompensează clienții și crește retenția. Fără costuri!',
+        keywords: 'card de fidelitate digital, aplicație recompense clienți, program loialitate gratuit, card digital puncte, card loialitate mobil'
+      }
+    }
+
+    const meta = metaTags[language as keyof typeof metaTags] || metaTags.en
+    
+    document.title = meta.title
+    
+    const updateMetaTag = (name: string, content: string) => {
+      let element = document.querySelector(`meta[name="${name}"]`)
+      if (!element) {
+        element = document.createElement('meta')
+        element.setAttribute('name', name)
+        document.head.appendChild(element)
+      }
+      element.setAttribute('content', content)
+    }
+    
+    updateMetaTag('description', meta.description)
+    updateMetaTag('keywords', meta.keywords)
+    
+    // Update html lang attribute
+    document.documentElement.lang = language
+  }, [language])
+
   // Funzione per chiudere il menu con animazione
   const closeMenu = () => {
     setMenuClosing(true)
@@ -55,6 +91,146 @@ export default function LandingPage() {
       {/* Overlay gradient for better text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
 
+      {/* Menu Slide-in Drawer - Moved outside z-20 wrapper */}
+      {menuOpen && (
+        <>
+          {/* Overlay */}
+          <div 
+            className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${
+              menuClosing ? 'opacity-0' : 'opacity-100'
+            }`}
+            onClick={closeMenu}
+          ></div>
+
+          {/* Drawer */}
+          <div 
+            ref={menuRef}
+            className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[9999] transform transition-transform duration-300 ease-out flex flex-col"
+            style={{ animation: menuClosing ? 'slideOutRight 0.3s ease-out' : 'slideInRight 0.3s ease-out' }}
+          >
+            {/* Header del Menu */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">{t.menu.title}</h2>
+              <button
+                onClick={closeMenu}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Menu Items */}
+            <nav className="flex-1 overflow-y-auto py-4">
+              <button
+                onClick={() => {
+                  closeMenu()
+                  setTimeout(scrollToTop, 300)
+                }}
+                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span className="text-lg">{t.menu.home}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  closeMenu()
+                  setTimeout(() => {
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                  }, 300)
+                }}
+                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-lg">{t.menu.howItWorks}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  closeMenu()
+                  setTimeout(() => {
+                    document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })
+                  }, 300)
+                }}
+                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-lg">{t.menu.faq}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  closeMenu()
+                  setTimeout(() => {
+                    document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })
+                  }, 300)
+                }}
+                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+                <span className="text-lg">{t.menu.footer}</span>
+              </button>
+            </nav>
+
+            {/* Language Toggle - Spostato in basso per accessibilità mobile */}
+            <div className="p-6 border-t border-gray-200">
+              <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                 Language / Limba
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+                    language === 'en'
+                      ? 'bg-primary-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  🇬🇧 EN
+                </button>
+                <button
+                  onClick={() => setLanguage('ro')}
+                  className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+                    language === 'ro'
+                      ? 'bg-primary-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  🇷🇴 RO
+                </button>
+              </div>
+            </div>
+
+            {/* Admin Button - In fondo */}
+            <div className="p-6 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  closeMenu()
+                  setTimeout(() => navigate('/admin/login'), 300)
+                }}
+                className="w-full px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-3 font-semibold"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {t.menu.admin}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Content */}
       <div className="relative z-20 min-h-screen flex flex-col">
         {/* Header */}
@@ -79,146 +255,6 @@ export default function LandingPage() {
             </button>
           </div>
         </header>
-
-        {/* Menu Slide-in Drawer */}
-        {menuOpen && (
-          <>
-            {/* Overlay */}
-            <div 
-              className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
-                menuClosing ? 'opacity-0' : 'opacity-100'
-              }`}
-              onClick={closeMenu}
-            ></div>
-
-            {/* Drawer */}
-            <div 
-              ref={menuRef}
-              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col"
-              style={{ animation: menuClosing ? 'slideOutRight 0.3s ease-out' : 'slideInRight 0.3s ease-out' }}
-            >
-              {/* Header del Menu */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-900">{t.menu.title}</h2>
-                <button
-                  onClick={closeMenu}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Menu Items */}
-              <nav className="flex-1 overflow-y-auto py-4">
-                <button
-                  onClick={() => {
-                    closeMenu()
-                    setTimeout(scrollToTop, 300)
-                  }}
-                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
-                >
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  <span className="text-lg">{t.menu.home}</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    closeMenu()
-                    setTimeout(() => {
-                      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
-                    }, 300)
-                  }}
-                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
-                >
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-lg">{t.menu.howItWorks}</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    closeMenu()
-                    setTimeout(() => {
-                      document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })
-                    }, 300)
-                  }}
-                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
-                >
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-lg">{t.menu.faq}</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    closeMenu()
-                    setTimeout(() => {
-                      document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })
-                    }, 300)
-                  }}
-                  className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
-                >
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                  <span className="text-lg">{t.menu.footer}</span>
-                </button>
-              </nav>
-
-              {/* Language Toggle - Spostato in basso per accessibilità mobile */}
-              <div className="p-6 border-t border-gray-200">
-                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                   Language / Limba
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setLanguage('en')}
-                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
-                      language === 'en'
-                        ? 'bg-primary-600 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    🇬🇧 EN
-                  </button>
-                  <button
-                    onClick={() => setLanguage('ro')}
-                    className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
-                      language === 'ro'
-                        ? 'bg-primary-600 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    🇷🇴 RO
-                  </button>
-                </div>
-              </div>
-
-              {/* Admin Button - In fondo */}
-              <div className="p-6 border-t border-gray-200">
-                <button
-                  onClick={() => {
-                    closeMenu()
-                    setTimeout(() => navigate('/admin/login'), 300)
-                  }}
-                  className="w-full px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-3 font-semibold"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {t.menu.admin}
-                </button>
-              </div>
-            </div>
-          </>
-        )}
 
         {/* Hero Section */}
         <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-2 sm:py-4">

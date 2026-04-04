@@ -95,11 +95,13 @@ export const translations = {
       about: 'About Us',
       careers: 'Careers',
       contact: 'Contact',
+      contactUs: 'Contact Us',
       legal: 'Legal',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service',
       cookies: 'Cookie Policy',
       social: 'Follow Us',
+      instagram: 'Instagram',
       copyright: '© 2026 LoyalCard. All rights reserved.',
       tagline: 'Digital loyalty made simple.',
     },
@@ -584,6 +586,40 @@ export const translations = {
       },
       privacyFirst: 'LoyalCard is designed to respect your privacy. We only use essential cookies to make the service work, without tracking or advertising.'
     },
+
+    contactPage: {
+      title: 'Contact Us',
+      subtitle: 'Have questions? We\'d love to hear from you.',
+      form: {
+        name: 'Your Name',
+        namePlaceholder: 'John Doe',
+        email: 'Your Email',
+        emailPlaceholder: 'john@example.com',
+        subject: 'Subject',
+        subjectPlaceholder: 'How can we help you?',
+        message: 'Message',
+        messagePlaceholder: 'Tell us more about your question or feedback...',
+        send: 'Send Message',
+        sending: 'Sending...',
+      },
+      success: {
+        title: 'Message Sent! ✅',
+        description: 'Thank you for contacting us. We\'ll get back to you as soon as possible.',
+        backHome: 'Back to Home'
+      },
+      error: {
+        title: 'Error',
+        description: 'Sorry, there was an error sending your message. Please try again or email us directly at eduardgavril.1999@gmail.com',
+        retry: 'Try Again'
+      },
+      info: {
+        title: 'Other Ways to Reach Us',
+        email: 'Email',
+        emailAddress: 'eduardgavril.1999@gmail.com',
+        instagram: 'Instagram',
+        instagramHandle: '@loyal.card'
+      }
+    },
   },
 
   ro: {
@@ -680,11 +716,13 @@ export const translations = {
       about: 'Despre Noi',
       careers: 'Cariere',
       contact: 'Contact',
+      contactUs: 'Contactează-ne',
       legal: 'Legal',
       privacy: 'Politica de Confidențialitate',
       terms: 'Termeni și Condiții',
       cookies: 'Politica de Cookie-uri',
       social: 'Urmărește-ne',
+      instagram: 'Instagram',
       copyright: '© 2026 LoyalCard. Toate drepturile rezervate.',
       tagline: 'Fidelizare digitală simplificată.',
     },
@@ -1167,6 +1205,40 @@ export const translations = {
         email: 'Email'
       },
       privacyFirst: 'LoyalCard este conceput să îți respecte confidențialitatea. Folosim doar cookie-uri esențiale pentru a face serviciul să funcționeze, fără urmărire sau publicitate.'
+    },
+
+    contactPage: {
+      title: 'Contactează-ne',
+      subtitle: 'Ai întrebări? Ne-ar plăcea să auzim de la tine.',
+      form: {
+        name: 'Numele Tău',
+        namePlaceholder: 'Ion Popescu',
+        email: 'Emailul Tău',
+        emailPlaceholder: 'ion@example.com',
+        subject: 'Subiect',
+        subjectPlaceholder: 'Cum te putem ajuta?',
+        message: 'Mesaj',
+        messagePlaceholder: 'Spune-ne mai multe despre întrebarea sau feedback-ul tău...',
+        send: 'Trimite Mesaj',
+        sending: 'Se trimite...',
+      },
+      success: {
+        title: 'Mesaj Trimis! ✅',
+        description: 'Îți mulțumim că ne-ai contactat. Îți vom răspunde cât mai curând posibil.',
+        backHome: 'Înapoi Acasă'
+      },
+      error: {
+        title: 'Eroare',
+        description: 'Ne pare rău, a apărut o eroare la trimiterea mesajului. Te rugăm să încerci din nou sau să ne scrii direct la eduardgavril.1999@gmail.com',
+        retry: 'Încearcă Din Nou'
+      },
+      info: {
+        title: 'Alte Modalități de Contact',
+        email: 'Email',
+        emailAddress: 'eduardgavril.1999@gmail.com',
+        instagram: 'Instagram',
+        instagramHandle: '@loyal.card'
+      }
     },
   },
 }

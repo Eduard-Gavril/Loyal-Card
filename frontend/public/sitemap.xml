@@ -65,5 +65,14 @@
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
+  
+  <!-- Contact Page -->
+  <url>
+    <loc>https://loyalcard.net/contact</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
 
 </urlset>

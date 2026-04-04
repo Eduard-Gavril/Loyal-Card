@@ -21,6 +21,7 @@ import AdminProducts from './pages/admin/AdminProducts'
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import CookiePolicy from './pages/CookiePolicy'
+import ContactPage from './pages/ContactPage'
 
 function App() {
   const { session } = useAuthStore()
@@ -125,6 +126,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
         {/* Legal pages */}
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/cookie-policy" element={<CookiePolicy />} />
+        <Route path="/contact" element={<ContactPage />} />
 
         {/* Admin routes (protected) */}
         <Route path="/admin" element={<Navigate to="/admin/login" replace />} />

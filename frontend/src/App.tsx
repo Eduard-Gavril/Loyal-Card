@@ -1,27 +1,41 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { AutoUpdateToast } from './components/AutoUpdateToast'
 import CookieBanner from './components/CookieBanner'
 
-// Pages
+// Critical pages - loaded immediately (small, first-screen)
 import LandingPage from './pages/LandingPage'
 import TenantSelector from './pages/TenantSelector'
-import ClientCard from './pages/client/ClientCard'
-import ClientWallet from './pages/client/ClientWallet'
-import UserDashboard from './pages/client/UserDashboard'
-import RecoveryPage from './pages/client/RecoveryPage'
 import AdminLogin from './pages/admin/AdminLogin'
-import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminScanner from './pages/admin/AdminScanner'
-import AdminReports from './pages/admin/AdminReports'
-import AdminRewards from './pages/admin/AdminRewards'
-import AdminSettings from './pages/admin/AdminSettings'
-import AdminProducts from './pages/admin/AdminProducts'
-import SuperAdminDashboard from './pages/admin/SuperAdminDashboard'
-import PrivacyPolicy from './pages/PrivacyPolicy'
-import CookiePolicy from './pages/CookiePolicy'
-import ContactPage from './pages/ContactPage'
+
+// Lazy-loaded pages - loaded on demand (reduces initial bundle)
+const ClientCard = lazy(() => import('./pages/client/ClientCard'))
+const ClientWallet = lazy(() => import('./pages/client/ClientWallet'))
+const UserDashboard = lazy(() => import('./pages/client/UserDashboard'))
+const RecoveryPage = lazy(() => import('./pages/client/RecoveryPage'))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const AdminScanner = lazy(() => import('./pages/admin/AdminScanner'))
+const AdminReports = lazy(() => import('./pages/admin/AdminReports'))
+const AdminRewards = lazy(() => import('./pages/admin/AdminRewards'))
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'))
+const SuperAdminDashboard = lazy(() => import('./pages/admin/SuperAdminDashboard'))
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
+const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
+const ContactPage = lazy(() => import('./pages/ContactPage'))
+
+// Loading fallback component
+function PageLoader() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 mx-auto mb-4 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+        <p className="text-white text-lg font-semibold">Loading...</p>
+      </div>
+    </div>
+  )
+}
 
 function App() {
   const { session } = useAuthStore()
@@ -108,60 +122,62 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
     <BrowserRouter>
       <AutoUpdateToast />
       <CookieBanner />
-      <Routes>
-        {/* Landing page */}
-        <Route path="/" element={<LandingPage />} />
-        
-        {/* Tenant selection */}
-        <Route path="/select-tenant" element={<TenantSelector />} />
-        
-        {/* Client routes (public) */}
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/wallet" element={<ClientWallet />} />
-        <Route path="/card" element={<ClientCard />} />
-        <Route path="/card/:qrCode" element={<ClientCard />} />
-        <Route path="/card/new" element={<ClientCard />} />
-        <Route path="/recovery" element={<RecoveryPage />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Landing page */}
+          <Route path="/" element={<LandingPage />} />
+          
+          {/* Tenant selection */}
+          <Route path="/select-tenant" element={<TenantSelector />} />
+          
+          {/* Client routes (public) */}
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/wallet" element={<ClientWallet />} />
+          <Route path="/card" element={<ClientCard />} />
+          <Route path="/card/:qrCode" element={<ClientCard />} />
+          <Route path="/card/new" element={<ClientCard />} />
+          <Route path="/recovery" element={<RecoveryPage />} />
 
-        {/* Legal pages */}
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/cookie-policy" element={<CookiePolicy />} />
-        <Route path="/contact" element={<ContactPage />} />
+          {/* Legal pages */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
+          <Route path="/contact" element={<ContactPage />} />
 
-        {/* Admin routes (protected) */}
-        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route
-          path="/admin/dashboard"
-          element={session ? <AdminDashboard /> : <Navigate to="/admin/login" />}
-        />
-        <Route
-          path="/admin/scan"
-          element={session ? <AdminScanner /> : <Navigate to="/admin/login" />}
-        />
-        <Route
-          path="/admin/reports"
-          element={session ? <AdminReports /> : <Navigate to="/admin/login" />}
-        />
-        <Route
-          path="/admin/rewards"
-          element={session ? <AdminRewards /> : <Navigate to="/admin/login" />}
-        />
-        <Route
-          path="/admin/products"
-          element={session ? <AdminProducts /> : <Navigate to="/admin/login" />}
-        />
-        <Route
-          path="/admin/settings"
-          element={session ? <AdminSettings /> : <Navigate to="/admin/login" />}
-        />
+          {/* Admin routes (protected) */}
+          <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/dashboard"
+            element={session ? <AdminDashboard /> : <Navigate to="/admin/login" />}
+          />
+          <Route
+            path="/admin/scan"
+            element={session ? <AdminScanner /> : <Navigate to="/admin/login" />}
+          />
+          <Route
+            path="/admin/reports"
+            element={session ? <AdminReports /> : <Navigate to="/admin/login" />}
+          />
+          <Route
+            path="/admin/rewards"
+            element={session ? <AdminRewards /> : <Navigate to="/admin/login" />}
+          />
+          <Route
+            path="/admin/products"
+            element={session ? <AdminProducts /> : <Navigate to="/admin/login" />}
+          />
+          <Route
+            path="/admin/settings"
+            element={session ? <AdminSettings /> : <Navigate to="/admin/login" />}
+          />
 
-        {/* Super Admin routes (protected) */}
-        <Route
-          path="/super-admin/dashboard"
-          element={session ? <SuperAdminDashboard /> : <Navigate to="/admin/login" />}
-        />
-      </Routes>
+          {/* Super Admin routes (protected) */}
+          <Route
+            path="/super-admin/dashboard"
+            element={session ? <SuperAdminDashboard /> : <Navigate to="/admin/login" />}
+          />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }

@@ -3,6 +3,7 @@ import { useAuthStore } from './store'
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { AutoUpdateToast } from './components/AutoUpdateToast'
 import CookieBanner from './components/CookieBanner'
+import { supabase } from './lib/supabase'
 
 // Critical pages - loaded immediately (small, first-screen)
 import LandingPage from './pages/LandingPage'
@@ -39,7 +40,7 @@ function PageLoader() {
 }
 
 function App() {
-  const { session } = useAuthStore()
+  const { session, setAuth, clearAuth } = useAuthStore()
   const [isConfigured, setIsConfigured] = useState(true)
 
   useEffect(() => {
@@ -48,6 +49,46 @@ function App() {
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
     setIsConfigured(!!(url && key && !url.includes('placeholder')))
   }, [])
+
+  // Auto-refresh session management
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        console.log('🔄 Initial session loaded')
+      }
+    })
+
+    // Listen for auth changes (including automatic token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔐 Auth event:', event, session ? 'Session active' : 'No session')
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (session) {
+          // Get admin info to update store
+          const { data: admin } = await supabase
+            .from('admins')
+            .select('tenant_id, role')
+            .eq('user_id', session.user.id)
+            .eq('active', true)
+            .single()
+
+          if (admin) {
+            setAuth(session.user, session, admin.tenant_id, admin.role)
+            console.log('✅ Session updated in store')
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        clearAuth()
+        console.log('🚪 Session cleared')
+      }
+    })
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [setAuth, clearAuth])
 
   // Show setup instructions if not configured
   if (!isConfigured) {

@@ -146,18 +146,19 @@ export const api = {
 
   // Register scan
   async registerScan(qrCode: string, productId: string) {
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession()
+    // Refresh session to ensure token is valid
+    const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
     
     console.log('🔐 Auth check before register-scan:', {
       hasSession: !!session,
       userId: session?.user?.id,
       email: session?.user?.email,
-      accessToken: session?.access_token ? 'Present' : 'Missing'
+      accessToken: session?.access_token ? 'Present' : 'Missing',
+      refreshError: refreshError?.message
     })
     
     if (!session) {
-      throw new Error('Not authenticated - please login again')
+      throw new Error('Not authenticated - please login again - session expired')
     }
     
     // Get Supabase URL and anon key from env
@@ -194,10 +195,11 @@ export const api = {
 
   // Redeem reward
   async redeemReward(qrCode: string, rewardRuleId: string) {
-    // Get session for auth
-    const { data: { session } } = await supabase.auth.getSession()
+    // Refresh session to ensure token is valid
+    const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
     
     if (!session) {
+      console.error('❌ No session after refresh:', refreshError?.message)
       throw new Error('Not authenticated - please login again')
     }
     

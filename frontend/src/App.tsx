@@ -24,6 +24,7 @@ const SuperAdminDashboard = lazy(() => import('./pages/admin/SuperAdminDashboard
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
+const PricingPage = lazy(() => import('./pages/PricingPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -142,6 +143,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
 
           {/* Admin routes (protected) */}
           <Route path="/admin" element={<Navigate to="/admin/login" replace />} />

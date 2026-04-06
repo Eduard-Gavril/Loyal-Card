@@ -122,13 +122,13 @@ export default function LandingPage() {
             </div>
 
             {/* Menu Items */}
-            <nav className="flex-1 overflow-y-auto py-4">
+            <nav className="flex-1 overflow-y-auto py-2">
               <button
                 onClick={() => {
                   closeMenu()
                   setTimeout(scrollToTop, 300)
                 }}
-                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                className="w-full px-6 py-2.5 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -143,7 +143,7 @@ export default function LandingPage() {
                     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
                   }, 300)
                 }}
-                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                className="w-full px-6 py-2.5 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -158,7 +158,7 @@ export default function LandingPage() {
                     document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })
                   }, 300)
                 }}
-                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                className="w-full px-6 py-2.5 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -169,11 +169,37 @@ export default function LandingPage() {
               <button
                 onClick={() => {
                   closeMenu()
+                  navigate('/pricing')
+                }}
+                className="w-full px-6 py-2.5 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-lg">{language === 'ro' ? 'Prețuri' : 'Pricing'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  closeMenu()
+                  navigate('/contact')
+                }}
+                className="w-full px-6 py-2.5 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span className="text-lg">{language === 'ro' ? 'Contactează-ne' : 'Contact Us'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  closeMenu()
                   setTimeout(() => {
                     document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })
                   }, 300)
                 }}
-                className="w-full px-6 py-4 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
+                className="w-full px-6 py-2.5 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -183,14 +209,14 @@ export default function LandingPage() {
             </nav>
 
             {/* Language Toggle - Spostato in basso per accessibilità mobile */}
-            <div className="p-6 border-t border-gray-200">
-              <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            <div className="p-4 border-t border-gray-200">
+              <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
                  Language / Limba
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setLanguage('en')}
-                  className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+                  className={`flex-1 py-2 px-3 rounded-lg font-semibold transition-all ${
                     language === 'en'
                       ? 'bg-primary-600 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -200,7 +226,7 @@ export default function LandingPage() {
                 </button>
                 <button
                   onClick={() => setLanguage('ro')}
-                  className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+                  className={`flex-1 py-2 px-3 rounded-lg font-semibold transition-all ${
                     language === 'ro'
                       ? 'bg-primary-600 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -212,13 +238,13 @@ export default function LandingPage() {
             </div>
 
             {/* Admin Button - In fondo */}
-            <div className="p-6 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200">
               <button
                 onClick={() => {
                   closeMenu()
                   setTimeout(() => navigate('/admin/login'), 300)
                 }}
-                className="w-full px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-3 font-semibold"
+                className="w-full px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-3 font-semibold"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -501,17 +527,65 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="footer" className="relative z-30 bg-gray-900 text-white py-12 sm:py-16 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Brand */}
-          <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold mb-4">LoyalCard</h4>
-            <p className="text-gray-400">{t.footerNav.tagline}</p>
+      {/* Pricing Teaser Section */}
+      <section className="relative z-30 bg-gradient-to-br from-purple-600 to-blue-600 py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
+            {language === 'ro' ? 'Planuri Personalizate Pentru Afacerea Ta' : 'Custom Plans For Your Business'}
+          </h3>
+          <p className="text-xl text-purple-100 mb-12 max-w-2xl mx-auto">
+            {language === 'ro' 
+              ? 'De la gratuit pentru a începe, până la soluții enterprise pentru afaceri mari. Alege planul perfect pentru nevoile tale.'
+              : 'From free to get started, to enterprise solutions for large businesses. Choose the perfect plan for your needs.'}
+          </p>
+
+          {/* Quick Pricing Preview - Only 3 plans */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+              <div className="text-green-300 font-bold text-sm mb-3">{language === 'ro' ? 'STARTER' : 'STARTER'}</div>
+              <div className="text-5xl font-bold text-white mb-2">€0</div>
+              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : '/month'}</div>
+            </div>
+
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-8 border-2 border-yellow-400 relative hover:bg-white/25 transition-all transform hover:scale-105">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full">
+                {language === 'ro' ? 'POPULAR' : 'POPULAR'}
+              </div>
+              <div className="text-yellow-300 font-bold text-sm mb-3">BUSINESS</div>
+              <div className="text-5xl font-bold text-white mb-2">€29</div>
+              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : '/month'}</div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+              <div className="text-blue-300 font-bold text-sm mb-3">PROFESSIONAL</div>
+              <div className="text-5xl font-bold text-white mb-2">€59</div>
+              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : '/month'}</div>
+            </div>
           </div>
-          
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button
+              onClick={() => navigate('/pricing')}
+              className="px-8 py-4 bg-white text-purple-600 font-semibold rounded-xl hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+            >
+              {language === 'ro' ? 'Vezi Toate Planurile' : 'View All Plans'}
+            </button>
+            <button
+              onClick={() => navigate('/contact')}
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 border-2 border-white/30"
+            >
+              {language === 'ro' ? 'Contactează-ne' : 'Contact Us'}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer id="footer" className="relative z-30 bg-gray-900 text-white py-8 sm:py-10 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
           {/* Footer Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* Legal Links */}
             <div className="text-center md:text-left">
               <h5 className="font-semibold text-lg mb-4">{t.footerNav.legal}</h5>

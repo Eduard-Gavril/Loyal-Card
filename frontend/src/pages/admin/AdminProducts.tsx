@@ -393,7 +393,7 @@ export default function AdminProducts() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-white">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">
                   🛍️ {t.title}
                 </h1>
                 <p className="text-sm text-gray-300 mt-1">
@@ -407,7 +407,7 @@ export default function AdminProducts() {
                 setFormData({ name: '', emoji: '📦', category: '', price: '', scans_required: 3 })
                 setShowAddModal(true)
               }}
-              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg text-sm font-semibold"
+              className="px-3 py-2 sm:px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg text-xs sm:text-sm font-semibold"
             >
               + {t.newProduct}
             </button>
@@ -415,15 +415,15 @@ export default function AdminProducts() {
         </header>
 
         {/* Products Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {loading ? (
-            <div className="text-center py-20">
+            <div className="text-center py-12 sm:py-20">
               <div className="w-12 h-12 mx-auto border-3 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">🛍️</div>
-              <h3 className="text-2xl font-bold text-white mb-2">
+            <div className="text-center py-12 sm:py-20">
+              <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🛍️</div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
                 {t.noProducts}
               </h3>
               <p className="text-gray-400">
@@ -431,19 +431,19 @@ export default function AdminProducts() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {products.map((product) => {
                 const productRules = rules.get(product.id) || []
                 console.log(`Product ${product.name} (${product.id}):`, productRules.length, 'rules')
                 return (
                   <div
                     key={product.id}
-                    className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-6 hover:bg-white/15 transition-all"
+                    className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 sm:p-6 hover:bg-white/15 transition-all"
                   >
                     {/* Product Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="text-4xl">{product.metadata?.emoji || '📦'}</div>
+                    <div className="flex items-start justify-between mb-3 sm:mb-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="text-3xl sm:text-4xl">{product.metadata?.emoji || '📦'}</div>
                         <div>
                           <h3 className="text-xl font-bold text-white">{product.name}</h3>
                           <div className="flex items-center gap-2 mt-0.5">

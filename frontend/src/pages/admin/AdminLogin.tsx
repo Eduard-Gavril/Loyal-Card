@@ -77,23 +77,23 @@ export default function AdminLogin() {
       {/* Overlay gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-transparent to-blue-900/40 z-10"></div>
 
-      <div className="relative z-20 max-w-md w-full">
-        <div className="text-center mb-8">
+      <div className="relative z-20 max-w-md w-full px-4">
+        <div className="text-center mb-6 sm:mb-8">
           <button
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 sm:mb-6 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             {t.admin.login.backHome}
           </button>
-          <h1 className="text-5xl font-bold text-white mb-3">{t.admin.login.title}</h1>
-          <p className="text-gray-300 text-lg">{t.admin.login.subtitle}</p>
+          <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2 sm:mb-3">{t.admin.login.title}</h1>
+          <p className="text-gray-300 text-base sm:text-lg">{t.admin.login.subtitle}</p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
-          <form onSubmit={handleLogin} className="space-y-6">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 sm:p-8">
+          <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
                 {t.admin.login.email}

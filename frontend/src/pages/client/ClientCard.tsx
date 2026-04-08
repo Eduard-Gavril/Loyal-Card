@@ -290,24 +290,24 @@ export default function ClientCard() {
             </div>
             {/* Title */}
             <div>
-              <h1 className="text-4xl font-bold text-white tracking-tight mb-1">{t.card.title}</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight mb-1">{t.card.title}</h1>
               <p className="text-gray-200">{t.card.subtitle}</p>
             </div>
           </div>
         </header>
 
-        <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
           {/* QR Code Card */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-8 border border-white/20 mb-4 sm:mb-6">
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-4 text-white flex items-center justify-center gap-2">
-                <span className="text-4xl">📱</span>
+              <h2 className="text-xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white flex items-center justify-center gap-2">
+                <span className="text-2xl sm:text-4xl">📱</span>
                 {t.card.qrTitle}
               </h2>
             {qrDataUrl ? (
               <>
-                <div className="flex justify-center mb-4">
-                  <div className="bg-white p-6 rounded-2xl shadow-2xl">
+                <div className="flex justify-center mb-3 sm:mb-4">
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-2xl">
                     <img src={qrDataUrl} alt="QR Code" className="w-64 h-64" />
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export default function ClientCard() {
                 const stamps = Array.from({ length: rule.buy_count }, (_, i) => i < progress.count)
                 
                 return (
-                  <div key={rule.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
+                  <div key={rule.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="font-bold text-xl text-white">{rule.name}</h3>
@@ -444,7 +444,7 @@ export default function ClientCard() {
                 const stamps = Array.from({ length: item.buy_count }, (_, i) => i < item.count)
                 
                 return (
-                  <div key={item.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
+                  <div key={item.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl transition-all duration-300">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="font-bold text-xl text-white">{item.name}</h3>

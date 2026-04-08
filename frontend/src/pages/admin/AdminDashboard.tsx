@@ -296,6 +296,49 @@ export default function AdminDashboard() {
         </header>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+          {/* Quick Actions - Moved to top for better mobile UX */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-8 border border-white/20 mb-6 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-white">{t.admin.dashboard.quickActions}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            <button
+              onClick={() => navigate('/admin/scan')}
+              className="group relative overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600 text-white py-6 sm:py-8 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 hover:scale-105 active:scale-95"
+            >
+              <span className="relative flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold">
+                <span className="text-2xl sm:text-3xl">📷</span>
+                {t.admin.dashboard.scanQR}
+              </span>
+            </button>
+            <button
+              onClick={() => navigate('/admin/reports')}
+              className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
+            >
+              <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
+                <span className="text-2xl sm:text-3xl">📊</span>
+                {t.admin.dashboard.viewReports}
+              </span>
+            </button>
+            <button
+              onClick={() => navigate('/admin/products')}
+              className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
+            >
+              <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
+                <span className="text-2xl sm:text-3xl">🎁</span>
+                {t.admin.dashboard.manageRewards}
+              </span>
+            </button>
+            <button
+              onClick={downloadClientsExcel}
+              className="group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-600/40 hover:scale-105 active:scale-95"
+            >
+              <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
+                <span className="text-2xl sm:text-3xl">📥</span>
+                {language === 'ro' ? 'Download Report Excel' : 'Download Excel Report'}
+              </span>
+            </button>
+          </div>
+        </div>
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
             <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
@@ -327,49 +370,6 @@ export default function AdminDashboard() {
               <p className="text-3xl sm:text-4xl font-bold text-white">{stats.scansToday}</p>
             </div>
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
-            <h2 className="text-3xl font-bold mb-6 text-white">{t.admin.dashboard.quickActions}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              onClick={() => navigate('/admin/scan')}
-              className="group relative overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600 text-white py-8 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 hover:scale-105 active:scale-95"
-            >
-              <span className="relative flex items-center justify-center gap-3 text-lg font-semibold">
-                <span className="text-3xl">📷</span>
-                {t.admin.dashboard.scanQR}
-              </span>
-            </button>
-            <button
-              onClick={() => navigate('/admin/reports')}
-              className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
-            >
-              <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
-                <span className="text-3xl">📊</span>
-                {t.admin.dashboard.viewReports}
-              </span>
-            </button>
-            <button
-              onClick={() => navigate('/admin/products')}
-              className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
-            >
-              <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
-                <span className="text-3xl">🎁</span>
-                {t.admin.dashboard.manageRewards}
-              </span>
-            </button>
-            <button
-              onClick={downloadClientsExcel}
-              className="group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400/40 py-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-600/40 hover:scale-105 active:scale-95"
-            >
-              <span className="flex items-center justify-center gap-3 text-lg font-semibold text-white">
-                <span className="text-3xl">📥</span>
-                {language === 'ro' ? 'Download Report Excel' : 'Download Excel Report'}
-              </span>
-            </button>
-          </div>
-        </div>
 
           {/* Recent Activity */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mt-10">

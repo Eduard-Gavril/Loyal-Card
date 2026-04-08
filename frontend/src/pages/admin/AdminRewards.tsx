@@ -241,9 +241,9 @@ export default function AdminRewards() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">📭</div>
-                    <p className="text-gray-300 text-lg">
+                  <div className="text-center py-8 sm:py-12">
+                    <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📭</div>
+                    <p className="text-gray-300 text-base sm:text-lg">
                       {language === 'ro' ? 'Nicio regulă de premii configurată' : 'No reward rules configured'}
                     </p>
                     <p className="text-gray-400 text-sm mt-2">
@@ -256,19 +256,19 @@ export default function AdminRewards() {
               </div>
 
               {/* Products List */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-                <h2 className="text-2xl font-bold text-white mb-6">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                   {language === 'ro' ? 'Produse Active' : 'Active Products'}
                 </h2>
                 
                 {products.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     {products.map((product) => (
                       <div
                         key={product.id}
-                        className="bg-white/5 rounded-xl p-4 border border-white/10 text-center hover:bg-white/10 transition-colors"
+                        className="bg-white/5 rounded-xl p-3 sm:p-4 border border-white/10 text-center hover:bg-white/10 transition-colors"
                       >
-                        <span className="text-3xl">{getProductEmoji(product.name, product.metadata)}</span>
+                        <span className="text-2xl sm:text-3xl">{getProductEmoji(product.name, product.metadata)}</span>
                         <p className="text-white font-medium mt-2">{product.name}</p>
                         <p className="text-gray-400 text-sm">
                           {product.metadata?.type || 'product'}

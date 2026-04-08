@@ -103,38 +103,38 @@ export default function AdminSettings() {
       {/* Content */}
       <div className="relative z-20">
         {/* Header */}
-        <header className="pt-6 px-6">
-          <div className="max-w-7xl mx-auto flex items-center gap-4">
+        <header className="pt-4 sm:pt-6 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => navigate('/admin/dashboard')}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20"
+              className="flex items-center gap-1 sm:gap-2 px-3 py-2 sm:px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               {language === 'ro' ? 'Înapoi' : 'Back'}
             </button>
-            <h1 className="text-4xl font-bold text-white tracking-tight flex-1">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1">
               ⚙️ {language === 'ro' ? 'Setări' : 'Settings'}
             </h1>
           </div>
         </header>
 
-        <div className="max-w-2xl mx-auto px-6 py-10">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {loading ? (
-            <div className="text-center py-20">
+            <div className="text-center py-12 sm:py-20">
               <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
               <p className="text-gray-300">{language === 'ro' ? 'Se încarcă...' : 'Loading...'}</p>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {/* Business Info */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-                <h2 className="text-2xl font-bold text-white mb-6">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                   {language === 'ro' ? 'Informații Afacere' : 'Business Info'}
                 </h2>
                 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Name */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -192,8 +192,8 @@ export default function AdminSettings() {
               </div>
 
               {/* Appearance */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-                <h2 className="text-2xl font-bold text-white mb-6">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                   {language === 'ro' ? 'Aspect' : 'Appearance'}
                 </h2>
                 
@@ -203,7 +203,7 @@ export default function AdminSettings() {
                   </label>
                   
                   {/* Color presets */}
-                  <div className="grid grid-cols-4 gap-3 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
                     {colorPresets.map((preset) => (
                       <button
                         key={preset.value}

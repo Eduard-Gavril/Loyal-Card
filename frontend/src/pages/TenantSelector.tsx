@@ -160,13 +160,13 @@ export default function TenantSelector() {
           </div>
         </header>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {/* Title section */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
               {t.tenantSelector.chooseStore}
             </h1>
-            <p className="text-lg sm:text-xl text-gray-200">
+            <p className="text-base sm:text-lg md:text-xl text-gray-200">
               {userLocation 
                 ? '📍 ' + (language === 'ro' ? 'Magazine aproape de tine' : 'Stores near you')
                 : t.tenantSelector.allStores}
@@ -175,7 +175,7 @@ export default function TenantSelector() {
 
           {/* Location status */}
           {locationLoading && (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 mb-6">
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 mb-4 sm:mb-6">
               <div className="flex items-center gap-3 text-white">
                 <div className="animate-spin">📍</div>
                 <span>{t.tenantSelector.searchingLocation}</span>
@@ -185,9 +185,9 @@ export default function TenantSelector() {
 
           {/* User location info (for debugging) */}
           {userLocation && (
-            <div className="bg-blue-500/20 backdrop-blur-xl rounded-2xl shadow-2xl p-4 border border-blue-400/50 mb-6">
-              <div className="flex items-start gap-3 text-sm">
-                <span className="text-2xl">📍</span>
+            <div className="bg-blue-500/20 backdrop-blur-xl rounded-2xl shadow-2xl p-3 sm:p-4 border border-blue-400/50 mb-4 sm:mb-6">
+              <div className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+                <span className="text-xl sm:text-2xl">📍</span>
                 <div className="flex-1 text-blue-100">
                   <p className="font-semibold mb-1">{language === 'ro' ? 'Locație detectată' : 'Location detected'}</p>
                   <p className="text-xs">Lat: {userLocation.lat.toFixed(6)}, Lon: {userLocation.lon.toFixed(6)}</p>
@@ -197,11 +197,11 @@ export default function TenantSelector() {
           )}
 
           {locationError && (
-            <div className="bg-yellow-500/20 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-yellow-400/50 mb-6">
-              <div className="flex items-start gap-3">
-                <span className="text-3xl">⚠️</span>
+            <div className="bg-yellow-500/20 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-yellow-400/50 mb-4 sm:mb-6">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <span className="text-2xl sm:text-3xl">⚠️</span>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-yellow-200 mb-2">
+                  <h3 className="text-base sm:text-lg font-bold text-yellow-200 mb-2">
                     {t.tenantSelector.locationUnavailable}
                   </h3>
                   <p className="text-yellow-100 text-sm mb-3">{locationError}</p>
@@ -217,36 +217,36 @@ export default function TenantSelector() {
           )}
 
           {/* Search bar */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="relative">
               <input
                 type="text"
                 placeholder={t.tenantSelector.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+                className="w-full px-4 py-3 sm:px-6 sm:py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent text-sm sm:text-base"
               />
             </div>
           </div>
 
           {/* Tenants list */}
           {loading ? (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-12 border border-white/20 text-center">
-              <div className="animate-pulse text-white text-xl">{t.tenantSelector.loadingStores}</div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 sm:p-12 border border-white/20 text-center">
+              <div className="animate-pulse text-white text-lg sm:text-xl">{t.tenantSelector.loadingStores}</div>
             </div>
           ) : filteredTenants.length === 0 ? (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-12 border border-white/20 text-center">
-              <span className="text-5xl mb-4 block">🔍</span>
-              <p className="text-white text-xl">{t.tenantSelector.noStoresFound}</p>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 sm:p-12 border border-white/20 text-center">
+              <span className="text-4xl sm:text-5xl mb-3 sm:mb-4 block">🔍</span>
+              <p className="text-white text-lg sm:text-xl">{t.tenantSelector.noStoresFound}</p>
               <p className="text-gray-300 mt-2">{t.tenantSelector.tryDifferentSearch}</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filteredTenants.map((tenant) => (
                 <button
                   key={tenant.id}
                   onClick={() => handleSelectTenant(tenant)}
-                  className="w-full bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:border-primary-400 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-primary-500/30 text-left"
+                  className="w-full bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 hover:border-primary-400 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-primary-500/30 text-left"
                 >
                   <div className="flex items-start gap-4">
                     {/* Logo or Icon */}

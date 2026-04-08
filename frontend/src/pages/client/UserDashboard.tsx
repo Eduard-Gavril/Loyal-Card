@@ -206,7 +206,7 @@ export default function UserDashboard() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/20 text-center">
                 <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
                   {loading ? '...' : cardCount}
@@ -268,11 +268,11 @@ export default function UserDashboard() {
               {/* Get New Card - Main CTA */}
               <button
                 onClick={() => navigate('/select-tenant')}
-                className="w-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-6 text-left hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-600/40 group"
+                className="w-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-4 sm:p-6 text-left hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-600/40 group"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-1">{t.userDashboard.getNewCard}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{t.userDashboard.getNewCard}</h3>
                     <p className="text-primary-100">{t.userDashboard.getNewCardDesc}</p>
                   </div>
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -286,11 +286,11 @@ export default function UserDashboard() {
               {/* View My Cards */}
               <button
                 onClick={() => navigate('/wallet')}
-                className="w-full bg-white/10 backdrop-blur-sm rounded-xl p-6 text-left hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                className="w-full bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 text-left hover:bg-white/20 transition-all duration-300 border border-white/20 group"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-1">{t.userDashboard.viewMyCards}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{t.userDashboard.viewMyCards}</h3>
                     <p className="text-gray-300">{t.userDashboard.viewMyCardsDesc}</p>
                   </div>
                   <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -304,11 +304,11 @@ export default function UserDashboard() {
               {/* Recover Account - always visible for users who need to restore their data */}
               <button
                 onClick={() => navigate('/recovery')}
-                className="w-full bg-white/5 backdrop-blur-sm rounded-xl p-4 text-left hover:bg-white/10 transition-all duration-300 border border-white/10 group"
+                className="w-full bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-left hover:bg-white/10 transition-all duration-300 border border-white/10 group"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-white/80 mb-1">{t.recovery.title}</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-white/80 mb-1">{t.recovery.title}</h3>
                     <p className="text-gray-400 text-sm">{t.recovery.dashboardDesc}</p>
                   </div>
                   <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -323,11 +323,11 @@ export default function UserDashboard() {
               {showInstallButton && (
                 <button
                   onClick={handleInstallClick}
-                  className="w-full bg-white/10 backdrop-blur-sm rounded-xl p-6 text-left hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                  className="w-full bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 text-left hover:bg-white/20 transition-all duration-300 border border-white/20 group"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-1">{t.userDashboard.installApp}</h3>
+                      <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{t.userDashboard.installApp}</h3>
                       <p className="text-gray-300">{t.userDashboard.installAppDesc}</p>
                     </div>
                     <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -341,8 +341,8 @@ export default function UserDashboard() {
             </div>
 
             {/* Info Section */}
-            <div className="mt-8 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              <h4 className="text-lg font-semibold text-white mb-4">{t.userDashboard.howItWorksTitle}</h4>
+            <div className="mt-6 sm:mt-8 bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
+              <h4 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">{t.userDashboard.howItWorksTitle}</h4>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">

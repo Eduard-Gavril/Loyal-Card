@@ -145,31 +145,31 @@ export default function AdminReports() {
       {/* Content */}
       <div className="relative z-20">
         {/* Header */}
-        <header className="pt-6 px-6">
-          <div className="max-w-7xl mx-auto flex items-center gap-4">
+        <header className="pt-4 sm:pt-6 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => navigate('/admin/dashboard')}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20"
+              className="flex items-center gap-1 sm:gap-2 px-3 py-2 sm:px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               {language === 'ro' ? 'Înapoi' : 'Back'}
             </button>
-            <h1 className="text-4xl font-bold text-white tracking-tight flex-1">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1">
               📊 {language === 'ro' ? 'Rapoarte' : 'Reports'}
             </h1>
           </div>
         </header>
 
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {/* Time Range Selector */}
-          <div className="flex gap-2 mb-8">
+          <div className="flex flex-col sm:flex-row gap-2 mb-6 sm:mb-8">
             {(['7d', '30d', '90d'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                className={`px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
                   timeRange === range
                     ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/50'
                     : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
@@ -190,28 +190,28 @@ export default function AdminReports() {
           ) : (
             <>
               {/* Summary Stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                  <p className="text-gray-300 text-sm mb-1">{language === 'ro' ? 'Total Scanări' : 'Total Scans'}</p>
-                  <p className="text-3xl font-bold text-white">{totalStats.totalScans}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Total Scanări' : 'Total Scans'}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.totalScans}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                  <p className="text-gray-300 text-sm mb-1">{language === 'ro' ? 'Premii Date' : 'Rewards Given'}</p>
-                  <p className="text-3xl font-bold text-white">{totalStats.totalRewards}</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Premii Date' : 'Rewards Given'}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.totalRewards}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                  <p className="text-gray-300 text-sm mb-1">{language === 'ro' ? 'Medie/Zi' : 'Avg/Day'}</p>
-                  <p className="text-3xl font-bold text-white">{totalStats.avgScansPerDay}</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Medie/Zi' : 'Avg/Day'}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.avgScansPerDay}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                  <p className="text-gray-300 text-sm mb-1">{language === 'ro' ? 'Rata Conversie' : 'Conversion Rate'}</p>
-                  <p className="text-3xl font-bold text-white">{totalStats.conversionRate}%</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Rata Conversie' : 'Conversion Rate'}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.conversionRate}%</p>
                 </div>
               </div>
 
               {/* Chart */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 mb-8">
-                <h2 className="text-2xl font-bold text-white mb-6">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20 mb-6 sm:mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                   {language === 'ro' ? 'Scanări pe Zi' : 'Scans per Day'}
                 </h2>
                 <div className="flex items-end gap-1 h-48">

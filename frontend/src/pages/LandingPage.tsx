@@ -13,6 +13,95 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuClosing, setMenuClosing] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  
+  // Touch gesture detection with smooth follow
+  const touchStartX = useRef<number>(0)
+  const touchStartY = useRef<number>(0)
+  const touchStartTime = useRef<number>(0)
+  const isDragging = useRef<boolean>(false)
+  const [dragOffset, setDragOffset] = useState<number>(320) // 320 = fully closed, 0 = fully open
+
+  // Force menu closed on mount
+  useEffect(() => {
+    setMenuOpen(false)
+    setMenuClosing(false)
+  }, [])
+
+  // Swipe gesture handler: swipe from right edge to left opens menu smoothly
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      touchStartX.current = touch.clientX
+      touchStartY.current = touch.clientY
+      touchStartTime.current = Date.now()
+      
+      // Check if starting from right edge (within 50px) AND not touching a button
+      const target = e.target as HTMLElement
+      const isButton = target.tagName === 'BUTTON' || target.closest('button')
+      
+      if (touch.clientX > window.innerWidth - 50 && !menuOpen && !isButton) {
+        isDragging.current = true
+        setDragOffset(320) // Start with menu fully closed (off-screen)
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging.current) return
+      
+      const touch = e.touches[0]
+      const deltaX = touch.clientX - touchStartX.current
+      const deltaY = touch.clientY - touchStartY.current
+      
+      // Check if it's horizontal swipe
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Show menu during drag
+        if (!menuOpen) setMenuOpen(true)
+        
+        // Calculate offset: menu starts at 320px (off-screen) and moves to 0 (visible)
+        // When swiping left (negative deltaX), reduce offset to slide menu in
+        const offset = Math.max(0, Math.min(320, 320 + deltaX))
+        setDragOffset(offset)
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isDragging.current) return
+      
+      const touch = e.changedTouches[0]
+      const deltaX = touch.clientX - touchStartX.current
+      const deltaTime = Date.now() - touchStartTime.current
+      const velocity = Math.abs(deltaX) / deltaTime // px per ms
+      
+      isDragging.current = false
+      
+      // Threshold: if dragged menu in more than 40% or fast swipe, complete opening
+      const threshold = 320 * 0.6 // If offset < 192px (menu is 40% visible), open it
+      const shouldOpen = dragOffset < threshold || velocity > 0.5
+      
+      if (shouldOpen) {
+        // Complete the opening - snap to fully open
+        setDragOffset(0)
+      } else {
+        // Cancel and close - snap back out
+        setMenuClosing(true)
+        setDragOffset(320)
+        setTimeout(() => {
+          setMenuOpen(false)
+          setMenuClosing(false)
+        }, 300)
+      }
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', handleTouchMove, { passive: true })
+    document.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [menuOpen, dragOffset])
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -57,6 +146,7 @@ export default function LandingPage() {
   // Funzione per chiudere il menu con animazione
   const closeMenu = () => {
     setMenuClosing(true)
+    setDragOffset(320) // Reset offset to fully closed
     setTimeout(() => {
       setMenuOpen(false)
       setMenuClosing(false)
@@ -105,8 +195,16 @@ export default function LandingPage() {
           {/* Drawer */}
           <div 
             ref={menuRef}
-            className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[9999] transform transition-transform duration-300 ease-out flex flex-col"
-            style={{ animation: menuClosing ? 'slideOutRight 0.3s ease-out' : 'slideInRight 0.3s ease-out' }}
+            className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[9999] flex flex-col ${
+              isDragging.current ? '' : 'transition-transform duration-300 ease-out'
+            }`}
+            style={{
+              transform: isDragging.current && !menuClosing 
+                ? `translateX(${dragOffset}px)` 
+                : menuClosing 
+                  ? 'translateX(100%)' 
+                  : 'translateX(0)'
+            }}
           >
             {/* Header del Menu */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -269,15 +367,29 @@ export default function LandingPage() {
               </h1>
             </div>
             
-            {/* Menu Button */}
+            {/* Menu Button - Enhanced Design */}
             <button
-              onClick={() => setMenuOpen(true)}
-              className="p-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log('Menu button clicked!')
+                setMenuOpen(true)
+                setDragOffset(0) // Fully open when clicking button
+                setMenuClosing(false) // Ensure not closing
+              }}
+              className="group relative p-3.5 bg-gradient-to-br from-primary-500/90 to-primary-600/90 backdrop-blur-md text-white rounded-xl hover:from-primary-400 hover:to-primary-500 hover:shadow-lg hover:shadow-primary-500/40 active:scale-95 transition-all duration-300 border border-white/30"
               aria-label="Menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg 
+                className="w-6 h-6 transition-transform duration-300 group-hover:rotate-90" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
+              {/* Pulse effect on hover */}
+              <span className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity"></span>
             </button>
           </div>
         </header>

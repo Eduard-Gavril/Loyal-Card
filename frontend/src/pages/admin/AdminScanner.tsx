@@ -443,34 +443,34 @@ export default function AdminScanner() {
       {/* Content */}
       <div className="relative z-20">
         {/* Header */}
-        <header className="pt-6 px-6">
-          <div className="max-w-7xl mx-auto flex items-center gap-4">
+        <header className="pt-4 sm:pt-6 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => navigate('/admin/dashboard')}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              {t.admin.scanner.back}
+              <span className="hidden sm:inline">{t.admin.scanner.back}</span>
             </button>
-            <h1 className="text-4xl font-bold text-white tracking-tight flex-1">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1">
               {t.admin.scanner.title}
             </h1>
             <LanguageSelector />
           </div>
         </header>
 
-        <div className="max-w-2xl mx-auto px-6 py-10">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {/* Scanner */}
           {scanning && (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold mb-3 text-white flex items-center gap-2">
-                  <span className="text-4xl">📸</span>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-8 border border-white/20">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-white flex items-center gap-2">
+                  <span className="text-3xl sm:text-4xl">📸</span>
                   {t.admin.scanner.frameQR}
                 </h2>
-                <p className="text-gray-200">
+                <p className="text-sm sm:text-base text-gray-200">
                   {t.admin.scanner.frameDesc}
                 </p>
               </div>
@@ -555,44 +555,44 @@ export default function AdminScanner() {
           {!scanning && (
             <div>
               {/* QR Code scanned info */}
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6">
-                <h2 className="text-3xl font-bold mb-4 text-white flex items-center gap-2">
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-8 border border-white/20 mb-6">
+                <h2 className="text-xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white flex items-center gap-2">
                   <span className="text-green-400">✓</span>
                   {t.admin.scanner.qrScanned}
                 </h2>
-                <p className="text-sm text-gray-200 font-mono bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/10">
+                <p className="text-xs sm:text-sm text-gray-200 font-mono bg-black/30 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/10 break-all">
                   {scannedQR}
                 </p>
               </div>
 
               {/* Mode selector */}
               {!result && (
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
-                <div className="flex gap-3 mb-8">
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-8 border border-white/20">
+                <div className="flex flex-col sm:flex-row gap-3 mb-6 sm:mb-8">
                   <button
                     onClick={() => setMode('scan')}
-                    className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                    className={`flex-1 py-3 sm:py-4 px-3 sm:px-6 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 ${
                       mode === 'scan'
                         ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/50'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
-                      <span className="text-xl">📦</span>
-                      {t.admin.scanner.registerPurchase}
+                      <span className="text-lg sm:text-xl">📦</span>
+                      <span className="leading-tight">{t.admin.scanner.registerPurchase}</span>
                     </span>
                   </button>
                   <button
                     onClick={() => setMode('redeem')}
-                    className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                    className={`flex-1 py-3 sm:py-4 px-3 sm:px-6 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 ${
                       mode === 'redeem'
                         ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/50'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
-                      <span className="text-xl">🎁</span>
-                      {t.admin.scanner.redeemReward}
+                      <span className="text-lg sm:text-xl">🎁</span>
+                      <span className="leading-tight">{t.admin.scanner.redeemReward}</span>
                     </span>
                   </button>
                 </div>
@@ -626,15 +626,15 @@ export default function AdminScanner() {
                     {/* Show macro categories if more than 8 products */}
                     {useMacroCategories && !selectedCategory ? (
                       <>
-                        <h2 className="text-2xl font-bold mb-4 text-white">{t.scanner.selectCategory}</h2>
-                        <div className="grid grid-cols-2 gap-3">
+                        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">{t.scanner.selectCategory}</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                           {availableCategories.map(([key, category]) => (
                             <button
                               key={key}
                               onClick={() => setSelectedCategory(key)}
-                              className="p-6 rounded-xl border-2 border-white/20 hover:border-primary-400 hover:bg-primary-500/10 bg-white/5 transition-all duration-300 hover:shadow-lg hover:scale-105"
+                              className="p-4 sm:p-6 rounded-xl border-2 border-white/20 hover:border-primary-400 hover:bg-primary-500/10 bg-white/5 transition-all duration-300 hover:shadow-lg hover:scale-105"
                             >
-                              <div className="text-4xl mb-2">{category.emoji}</div>
+                              <div className="text-3xl sm:text-4xl mb-2">{category.emoji}</div>
                               <div className="font-semibold text-white text-sm">
                                 {category.name.replace(/^[^\s]+\s/, '')}
                               </div>
@@ -659,8 +659,8 @@ export default function AdminScanner() {
                       </>
                     ) : (
                       <>
-                        <div className="flex items-center justify-between mb-4">
-                          <h2 className="text-2xl font-bold text-white">
+                        <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+                          <h2 className="text-xl sm:text-2xl font-bold text-white">
                             {selectedCategory 
                               ? macroCategories[selectedCategory as keyof typeof macroCategories]?.name 
                               : t.admin.scanner.selectProduct}
@@ -671,7 +671,7 @@ export default function AdminScanner() {
                                 setSelectedCategory('')
                                 setSearchFilter('')
                               }}
-                              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
+                              className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm rounded-lg transition-all duration-300 whitespace-nowrap"
                             >
                               {t.scanner.otherCategories}
                             </button>
@@ -679,16 +679,16 @@ export default function AdminScanner() {
                         </div>
 
                         {/* Search input field */}
-                        <div className="mb-4">
+                        <div className="mb-3 sm:mb-4">
                           <div className="relative">
                             <input
                               type="text"
                               value={searchFilter}
                               onChange={(e) => setSearchFilter(e.target.value)}
                               placeholder={language === 'ro' ? 'Caută produs...' : 'Search product...'}
-                              className="w-full px-4 py-3 pl-12 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
+                              className="w-full px-3 py-2 pl-10 sm:px-4 sm:py-3 sm:pl-12 bg-white/10 border-2 border-white/20 rounded-xl text-white text-sm sm:text-base placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
                             />
-                            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                             {searchFilter && (
@@ -707,7 +707,7 @@ export default function AdminScanner() {
                         {getFilteredProducts().length === 0 ? (
                           <p className="text-gray-200">{searchFilter ? `Nessun prodotto trovato per "${searchFilter}"` : t.admin.scanner.noProducts}</p>
                         ) : (
-                          <div className="space-y-3">
+                          <div className="space-y-2 sm:space-y-3">
                             {getFilteredProducts().map((product) => {
                               const cartItem = cart.find(item => item.productId === product.id)
                               const usageCount = productStats[product.id] || 0
@@ -715,13 +715,13 @@ export default function AdminScanner() {
                               return (
                                 <div
                                   key={product.id}
-                                  className={`w-full p-5 rounded-xl border-2 transition-all duration-300 ${
+                                  className={`w-full p-3 sm:p-5 rounded-xl border-2 transition-all duration-300 ${
                                     cartItem
                                       ? 'border-primary-400 bg-primary-500/20 shadow-lg shadow-primary-500/30'
                                       : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
                                   }`}
                                 >
-                                  <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center justify-between gap-2 sm:gap-3">
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
                                         <div className="font-semibold text-white">{product.name}</div>
@@ -742,21 +742,21 @@ export default function AdminScanner() {
                                     </div>
                                     
                                     {/* Quantity controls */}
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1 sm:gap-2">
                                       {cartItem ? (
                                         <>
                                           <button
                                             onClick={() => updateCartQuantity(product.id, -1)}
-                                            className="w-10 h-10 flex items-center justify-center bg-red-500/20 hover:bg-red-500/40 text-white rounded-lg transition-all duration-200 text-xl font-bold"
+                                            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-red-500/20 hover:bg-red-500/40 text-white rounded-lg transition-all duration-200 text-lg sm:text-xl font-bold"
                                           >
                                             −
                                           </button>
-                                          <span className="w-10 text-center text-white font-bold text-lg">
+                                          <span className="w-8 sm:w-10 text-center text-white font-bold text-base sm:text-lg">
                                             {cartItem.quantity}
                                           </span>
                                           <button
                                             onClick={() => updateCartQuantity(product.id, 1)}
-                                            className="w-10 h-10 flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-white rounded-lg transition-all duration-200 text-xl font-bold"
+                                            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-white rounded-lg transition-all duration-200 text-lg sm:text-xl font-bold"
                                           >
                                             +
                                           </button>
@@ -764,7 +764,7 @@ export default function AdminScanner() {
                                       ) : (
                                         <button
                                           onClick={() => addToCart(product.id)}
-                                          className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-all duration-200"
+                                          className="px-3 py-2 sm:px-4 text-sm sm:text-base bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-all duration-200"
                                         >
                                           + {t.scanner.add}
                                         </button>
@@ -786,11 +786,11 @@ export default function AdminScanner() {
                     )}
 
                     {(!useMacroCategories || selectedCategory) && (
-                      <div className="mt-8 flex gap-3">
+                      <div className="mt-6 sm:mt-8 flex gap-2 sm:gap-3">
                         {cart.length > 0 ? (
                           <button
                             onClick={() => setShowConfirmation(true)}
-                            className="flex-1 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
+                            className="flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
                           >
                             {t.scanner.confirm} {getTotalItems()} {t.scanner.products} →
                           </button>
@@ -816,54 +816,54 @@ export default function AdminScanner() {
                 {/* Cart confirmation screen */}
                 {mode === 'scan' && showConfirmation && (
                   <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <span className="text-2xl">🛒</span>
+                    <div className="flex items-center justify-between mb-4 sm:mb-6 gap-2">
+                      <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+                        <span className="text-xl sm:text-2xl">🛒</span>
                         {t.scanner.orderSummary}
                       </h2>
                       <button
                         onClick={() => setShowConfirmation(false)}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-all duration-300"
+                        className="px-3 py-2 sm:px-4 bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm rounded-lg transition-all duration-300 whitespace-nowrap"
                       >
                         {t.scanner.edit}
                       </button>
                     </div>
 
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                       {cart.map((item) => (
                         <div
                           key={item.productId}
-                          className="p-4 bg-white/5 border-2 border-white/20 rounded-xl"
+                          className="p-3 sm:p-4 bg-white/5 border-2 border-white/20 rounded-xl"
                         >
                           <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="font-semibold text-white">{item.productName}</div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-white text-sm sm:text-base truncate">{item.productName}</div>
                               {item.price && (
-                                <div className="text-sm text-primary-300 mt-1">
+                                <div className="text-xs sm:text-sm text-primary-300 mt-1">
                                   {item.price.toFixed(2)} RON × {item.quantity} = {(item.price * item.quantity).toFixed(2)} RON
                                 </div>
                               )}
                             </div>
                             
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 sm:gap-2">
                               <button
                                 onClick={() => updateCartQuantity(item.productId, -1)}
-                                className="w-8 h-8 flex items-center justify-center bg-red-500/20 hover:bg-red-500/40 text-white rounded-lg transition-all duration-200 text-lg font-bold"
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-500/20 hover:bg-red-500/40 text-white rounded-lg transition-all duration-200 text-base sm:text-lg font-bold"
                               >
                                 −
                               </button>
-                              <span className="w-8 text-center text-white font-bold">
+                              <span className="w-7 sm:w-8 text-center text-white font-bold text-sm sm:text-base">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateCartQuantity(item.productId, 1)}
-                                className="w-8 h-8 flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-white rounded-lg transition-all duration-200 text-lg font-bold"
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-white rounded-lg transition-all duration-200 text-base sm:text-lg font-bold"
                               >
                                 +
                               </button>
                               <button
                                 onClick={() => removeFromCart(item.productId)}
-                                className="w-8 h-8 flex items-center justify-center bg-red-500/30 hover:bg-red-500/50 text-red-200 rounded-lg transition-all duration-200 ml-2"
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-500/30 hover:bg-red-500/50 text-red-200 rounded-lg transition-all duration-200 ml-1 sm:ml-2"
                               >
                                 ✕
                               </button>
@@ -874,15 +874,15 @@ export default function AdminScanner() {
                     </div>
 
                     {/* Total summary */}
-                    <div className="p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl mb-6">
+                    <div className="p-3 sm:p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl mb-4 sm:mb-6">
                       <div className="flex justify-between items-center text-white">
-                        <span className="font-semibold">{t.scanner.totalProducts}</span>
-                        <span className="text-2xl font-bold">{getTotalItems()}</span>
+                        <span className="font-semibold text-sm sm:text-base">{t.scanner.totalProducts}</span>
+                        <span className="text-xl sm:text-2xl font-bold">{getTotalItems()}</span>
                       </div>
                       {cart.some(item => item.price) && (
                         <div className="flex justify-between items-center text-primary-200 mt-2">
-                          <span>{t.scanner.totalPrice}</span>
-                          <span className="font-bold">
+                          <span className="text-xs sm:text-sm">{t.scanner.totalPrice}</span>
+                          <span className="font-bold text-sm sm:text-base">
                             {cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0).toFixed(2)} RON
                           </span>
                         </div>
@@ -890,16 +890,16 @@ export default function AdminScanner() {
                     </div>
 
                     {error && (
-                      <div className="mb-4 bg-red-50 border-2 border-red-200 text-red-700 px-5 py-4 rounded-xl">
-                        <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
+                      <div className="mb-3 sm:mb-4 bg-red-50 border-2 border-red-200 text-red-700 px-3 py-3 sm:px-5 sm:py-4 rounded-xl">
+                        <pre className="text-xs whitespace-pre-wrap font-mono break-all">{error}</pre>
                       </div>
                     )}
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 sm:gap-3">
                       <button
                         onClick={handleRegisterCart}
                         disabled={cart.length === 0 || processing}
-                        className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                        className="flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                       >
                         {processing ? (
                           <span className="flex items-center justify-center gap-2">
@@ -913,7 +913,7 @@ export default function AdminScanner() {
                       <button
                         onClick={resetScanner}
                         disabled={processing}
-                        className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md disabled:opacity-50"
+                        className="px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md disabled:opacity-50"
                       >
                         {t.admin.scanner.cancel}
                       </button>
@@ -924,7 +924,7 @@ export default function AdminScanner() {
                 {/* Reward redemption (redeem mode) */}
                 {mode === 'redeem' && (
                   <div>
-                    <h2 className="text-2xl font-bold mb-4 text-white">{t.admin.scanner.selectReward}</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">{t.admin.scanner.selectReward}</h2>
                     
                     {!card || !card.loyalty_state || Object.keys(card.loyalty_state).length === 0 ? (
                       <p className="text-gray-200">{t.admin.scanner.noRewards}</p>
@@ -932,12 +932,12 @@ export default function AdminScanner() {
                         const state = card.loyalty_state[rule.id]
                         return state && state.rewards > 0
                       }).length === 0 ? (
-                      <div className="text-center py-8 text-gray-200 bg-white/5 rounded-xl border-2 border-dashed border-white/20">
-                        <span className="text-4xl mb-2 block">🎁</span>
+                      <div className="text-center py-6 sm:py-8 text-gray-200 bg-white/5 rounded-xl border-2 border-dashed border-white/20">
+                        <span className="text-3xl sm:text-4xl mb-2 block">🎁</span>
                         {t.admin.scanner.noRewards}
                       </div>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {rules
                           .filter(rule => {
                             const state = card.loyalty_state[rule.id]
@@ -949,22 +949,22 @@ export default function AdminScanner() {
                               <button
                                 key={rule.id}
                                 onClick={() => setSelectedRule(rule.id)}
-                                className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-300 ${
+                                className={`w-full text-left p-3 sm:p-5 rounded-xl border-2 transition-all duration-300 ${
                                   selectedRule === rule.id
                                     ? 'border-yellow-400 bg-yellow-500/20 shadow-lg shadow-yellow-500/30 scale-[1.02]'
                                     : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
                                 }`}
                               >
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <div className="font-semibold text-white">{rule.name}</div>
-                                    <div className="text-sm text-gray-300 mt-2 flex items-center gap-2">
+                                <div className="flex justify-between items-start gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-white text-sm sm:text-base">{rule.name}</div>
+                                    <div className="text-xs sm:text-sm text-gray-300 mt-2 flex items-center gap-2">
                                       <span>{t.admin.scanner.availableRewards}:</span>
-                                      <span className="font-bold text-yellow-600 text-lg">{state.rewards}</span>
+                                      <span className="font-bold text-yellow-600 text-base sm:text-lg">{state.rewards}</span>
                                     </div>
                                   </div>
 
-                                  <div className="text-2xl">🎁</div>
+                                  <div className="text-xl sm:text-2xl">🎁</div>
                                 </div>
                               </button>
                             )
@@ -973,22 +973,22 @@ export default function AdminScanner() {
                     )}
 
                     {error && (
-                      <div className="mt-4 bg-red-50 border-2 border-red-200 text-red-700 px-5 py-4 rounded-xl">
-                        <pre className="text-xs whitespace-pre-wrap font-mono">{error}</pre>
+                      <div className="mt-3 sm:mt-4 bg-red-50 border-2 border-red-200 text-red-700 px-3 py-3 sm:px-5 sm:py-4 rounded-xl">
+                        <pre className="text-xs whitespace-pre-wrap font-mono break-all">{error}</pre>
                       </div>
                     )}
 
-                    <div className="mt-8 flex gap-3">
+                    <div className="mt-6 sm:mt-8 flex gap-2 sm:gap-3">
                       <button
                         onClick={handleRedeemReward}
                         disabled={!selectedRule || processing}
-                        className="flex-1 py-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 shadow-lg shadow-yellow-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                        className="flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 shadow-lg shadow-yellow-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                       >
                         {processing ? t.admin.scanner.redeeming : t.admin.scanner.confirmRedeem}
                       </button>
                       <button
                         onClick={resetScanner}
-                        className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
+                        className="px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
                       >
                         {t.admin.scanner.cancel}
                       </button>
@@ -1007,12 +1007,12 @@ export default function AdminScanner() {
 
                 {result.redeemed ? (
                   <div>
-                    <p className="text-yellow-200 text-lg mb-3">
+                    <p className="text-yellow-200 text-base sm:text-lg mb-3">
                       {result.message}
                     </p>
                     {result.remaining_rewards !== undefined && (
-                      <p className="text-sm text-yellow-200 bg-yellow-500/20 rounded-xl p-4 border border-yellow-400/30">
-                        {t.admin.scanner.remainingRewards}: <span className="font-bold text-xl">{result.remaining_rewards}</span>
+                      <p className="text-xs sm:text-sm text-yellow-200 bg-yellow-500/20 rounded-xl p-3 sm:p-4 border border-yellow-400/30">
+                        {t.admin.scanner.remainingRewards}: <span className="font-bold text-lg sm:text-xl">{result.remaining_rewards}</span>
                       </p>
                     )}
                   </div>
@@ -1020,39 +1020,39 @@ export default function AdminScanner() {
                   <div>
                     {/* Show multi-item success message */}
                     {result.multipleItems && (
-                      <div className="bg-green-500/20 border-2 border-green-400/50 p-4 rounded-xl mb-4">
-                        <p className="text-green-200 text-lg font-semibold flex items-center gap-2">
-                          <span className="text-2xl">📦</span>
+                      <div className="bg-green-500/20 border-2 border-green-400/50 p-3 sm:p-4 rounded-xl mb-3 sm:mb-4">
+                        <p className="text-green-200 text-base sm:text-lg font-semibold flex items-center gap-2">
+                          <span className="text-xl sm:text-2xl">📦</span>
                           {result.totalItemsProcessed} {t.scanner.products} {t.scanner.success}
                         </p>
                       </div>
                     )}
                     
                     {result.reward_earned ? (
-                      <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-2 border-yellow-400/50 p-6 rounded-xl mb-6">
-                        <p className="text-2xl font-bold text-yellow-300 mb-3 flex items-center gap-2">
-                          <span className="text-3xl">🎉</span>
+                      <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-2 border-yellow-400/50 p-4 sm:p-6 rounded-xl mb-4 sm:mb-6">
+                        <p className="text-xl sm:text-2xl font-bold text-yellow-300 mb-2 sm:mb-3 flex items-center gap-2">
+                          <span className="text-2xl sm:text-3xl">🎉</span>
                           {t.admin.scanner.rewardEarned}
                         </p>
-                        <p className="text-yellow-200 text-lg mb-2">
+                        <p className="text-yellow-200 text-base sm:text-lg mb-2">
                           {result.reward_earned.rule_name}
                         </p>
-                        <p className="text-sm text-yellow-200 bg-yellow-500/30 rounded-lg p-3">
+                        <p className="text-xs sm:text-sm text-yellow-200 bg-yellow-500/30 rounded-lg p-2 sm:p-3">
                           {result.reward_earned.reward_count} {result.reward_earned.reward_count === 1 ? t.scanner.rewardAvailableFor : t.scanner.rewardsAvailableFor}
                         </p>
                       </div>
                     ) : result.milestone_reached ? (
-                      <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border-2 border-orange-400/50 p-6 rounded-xl mb-6">
-                        <p className="text-2xl font-bold text-orange-300 mb-3 flex items-center gap-2">
-                          <span className="text-3xl">⭐</span>
+                      <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border-2 border-orange-400/50 p-4 sm:p-6 rounded-xl mb-4 sm:mb-6">
+                        <p className="text-xl sm:text-2xl font-bold text-orange-300 mb-2 sm:mb-3 flex items-center gap-2">
+                          <span className="text-2xl sm:text-3xl">⭐</span>
                           {t.admin.scanner.milestoneReached}
                         </p>
-                        <p className="text-orange-200 text-lg">
+                        <p className="text-orange-200 text-base sm:text-lg">
                           {result.milestone_reached.message}
                         </p>
                       </div>
                     ) : !result.multipleItems && (
-                      <p className="text-green-200 text-lg mb-6 bg-green-500/20 rounded-xl p-4 border border-green-400/30">
+                      <p className="text-green-200 text-base sm:text-lg mb-4 sm:mb-6 bg-green-500/20 rounded-xl p-3 sm:p-4 border border-green-400/30">
                         ✓ {t.admin.scanner.pointsAdded}
                       </p>
                     )}
@@ -1061,7 +1061,7 @@ export default function AdminScanner() {
 
                 <button
                   onClick={resetScanner}
-                  className="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
+                  className="w-full py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
                 >
                   {t.admin.scanner.scanNewClient}
                 </button>

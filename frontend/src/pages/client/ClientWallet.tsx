@@ -171,26 +171,26 @@ export default function ClientWallet() {
         </div>
 
         {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-3 flex items-center justify-center gap-3">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2 sm:mb-3 flex items-center justify-center gap-2 sm:gap-3">
             <span>💳</span> {t.wallet.title}
           </h1>
-          <p className="text-white/80 text-lg">{t.wallet.subtitle}</p>
+          <p className="text-white/80 text-base sm:text-lg">{t.wallet.subtitle}</p>
         </div>
 
         {/* Cards List */}
         {cards.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-10 text-center border border-white/50">
-            <div className="text-7xl mb-6">👋</div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-10 text-center border border-white/50">
+            <div className="text-5xl sm:text-7xl mb-4 sm:mb-6">👋</div>
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
               {!clientId ? t.wallet.welcome : t.wallet.noCards}
             </h2>
-            <p className="text-gray-700 mb-8 text-lg leading-relaxed whitespace-pre-line">
+            <p className="text-gray-700 mb-6 sm:mb-8 text-base sm:text-lg leading-relaxed whitespace-pre-line">
               {!clientId ? t.wallet.startCollecting : t.wallet.noCardsYet}
             </p>
             <button
               onClick={handleAddNewCard}
-              className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 mx-auto"
+              className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 mx-auto"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -199,11 +199,11 @@ export default function ClientWallet() {
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {cards.map((card) => (
               <div
                 key={card.cardId}
-                className="w-full bg-white/15 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 hover:border-white/30 hover:bg-white/20 hover:scale-[1.02] transition-all duration-300"
+                className="w-full bg-white/15 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 hover:border-white/30 hover:bg-white/20 hover:scale-[1.02] transition-all duration-300"
                 style={{ 
                   borderLeft: `4px solid ${card.brandColor}`,
                   boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)`

@@ -163,6 +163,8 @@ export function useClientCard() {
       })
         .then(setQrDataUrl)
         .catch(() => {})
+    }
+  }, [qrCode])
 
   const getRuleProgress = (ruleId: string) => {
     if (!card?.loyalty_state[ruleId]) {

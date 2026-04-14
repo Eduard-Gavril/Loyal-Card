@@ -46,12 +46,13 @@ export default function AdminScanner() {
     loadProducts()
     loadRewardRules()
     loadProductStats()
-    // Don't auto-init scanner, wait for user to request camera permission
 
     return () => {
       // Cleanup scanner on unmount
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {})
+        try {
+          scannerRef.current.stop()
+        } catch {}
       }
     }
   }, [])
@@ -128,7 +129,7 @@ export default function AdminScanner() {
       const data = await api.getProducts(tenantId)
       setProducts(data)
     } catch (err) {
-      console.error('Error loading products:', err)
+      // Error silently handled
     }
   }
 
@@ -138,7 +139,7 @@ export default function AdminScanner() {
       const stats = await api.getProductUsageStats(tenantId)
       setProductStats(stats)
     } catch (err) {
-      console.error('Error loading product stats:', err)
+      // Error silently handled
     }
   }
 
@@ -148,7 +149,7 @@ export default function AdminScanner() {
       const data = await api.getRewardRules(tenantId)
       setRules(data)
     } catch (err) {
-      console.error('Error loading reward rules:', err)
+      // Error silently handled
     }
   }
 
@@ -157,7 +158,7 @@ export default function AdminScanner() {
       const cardData = await api.getCardByQR(qrCode)
       setCard(cardData)
     } catch (err) {
-      console.error('Error loading card:', err)
+      // Error silently handled
     }
   }
 
@@ -187,14 +188,13 @@ export default function AdminScanner() {
           // QR code scanned successfully
           setScannedQR(decodedText)
           setScanning(false)
-          html5QrCode.stop().catch(err => console.error('Error stopping scanner:', err))
+          html5QrCode.stop().catch(() => {})
         },
         () => {
           // QR code scan error (ignore, just means no QR found in frame)
         }
       )
     } catch (err) {
-      console.error('Error starting scanner:', err)
       setCameraPermission('denied')
     }
   }
@@ -495,7 +495,6 @@ export default function AdminScanner() {
                         setCameraPermission('granted')
                         setTimeout(() => initScanner(), 100)
                       } catch (err) {
-                        console.error('Camera permission error:', err)
                         setCameraPermission('denied')
                       }
                     }}

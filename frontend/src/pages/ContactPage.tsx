@@ -40,7 +40,6 @@ export default function ContactPage() {
         setStatus('error')
       }
     } catch (error) {
-      console.error('Error sending message:', error)
       setStatus('error')
     }
   }

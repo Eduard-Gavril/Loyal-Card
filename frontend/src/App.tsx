@@ -53,22 +53,15 @@ function App() {
   // Auto-refresh session management
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        console.log('🔄 Initial session loaded')
-      }
-    })
+    supabase.auth.getSession()
 
     // Listen for auth changes (including automatic token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔐 Auth event:', event, session ? 'Session active' : 'No session')
-
       // Only handle TOKEN_REFRESHED - let AdminLogin handle SIGNED_IN
       if (event === 'TOKEN_REFRESHED') {
         if (session) {
-          console.log('🔄 Token refreshed, updating store...')
           // Get admin info to update store
-          const { data: admin, error } = await supabase
+          const { data: admin } = await supabase
             .from('admins')
             .select('tenant_id, role')
             .eq('user_id', session.user.id)
@@ -77,14 +70,10 @@ function App() {
 
           if (admin) {
             setAuth(session.user, session, admin.tenant_id, admin.role)
-            console.log('✅ Session updated in store after refresh')
-          } else {
-            console.warn('⚠️ Admin not found during token refresh:', error?.message)
           }
         }
       } else if (event === 'SIGNED_OUT') {
         clearAuth()
-        console.log('🚪 Session cleared')
       }
     })
 

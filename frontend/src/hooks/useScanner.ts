@@ -27,7 +27,7 @@ export function useScanner({ tenantId }: UseScannerProps) {
       const data = await api.getProducts(tenantId)
       setProducts(data)
     } catch (err) {
-      console.error('Error loading products:', err)
+      // Error silently handled
     }
   }, [tenantId])
 
@@ -38,7 +38,7 @@ export function useScanner({ tenantId }: UseScannerProps) {
       const data = await api.getRewardRules(tenantId)
       setRules(data)
     } catch (err) {
-      console.error('Error loading reward rules:', err)
+      // Error silently handled
     }
   }, [tenantId])
 
@@ -48,7 +48,7 @@ export function useScanner({ tenantId }: UseScannerProps) {
       const cardData = await api.getCardByQR(qrCode)
       setCard(cardData)
     } catch (err) {
-      console.error('Error loading card:', err)
+      // Error silently handled
     }
   }, [])
 
@@ -76,14 +76,13 @@ export function useScanner({ tenantId }: UseScannerProps) {
         (decodedText) => {
           setScannedQR(decodedText)
           setScanning(false)
-          html5QrCode.stop().catch(err => console.error('Error stopping scanner:', err))
+          html5QrCode.stop().catch(() => {})
         },
         () => {
           // QR code scan error (ignore, just means no QR found in frame)
         }
       )
     } catch (err) {
-      console.error('Error starting scanner:', err)
       setCameraPermission('denied')
     }
   }, [])
@@ -97,7 +96,6 @@ export function useScanner({ tenantId }: UseScannerProps) {
       setCameraPermission('granted')
       setTimeout(() => initScanner(), 100)
     } catch (err) {
-      console.error('Camera permission error:', err)
       setCameraPermission('denied')
     }
   }, [initScanner])

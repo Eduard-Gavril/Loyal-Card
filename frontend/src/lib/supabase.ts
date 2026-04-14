@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
@@ -10,19 +10,29 @@ if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
   console.error('VITE_SUPABASE_ANON_KEY=your_anon_key')
 }
 
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-    db: {
-      schema: 'public',
-    },
+// Use singleton pattern to avoid multiple instances during HMR
+let supabaseInstance: SupabaseClient | null = null
+
+const getSupabaseClient = () => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(
+      supabaseUrl || 'https://placeholder.supabase.co',
+      supabaseAnonKey || 'placeholder',
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        },
+        db: {
+          schema: 'public',
+        },
+      }
+    )
   }
-)
+  return supabaseInstance
+}
+
+export const supabase = getSupabaseClient()
 
 // Database types (can be generated with supabase gen types typescript)
 export interface Tenant {
@@ -134,6 +144,7 @@ export interface ScanEvent {
 export const api = {
   // Generate anonymous client ID via Edge Function
   async generateClientId(tenantId: string, existingClientId?: string) {
+    // This is called by anonymous users (no auth needed)
     const { data, error } = await supabase.functions.invoke('generate-client-id', {
       body: { 
         tenant_id: tenantId,
@@ -146,19 +157,28 @@ export const api = {
 
   // Register scan
   async registerScan(qrCode: string, productId: string) {
-    // Refresh session to ensure token is valid
-    const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
-    
-    console.log('🔐 Auth check before register-scan:', {
-      hasSession: !!session,
-      userId: session?.user?.id,
-      email: session?.user?.email,
-      accessToken: session?.access_token ? 'Present' : 'Missing',
-      refreshError: refreshError?.message
-    })
+    // Get current session
+    let { data: { session } } = await supabase.auth.getSession()
     
     if (!session) {
-      throw new Error('Not authenticated - please login again - session expired')
+      throw new Error('Not authenticated - please login again')
+    }
+    
+    // Check if token expires in less than 5 minutes, refresh if needed
+    const expiresAt = session.expires_at || 0
+    const now = Math.floor(Date.now() / 1000)
+    const fiveMinutes = 300
+    
+    if (expiresAt < now + fiveMinutes) {
+      // Token is expiring soon or expired, try to refresh
+      const { data: { session: newSession } } = await supabase.auth.refreshSession()
+      
+      // If refresh succeeded, use new session
+      if (newSession) {
+        session = newSession
+      }
+      // If refresh failed but we still have an old session, try to use it anyway
+      // (might work if server-side expiry is more lenient)
     }
     
     // Get Supabase URL and anon key from env
@@ -179,7 +199,6 @@ export const api = {
     const data = await response.json()
     
     if (!response.ok) {
-      console.error('❌ register-scan error:', data)
       throw {
         message: data.error || 'Request failed',
         name: 'FunctionsHttpError',
@@ -189,18 +208,33 @@ export const api = {
       }
     }
     
-    console.log('✅ register-scan success:', data)
     return data
   },
 
   // Redeem reward
   async redeemReward(qrCode: string, rewardRuleId: string) {
-    // Refresh session to ensure token is valid
-    const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
+    // Get current session
+    let { data: { session } } = await supabase.auth.getSession()
     
     if (!session) {
-      console.error('❌ No session after refresh:', refreshError?.message)
       throw new Error('Not authenticated - please login again')
+    }
+    
+    // Check if token expires in less than 5 minutes, refresh if needed
+    const expiresAt = session.expires_at || 0
+    const now = Math.floor(Date.now() / 1000)
+    const fiveMinutes = 300
+    
+    if (expiresAt < now + fiveMinutes) {
+      // Token is expiring soon or expired, try to refresh
+      const { data: { session: newSession } } = await supabase.auth.refreshSession()
+      
+      // If refresh succeeded, use new session
+      if (newSession) {
+        session = newSession
+      }
+      // If refresh failed but we still have an old session, try to use it anyway
+      // (might work if server-side expiry is more lenient)
     }
     
     // Get Supabase URL and anon key from env
@@ -244,7 +278,6 @@ export const api = {
 
   // Get card by client ID and tenant ID
   async getCardByClientAndTenant(clientId: string, tenantId: string) {
-    console.log('🔍 Searching card with:', { clientId, tenantId })
     const { data, error } = await supabase
       .from('cards')
       .select('*, clients(*)')
@@ -253,12 +286,10 @@ export const api = {
       .single()
     
     if (error) {
-      console.log('❌ Card search error:', error.code, error.message)
       // If not found, return null instead of throwing
       if (error.code === 'PGRST116') return null
       throw error
     }
-    console.log('✅ Card found:', data)
     return data
   },
 
@@ -311,10 +342,6 @@ export const api = {
 
   // Get tenant info
   async getTenant(tenantId: string): Promise<Tenant> {
-    console.log('🔍 Fetching tenant:', tenantId)
-    console.log('📡 Supabase URL:', supabaseUrl)
-    console.log('🔑 Has anon key:', !!supabaseAnonKey)
-    
     const { data, error } = await supabase
       .from('tenants')
       .select('*')
@@ -322,16 +349,9 @@ export const api = {
       .single()
     
     if (error) {
-      console.error('❌ Supabase error details:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      })
       throw error
     }
     
-    console.log('✅ Tenant loaded:', data)
     return data
   },
 
@@ -366,7 +386,6 @@ export const api = {
       .eq('tenant_id', tenantId)
     
     if (error) {
-      console.error('Error loading product stats:', error)
       return {}
     }
     
@@ -381,6 +400,7 @@ export const api = {
 
   // Link phone number to client for recovery (with PIN and backup codes)
   async linkPhone(clientId: string, phone: string, pin: string) {
+    // This is called by anonymous users (no auth needed)
     const { data, error } = await supabase.functions.invoke('link-phone', {
       body: { client_id: clientId, phone, pin }
     })
@@ -407,6 +427,7 @@ export const api = {
 
   // Request account recovery (checks if phone exists)
   async requestRecovery(phone: string) {
+    // This is called by anonymous users (no auth needed)
     const { data, error } = await supabase.functions.invoke('recover-client', {
       body: { action: 'request', phone }
     })
@@ -419,6 +440,7 @@ export const api = {
 
   // Verify recovery with PIN or backup code
   async verifyRecovery(phone: string, pin?: string, backupCode?: string, newClientId?: string) {
+    // This is called by anonymous users (no auth needed)
     const { data, error } = await supabase.functions.invoke('recover-client', {
       body: { 
         action: 'verify', 

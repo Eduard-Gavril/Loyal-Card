@@ -68,13 +68,9 @@ export function useClientCard() {
       try {
         const activeTenantId = tenantId || urlTenantId
         
-        console.log('🚀 Init with:', { clientId, tenantId, urlTenantId, activeTenantId, urlQrCode })
-        
         // CASE 1: QR code in URL (shared link)
         if (urlQrCode) {
-          console.log('📱 Loading card from shared URL')
           const cardData = await api.getCardByQR(urlQrCode)
-          console.log('📦 Card loaded:', cardData)
           setCard(cardData)
           setClientData({
             clientId: cardData.client_id,
@@ -84,13 +80,11 @@ export function useClientCard() {
             customName: tenantName || undefined
           })
           
-          console.log('📋 Loading rules for tenant:', cardData.tenant_id)
           try {
             const rulesData = await api.getRewardRules(cardData.tenant_id)
-            console.log('📋 Rules loaded:', rulesData)
             setRules(rulesData || [])
           } catch (ruleError) {
-            console.error('❌ Error loading rules:', ruleError)
+            // Error silently handled
           }
           setLoading(false)
           return
@@ -98,20 +92,15 @@ export function useClientCard() {
         
         // CASE 2: No shop selected → go to selection
         if (!activeTenantId) {
-          console.log('❌ No tenant selected, redirecting')
           navigate('/select-tenant')
           return
         }
         
-        console.log('✅ Tenant selected:', activeTenantId)
-        
         // CASE 3: Shop selected
         if (clientId) {
-          console.log('📋 Has clientId:', clientId, 'checking for tenant:', activeTenantId)
           const existingCard = await api.getCardByClientAndTenant(clientId, activeTenantId)
           
           if (existingCard) {
-            console.log('✅ REUSING EXISTING CARD:', existingCard.qr_code)
             setCard(existingCard)
             setClientData({
               clientId: existingCard.client_id,
@@ -121,10 +110,8 @@ export function useClientCard() {
               customName: tenantName || undefined
             })
           } else {
-            console.log('📝 NO CARD FOUND - Creating new card with SAME clientId:', clientId)
             const result = await api.generateClientId(activeTenantId, clientId)
             if (result.success) {
-              console.log('✅ NEW CARD CREATED:', result.qr_code)
               setClientData({
                 clientId: result.client_id,
                 cardId: result.card_id,
@@ -137,10 +124,8 @@ export function useClientCard() {
             }
           }
         } else {
-          console.log('🆕 New user, creating client and card')
           const result = await api.generateClientId(activeTenantId)
           if (result.success) {
-            console.log('✅ Client and card created:', result.qr_code)
             setClientData({
               clientId: result.client_id,
               cardId: result.card_id,
@@ -157,7 +142,7 @@ export function useClientCard() {
         setRules(rulesData)
         
       } catch (error) {
-        console.error('❌ Error:', error)
+        // Error silently handled
       } finally {
         setLoading(false)
       }
@@ -177,9 +162,7 @@ export function useClientCard() {
         }
       })
         .then(setQrDataUrl)
-        .catch(console.error)
-    }
-  }, [qrCode])
+        .catch(() => {})
 
   const getRuleProgress = (ruleId: string) => {
     if (!card?.loyalty_state[ruleId]) {
@@ -213,16 +196,6 @@ export function useClientCard() {
     : []
 
   const displayProgress = loyaltyProgressFromState
-
-  // Debug log
-  console.log('🎯 ClientCard Debug:', {
-    card,
-    loyalty_state: card?.loyalty_state,
-    rules: rules.map(r => ({ id: r.id, name: r.name })),
-    activeRules: activeRules.map(r => ({ id: r.id, name: r.name })),
-    displayProgress,
-    hasLoyaltyProgress
-  })
 
   return {
     loading,

@@ -88,7 +88,6 @@ export default function AdminProducts() {
       if (productsError) throw productsError
 
       setProducts(productsData || [])
-      console.log('Loaded products:', productsData)
 
       // Get rules for each product
       const { data: rulesData } = await supabase
@@ -111,12 +110,9 @@ export default function AdminProducts() {
           rulesMap.set(rule.product_id, [...existing, ruleWithType])
         })
         setRules(rulesMap)
-        console.log('Loaded rules:', rulesData)
-        console.log('Rules map:', rulesMap)
       }
 
     } catch (error) {
-      console.error('Error loading products:', error)
       alert(t.errorLoading)
     } finally {
       setLoading(false)
@@ -222,7 +218,6 @@ export default function AdminProducts() {
       alert(t.productDeleted)
 
     } catch (error) {
-      console.error('Error deleting product:', error)
       alert(t.errorDeleting)
     }
   }
@@ -242,7 +237,6 @@ export default function AdminProducts() {
         p.id === productId ? { ...p, active: !currentStatus } : p
       ))
     } catch (error) {
-      console.error('Error toggling product status:', error)
       alert(t.errorStatus)
     }
   }
@@ -312,7 +306,6 @@ export default function AdminProducts() {
       alert(editingRule ? t.ruleUpdated : t.ruleAdded)
 
     } catch (error) {
-      console.error('Error saving rule:', error)
       alert(language === 'ro' ? 'Eroare la salvarea regulii' : 'Error saving rule')
     }
   }
@@ -333,7 +326,6 @@ export default function AdminProducts() {
       alert(t.ruleDeleted)
 
     } catch (error) {
-      console.error('Error deleting rule:', error)
       alert(language === 'ro' ? 'Eroare la ștergerea regulii' : 'Error deleting rule')
     }
   }

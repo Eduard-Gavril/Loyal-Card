@@ -332,6 +332,8 @@ export const translations = {
       allStores: '🏪 All available stores',
       searchingLocation: 'Searching for your location...',
       locationUnavailable: 'Location unavailable',
+      geoNotSupported: 'Geolocation is not supported by your browser',
+      geoFailed: 'Could not get your location',
       retry: 'Retry',
       searchPlaceholder: '🔍 Search by name, city or address...',
       loadingStores: 'Loading stores...',
@@ -396,6 +398,8 @@ export const translations = {
       savePhone: 'Save Phone Number',
       phoneLinked: 'Phone number linked successfully!',
       linkError: 'Failed to link phone number. Please try again.',
+      pinSixDigits: 'PIN must be exactly 6 digits.',
+      pinsMismatch: 'PINs do not match.',
     },
 
     // Account Recovery
@@ -420,6 +424,9 @@ export const translations = {
       tryAgain: 'Try again',
       noPhone: "Don't have a phone number linked?",
       createNew: 'Start fresh',
+      invalidPhoneFormat: 'Invalid phone number format. Please use format: +39 123 456 7890',
+      enterPin: 'Please enter your PIN',
+      enterBackupCode: 'Please enter a backup code',
     },
 
     // Privacy & Legal
@@ -951,6 +958,8 @@ export const translations = {
       allStores: '🏪 Toate magazinele disponibile',
       searchingLocation: 'Se caută locația ta...',
       locationUnavailable: 'Locație indisponibilă',
+      geoNotSupported: 'Geolocalizarea nu este suportată de browserul tău',
+      geoFailed: 'Nu s-a putut obține locația ta',
       retry: 'Reîncearcă',
       searchPlaceholder: '🔍 Caută după nume, oraș sau adresă...',
       loadingStores: 'Se încarcă magazinele...',
@@ -1016,6 +1025,8 @@ export const translations = {
       savePhone: 'Salvează Telefon',
       phoneLinked: 'Telefon asociat cu succes!',
       linkError: 'Nu s-a putut asocia telefonul. Te rugăm să încerci din nou.',
+      pinSixDigits: 'PIN-ul trebuie să aibă exact 6 cifre.',
+      pinsMismatch: 'PIN-urile nu se potrivesc.',
     },
 
     // Account Recovery
@@ -1040,6 +1051,9 @@ export const translations = {
       tryAgain: 'Încearcă din nou',
       noPhone: 'Nu ai un telefon asociat?',
       createNew: 'Începe de la zero',
+      invalidPhoneFormat: 'Format număr de telefon invalid. Folosiți formatul: +40 123 456 789',
+      enterPin: 'Introduceți PIN-ul',
+      enterBackupCode: 'Introduceți codul de rezervă',
     },
 
     // Privacy & Legal

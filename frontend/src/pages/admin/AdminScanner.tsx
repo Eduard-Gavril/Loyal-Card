@@ -128,8 +128,8 @@ export default function AdminScanner() {
     try {
       const data = await api.getProducts(tenantId)
       setProducts(data)
-    } catch (err) {
-      // Error silently handled
+    } catch (err: any) {
+      setError(err?.message || t.scanner.networkError)
     }
   }
 
@@ -148,8 +148,8 @@ export default function AdminScanner() {
     try {
       const data = await api.getRewardRules(tenantId)
       setRules(data)
-    } catch (err) {
-      // Error silently handled
+    } catch (err: any) {
+      setError(err?.message || t.scanner.networkError)
     }
   }
 
@@ -157,8 +157,8 @@ export default function AdminScanner() {
     try {
       const cardData = await api.getCardByQR(qrCode)
       setCard(cardData)
-    } catch (err) {
-      // Error silently handled
+    } catch (err: any) {
+      setError(err?.message || t.scanner.networkError)
     }
   }
 

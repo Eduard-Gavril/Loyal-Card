@@ -36,7 +36,6 @@ export default function ClientWallet() {
     setLoading(true)
     try {
       if (!clientId) {
-        console.log('No clientId found - new user')
         setCards([])
         setLoading(false)
         return
@@ -44,19 +43,15 @@ export default function ClientWallet() {
 
       // Get ALL cards for this client from database
       const allCards = await api.getCardsByClient(clientId)
-      console.log('Found cards for client:', allCards)
       
       // Get saved cards from store (with customName)
       const savedCards = getAllCards()
-      console.log('Saved cards from store:', savedCards)
       
       // Fetch tenant details for each card
       const cardsWithDetails = await Promise.all(
-        allCards.map(async (cardData) => {
+        allCards.map(async (cardData: any) => {
           try {
-            console.log('Loading tenant for card:', cardData.tenant_id)
             const tenant = await api.getTenant(cardData.tenant_id)
-            console.log('Tenant loaded successfully:', tenant)
             
             // Count total stamps/points
             const loyaltyState = cardData.loyalty_state || {}
@@ -80,8 +75,7 @@ export default function ClientWallet() {
               totalStamps,
               customName: savedCard?.customName
             }
-          } catch (error) {
-            console.error('Error loading card details for tenant:', cardData.tenant_id, error)
+          } catch (_err) {
             // Get customName from store if available
             const savedCard = savedCards.find(c => c.qrCode === cardData.qr_code)
             // Return card even if tenant fetch fails, with fallback values
@@ -104,10 +98,8 @@ export default function ClientWallet() {
         })
       )
 
-      console.log('Cards with details:', cardsWithDetails)
       setCards(cardsWithDetails.filter(c => c !== null) as SavedCard[])
-    } catch (error) {
-      console.error('Error loading cards:', error)
+    } catch (_err) {
       setCards([])
     } finally {
       setLoading(false)

@@ -45,43 +45,25 @@ export default function AdminDashboard() {
 
   const loadStats = async () => {
     if (!tenantId) return
+    const timeout = (p: any) => Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))])
 
     try {
-      // Get total scans
-      const { count: totalScans } = await supabase
-        .from('scan_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', tenantId)
-
-      // Get total clients (via cards)
-      const { count: totalClients } = await supabase
-        .from('cards')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', tenantId)
-
-      // Get scans today
       const today = new Date().toISOString().split('T')[0]
-      const { count: scansToday } = await supabase
-        .from('scan_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', tenantId)
-        .gte('scanned_at', today)
-
-      // Get total rewards given
-      const { count: totalRewards } = await supabase
-        .from('scan_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', tenantId)
-        .eq('reward_applied', true)
+      const [r1, r2, r3, r4] = await Promise.all([
+        timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId)),
+        timeout(supabase.from('cards').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId)),
+        timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId).gte('scanned_at', today)),
+        timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('reward_applied', true)),
+      ]) as any[]
 
       setStats({
-        totalScans: totalScans || 0,
-        totalClients: totalClients || 0,
-        totalRewards: totalRewards || 0,
-        scansToday: scansToday || 0
+        totalScans: r1.count || 0,
+        totalClients: r2.count || 0,
+        scansToday: r3.count || 0,
+        totalRewards: r4.count || 0,
       })
-    } catch (error) {
-      console.error('Error loading stats:', error)
+    } catch {
+      // Stats failed to load - leave defaults as 0
     }
   }
 
@@ -90,18 +72,23 @@ export default function AdminDashboard() {
     setLoadingActivity(true)
 
     try {
-      const { data } = await supabase
-        .from('scan_events')
-        .select(`
-          id,
-          scanned_at,
-          reward_applied,
-          products (name, metadata),
-          cards (client_id)
-        `)
-        .eq('tenant_id', tenantId)
-        .order('scanned_at', { ascending: false })
-        .limit(10)
+      const { data } = await Promise.race([
+        supabase
+          .from('scan_events')
+          .select(`
+            id,
+            scanned_at,
+            reward_applied,
+            products (name, metadata),
+            cards (client_id)
+          `)
+          .eq('tenant_id', tenantId)
+          .order('scanned_at', { ascending: false })
+          .limit(10),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+        )
+      ]) as any
 
       if (data) {
         const scans: RecentScan[] = data.map((scan: any) => ({
@@ -114,8 +101,8 @@ export default function AdminDashboard() {
         }))
         setRecentScans(scans)
       }
-    } catch (error) {
-      console.error('Error loading recent activity:', error)
+    } catch {
+      // Activity failed to load - spinner stops
     } finally {
       setLoadingActivity(false)
     }
@@ -163,10 +150,7 @@ export default function AdminDashboard() {
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
-      console.log('Cards query result:', { cards, cardsError, tenantId })
-
       if (cardsError) {
-        console.error('Error fetching cards:', cardsError)
         alert(language === 'ro' ? `Eroare: ${cardsError.message}` : `Error: ${cardsError.message}`)
         return
       }
@@ -242,8 +226,7 @@ export default function AdminDashboard() {
       // Download
       XLSX.writeFile(wb, filename)
 
-    } catch (error) {
-      console.error('Error exporting clients:', error)
+    } catch (error: any) {
       alert(language === 'ro' ? 'Eroare la exportul datelor' : 'Error exporting data')
     }
   }

@@ -90,7 +90,7 @@ export default function UserDashboard() {
       let stamps = 0
       let rewards = 0
 
-      allCards.forEach((card) => {
+      allCards.forEach((card: any) => {
         const loyaltyState = card.loyalty_state || {}
         Object.values(loyaltyState).forEach((state: any) => {
           stamps += state?.count || 0
@@ -118,13 +118,12 @@ export default function UserDashboard() {
 
     // Validate PIN (must be 6 digits)
     if (!/^\d{6}$/.test(pin)) {
-      setPhoneError('PIN must be exactly 6 digits.')
+      setPhoneError(t.protection.pinSixDigits)
       return
     }
 
-    // Check PIN confirmation
     if (pin !== confirmPin) {
-      setPhoneError('PINs do not match.')
+      setPhoneError(t.protection.pinsMismatch)
       return
     }
 
@@ -140,8 +139,8 @@ export default function UserDashboard() {
         setHasPhone(true)
         // Don't close modal yet - show backup codes first
       }
-    } catch (err: any) {
-      setPhoneError(err.message || t.protection.linkError)
+    } catch (error: any) {
+      setPhoneError(error?.message || t.protection.linkError)
     } finally {
       setSavingPhone(false)
     }

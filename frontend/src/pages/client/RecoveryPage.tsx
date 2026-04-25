@@ -29,7 +29,7 @@ export default function RecoveryPage() {
 
     // Validate phone number
     if (!isValidPhoneNumber(phone)) {
-      setError('Invalid phone number format. Please use format: +40 123 456 789')
+      setError(t.recovery.invalidPhoneFormat)
       setLoading(false)
       return
     }
@@ -39,7 +39,7 @@ export default function RecoveryPage() {
       
       if (result.success && result.phone_found) {
         setMode('verify')
-        setSuccess(t.recovery.checkPhone || 'Phone found. Please enter your PIN.')
+        setSuccess(t.recovery.checkPhone)
       }
     } catch (err: any) {
       setError(err.message || t.recovery.requestError)
@@ -52,12 +52,12 @@ export default function RecoveryPage() {
     e.preventDefault()
     
     if (!useBackupCode && !pin) {
-      setError('Please enter your PIN')
+      setError(t.recovery.enterPin)
       return
     }
 
     if (useBackupCode && !backupCode) {
-      setError('Please enter a backup code')
+      setError(t.recovery.enterBackupCode)
       return
     }
 
@@ -80,7 +80,7 @@ export default function RecoveryPage() {
           const cards = await api.getCardsByClient(result.client_id)
           if (cards && cards.length > 0) {
             // Replace all saved cards with the recovered ones
-            const recoveredCards = cards.map(card => ({
+            const recoveredCards = cards.map((card: any) => ({
               clientId: result.client_id,
               cardId: card.id,
               qrCode: card.qr_code,

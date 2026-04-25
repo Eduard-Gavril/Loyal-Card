@@ -28,7 +28,7 @@ export default function TenantSelector() {
 
     // Check if geolocation is supported
     if (!navigator.geolocation) {
-      setLocationError('La geolocalizzazione non è supportata dal tuo browser')
+      setLocationError(t.tenantSelector.geoNotSupported)
       await loadAllTenants()
       setLocationLoading(false)
       return
@@ -42,29 +42,22 @@ export default function TenantSelector() {
         setUserLocation({ lat, lon })
         
         try {
-          // Get nearest tenants
-          console.log('Requesting nearest tenants for:', { lat, lon })
           const nearestTenants = await api.getNearestTenants(lat, lon, 5)
-          console.log('Nearest tenants received:', nearestTenants)
           
-          // If no nearby tenants found, load all tenants
           if (!nearestTenants || nearestTenants.length === 0) {
-            console.log('No nearby tenants found, loading all tenants')
             await loadAllTenants()
           } else {
             setTenants(nearestTenants)
           }
-        } catch (error) {
-          console.error('Error fetching nearest tenants:', error)
+        } catch {
           await loadAllTenants()
         } finally {
           setLoading(false)
           setLocationLoading(false)
         }
       },
-      async (error) => {
-        console.error('Geolocation error:', error)
-        setLocationError('Non è stato possibile ottenere la tua posizione')
+      async (_error) => {
+        setLocationError(t.tenantSelector.geoFailed)
         await loadAllTenants()
         setLocationLoading(false)
       },
@@ -80,32 +73,21 @@ export default function TenantSelector() {
     setLoading(true)
     try {
       const allTenants = await api.getAllTenants()
-      console.log('All tenants loaded:', allTenants)
       setTenants(allTenants)
-    } catch (error) {
-      console.error('Error loading tenants:', error)
+    } catch (error: any) {
+      setLocationError(error?.message || t.tenantSelector.locationUnavailable)
     } finally {
       setLoading(false)
     }
   }
 
   const handleSelectTenant = (tenant: TenantWithDistance | Tenant) => {
-    console.log('🏪 Tenant selected:', {
-      id: tenant.id,
-      name: tenant.name,
-      slug: tenant.slug
-    })
-    
-    // Save selected tenant to store
     setTenantData({
       tenantId: tenant.id,
       tenantName: tenant.name,
       tenantSlug: tenant.slug
     })
-    
-    console.log('✅ Tenant data saved, navigating to /card')
-    
-    // Navigate to card generation with tenant in URL as fallback
+
     navigate(`/card?tenant=${tenant.id}`)
   }
 

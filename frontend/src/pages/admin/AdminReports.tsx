@@ -30,6 +30,7 @@ export default function AdminReports() {
     conversionRate: 0
   })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('7d')
 
   useEffect(() => {
@@ -39,6 +40,9 @@ export default function AdminReports() {
   const loadReports = async () => {
     if (!tenantId) return
     setLoading(true)
+    setError('')
+
+    const timeout = (p: any) => Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 8000))])
 
     try {
       const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90
@@ -46,18 +50,18 @@ export default function AdminReports() {
       startDate.setDate(startDate.getDate() - days)
 
       // Get all scans in the time range
-      const { data: scans } = await supabase
+      const { data: scans } = await timeout(supabase
         .from('scan_events')
         .select('scanned_at, reward_applied, product_id')
         .eq('tenant_id', tenantId)
         .gte('scanned_at', startDate.toISOString())
-        .order('scanned_at', { ascending: true })
+        .order('scanned_at', { ascending: true })) as any
 
       // Get products for names
-      const { data: products } = await supabase
+      const { data: products } = await timeout(supabase
         .from('products')
         .select('id, name, metadata')
-        .eq('tenant_id', tenantId)
+        .eq('tenant_id', tenantId)) as any
 
       // Process daily stats
       const dailyMap = new Map<string, { scans: number; rewards: number }>()
@@ -71,7 +75,7 @@ export default function AdminReports() {
       }
 
       // Count scans per day
-      scans?.forEach(scan => {
+      scans?.forEach((scan: any) => {
         const dateStr = scan.scanned_at.split('T')[0]
         const existing = dailyMap.get(dateStr) || { scans: 0, rewards: 0 }
         existing.scans++
@@ -88,7 +92,7 @@ export default function AdminReports() {
 
       // Calculate product stats
       const productCounts = new Map<string, number>()
-      scans?.forEach(scan => {
+      scans?.forEach((scan: any) => {
         if (scan.product_id) {
           const count = productCounts.get(scan.product_id) || 0
           productCounts.set(scan.product_id, count + 1)
@@ -98,7 +102,7 @@ export default function AdminReports() {
       // Get top 5 products
       const topProductsArray = Array.from(productCounts.entries())
         .map(([id, count]) => {
-          const product = products?.find(p => p.id === id)
+          const product = products?.find((p: any) => p.id === id)
           return {
             name: product?.name || 'Unknown',
             count,
@@ -112,7 +116,7 @@ export default function AdminReports() {
 
       // Calculate totals
       const totalScans = scans?.length || 0
-      const totalRewards = scans?.filter(s => s.reward_applied).length || 0
+      const totalRewards = scans?.filter((s: any) => s.reward_applied).length || 0
       const avgScansPerDay = totalScans / days
       const conversionRate = totalScans > 0 ? (totalRewards / totalScans) * 100 : 0
 
@@ -123,8 +127,8 @@ export default function AdminReports() {
         conversionRate: Math.round(conversionRate * 10) / 10
       })
 
-    } catch (error) {
-      console.error('Error loading reports:', error)
+    } catch (err: any) {
+      setError(err?.message || (language === 'ro' ? 'Eroare la încărcarea rapoartelor' : 'Failed to load reports'))
     } finally {
       setLoading(false)
     }
@@ -186,6 +190,10 @@ export default function AdminReports() {
             <div className="text-center py-20">
               <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
               <p className="text-gray-300">{language === 'ro' ? 'Se încarcă...' : 'Loading...'}</p>
+            </div>
+          ) : error ? (
+            <div className="bg-red-900/40 border border-red-500/50 text-red-300 px-5 py-4 rounded-xl mb-6">
+              {error}
             </div>
           ) : (
             <>

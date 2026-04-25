@@ -157,133 +157,199 @@ export const api = {
 
   // Register scan
   async registerScan(qrCode: string, productId: string) {
-    // Get current session
-    let { data: { session } } = await supabase.auth.getSession()
+    // Create AbortController with 10 second timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     
-    if (!session) {
-      throw new Error('Not authenticated - please login again')
-    }
-    
-    // Check if token expires in less than 5 minutes, refresh if needed
-    const expiresAt = session.expires_at || 0
-    const now = Math.floor(Date.now() / 1000)
-    const fiveMinutes = 300
-    
-    if (expiresAt < now + fiveMinutes) {
-      // Token is expiring soon or expired, try to refresh
-      const { data: { session: newSession } } = await supabase.auth.refreshSession()
+    try {
+      // Get current session with timeout
+      const sessionPromise = supabase.auth.getSession()
+      const sessionResult = await Promise.race([
+        sessionPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Session check timeout')), 5000))
+      ]) as { data: { session: any } }
       
-      // If refresh succeeded, use new session
-      if (newSession) {
-        session = newSession
+      let session = sessionResult.data.session
+      
+      if (!session) {
+        throw new Error('Not authenticated - please login again')
       }
-      // If refresh failed but we still have an old session, try to use it anyway
-      // (might work if server-side expiry is more lenient)
-    }
-    
-    // Get Supabase URL and anon key from env
-    const functionUrl = import.meta.env.VITE_SUPABASE_URL
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-    
-    // Make direct fetch call with explicit headers
-    const response = await fetch(`${functionUrl}/functions/v1/register-scan`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': anonKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ qr_code: qrCode, product_id: productId })
-    })
-    
-    const data = await response.json()
-    
-    if (!response.ok) {
-      throw {
-        message: data.error || 'Request failed',
-        name: 'FunctionsHttpError',
-        status: response.status,
-        body: data,
-        fullError: data
+      
+      // Check if token expires in less than 5 minutes, refresh if needed
+      const expiresAt = session.expires_at || 0
+      const now = Math.floor(Date.now() / 1000)
+      const fiveMinutes = 300
+      
+      if (expiresAt < now + fiveMinutes) {
+        // Token is expiring soon or expired, try to refresh with timeout
+        const refreshPromise = supabase.auth.refreshSession()
+        const refreshResult = await Promise.race([
+          refreshPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Token refresh timeout')), 5000))
+        ]).catch(() => null) as any
+        
+        // If refresh succeeded, use new session
+        if (refreshResult?.data?.session) {
+          session = refreshResult.data.session
+        }
       }
+      
+      // Get Supabase URL and anon key from env
+      const functionUrl = import.meta.env.VITE_SUPABASE_URL
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+      
+      // Make direct fetch call with explicit headers and timeout
+      const response = await fetch(`${functionUrl}/functions/v1/register-scan`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': anonKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ qr_code: qrCode, product_id: productId }),
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw {
+          message: data.error || 'Request failed',
+          name: 'FunctionsHttpError',
+          status: response.status,
+          body: data,
+          fullError: data
+        }
+      }
+      
+      return data
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Connection timeout. Close any background tabs and try again.')
+      }
+      throw error
     }
-    
-    return data
   },
 
   // Redeem reward
   async redeemReward(qrCode: string, rewardRuleId: string) {
-    // Get current session
-    let { data: { session } } = await supabase.auth.getSession()
+    // Create AbortController with 10 second timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     
-    if (!session) {
-      throw new Error('Not authenticated - please login again')
-    }
-    
-    // Check if token expires in less than 5 minutes, refresh if needed
-    const expiresAt = session.expires_at || 0
-    const now = Math.floor(Date.now() / 1000)
-    const fiveMinutes = 300
-    
-    if (expiresAt < now + fiveMinutes) {
-      // Token is expiring soon or expired, try to refresh
-      const { data: { session: newSession } } = await supabase.auth.refreshSession()
+    try {
+      // Get current session with timeout
+      const sessionPromise = supabase.auth.getSession()
+      const sessionResult = await Promise.race([
+        sessionPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Session check timeout')), 5000))
+      ]) as { data: { session: any } }
       
-      // If refresh succeeded, use new session
-      if (newSession) {
-        session = newSession
+      let session = sessionResult.data.session
+      
+      if (!session) {
+        throw new Error('Not authenticated - please login again')
       }
-      // If refresh failed but we still have an old session, try to use it anyway
-      // (might work if server-side expiry is more lenient)
-    }
-    
-    // Get Supabase URL and anon key from env
-    const functionUrl = import.meta.env.VITE_SUPABASE_URL
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-    
-    // Make direct fetch call with explicit headers
-    const response = await fetch(`${functionUrl}/functions/v1/redeem-reward`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': anonKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ qr_code: qrCode, reward_rule_id: rewardRuleId })
-    })
-    
-    const data = await response.json()
-    
-    if (!response.ok) {
-      throw {
-        message: data.error || 'Failed to redeem reward',
-        name: 'FunctionsHttpError',
-        fullError: data
+      
+      // Check if token expires in less than 5 minutes, refresh if needed
+      const expiresAt = session.expires_at || 0
+      const now = Math.floor(Date.now() / 1000)
+      const fiveMinutes = 300
+      
+      if (expiresAt < now + fiveMinutes) {
+        // Token is expiring soon or expired, try to refresh with timeout
+        const refreshPromise = supabase.auth.refreshSession()
+        const refreshResult = await Promise.race([
+          refreshPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Token refresh timeout')), 5000))
+        ]).catch(() => null) as any
+        
+        // If refresh succeeded, use new session
+        if (refreshResult?.data?.session) {
+          session = refreshResult.data.session
+        }
       }
+      
+      // Get Supabase URL and anon key from env
+      const functionUrl = import.meta.env.VITE_SUPABASE_URL
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+      
+      // Make direct fetch call with explicit headers and timeout
+      const response = await fetch(`${functionUrl}/functions/v1/redeem-reward`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': anonKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ qr_code: qrCode, reward_rule_id: rewardRuleId }),
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw {
+          message: data.error || 'Failed to redeem reward',
+          name: 'FunctionsHttpError',
+          fullError: data
+        }
+      }
+      
+      return data
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Connection timeout. Close any background tabs and try again.')
+      }
+      throw error
     }
-    
-    return data
   },
 
   // Get card by QR code
   async getCardByQR(qrCode: string) {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('cards')
       .select('*, clients(*)')
       .eq('qr_code', qrCode)
       .single()
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     return data
   },
 
   // Get card by client ID and tenant ID
   async getCardByClientAndTenant(clientId: string, tenantId: string) {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('cards')
       .select('*, clients(*)')
       .eq('client_id', clientId)
       .eq('tenant_id', tenantId)
       .single()
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     
     if (error) {
       // If not found, return null instead of throwing
@@ -295,58 +361,103 @@ export const api = {
 
   // Get all cards for a client
   async getCardsByClient(clientId: string) {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('cards')
       .select('*, clients(*)')
       .eq('client_id', clientId)
       .eq('active', true)
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     return data || []
   },
 
   // Get products for tenant
   async getProducts(tenantId: string) {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('products')
       .select('*, product_categories(*)')
       .eq('tenant_id', tenantId)
       .eq('active', true)
       .order('name')
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     return data
   },
 
   // Get reward rules for tenant
   async getRewardRules(tenantId: string) {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('reward_rules')
       .select('*')
       .eq('tenant_id', tenantId)
       .eq('active', true)
       .order('priority', { ascending: true })  // Lower priority number = shown first
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     return data
   },
 
   // Get scan events for card
   async getScanEvents(cardId: string, limit = 50) {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('scan_events')
       .select('*, products(name), admins(id)')
       .eq('card_id', cardId)
       .order('scanned_at', { ascending: false })
       .limit(limit)
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     return data
   },
 
   // Get tenant info
   async getTenant(tenantId: string): Promise<Tenant> {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('tenants')
       .select('*')
       .eq('id', tenantId)
       .single()
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     
     if (error) {
       throw error
@@ -357,33 +468,60 @@ export const api = {
 
   // Get all active tenants
   async getAllTenants(): Promise<Tenant[]> {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('tenants')
       .select('*')
       .eq('active', true)
       .order('name')
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     return data || []
   },
 
   // Get nearest tenants by geolocation
   async getNearestTenants(latitude: number, longitude: number, maxResults: number = 5): Promise<TenantWithDistance[]> {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .rpc('get_nearest_tenants', {
         user_lat: latitude,
         user_lon: longitude,
         max_results: maxResults
       })
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     return data || []
   },
 
   // Get product usage statistics for tenant
   async getProductUsageStats(tenantId: string): Promise<Record<string, number>> {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('scan_events')
       .select('product_id')
       .eq('tenant_id', tenantId)
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     
     if (error) {
       return {}
@@ -391,7 +529,7 @@ export const api = {
     
     // Count occurrences
     const stats: Record<string, number> = {}
-    data?.forEach(event => {
+    data?.forEach((event: any) => {
       stats[event.product_id] = (stats[event.product_id] || 0) + 1
     })
     
@@ -401,9 +539,18 @@ export const api = {
   // Link phone number to client for recovery (with PIN and backup codes)
   async linkPhone(clientId: string, phone: string, pin: string) {
     // This is called by anonymous users (no auth needed)
-    const { data, error } = await supabase.functions.invoke('link-phone', {
+    const invocationPromise = supabase.functions.invoke('link-phone', {
       body: { client_id: clientId, phone, pin }
     })
+    
+    const result = await Promise.race([
+      invocationPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     if (data && !data.success) {
       throw new Error(data.error || 'Failed to link phone')
@@ -413,11 +560,20 @@ export const api = {
 
   // Get client by ID
   async getClient(clientId: string): Promise<Client | null> {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('clients')
       .select('*')
       .eq('id', clientId)
       .single()
+    
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) {
       if (error.code === 'PGRST116') return null
       throw error
@@ -428,9 +584,18 @@ export const api = {
   // Request account recovery (checks if phone exists)
   async requestRecovery(phone: string) {
     // This is called by anonymous users (no auth needed)
-    const { data, error } = await supabase.functions.invoke('recover-client', {
+    const invocationPromise = supabase.functions.invoke('recover-client', {
       body: { action: 'request', phone }
     })
+    
+    const result = await Promise.race([
+      invocationPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     if (data && !data.success) {
       throw new Error(data.error || 'Recovery request failed')
@@ -441,7 +606,7 @@ export const api = {
   // Verify recovery with PIN or backup code
   async verifyRecovery(phone: string, pin?: string, backupCode?: string, newClientId?: string) {
     // This is called by anonymous users (no auth needed)
-    const { data, error } = await supabase.functions.invoke('recover-client', {
+    const invocationPromise = supabase.functions.invoke('recover-client', {
       body: { 
         action: 'verify', 
         phone,
@@ -450,6 +615,15 @@ export const api = {
         new_client_id: newClientId 
       }
     })
+    
+    const result = await Promise.race([
+      invocationPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
+      )
+    ]) as any
+    
+    const { data, error } = result
     if (error) throw error
     if (data && !data.success) {
       throw new Error(data.error || 'Recovery verification failed')

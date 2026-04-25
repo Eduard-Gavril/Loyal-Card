@@ -24,6 +24,7 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     loadSettings()
@@ -34,12 +35,14 @@ export default function AdminSettings() {
     setLoading(true)
 
     try {
-      const { data } = await supabase
-        .from('tenants')
-        .select('*')
-        .eq('id', tenantId)
-        .single()
+      const result = await Promise.race([
+        supabase.from('tenants').select('*').eq('id', tenantId).single(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+        )
+      ]) as any
 
+      const data = result?.data
       if (data) {
         setSettings({
           name: data.name || '',
@@ -48,8 +51,8 @@ export default function AdminSettings() {
           welcome_message: data.metadata?.welcome_message || ''
         })
       }
-    } catch (error) {
-      console.error('Error loading settings:', error)
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load settings')
     } finally {
       setLoading(false)
     }
@@ -58,22 +61,26 @@ export default function AdminSettings() {
   const saveSettings = async () => {
     if (!tenantId) return
     setSaving(true)
+    setError('')
 
     try {
-      await supabase
-        .from('tenants')
-        .update({
+      await Promise.race([
+        supabase.from('tenants').update({
           name: settings.name,
           logo_url: settings.logo_url,
           primary_color: settings.primary_color,
           metadata: { welcome_message: settings.welcome_message }
-        })
-        .eq('id', tenantId)
+        }).eq('id', tenantId),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+        )
+      ])
 
       setSaved(true)
+      setError('')
       setTimeout(() => setSaved(false), 3000)
-    } catch (error) {
-      console.error('Error saving settings:', error)
+    } catch (err: any) {
+      setError(err?.message || 'Failed to save settings. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -249,6 +256,13 @@ export default function AdminSettings() {
                   </div>
                 </div>
               </div>
+
+              {/* Error message */}
+              {error && (
+                <div className="bg-red-500/20 border border-red-500/50 rounded-xl px-4 py-3 text-red-300 text-sm">
+                  {error}
+                </div>
+              )}
 
               {/* Save Button */}
               <button

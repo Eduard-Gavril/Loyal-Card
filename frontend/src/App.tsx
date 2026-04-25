@@ -60,16 +60,17 @@ function App() {
       // Only handle TOKEN_REFRESHED - let AdminLogin handle SIGNED_IN
       if (event === 'TOKEN_REFRESHED') {
         if (session) {
-          // Get admin info to update store
-          const { data: admin } = await supabase
-            .from('admins')
-            .select('tenant_id, role')
-            .eq('user_id', session.user.id)
-            .eq('active', true)
-            .single()
-
-          if (admin) {
-            setAuth(session.user, session, admin.tenant_id, admin.role)
+          try {
+            const result = await Promise.race([
+              supabase.from('admins').select('tenant_id, role').eq('user_id', session.user.id).eq('active', true).single(),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
+            ]) as any
+            const admin = result?.data
+            if (admin) {
+              setAuth(session.user, session, admin.tenant_id, admin.role)
+            }
+          } catch {
+            // Token refreshed but admin fetch timed out - not critical
           }
         }
       } else if (event === 'SIGNED_OUT') {
@@ -77,9 +78,55 @@ function App() {
       }
     })
 
-    // Cleanup subscription
+    // Handle tab visibility changes - refresh session when tab becomes visible
+    let lastVisibilityChange = Date.now()
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden') {
+        lastVisibilityChange = Date.now()
+        return
+      }
+
+      if (document.visibilityState === 'visible') {
+        const timeSinceLastChange = Date.now() - lastVisibilityChange
+        
+        // If tab was hidden for more than 5 minutes, force session refresh
+        if (timeSinceLastChange > 5 * 60 * 1000) {
+          try {
+            const { data: { session } } = await Promise.race([
+              supabase.auth.getSession(),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Session check timeout')), 5000)
+              )
+            ]) as any
+            
+            if (session) {
+              // Try to refresh the session
+              await Promise.race([
+                supabase.auth.refreshSession(),
+                new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error('Refresh timeout')), 5000)
+                )
+              ]).catch(() => {
+                // If refresh fails, sign out to force re-login
+                supabase.auth.signOut()
+                clearAuth()
+              })
+            }
+          } catch {
+            // On error, do nothing - let normal flow handle it
+          }
+        }
+        
+        lastVisibilityChange = Date.now()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Cleanup subscription and listener
     return () => {
       subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [setAuth, clearAuth])
 

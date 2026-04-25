@@ -22,21 +22,42 @@ export default function AdminLogin() {
     setError('')
 
     try {
-      // Sign in with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      // Clear any existing corrupted session before login
+      await supabase.auth.signOut().catch(() => {})
+      
+      // Sign in with Supabase Auth with timeout
+      const loginPromise = supabase.auth.signInWithPassword({
         email,
         password
       })
+      
+      const authResult = await Promise.race([
+        loginPromise,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
+        )
+      ]) as any
+      
+      const { data: authData, error: authError } = authResult
 
       if (authError) throw authError
 
-      // Get admin info
-      const { data: admin, error: adminError } = await supabase
+      // Get admin info with timeout
+      const adminPromise = supabase
         .from('admins')
         .select('tenant_id, role')
         .eq('user_id', authData.user.id)
         .eq('active', true)
         .single()
+      
+      const adminResult = await Promise.race([
+        adminPromise,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
+        )
+      ]) as any
+      
+      const { data: admin, error: adminError } = adminResult
 
       if (adminError || !admin) {
         await supabase.auth.signOut()

@@ -40,6 +40,7 @@ export default function SuperAdminDashboard() {
   })
   const [tenants, setTenants] = useState<TenantInfo[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
   // Redirect if not super admin
@@ -57,47 +58,29 @@ export default function SuperAdminDashboard() {
   }, [role])
 
   const loadGlobalStats = async () => {
+    const timeout = (p: any) => Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 8000))])
     try {
-      // Get all tenants count
-      const { count: totalTenants } = await supabase
-        .from('tenants')
-        .select('*', { count: 'exact', head: true })
-
-      const { count: activeTenants } = await supabase
-        .from('tenants')
-        .select('*', { count: 'exact', head: true })
-        .eq('active', true)
-
-      // Get total clients across all tenants
-      const { count: totalClients } = await supabase
-        .from('cards')
-        .select('*', { count: 'exact', head: true })
-
-      // Get total scans
-      const { count: totalScans } = await supabase
-        .from('scan_events')
-        .select('*', { count: 'exact', head: true })
-
-      // Get total rewards
-      const { count: totalRewards } = await supabase
-        .from('scan_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('reward_applied', true)
-
-      // Get scans today
       const today = new Date().toISOString().split('T')[0]
-      const { count: scansToday } = await supabase
-        .from('scan_events')
-        .select('*', { count: 'exact', head: true })
-        .gte('scanned_at', today)
-
-      // Get scans this month
       const firstDayOfMonth = new Date()
       firstDayOfMonth.setDate(1)
-      const { count: scansThisMonth } = await supabase
-        .from('scan_events')
-        .select('*', { count: 'exact', head: true })
-        .gte('scanned_at', firstDayOfMonth.toISOString())
+
+      const [
+        { count: totalTenants },
+        { count: activeTenants },
+        { count: totalClients },
+        { count: totalScans },
+        { count: totalRewards },
+        { count: scansToday },
+        { count: scansThisMonth }
+      ] = await Promise.all([
+        timeout(supabase.from('tenants').select('*', { count: 'exact', head: true })),
+        timeout(supabase.from('tenants').select('*', { count: 'exact', head: true }).eq('active', true)),
+        timeout(supabase.from('cards').select('*', { count: 'exact', head: true })),
+        timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true })),
+        timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).eq('reward_applied', true)),
+        timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).gte('scanned_at', today)),
+        timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).gte('scanned_at', firstDayOfMonth.toISOString()))
+      ]) as any[]
 
       setGlobalStats({
         totalTenants: totalTenants || 0,
@@ -108,54 +91,41 @@ export default function SuperAdminDashboard() {
         scansToday: scansToday || 0,
         scansThisMonth: scansThisMonth || 0
       })
-    } catch (error) {
-      console.error('Error loading global stats:', error)
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load global stats')
     }
   }
 
   const loadTenants = async () => {
     setLoading(true)
+    const timeout = (p: any) => Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 8000))])
     try {
       // Get all tenants
-      const { data: tenantsData } = await supabase
+      const { data: tenantsData } = await timeout(supabase
         .from('tenants')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false })) as any
 
       if (!tenantsData) {
         setTenants([])
         return
       }
 
-      // Load stats for each tenant
+      // Load stats for each tenant (4 queries in parallel per tenant)
+      const today = new Date().toISOString().split('T')[0]
       const tenantsWithStats = await Promise.all(
-        tenantsData.map(async (tenant) => {
-          // Get clients count
-          const { count: totalClients } = await supabase
-            .from('cards')
-            .select('*', { count: 'exact', head: true })
-            .eq('tenant_id', tenant.id)
-
-          // Get scans count
-          const { count: totalScans } = await supabase
-            .from('scan_events')
-            .select('*', { count: 'exact', head: true })
-            .eq('tenant_id', tenant.id)
-
-          // Get rewards count
-          const { count: totalRewards } = await supabase
-            .from('scan_events')
-            .select('*', { count: 'exact', head: true })
-            .eq('tenant_id', tenant.id)
-            .eq('reward_applied', true)
-
-          // Get scans today
-          const today = new Date().toISOString().split('T')[0]
-          const { count: scansToday } = await supabase
-            .from('scan_events')
-            .select('*', { count: 'exact', head: true })
-            .eq('tenant_id', tenant.id)
-            .gte('scanned_at', today)
+        tenantsData.map(async (tenant: any) => {
+          const [
+            { count: totalClients },
+            { count: totalScans },
+            { count: totalRewards },
+            { count: scansToday }
+          ] = await Promise.all([
+            timeout(supabase.from('cards').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id)),
+            timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id)),
+            timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('reward_applied', true)),
+            timeout(supabase.from('scan_events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id).gte('scanned_at', today))
+          ]) as any[]
 
           return {
             ...tenant,
@@ -168,8 +138,8 @@ export default function SuperAdminDashboard() {
       )
 
       setTenants(tenantsWithStats)
-    } catch (error) {
-      console.error('Error loading tenants:', error)
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load tenants')
     } finally {
       setLoading(false)
     }
@@ -177,10 +147,10 @@ export default function SuperAdminDashboard() {
 
   const toggleTenantStatus = async (tenantId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('tenants')
-        .update({ active: !currentStatus })
-        .eq('id', tenantId)
+      const { error } = await Promise.race([
+        supabase.from('tenants').update({ active: !currentStatus }).eq('id', tenantId),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 8000))
+      ]) as any
 
       if (error) throw error
 
@@ -188,10 +158,9 @@ export default function SuperAdminDashboard() {
       await loadTenants()
       await loadGlobalStats()
       
-      alert(currentStatus ? '❌ Tenant disattivato' : '✅ Tenant attivato')
-    } catch (error) {
-      console.error('Error toggling tenant status:', error)
-      alert('Errore durante la modifica dello stato')
+      alert(currentStatus ? 'Tenant deactivated' : 'Tenant activated')
+    } catch (err: any) {
+      setError(err?.message || 'Failed to update tenant status')
     }
   }
 
@@ -233,6 +202,15 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
         </header>
+
+        {/* Error banner */}
+        {error && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+            <div className="bg-red-900/40 border border-red-500/50 text-red-300 px-5 py-4 rounded-xl">
+              {error}
+            </div>
+          </div>
+        )}
 
         {/* Global Stats */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">

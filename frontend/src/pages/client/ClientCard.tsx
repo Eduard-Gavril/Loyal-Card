@@ -67,14 +67,9 @@ export default function ClientCard() {
         // Use tenantId from store or URL parameter
         const activeTenantId = tenantId || urlTenantId
         
-        console.log('🚀 Init with:', { clientId, tenantId, urlTenantId, activeTenantId, urlQrCode })
-        
-        // CASO 1: QR code nell'URL (link condiviso)
+        // CASE 1: QR code in URL (shared link)
         if (urlQrCode) {
-          console.log('📱 Loading card from shared URL')
           const cardData = await api.getCardByQR(urlQrCode)
-          console.log('📦 Card loaded:', cardData)
-          console.log('🏪 Tenant ID from card:', cardData.tenant_id)
           setCard(cardData)
           setClientData({
             clientId: cardData.client_id,
@@ -84,42 +79,27 @@ export default function ClientCard() {
             customName: tenantName || undefined
           })
           
-          // Load rules
-          console.log('📋 Loading rules for tenant:', cardData.tenant_id)
           try {
             const rulesData = await api.getRewardRules(cardData.tenant_id)
-            console.log('📋 Rules loaded:', rulesData)
             setRules(rulesData || [])
-          } catch (ruleError) {
-            console.error('❌ Error loading rules:', ruleError)
+          } catch {
+            // Rules failed to load - non-critical
           }
           setLoading(false)
           return
         }
         
-        // CASO 2: Nessun negozio selezionato → vai a selezionare
+        // CASE 2: No store selected → go select one
         if (!activeTenantId) {
-          console.log('❌ No tenant selected (store:', tenantId, 'url:', urlTenantId, '), redirecting')
           navigate('/select-tenant')
           return
         }
         
-        console.log('✅ Tenant selected:', activeTenantId)
-        
-        // CASO 3: Ha selezionato un negozio
-        // Controlla se ha già una card per questo negozio
+        // CASE 3: Store selected
         if (clientId) {
-          console.log('� Has clientId:', clientId, 'checking for tenant:', activeTenantId)
           const existingCard = await api.getCardByClientAndTenant(clientId, activeTenantId)
-          
+
           if (existingCard) {
-            // Ha già una card per questo negozio
-            console.log('✅ REUSING EXISTING CARD:', {
-              qr: existingCard.qr_code,
-              cardId: existingCard.id,
-              clientId: existingCard.client_id,
-              tenantId: existingCard.tenant_id
-            })
             setCard(existingCard)
             setClientData({
               clientId: existingCard.client_id,
@@ -129,17 +109,8 @@ export default function ClientCard() {
               customName: tenantName || undefined
             })
           } else {
-            // Non ha una card per questo negozio, creala riusando il client
-            console.log('📝 NO CARD FOUND - Creating new card with SAME clientId:', clientId)
             const result = await api.generateClientId(activeTenantId, clientId)
-            console.log('📝 Result from generateClientId:', result)
             if (result.success) {
-              console.log('✅ NEW CARD CREATED:', {
-                qr: result.qr_code,
-                cardId: result.card_id,
-                clientId: result.client_id,
-                tenantId: activeTenantId
-              })
               setClientData({
                 clientId: result.client_id,
                 cardId: result.card_id,
@@ -152,11 +123,9 @@ export default function ClientCard() {
             }
           }
         } else {
-          // Utente completamente nuovo - crea client e card
-          console.log('🆕 New user, creating client and card')
+          // New user - create client and card
           const result = await api.generateClientId(activeTenantId)
           if (result.success) {
-            console.log('✅ Client and card created:', result.qr_code)
             setClientData({
               clientId: result.client_id,
               cardId: result.card_id,
@@ -173,8 +142,8 @@ export default function ClientCard() {
         const rulesData = await api.getRewardRules(activeTenantId)
         setRules(rulesData)
         
-      } catch (error) {
-        console.error('❌ Error:', error)
+      } catch {
+        // Error handled silently
       } finally {
         setLoading(false)
       }
@@ -194,7 +163,7 @@ export default function ClientCard() {
         }
       })
         .then(setQrDataUrl)
-        .catch(console.error)
+        .catch(() => {})
     }
   }, [qrCode])
 

@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
 import { api, Card as CardType, RewardRule } from '@/lib/supabase'
+import { getTranslation } from '@/lib/i18n'
 
 interface LoyaltyProgressItem {
   id: string
@@ -18,6 +19,7 @@ export function useClientCard() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { clientId, qrCode, tenantId, tenantName, setClientData, language } = useClientStore()
+  const t = getTranslation(language)
   
   const urlTenantId = searchParams.get('tenant')
   
@@ -48,7 +50,7 @@ export function useClientCard() {
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-        alert('Per aggiungere alla schermata home su iOS:\n\n1. Tocca il pulsante Condividi\n2. Scorri e tocca "Aggiungi a Home"\n3. Tocca "Aggiungi"')
+        alert(t.clientCard.iosInstallInstructions)
       }
       return
     }
@@ -188,7 +190,7 @@ export function useClientCard() {
           const matchingRule = rules.find(r => r.id === ruleId)
           return {
             id: ruleId,
-            name: matchingRule?.name || 'Programma Fedeltà',
+            name: matchingRule?.name || t.clientCard.loyaltyProgram,
             description: matchingRule?.description,
             buy_count: matchingRule?.buy_count || 6,
             count: state.count,

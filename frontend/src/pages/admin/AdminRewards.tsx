@@ -14,6 +14,7 @@ export default function AdminRewards() {
   const [loading, setLoading] = useState(true)
   const [editingRule, setEditingRule] = useState<string | null>(null)
   const [editValue, setEditValue] = useState<number>(0)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     loadData()
@@ -22,60 +23,53 @@ export default function AdminRewards() {
   const loadData = async () => {
     if (!tenantId) return
     setLoading(true)
+    setError('')
 
     try {
-      // Load products
-      const { data: productsData } = await supabase
-        .from('products')
-        .select('*')
-        .eq('tenant_id', tenantId)
-        .eq('active', true)
-        .order('name')
+      const timeout = (p: any) => Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000))])
 
-      // Load reward rules
-      const { data: rulesData } = await supabase
-        .from('reward_rules')
-        .select('*')
-        .eq('tenant_id', tenantId)
-        .order('created_at')
+      const [{ data: productsData }, { data: rulesData }] = await Promise.all([
+        timeout(supabase.from('products').select('*').eq('tenant_id', tenantId).eq('active', true).order('name')),
+        timeout(supabase.from('reward_rules').select('*').eq('tenant_id', tenantId).order('created_at')),
+      ]) as any[]
 
       setProducts(productsData || [])
       setRewardRules(rulesData || [])
-    } catch (error) {
-      console.error('Error loading data:', error)
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load data. Please refresh the page.')
     } finally {
       setLoading(false)
     }
   }
 
   const updateRewardRule = async (ruleId: string, buyCount: number) => {
+    const previousRules = rewardRules
+    setError('')
+    setRewardRules(rules => rules.map(r => r.id === ruleId ? { ...r, buy_count: buyCount } : r))
+    setEditingRule(null)
     try {
-      await supabase
-        .from('reward_rules')
-        .update({ buy_count: buyCount })
-        .eq('id', ruleId)
-
-      setRewardRules(rules => 
-        rules.map(r => r.id === ruleId ? { ...r, buy_count: buyCount } : r)
-      )
-      setEditingRule(null)
-    } catch (error) {
-      console.error('Error updating rule:', error)
+      await Promise.race([
+        supabase.from('reward_rules').update({ buy_count: buyCount }).eq('id', ruleId),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000))
+      ])
+    } catch (err: any) {
+      setRewardRules(previousRules)
+      setError(err?.message || 'Failed to update rule. Please try again.')
     }
   }
 
   const toggleRuleActive = async (ruleId: string, active: boolean) => {
+    const previousRules = rewardRules
+    setError('')
+    setRewardRules(rules => rules.map(r => r.id === ruleId ? { ...r, active } : r))
     try {
-      await supabase
-        .from('reward_rules')
-        .update({ active })
-        .eq('id', ruleId)
-
-      setRewardRules(rules => 
-        rules.map(r => r.id === ruleId ? { ...r, active } : r)
-      )
-    } catch (error) {
-      console.error('Error toggling rule:', error)
+      await Promise.race([
+        supabase.from('reward_rules').update({ active }).eq('id', ruleId),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000))
+      ])
+    } catch (err: any) {
+      setRewardRules(previousRules)
+      setError(err?.message || 'Failed to update rule. Please try again.')
     }
   }
 
@@ -122,6 +116,11 @@ export default function AdminRewards() {
         </header>
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+          {error && (
+            <div className="mb-4 bg-red-500/20 border border-red-500/50 rounded-xl px-4 py-3 text-red-300 text-sm">
+              {error}
+            </div>
+          )}
           {loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>

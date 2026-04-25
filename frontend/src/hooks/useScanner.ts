@@ -2,12 +2,15 @@ import { useState, useRef, useCallback } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { api, Product, Card, RewardRule } from '@/lib/supabase'
 import { CartItem, CameraPermission, ScanResult } from '@/types/scanner'
+import { useClientStore } from '@/store'
+import { getTranslation } from '@/lib/i18n'
 
 interface UseScannerProps {
   tenantId: string | null
 }
 
 export function useScanner({ tenantId }: UseScannerProps) {
+  const { language } = useClientStore()
   const [scannedQR, setScannedQR] = useState<string>('')
   const [card, setCard] = useState<Card | null>(null)
   const [rules, setRules] = useState<RewardRule[]>([])
@@ -163,8 +166,9 @@ export function useScanner({ tenantId }: UseScannerProps) {
 
   // Register all cart items
   const registerCart = useCallback(async () => {
+    const t = getTranslation(language)
     if (cart.length === 0 || !scannedQR) {
-      setError('Aggiungi almeno un prodotto al carrello')
+      setError(t.scanner.addAtLeastOne)
       return false
     }
 
@@ -179,7 +183,7 @@ export function useScanner({ tenantId }: UseScannerProps) {
         for (let i = 0; i < item.quantity; i++) {
           const data = await api.registerScan(scannedQR, item.productId)
           if (!data.success) {
-            throw new Error(data.error || 'Errore durante la registrazione')
+            throw new Error(data.error || t.scanner.registrationError)
           }
           lastResult = data
           allResults.push(data)
@@ -196,17 +200,18 @@ export function useScanner({ tenantId }: UseScannerProps) {
       clearCart()
       return true
     } catch (err: any) {
-      setError(err.message || 'Errore di rete')
+      setError(err.message || t.scanner.networkError)
       return false
     } finally {
       setProcessing(false)
     }
-  }, [cart, scannedQR, getTotalItems, loadCardInfo, clearCart])
+  }, [cart, scannedQR, getTotalItems, loadCardInfo, clearCart, language])
 
   // Redeem reward
   const redeemReward = useCallback(async (ruleId: string) => {
+    const t = getTranslation(language)
     if (!ruleId || !scannedQR) {
-      setError('Seleziona un premio da riscattare')
+      setError(t.scanner.selectRewardToRedeem)
       return false
     }
 
@@ -226,16 +231,16 @@ export function useScanner({ tenantId }: UseScannerProps) {
         await loadCardInfo(scannedQR)
         return true
       } else {
-        setError(data.error || 'Errore durante il riscatto')
+        setError(data.error || t.scanner.redemptionError)
         return false
       }
     } catch (err: any) {
-      setError(err.message || 'Errore durante il riscatto')
+      setError(err.message || t.scanner.redemptionError)
       return false
     } finally {
       setProcessing(false)
     }
-  }, [scannedQR, loadCardInfo])
+  }, [scannedQR, loadCardInfo, language])
 
   // Reset scanner state
   const resetScanner = useCallback(async () => {

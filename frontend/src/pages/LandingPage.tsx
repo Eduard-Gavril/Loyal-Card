@@ -712,10 +712,34 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <a
+                    href="/terms"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    {t.footerNav.terms}
+                  </a>
+                </li>
+                <li>
+                  <a
                     href="/cookie-policy"
                     className="text-gray-400 hover:text-white transition-colors"
                   >
                     {t.footerNav.cookies}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/refund"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    {t.footerNav.refund}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/acceptable-use"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    {t.footerNav.acceptableUse}
                   </a>
                 </li>
               </ul>

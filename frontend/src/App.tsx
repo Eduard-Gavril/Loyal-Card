@@ -24,6 +24,9 @@ const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'))
 const SuperAdminDashboard = lazy(() => import('./pages/admin/SuperAdminDashboard'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
+const TermsOfService = lazy(() => import('./pages/TermsOfService'))
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'))
+const AcceptableUsePolicy = lazy(() => import('./pages/AcceptableUsePolicy'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const PricingPage = lazy(() => import('./pages/PricingPage'))
 
@@ -223,6 +226,9 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           {/* Legal pages */}
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/refund" element={<RefundPolicy />} />
+          <Route path="/acceptable-use" element={<AcceptableUsePolicy />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/pricing" element={<PricingPage />} />
 

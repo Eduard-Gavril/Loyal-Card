@@ -29,7 +29,7 @@ export default function CookiePolicy() {
         <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8">
           <div className="prose prose-blue max-w-none text-gray-900">
             <p className="text-sm text-gray-500 mb-6">
-              <strong>{t.cookiePolicy.lastUpdated}:</strong> 1 {language === 'ro' ? 'Aprilie' : 'April'} 2026
+              <strong>{t.cookiePolicy.lastUpdated}:</strong> 1 {language === 'ro' ? 'Aprilie' : language === 'it' ? 'Aprile' : 'April'} 2026
             </p>
 
             <h2>{t.cookiePolicy.what.title}</h2>

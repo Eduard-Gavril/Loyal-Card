@@ -1,4 +1,4 @@
-export type Language = 'en' | 'ro'
+export type Language = 'en' | 'ro' | 'it'
 
 export const translations = {
   en: {
@@ -1252,6 +1252,637 @@ export const translations = {
       },
       info: {
         title: 'Alte Modalități de Contact',
+        email: 'Email',
+        emailAddress: 'eduardgavril.1999@gmail.com',
+        instagram: 'Instagram',
+        instagramHandle: '@loyal.card'
+      }
+    },
+  },
+
+  it: {
+    // Landing Page
+    appName: 'LoyalCard',
+    hero: {
+      title: 'La tua carta fedeltà',
+      titleHighlight: 'sempre con te',
+      subtitle: 'Dimentica le carte di plastica. Accumula punti, guadagna premi e porta la tua fedeltà nel futuro.',
+      getCard: 'Inizia la Fedeltà',
+      learnMore: 'Scopri di Più',
+      backToTop: 'Torna su',
+    },
+    stats: {
+      digital: '100% Digitale',
+      rewards: '∞ Premi',
+      cost: '0€ Costo',
+    },
+    features: {
+      title: 'Come funziona',
+      step1: {
+        title: 'Ottieni la tua carta digitale',
+        description: 'Generazione istantanea, nessuna registrazione richiesta',
+      },
+      step2: {
+        title: 'Scansiona alla cassa',
+        description: 'Mostra il tuo codice QR ad ogni acquisto',
+      },
+      step3: {
+        title: 'Raccogli premi',
+        description: 'Sblocca premi e benefici esclusivi',
+      },
+    },
+    footer: {
+      info1: '💡 Ogni carta è specifica per un negozio',
+      info2: 'Accumula punti separatamente in ogni attività',
+    },
+
+    // For Who Section
+    forWho: {
+      title: 'Per chi è LoyalCard?',
+      businesses: {
+        title: 'Per le Attività',
+        subtitle: 'Fidelizza i clienti senza carte fisiche, app o costi elevati',
+        benefit1: 'Nessuna carta fisica da stampare',
+        benefit2: 'Nessuna app da scaricare per i clienti',
+        benefit3: 'Dashboard con analisi in tempo reale',
+        benefit4: 'Funziona con qualsiasi smartphone',
+      },
+      customers: {
+        title: 'Per i Clienti',
+        subtitle: 'Raccogli punti con il telefono, senza scaricare nulla',
+        benefit1: 'Nessuna registrazione necessaria',
+        benefit2: 'Tutte le carte in un unico posto',
+        benefit3: 'Non perderai mai i tuoi punti',
+        benefit4: 'Funziona anche offline',
+      },
+    },
+
+    // FAQ Section
+    faq: {
+      title: 'Domande Frequenti',
+      q1: 'Costa qualcosa?',
+      a1: 'Per i clienti, LoyalCard è completamente gratuito. Le attività possono iniziare con un piano gratuito generoso.',
+      q2: 'Devo scaricare un\'app?',
+      a2: 'No! LoyalCard funziona direttamente dal browser. Nessuna app da installare, nessuno spazio occupato.',
+      q3: 'Come ottengo la mia carta fedeltà?',
+      a3: 'Visita il negozio e chiedi di scansionare il tuo codice QR. La carta viene creata automaticamente.',
+      q4: 'I miei dati sono sicuri?',
+      a4: 'Assolutamente. Siamo conformi al GDPR e non vendiamo mai i tuoi dati. Le tue informazioni sono criptate e sicure.',
+      q5: 'Cosa succede se cambio telefono?',
+      a5: 'Le tue carte sono collegate al browser. Puoi trasferirle facilmente o accedervi da qualsiasi dispositivo.',
+      q6: 'Posso usarla in qualsiasi negozio?',
+      a6: 'LoyalCard funziona in qualsiasi negozio partecipante. Ogni negozio ha il proprio programma fedeltà.',
+      q7: 'Come funzionano i premi?',
+      a7: 'Ogni acquisto ti fa guadagnare punti. Quando raggiungi l\'obiettivo, sblocchi premi che puoi riscattare alla cassa.',
+      q8: 'Cosa succede se il negozio chiude?',
+      a8: 'Lo storico dei tuoi punti è sempre salvato. Se un negozio chiude, puoi comunque vedere i premi precedenti.',
+    },
+
+    // Menu
+    menu: {
+      title: 'Menu',
+      home: 'Home',
+      howItWorks: 'Come Funziona',
+      faq: 'Domande Frequenti',
+      footer: 'Footer',
+      admin: 'Admin',
+    },
+
+    // Footer
+    footerNav: {
+      company: 'Azienda',
+      about: 'Chi Siamo',
+      careers: 'Carriere',
+      contact: 'Contatti',
+      contactUs: 'Contattaci',
+      legal: 'Legale',
+      privacy: 'Privacy Policy',
+      terms: 'Termini di Servizio',
+      cookies: 'Cookie Policy',
+      refund: 'Politica di Rimborso',
+      acceptableUse: 'Politica d\'Uso Accettabile',
+      social: 'Seguici',
+      instagram: 'Instagram',
+      copyright: '© 2026 LoyalCard. Tutti i diritti riservati.',
+      tagline: 'Fedeltà digitale semplificata.',
+    },
+
+    // Client Card
+    card: {
+      title: 'LoyalCard',
+      subtitle: 'La tua carta fedeltà digitale',
+      loading: 'Caricamento...',
+      qrTitle: 'Il tuo Codice QR',
+      qrInfo: '💡 Mostra questo codice alla cassa per accumulare premi',
+      noCard: 'Non hai ancora una carta fedeltà',
+      generateCard: 'Genera la tua Carta Fedeltà',
+      addAppleWallet: 'Aggiungi a Apple Wallet',
+      addGoogleWallet: 'Aggiungi a Google Wallet',
+      yourRewards: 'I tuoi premi',
+      noProgram: 'Nessun programma fedeltà attivo',
+      purchases: 'acquisti',
+      onlyMore: 'Solo',
+      moreNeeded: ' ancora necessari!',
+      available: 'disponibile',
+      reward: 'premio',
+      rewards: 'premi',
+      rewardAvailable: 'Premio Guadagnato!',
+      showAtCheckout: 'Mostra questa carta alla cassa per riscattare il premio',
+      howItWorks: 'Come funziona',
+      howStep1: '📱 Mostra il codice QR alla cassa',
+      howStep2: '⭐ Guadagna punti ad ogni acquisto',
+      howStep3: '🎯 I premi sono specifici per prodotto',
+      howStep4: '💳 Aggiungi a Wallet per accesso rapido',
+      of: 'di',
+      stamp: 'timbro',
+      stamps: 'timbri',
+    },
+
+    // Client Wallet
+    wallet: {
+      title: 'Le Tue Carte',
+      subtitle: 'Scegli la carta da mostrare',
+      noCards: 'Nessuna carta',
+      noCardsDesc: 'Non hai ancora nessuna carta fedeltà.\nChiedi al negozio di scansionare il tuo QR!',
+      createNew: 'Crea Nuova Carta',
+      addNew: 'Aggiungi Nuova Carta',
+      welcome: 'Benvenuto!',
+      startCollecting: 'Inizia a raccogliere punti fedeltà ora!\nSeleziona il tuo negozio preferito e crea la tua prima carta digitale.',
+      noCardsYet: 'Non hai ancora nessuna carta fedeltà.\nCrea una nuova carta per iniziare a raccogliere punti!',
+      createFirstCard: 'Crea Prima Carta',
+      loading: 'Caricamento...',
+      store: 'Negozio',
+      noStamps: 'Nessun timbro',
+      stamp: 'timbro',
+      stamps: 'timbri',
+      save: 'Salva',
+      cancel: 'Annulla',
+      cardNamePlaceholder: 'Nome carta',
+      renameCard: 'Rinomina carta',
+      cardSpecificInfo: 'Ogni carta è specifica per un negozio',
+      earnPointsSeparately: 'Accumula punti separatamente in ogni sede',
+      back: 'Indietro',
+    },
+
+    // Admin Login
+    admin: {
+      login: {
+        title: 'LoyalCard Admin',
+        subtitle: 'Gestisci il tuo programma fedeltà',
+        email: 'Email',
+        password: 'Password',
+        loginButton: 'Accedi',
+        loggingIn: 'Accesso in corso...',
+        backHome: 'Torna alla Home',
+        demoCredentials: 'Credenziali demo',
+      },
+
+      // Admin Dashboard
+      dashboard: {
+        title: 'LoyalCard Admin',
+        logout: 'Disconnetti',
+        statsTotal: 'Scansioni Totali',
+        statsClients: 'Clienti',
+        statsRewards: 'Premi Dati',
+        statsToday: 'Scansioni Oggi',
+        quickActions: 'Azioni Rapide',
+        scanQR: 'Scansiona Codice QR',
+        viewReports: 'Visualizza Report',
+        manageRewards: 'Gestisci Premi',
+        settings: 'Impostazioni',
+        recentActivity: 'Attività Recente',
+        inDevelopment: 'Funzionalità in sviluppo',
+        comingSoon: 'Prossimamente: log in tempo reale, grafici e analisi',
+      },
+
+      // Admin Scanner
+      scanner: {
+        title: 'Scansiona Codice QR',
+        back: 'Indietro',
+        frameQR: 'Inquadra il codice QR',
+        frameDesc: 'Posiziona il codice QR del cliente al centro del riquadro',
+        cameraInfo: '💡 Consenti l\'accesso alla fotocamera quando richiesto',
+        qrScanned: 'Codice QR Scansionato',
+        registerPurchase: 'Registra Acquisto',
+        redeemReward: 'Riscatta Premio',
+        selectProduct: 'Seleziona il prodotto acquistato',
+        noProducts: 'Nessun prodotto disponibile',
+        selectReward: 'Seleziona il premio da riscattare',
+        noRewards: 'Nessun premio disponibile per questa carta',
+        availableRewards: 'Premi disponibili',
+        confirmPurchase: 'Conferma Acquisto',
+        confirmRedeem: 'Conferma Riscatto',
+        cancel: 'Annulla',
+        registering: 'Registrazione in corso...',
+        redeeming: 'Riscatto in corso...',
+        purchaseRegistered: '✓ Acquisto Registrato!',
+        rewardRedeemed: '🎁 Premio Riscattato!',
+        rewardEarned: 'Premio Guadagnato!',
+        milestoneReached: 'Traguardo Raggiunto!',
+        pointsAdded: '✓ Punti aggiunti alla carta cliente',
+        remainingRewards: 'Premi rimanenti',
+        scanNewClient: 'Scansiona Nuovo Cliente',
+      },
+
+      // Admin Products
+      products: {
+        title: 'Gestisci Prodotti',
+        subtitle: 'Gestisci i tuoi prodotti e regole',
+        newProduct: 'Nuovo Prodotto',
+        noProducts: 'Nessun prodotto ancora',
+        noProductsDesc: 'Inizia aggiungendo il tuo primo prodotto',
+        active: 'Attivo',
+        inactive: 'Inattivo',
+        noRules: 'Nessuna regola configurata',
+        level: 'Livello',
+        scans: 'scansioni',
+        edit: 'Modifica',
+        rules: 'Regole',
+        delete: 'Elimina',
+        addTitle: 'Nuovo Prodotto',
+        editTitle: 'Modifica Prodotto',
+        productName: 'Nome Prodotto',
+        productNamePlaceholder: 'es. Caffè Espresso',
+        icon: 'Icona',
+        category: 'Categoria',
+        categoryPlaceholder: 'es. Bevande',
+        price: 'Prezzo',
+        priceDesc: 'Prezzo del prodotto (opzionale, per visualizzazione)',
+        pricePlaceholder: 'es. 2.50',
+        scansRequired: 'Scansioni Richieste',
+        scansRequiredDesc: 'Numero di scansioni per guadagnare premio',
+        save: 'Salva',
+        cancel: 'Annulla',
+        productAdded: 'Prodotto aggiunto!',
+        productUpdated: 'Prodotto aggiornato!',
+        productDeleted: 'Prodotto eliminato!',
+        confirmDelete: 'Sei sicuro di voler eliminare questo prodotto?',
+        errorLoading: 'Errore nel caricamento dei prodotti',
+        errorSaving: 'Errore nel salvataggio del prodotto',
+        errorDeleting: 'Errore nell\'eliminazione del prodotto',
+        errorStatus: 'Errore nel cambio di stato',
+        manageRules: 'Gestisci Regole',
+        rulesDesc: 'Configura le regole premio per questo prodotto. Ogni regola definisce quante scansioni sono necessarie per ottenere un premio.',
+        rulesInfo: 'Le regole determinano cosa guadagnano i clienti dopo un certo numero di scansioni.',
+        rulesExample: 'Esempio: "3 scansioni = 1 caffè gratis" oppure "5 scansioni = 20% di sconto"',
+        addRule: 'Aggiungi Regola',
+        editRule: 'Modifica Regola',
+        newRule: 'Nuova Regola',
+        ruleLevel: 'Livello',
+        ruleLevelDesc: 'Numero di priorità della regola (1, 2, 3...)',
+        priority: 'Priorità',
+        ruleScans: 'Scansioni Richieste',
+        ruleScansDesc: 'Quante scansioni sono necessarie per sbloccare questo premio',
+        rewardType: 'Tipo Premio',
+        freeProduct: 'Prodotto Gratuito',
+        percentageDiscount: 'Sconto Percentuale',
+        rewardDescription: 'Descrizione Premio',
+        rewardDescPlaceholder: 'es. 1 caffè gratis',
+        discountValue: 'Valore Sconto',
+        discountValueDesc: 'Percentuale di sconto (es. 10 per 10%)',
+        ruleAdded: 'Regola aggiunta!',
+        ruleUpdated: 'Regola aggiornata!',
+        ruleDeleted: 'Regola eliminata!',
+        confirmDeleteRule: 'Sei sicuro di voler eliminare questa regola?',
+        close: 'Chiudi',
+      },
+    },
+
+    common: {
+      on: 'su',
+      out: 'di',
+    },
+
+    // Scanner/Cart translations
+    scanner: {
+      productsInCart: 'prodotti nel carrello',
+      confirm: 'Conferma',
+      selectCategory: 'Seleziona Categoria',
+      products: 'prodotti',
+      proceedWith: 'Procedi con',
+      add: 'Aggiungi',
+      selectProducts: 'Seleziona prodotti',
+      otherCategories: '← Altre categorie',
+      orderSummary: 'Riepilogo Ordine',
+      edit: '← Modifica',
+      totalProducts: 'Totale prodotti:',
+      totalPrice: 'Prezzo totale:',
+      registering: 'Registrazione in corso...',
+      confirmProducts: 'Conferma',
+      addAtLeastOne: 'Aggiungi almeno un prodotto al carrello',
+      registrationError: 'Errore durante la registrazione',
+      selectRewardToRedeem: 'Seleziona un premio da riscattare',
+      redemptionError: 'Errore durante il riscatto',
+      networkError: 'Errore di rete',
+      rewardAvailableFor: 'premio disponibile per cliente',
+      rewardsAvailableFor: 'premi disponibili per cliente',
+      enableCamera: 'Abilita Fotocamera',
+      cameraNeeded: 'Per scansionare i codici QR, abbiamo bisogno di accedere alla tua fotocamera',
+      cameraError: 'Accesso alla fotocamera negato. Controlla le impostazioni del browser.',
+      tryAgain: 'Riprova',
+      processing: 'Elaborazione in corso...',
+      success: 'Successo!',
+      error: 'Errore',
+      scanAnother: 'Scansiona Altro',
+      requiredStamps: 'Timbri richiesti',
+    },
+
+    // Tenant selector translations
+    tenantSelector: {
+      chooseStore: 'Scegli il tuo negozio',
+      allStores: '🏪 Tutti i negozi disponibili',
+      searchingLocation: 'Ricerca della tua posizione...',
+      locationUnavailable: 'Posizione non disponibile',
+      geoNotSupported: 'La geolocalizzazione non è supportata dal tuo browser',
+      geoFailed: 'Impossibile ottenere la tua posizione',
+      retry: 'Riprova',
+      searchPlaceholder: '🔍 Cerca per nome, città o indirizzo...',
+      loadingStores: 'Caricamento negozi...',
+      noStoresFound: 'Nessun negozio trovato',
+      tryDifferentSearch: 'Prova una ricerca diversa',
+      selectStore: 'Seleziona il negozio in cui vuoi usare la tua carta fedeltà.',
+      eachStoreHasRewards: 'Ogni negozio ha il proprio sistema premi personalizzato.',
+    },
+
+    // Client card additional translations
+    clientCard: {
+      noCardYet: 'Non hai ancora una carta fedeltà per questo negozio',
+      selectStore: 'Seleziona un negozio',
+      addToHomeScreen: 'Aggiungi a Schermata Home',
+      iosInstallInstructions: 'Per aggiungere alla schermata home su iOS:\n\n1. Tocca il pulsante Condividi\n2. Scorri e tocca "Aggiungi a Home"\n3. Tocca "Aggiungi"',
+      rewardAvailable: 'premio disponibile!',
+      rewardsAvailable: 'premi disponibili!',
+      showCardToRedeem: 'Mostra questa carta alla cassa per riscattare il premio',
+      loyaltyProgram: 'Programma Fedeltà',
+      stamps: 'timbri',
+      toNextReward: 'al prossimo premio',
+      rewardsAvailableLabel: 'premi',
+      collectReward: 'Raccogli Premio',
+      installApp: 'Installa App',
+      installDescription: 'Aggiungi alla schermata home per accesso rapido',
+      install: 'Installa',
+      rewardUnlocked: '🎉 Premio sbloccato!',
+    },
+
+    // User Dashboard
+    userDashboard: {
+      welcome: 'Benvenuto!',
+      subtitle: 'Gestisci le tue carte fedeltà e i premi',
+      activeCards: 'Carte Attive',
+      totalStamps: 'Timbri Totali',
+      rewardsEarned: 'Premi Guadagnati',
+      getNewCard: 'Ottieni una Nuova Carta',
+      getNewCardDesc: 'Inizia a raccogliere punti in un nuovo negozio',
+      viewMyCards: 'Visualizza le Mie Carte',
+      viewMyCardsDesc: 'Visualizza tutte le tue carte fedeltà e i progressi',
+      installApp: 'Installa App',
+      installAppDesc: 'Aggiungi alla schermata home per accesso rapido',
+      iosInstallInstructions: 'Per aggiungere alla schermata home su iOS:\n\n1. Tocca il pulsante Condividi\n2. Scorri verso il basso e tocca "Aggiungi a Schermata Home"\n3. Tocca "Aggiungi"',
+      howItWorksTitle: 'Come funziona',
+      step1: 'Ottieni una carta digitale per il tuo negozio preferito',
+      step2: 'Mostra il tuo codice QR alla cassa quando fai un acquisto',
+      step3: 'Raccogli timbri e guadagna premi automaticamente',
+      step4: 'Riscatta i tuoi premi nel negozio',
+    },
+
+    // Account Protection
+    protection: {
+      title: 'Proteggi le tue carte',
+      description: 'Aggiungi il tuo numero di telefono per recuperare le tue carte se cancelli i dati del browser o cambi dispositivo.',
+      warning: '⚠️ Gli account senza numero di telefono vengono eliminati il 1° di ogni mese. Aggiungi il tuo telefono ora per evitare di perdere le tue carte!',
+      addPhone: 'Aggiungi Numero di Telefono',
+      recoverAccount: 'Recupera Account',
+      accountProtected: 'Le tue carte sono protette con recupero via telefono',
+      modalTitle: 'Aggiungi Numero di Telefono di Recupero',
+      modalDescription: 'Il tuo numero di telefono sarà utilizzato solo per recuperare le tue carte se perdi l\'accesso.',
+      phoneLabel: 'Numero di telefono',
+      phonePlaceholder: '+39 123 456 7890',
+      savePhone: 'Salva Numero di Telefono',
+      phoneLinked: 'Numero di telefono collegato con successo!',
+      linkError: 'Impossibile collegare il numero di telefono. Riprova.',
+      pinSixDigits: 'Il PIN deve essere esattamente di 6 cifre.',
+      pinsMismatch: 'I PIN non corrispondono.',
+    },
+
+    // Account Recovery
+    recovery: {
+      title: 'Recupera le Tue Carte',
+      subtitle: 'Inserisci il numero di telefono che hai usato per proteggere il tuo account',
+      dashboardDesc: 'Hai già un account? Recuperalo qui.',
+      phoneLabel: 'Numero di Telefono di Recupero',
+      phonePlaceholder: '+39 123 456 7890',
+      sendButton: 'Invia Codice di Recupero',
+      sending: 'Invio in corso...',
+      checkPhone: 'Codice di recupero generato.',
+      tokenGenerated: 'Token di recupero generato!',
+      demoToken: 'Modalità demo - token di recupero',
+      useToken: 'Usa Questo Token',
+      verifying: 'Verifica in corso...',
+      accountRecovered: 'Account recuperato! {count} carte ripristinate.',
+      redirecting: 'Reindirizzamento alla dashboard...',
+      noToken: 'Nessun token di recupero fornito.',
+      requestError: 'Impossibile richiedere il recupero. Riprova.',
+      verifyError: 'Link di recupero non valido o scaduto.',
+      tryAgain: 'Riprova',
+      noPhone: 'Non hai un numero di telefono collegato?',
+      createNew: 'Ricomincia da capo',
+      invalidPhoneFormat: 'Formato numero di telefono non valido. Usa il formato: +39 123 456 7890',
+      enterPin: 'Inserisci il tuo PIN',
+      enterBackupCode: 'Inserisci un codice di backup',
+    },
+
+    // Privacy & Legal
+    privacy: {
+      title: 'Privacy Policy',
+      back: 'Indietro',
+      lastUpdated: 'Ultimo Aggiornamento',
+      intro: {
+        title: '1. Introduzione',
+        text: 'Questa Privacy Policy descrive come LoyalCard ("noi", "nostro") raccoglie, utilizza e protegge i dati personali degli utenti ("tu", "tuo") in conformità con il Regolamento Generale sulla Protezione dei Dati (GDPR - UE 2016/679).'
+      },
+      controller: {
+        title: '2. Titolare del Trattamento',
+        name: 'Nome',
+        email: 'Email',
+        website: 'Sito Web'
+      },
+      data: {
+        title: '3. Dati Raccolti',
+        text: 'Raccogliamo i seguenti dati personali:',
+        identification: 'Dati di identificazione: Numero di telefono (opzionale), Email (opzionale)',
+        usage: 'Dati di utilizzo: ID Cliente anonimo, Storico acquisti, Punti fedeltà',
+        technical: 'Dati tecnici: Browser, Dispositivo, Indirizzo IP',
+        location: 'Geolocalizzazione: Coordinate GPS (solo se autorizzato)'
+      },
+      purpose: {
+        title: '4. Finalità del Trattamento',
+        text: 'I tuoi dati sono utilizzati per:',
+        service: 'Fornire il servizio di carta fedeltà digitale',
+        account: 'Gestire il tuo account e le carte fedeltà',
+        recovery: 'Recuperare l\'accesso alla carta tramite telefono/email',
+        notifications: 'Inviarti notifiche sui premi guadagnati',
+        improve: 'Migliorare il servizio e prevenire frodi',
+        legal: 'Rispettare gli obblighi legali'
+      },
+      legal: {
+        title: '5. Base Giuridica',
+        text: 'Il trattamento si basa su:',
+        consent: 'Consenso esplicito: per telefono/email (recupero account)',
+        contract: 'Esecuzione contratto: per fornire il servizio fedeltà',
+        legitimate: 'Interesse legittimo: per statistiche anonime e sicurezza'
+      },
+      sharing: {
+        title: '6. Condivisione Dati',
+        text: 'I tuoi dati sono condivisi solo con:',
+        supabase: 'Supabase Inc.: Provider hosting database (USA, certificato Privacy Shield)',
+        netlify: 'Netlify Inc.: Hosting frontend (USA)',
+        merchants: 'Commercianti: Solo dati fedeltà relativi alle loro carte',
+        noSale: 'Non vendiamo mai i tuoi dati a terze parti.'
+      },
+      retention: {
+        title: '7. Conservazione Dati',
+        text: 'I dati sono conservati per la durata dell\'utilizzo del servizio e per 3 anni aggiuntivi dopo l\'ultimo accesso, poi vengono eliminati automaticamente.'
+      },
+      rights: {
+        title: '8. I Tuoi Diritti (GDPR)',
+        text: 'Hai il diritto di:',
+        access: 'Accesso: Ottenere una copia dei tuoi dati',
+        rectification: 'Rettifica: Correggere dati inesatti',
+        erasure: 'Cancellazione: Eliminare i tuoi dati ("diritto all\'oblio")',
+        portability: 'Portabilità: Ricevere i dati in formato standard',
+        objection: 'Opposizione: Opporsi al trattamento',
+        restriction: 'Limitazione: Limitare il trattamento',
+        withdraw: 'Revoca consenso: Revocare il consenso in qualsiasi momento',
+        contact: 'Per esercitare i tuoi diritti, contattaci a:'
+      },
+      security: {
+        title: '9. Sicurezza',
+        text: 'Utilizziamo misure tecniche e organizzative per proteggere i tuoi dati:',
+        encryption: 'Crittografia end-to-end (HTTPS/TLS)',
+        rls: 'Database con Row Level Security (RLS)',
+        auth: 'Autenticazione sicura JWT',
+        backup: 'Backup giornalieri crittografati'
+      },
+      cookies: {
+        title: '10. Cookie',
+        text: 'Utilizziamo solo cookie essenziali (localStorage) per salvare il tuo ID Cliente e le preferenze. Vedi la nostra',
+        link: 'Cookie Policy',
+        forDetails: 'per i dettagli.'
+      },
+      minors: {
+        title: '11. Minori',
+        text: 'Il servizio non è destinato a minori di 16 anni. Se sei un genitore e ritieni che tuo figlio abbia fornito dati, contattaci per l\'eliminazione immediata.'
+      },
+      changes: {
+        title: '12. Modifiche alla Policy',
+        text: 'Ci riserviamo il diritto di modificare questa policy. Le modifiche saranno pubblicate su questa pagina con una data aggiornata.'
+      },
+      contact: {
+        title: '13. Contatti',
+        text: 'Per domande sulla privacy:',
+        email: 'Email',
+        complaints: 'Reclami: Puoi presentare un reclamo all\'Autorità Garante per la protezione dei dati personali del tuo paese.'
+      },
+      note: 'Questa privacy policy è stata generata gratuitamente e fornisce le informazioni di base richieste dal GDPR. Per un documento legalmente vincolante personalizzato, consulta un avvocato specializzato in protezione dei dati.'
+    },
+
+    cookieBanner: {
+      title: '🍪 Usiamo i Cookie',
+      description: 'Utilizziamo cookie essenziali per la funzionalità del sito e per salvare le tue preferenze. Nessun cookie di tracciamento.',
+      privacyLink: 'Privacy Policy',
+      cookieLink: 'Cookie Policy',
+      acceptEssential: 'Solo Essenziali',
+      acceptAll: 'Accetta Tutti'
+    },
+
+    cookiePolicy: {
+      title: 'Cookie Policy',
+      back: 'Indietro',
+      lastUpdated: 'Ultimo Aggiornamento',
+      what: {
+        title: '1. Cosa Sono i Cookie',
+        text: 'I cookie sono piccoli file di testo salvati sul tuo dispositivo quando visiti un sito web. Sono utilizzati per memorizzare preferenze e migliorare l\'esperienza utente.'
+      },
+      used: {
+        title: '2. Cookie Utilizzati da LoyalCard',
+        essential: 'Cookie Essenziali (Sempre Attivi)',
+        essentialText: 'Questi cookie sono necessari per la funzionalità di base del sito:',
+        storage: 'loyalcard-client-storage',
+        storageDesc: 'Salva il tuo ID Cliente e le carte fedeltà',
+        consent: 'loyalcard-cookie-consent',
+        consentDesc: 'Memorizza le tue preferenze sui cookie',
+        auth: 'sb-*-auth-token',
+        authDesc: 'Sessione admin (Supabase)',
+        thirdParty: 'Cookie di Terze Parti',
+        noTracking: 'LoyalCard NON utilizza cookie di tracciamento, analisi o pubblicità da terze parti.',
+        name: 'Nome',
+        purpose: 'Scopo',
+        duration: 'Durata',
+        persistent: 'Persistente',
+        session: 'Sessione',
+        year: '1 anno'
+      },
+      localStorage: {
+        title: '3. localStorage',
+        text: 'Utilizziamo la tecnologia localStorage del browser (simile ai cookie) per salvare:',
+        clientId: 'ID Cliente: Il tuo identificativo unico anonimo',
+        cards: 'Carte salvate: Le tue carte fedeltà attive',
+        language: 'Preferenza lingua: Italiano, Inglese o Rumeno',
+        adminSession: 'Sessione admin: Se sei un amministratore'
+      },
+      manage: {
+        title: '4. Come Gestire i Cookie',
+        text: 'Puoi gestire i cookie tramite:',
+        browser: 'Impostazioni Browser',
+        chrome: 'Chrome: Impostazioni → Privacy → Cookie',
+        firefox: 'Firefox: Opzioni → Privacy → Cookie',
+        safari: 'Safari: Preferenze → Privacy',
+        edge: 'Edge: Impostazioni → Privacy → Cookie',
+        banner: 'Banner Cookie',
+        bannerText: 'Alla prima visita, puoi scegliere di accettare solo cookie essenziali o tutti i cookie. Puoi modificare le preferenze cancellando i dati del sito dal browser.'
+      },
+      consequences: {
+        title: '5. Conseguenze del Rifiuto',
+        text: 'Se rifiuti i cookie essenziali, il sito NON funzionerà correttamente:',
+        noSave: 'Non potrai salvare la tua carta fedeltà',
+        newCard: 'Dovrai creare una nuova carta ad ogni visita',
+        noLogin: 'Gli amministratori non potranno effettuare il login'
+      },
+      contact: {
+        title: '6. Contatti',
+        text: 'Per domande sui cookie:',
+        email: 'Email'
+      },
+      privacyFirst: 'LoyalCard è progettato per rispettare la tua privacy. Utilizziamo solo cookie essenziali per far funzionare il servizio, senza tracciamento o pubblicità.'
+    },
+
+    contactPage: {
+      title: 'Contattaci',
+      subtitle: 'Hai domande? Ci piacerebbe sentirti.',
+      form: {
+        name: 'Il Tuo Nome',
+        namePlaceholder: 'Mario Rossi',
+        email: 'La Tua Email',
+        emailPlaceholder: 'mario@esempio.com',
+        subject: 'Oggetto',
+        subjectPlaceholder: 'Come possiamo aiutarti?',
+        message: 'Messaggio',
+        messagePlaceholder: 'Raccontaci di più sulla tua domanda o feedback...',
+        send: 'Invia Messaggio',
+        sending: 'Invio in corso...',
+      },
+      success: {
+        title: 'Messaggio Inviato! ✅',
+        description: 'Grazie per averci contattato. Ti risponderemo il prima possibile.',
+        backHome: 'Torna alla Home'
+      },
+      error: {
+        title: 'Errore',
+        description: 'Siamo spiacenti, si è verificato un errore nell\'invio del messaggio. Riprova o scrivici direttamente a eduardgavril.1999@gmail.com',
+        retry: 'Riprova'
+      },
+      info: {
+        title: 'Altri Modi per Contattarci',
         email: 'Email',
         emailAddress: 'eduardgavril.1999@gmail.com',
         instagram: 'Instagram',

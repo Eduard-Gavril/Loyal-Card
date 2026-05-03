@@ -116,10 +116,10 @@ export default function AdminDashboard() {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return language === 'ro' ? 'Acum' : 'Just now'
-    if (diffMins < 60) return language === 'ro' ? `${diffMins} min în urmă` : `${diffMins}m ago`
-    if (diffHours < 24) return language === 'ro' ? `${diffHours}h în urmă` : `${diffHours}h ago`
-    return language === 'ro' ? `${diffDays}z în urmă` : `${diffDays}d ago`
+    if (diffMins < 1) return language === 'ro' ? 'Acum' : language === 'it' ? 'Adesso' : 'Just now'
+    if (diffMins < 60) return language === 'ro' ? `${diffMins} min în urmă` : language === 'it' ? `${diffMins} min fa` : `${diffMins}m ago`
+    if (diffHours < 24) return language === 'ro' ? `${diffHours}h în urmă` : language === 'it' ? `${diffHours}h fa` : `${diffHours}h ago`
+    return language === 'ro' ? `${diffDays}z în urmă` : language === 'it' ? `${diffDays}g fa` : `${diffDays}d ago`
   }
 
   const handleLogout = async () => {
@@ -151,12 +151,12 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false })
 
       if (cardsError) {
-        alert(language === 'ro' ? `Eroare: ${cardsError.message}` : `Error: ${cardsError.message}`)
+        alert(language === 'ro' ? `Eroare: ${cardsError.message}` : language === 'it' ? `Errore: ${cardsError.message}` : `Error: ${cardsError.message}`)
         return
       }
 
       if (!cards || cards.length === 0) {
-        alert(language === 'ro' ? 'Nu există clienți de exportat' : 'No clients to export')
+        alert(language === 'ro' ? 'Nu există clienți de exportat' : language === 'it' ? 'Nessun cliente da esportare' : 'No clients to export')
         return
       }
 
@@ -227,7 +227,7 @@ export default function AdminDashboard() {
       XLSX.writeFile(wb, filename)
 
     } catch (error: any) {
-      alert(language === 'ro' ? 'Eroare la exportul datelor' : 'Error exporting data')
+      alert(language === 'ro' ? 'Eroare la exportul datelor' : language === 'it' ? 'Errore durante l\'esportazione' : 'Error exporting data')
     }
   }
 
@@ -316,7 +316,7 @@ export default function AdminDashboard() {
             >
               <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
                 <span className="text-2xl sm:text-3xl">📥</span>
-                {language === 'ro' ? 'Download Report Excel' : 'Download Excel Report'}
+                {language === 'ro' ? 'Download Report Excel' : language === 'it' ? 'Scarica Report Excel' : 'Download Excel Report'}
               </span>
             </button>
           </div>
@@ -361,7 +361,7 @@ export default function AdminDashboard() {
               <button
                 onClick={loadRecentActivity}
                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                title={language === 'ro' ? 'Reîmprospătează' : 'Refresh'}
+                title={language === 'ro' ? 'Reîmprospătează' : language === 'it' ? 'Aggiorna' : 'Refresh'}
               >
                 <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -389,12 +389,12 @@ export default function AdminDashboard() {
                         <span className="text-white font-medium">{scan.product_name}</span>
                         {scan.reward_applied && (
                           <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-300 text-xs font-medium rounded-full flex items-center gap-1">
-                            🎁 {language === 'ro' ? 'Premiu' : 'Reward'}
+                            🎁 {language === 'ro' ? 'Premiu' : language === 'it' ? 'Premio' : 'Reward'}
                           </span>
                         )}
                       </div>
                       <p className="text-gray-400 text-sm">
-                        {language === 'ro' ? 'Client' : 'Client'} #{scan.client_id}
+                        {language === 'ro' ? 'Client' : language === 'it' ? 'Cliente' : 'Client'} #{scan.client_id}
                       </p>
                     </div>
                     
@@ -409,10 +409,10 @@ export default function AdminDashboard() {
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📭</div>
                 <p className="text-gray-300 text-lg">
-                  {language === 'ro' ? 'Nicio activitate recentă' : 'No recent activity'}
+                  {language === 'ro' ? 'Nicio activitate recentă' : language === 'it' ? 'Nessuna attività recente' : 'No recent activity'}
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
-                  {language === 'ro' ? 'Scanările vor apărea aici' : 'Scans will appear here'}
+                  {language === 'ro' ? 'Scanările vor apărea aici' : language === 'it' ? 'Le scansioni appariranno qui' : 'Scans will appear here'}
                 </p>
               </div>
             )}

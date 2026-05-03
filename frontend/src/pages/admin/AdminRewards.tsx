@@ -107,10 +107,10 @@ export default function AdminRewards() {
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              <span className="hidden sm:inline">{language === 'ro' ? 'Înapoi' : 'Back'}</span>
+              <span className="hidden sm:inline">{language === 'ro' ? 'Înapoi' : language === 'it' ? 'Indietro' : 'Back'}</span>
             </button>
             <h1 className="text-xl sm:text-4xl font-bold text-white tracking-tight flex-1">
-              🎁 {language === 'ro' ? 'Gestionare Premii' : 'Manage Rewards'}
+              🎁 {language === 'ro' ? 'Gestionare Premii' : language === 'it' ? 'Gestione Premi' : 'Manage Rewards'}
             </h1>
           </div>
         </header>
@@ -124,14 +124,14 @@ export default function AdminRewards() {
           {loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
-              <p className="text-gray-300">{language === 'ro' ? 'Se încarcă...' : 'Loading...'}</p>
+              <p className="text-gray-300">{language === 'ro' ? 'Se încarcă...' : language === 'it' ? 'Caricamento...' : 'Loading...'}</p>
             </div>
           ) : (
             <>
               {/* Reward Rules */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20 mb-8">
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
-                  {language === 'ro' ? 'Reguli Premii' : 'Reward Rules'}
+                  {language === 'ro' ? 'Reguli Premii' : language === 'it' ? 'Regole Premi' : 'Reward Rules'}
                 </h2>
                 
                 {rewardRules.length > 0 ? (
@@ -156,7 +156,7 @@ export default function AdminRewards() {
                                 )}
                               </h3>
                               <p className="text-gray-300 text-xs sm:text-sm mt-1">
-                                {rule.description || (language === 'ro' ? 'Premiu gratis' : 'Free reward')}
+                                {rule.description || (language === 'ro' ? 'Premiu gratis' : language === 'it' ? 'Premio gratuito' : 'Free reward')}
                               </p>
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {rule.priority !== undefined && (
@@ -166,7 +166,7 @@ export default function AdminRewards() {
                                 )}
                                 {rule.reset_on_redeem === false && (
                                   <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">
-                                    {language === 'ro' ? 'Non resetta' : 'No reset'}
+                                    {language === 'ro' ? 'Non resetta' : language === 'it' ? 'Nessun reset' : 'No reset'}
                                   </span>
                                 )}
                               </div>
@@ -215,7 +215,7 @@ export default function AdminRewards() {
                                     {rule.buy_count}
                                   </span>
                                   <p className="text-xs text-gray-400 whitespace-nowrap">
-                                    {language === 'ro' ? 'achiziții' : 'purchases'}
+                                    {language === 'ro' ? 'achiziții' : language === 'it' ? 'acquisti' : 'purchases'}
                                   </p>
                                 </button>
                               )}
@@ -243,7 +243,7 @@ export default function AdminRewards() {
                   <div className="text-center py-8 sm:py-12">
                     <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📭</div>
                     <p className="text-gray-300 text-base sm:text-lg">
-                      {language === 'ro' ? 'Nicio regulă de premii configurată' : 'No reward rules configured'}
+                      {language === 'ro' ? 'Nicio regulă de premii configurată' : language === 'it' ? 'Nessuna regola premi configurata' : 'No reward rules configured'}
                     </p>
                     <p className="text-gray-400 text-sm mt-2">
                       {language === 'ro' 
@@ -257,7 +257,7 @@ export default function AdminRewards() {
               {/* Products List */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
-                  {language === 'ro' ? 'Produse Active' : 'Active Products'}
+                  {language === 'ro' ? 'Produse Active' : language === 'it' ? 'Prodotti Attivi' : 'Active Products'}
                 </h2>
                 
                 {products.length > 0 ? (
@@ -277,7 +277,7 @@ export default function AdminRewards() {
                   </div>
                 ) : (
                   <p className="text-gray-400 text-center py-8">
-                    {language === 'ro' ? 'Niciun produs configurat' : 'No products configured'}
+                    {language === 'ro' ? 'Niciun produs configurat' : language === 'it' ? 'Nessun prodotto configurato' : 'No products configured'}
                   </p>
                 )}
               </div>

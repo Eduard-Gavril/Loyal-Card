@@ -504,7 +504,7 @@ export default function AdminScanner() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
-                      {language === 'ro' ? 'Activează Camera' : 'Enable Camera'}
+                      {language === 'ro' ? 'Activează Camera' : language === 'it' ? 'Attiva Fotocamera' : 'Enable Camera'}
                     </span>
                   </button>
                 </div>
@@ -514,7 +514,7 @@ export default function AdminScanner() {
               {cameraPermission === 'requesting' && (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
-                  <p className="text-gray-300">{language === 'ro' ? 'Se solicită permisiunea...' : 'Requesting permission...'}</p>
+                  <p className="text-gray-300">{language === 'ro' ? 'Se solicită permisiunea...' : language === 'it' ? 'Richiesta permesso...' : 'Requesting permission...'}</p>
                 </div>
               )}
 
@@ -523,7 +523,7 @@ export default function AdminScanner() {
                 <div className="bg-red-500/20 border-2 border-red-400/50 rounded-xl p-6 text-center">
                   <div className="text-4xl mb-3">🚫</div>
                   <h3 className="text-xl font-bold text-red-200 mb-2">
-                    {language === 'ro' ? 'Permisiune Cameră Refuzată' : 'Camera Permission Denied'}
+                    {language === 'ro' ? 'Permisiune Cameră Refuzată' : language === 'it' ? 'Permesso Fotocamera Negato' : 'Camera Permission Denied'}
                   </h3>
                   <p className="text-red-100 text-sm mb-4">
                     {language === 'ro' 
@@ -534,7 +534,7 @@ export default function AdminScanner() {
                     onClick={() => window.location.reload()}
                     className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-300"
                   >
-                    {language === 'ro' ? 'Reîncearcă' : 'Try Again'}
+                    {language === 'ro' ? 'Reîncearcă' : language === 'it' ? 'Riprova' : 'Try Again'}
                   </button>
                 </div>
               )}
@@ -544,7 +544,7 @@ export default function AdminScanner() {
                 <div className="relative">
                   <div id="qr-reader" className="w-full rounded-2xl overflow-hidden [&>video]:w-full [&>video]:rounded-xl"></div>
                   <p className="text-center text-gray-300 mt-4 text-sm">
-                    {language === 'ro' ? 'Scanare în curs...' : 'Scanning...'}
+                    {language === 'ro' ? 'Scanare în curs...' : language === 'it' ? 'Scansione...' : 'Scanning...'}
                   </p>
                 </div>
               )}
@@ -684,7 +684,7 @@ export default function AdminScanner() {
                               type="text"
                               value={searchFilter}
                               onChange={(e) => setSearchFilter(e.target.value)}
-                              placeholder={language === 'ro' ? 'Caută produs...' : 'Search product...'}
+                              placeholder={language === 'ro' ? 'Caută produs...' : language === 'it' ? 'Cerca prodotto...' : 'Search product...'}
                               className="w-full px-3 py-2 pl-10 sm:px-4 sm:py-3 sm:pl-12 bg-white/10 border-2 border-white/20 rounded-xl text-white text-sm sm:text-base placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
                             />
                             <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

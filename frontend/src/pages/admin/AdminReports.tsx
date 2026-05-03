@@ -128,7 +128,7 @@ export default function AdminReports() {
       })
 
     } catch (err: any) {
-      setError(err?.message || (language === 'ro' ? 'Eroare la încărcarea rapoartelor' : 'Failed to load reports'))
+      setError(err?.message || (language === 'ro' ? 'Eroare la încărcarea rapoartelor' : language === 'it' ? 'Errore nel caricamento dei report' : 'Failed to load reports'))
     } finally {
       setLoading(false)
     }
@@ -158,10 +158,10 @@ export default function AdminReports() {
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              {language === 'ro' ? 'Înapoi' : 'Back'}
+              {language === 'ro' ? 'Înapoi' : language === 'it' ? 'Indietro' : 'Back'}
             </button>
             <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1">
-              📊 {language === 'ro' ? 'Rapoarte' : 'Reports'}
+              📊 {language === 'ro' ? 'Rapoarte' : language === 'it' ? 'Report' : 'Reports'}
             </h1>
           </div>
         </header>
@@ -179,9 +179,9 @@ export default function AdminReports() {
                     : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
                 }`}
               >
-                {range === '7d' ? (language === 'ro' ? '7 Zile' : '7 Days') :
-                 range === '30d' ? (language === 'ro' ? '30 Zile' : '30 Days') :
-                 (language === 'ro' ? '90 Zile' : '90 Days')}
+                {range === '7d' ? (language === 'ro' ? '7 Zile' : language === 'it' ? '7 Giorni' : '7 Days') :
+                 range === '30d' ? (language === 'ro' ? '30 Zile' : language === 'it' ? '30 Giorni' : '30 Days') :
+                 (language === 'ro' ? '90 Zile' : language === 'it' ? '90 Giorni' : '90 Days')}
               </button>
             ))}
           </div>
@@ -189,7 +189,7 @@ export default function AdminReports() {
           {loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
-              <p className="text-gray-300">{language === 'ro' ? 'Se încarcă...' : 'Loading...'}</p>
+              <p className="text-gray-300">{language === 'ro' ? 'Se încarcă...' : language === 'it' ? 'Caricamento...' : 'Loading...'}</p>
             </div>
           ) : error ? (
             <div className="bg-red-900/40 border border-red-500/50 text-red-300 px-5 py-4 rounded-xl mb-6">
@@ -200,19 +200,19 @@ export default function AdminReports() {
               {/* Summary Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
-                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Total Scanări' : 'Total Scans'}</p>
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Total Scanări' : language === 'it' ? 'Scansioni Totali' : 'Total Scans'}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.totalScans}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
-                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Premii Date' : 'Rewards Given'}</p>
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Premii Date' : language === 'it' ? 'Premi Dati' : 'Rewards Given'}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.totalRewards}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
-                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Medie/Zi' : 'Avg/Day'}</p>
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Medie/Zi' : language === 'it' ? 'Media/Giorno' : 'Avg/Day'}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.avgScansPerDay}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/20">
-                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Rata Conversie' : 'Conversion Rate'}</p>
+                  <p className="text-gray-300 text-xs sm:text-sm mb-1">{language === 'ro' ? 'Rata Conversie' : language === 'it' ? 'Tasso di Conversione' : 'Conversion Rate'}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-white">{totalStats.conversionRate}%</p>
                 </div>
               </div>
@@ -220,16 +220,17 @@ export default function AdminReports() {
               {/* Chart */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20 mb-6 sm:mb-8">
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
-                  {language === 'ro' ? 'Scanări pe Zi' : 'Scans per Day'}
+                  {language === 'ro' ? 'Scanări pe Zi' : language === 'it' ? 'Scansioni al Giorno' : 'Scans per Day'}
                 </h2>
-                <div className="flex items-end gap-1 h-48">
-                  {dailyStats.map((day, index) => (
-                    <div
-                      key={day.date}
-                      className="flex-1 flex flex-col items-center gap-1 group"
-                    >
-                      <div className="relative w-full flex flex-col items-center">
-                        <span className="absolute -top-6 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 py-1 rounded">
+                <div className="flex flex-col gap-2">
+                  {/* Bars container */}
+                  <div className="flex items-end gap-1 h-40">
+                    {dailyStats.map((day) => (
+                      <div
+                        key={day.date}
+                        className="flex-1 relative group"
+                      >
+                        <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 py-1 rounded whitespace-nowrap z-10">
                           {day.scans}
                         </span>
                         <div
@@ -237,20 +238,39 @@ export default function AdminReports() {
                           style={{ height: `${(day.scans / maxScans) * 160}px`, minHeight: day.scans > 0 ? '4px' : '0' }}
                         ></div>
                       </div>
-                      {index % Math.ceil(dailyStats.length / 7) === 0 && (
-                        <span className="text-xs text-gray-400 mt-2">
-                          {new Date(day.date).toLocaleDateString(language === 'ro' ? 'ro-RO' : 'en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      )}
+                    ))}
+                  </div>
+                  {/* Ruler with ticks */}
+                  <div className="relative h-2 border-t border-gray-400/50">
+                    <div className="flex h-full">
+                      {dailyStats.map((day) => (
+                        <div key={day.date} className="flex-1 relative">
+                          <div className="absolute left-0 top-0 w-px h-2 bg-gray-400/50"></div>
+                        </div>
+                      ))}
+                      {/* Last tick */}
+                      <div className="absolute right-0 top-0 w-px h-2 bg-gray-400/50"></div>
                     </div>
-                  ))}
+                  </div>
+                  {/* Labels container */}
+                  <div className="flex items-start gap-1 h-6">
+                    {dailyStats.map((day, index) => (
+                      <div key={day.date} className="flex-1 flex justify-center">
+                        {index % Math.ceil(dailyStats.length / 7) === 0 && (
+                          <span className="text-xs text-gray-400">
+                            {new Date(day.date).toLocaleDateString(language === 'ro' ? 'ro-RO' : language === 'it' ? 'it-IT' : 'en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Top Products */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
                 <h2 className="text-2xl font-bold text-white mb-6">
-                  {language === 'ro' ? 'Produse Populare' : 'Top Products'}
+                  {language === 'ro' ? 'Produse Populare' : language === 'it' ? 'Prodotti Popolari' : 'Top Products'}
                 </h2>
                 {topProducts.length > 0 ? (
                   <div className="space-y-4">
@@ -260,7 +280,7 @@ export default function AdminReports() {
                         <div className="flex-1">
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-white font-medium">{product.name}</span>
-                            <span className="text-gray-300">{product.count} {language === 'ro' ? 'scanări' : 'scans'}</span>
+                            <span className="text-gray-300">{product.count} {language === 'ro' ? 'scanări' : language === 'it' ? 'scansioni' : 'scans'}</span>
                           </div>
                           <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                             <div
@@ -274,7 +294,7 @@ export default function AdminReports() {
                   </div>
                 ) : (
                   <p className="text-gray-400 text-center py-8">
-                    {language === 'ro' ? 'Nicio dată disponibilă' : 'No data available'}
+                    {language === 'ro' ? 'Nicio dată disponibilă' : language === 'it' ? 'Nessun dato disponibile' : 'No data available'}
                   </p>
                 )}
               </div>

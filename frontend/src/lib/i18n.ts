@@ -37,6 +37,51 @@ export const translations = {
       info2: 'Earn points separately at each business',
     },
 
+    // Proven Results Section
+    provenResults: {
+      title: 'Proven Results',
+      subtitle: 'Real data from industry research',
+      before: 'Without Loyalty',
+      after: 'With LoyalCard',
+      stat1: {
+        label: 'Customer Retention',
+        value: '+27%',
+        before: '100',
+        after: '127',
+        unit: 'customers',
+        source: 'Accenture 2020',
+        sourceLink: 'https://www.accenture.com/us-en/insights/strategy/brand-purpose',
+      },
+      stat2: {
+        label: 'Repeat Visits',
+        value: '+60%',
+        before: '100',
+        after: '160',
+        unit: 'visits',
+        source: 'Bond Brand Loyalty 2023',
+        sourceLink: 'https://bondbrandloyalty.com/report/the-loyalty-report-2023/',
+      },
+      stat3: {
+        label: 'Revenue per Customer',
+        value: '+25%',
+        before: '€100',
+        after: '€125',
+        unit: '',
+        source: 'Harvard Business Review',
+        sourceLink: 'https://hbr.org/2014/10/the-value-of-keeping-the-right-customers',
+      },
+      stat4: {
+        label: 'Customer Lifetime Value',
+        value: '+30%',
+        before: '€100',
+        after: '€130',
+        unit: '',
+        source: 'Bain & Company',
+        sourceLink: 'https://www.bain.com/insights/topics/loyalty/',
+      },
+      sourceLabel: 'Source:',
+    },
+
     // For Who Section
     forWho: {
       title: 'Who is LoyalCard for?',
@@ -667,6 +712,51 @@ export const translations = {
       info2: 'Acumulează puncte separat la fiecare unitate',
     },
 
+    // Proven Results Section
+    provenResults: {
+      title: 'Rezultate Dovedite',
+      subtitle: 'Date reale din cercetări de industrie',
+      before: 'Fără Loialitate',
+      after: 'Cu LoyalCard',
+      stat1: {
+        label: 'Retenție Clienți',
+        value: '+27%',
+        before: '100',
+        after: '127',
+        unit: 'clienți',
+        source: 'Accenture 2020',
+        sourceLink: 'https://www.accenture.com/us-en/insights/strategy/brand-purpose',
+      },
+      stat2: {
+        label: 'Vizite Recurente',
+        value: '+60%',
+        before: '100',
+        after: '160',
+        unit: 'vizite',
+        source: 'Bond Brand Loyalty 2023',
+        sourceLink: 'https://bondbrandloyalty.com/report/the-loyalty-report-2023/',
+      },
+      stat3: {
+        label: 'Venituri per Client',
+        value: '+25%',
+        before: '€100',
+        after: '€125',
+        unit: '',
+        source: 'Harvard Business Review',
+        sourceLink: 'https://hbr.org/2014/10/the-value-of-keeping-the-right-customers',
+      },
+      stat4: {
+        label: 'Valoare pe Viață Client',
+        value: '+30%',
+        before: '€100',
+        after: '€130',
+        unit: '',
+        source: 'Bain & Company',
+        sourceLink: 'https://www.bain.com/insights/topics/loyalty/',
+      },
+      sourceLabel: 'Sursă:',
+    },
+
     // For Who Section
     forWho: {
       title: 'Pentru cine este LoyalCard?',
@@ -1294,6 +1384,51 @@ export const translations = {
     footer: {
       info1: '💡 Ogni carta è specifica per un negozio',
       info2: 'Accumula punti separatamente in ogni attività',
+    },
+
+    // Proven Results Section
+    provenResults: {
+      title: 'Risultati Comprovati',
+      subtitle: 'Dati reali da ricerche di settore',
+      before: 'Senza Fedeltà',
+      after: 'Con LoyalCard',
+      stat1: {
+        label: 'Fidelizzazione Clienti',
+        value: '+27%',
+        before: '100',
+        after: '127',
+        unit: 'clienti',
+        source: 'Accenture 2020',
+        sourceLink: 'https://www.accenture.com/us-en/insights/strategy/brand-purpose',
+      },
+      stat2: {
+        label: 'Visite Ripetute',
+        value: '+60%',
+        before: '100',
+        after: '160',
+        unit: 'visite',
+        source: 'Bond Brand Loyalty 2023',
+        sourceLink: 'https://bondbrandloyalty.com/report/the-loyalty-report-2023/',
+      },
+      stat3: {
+        label: 'Fatturato per Cliente',
+        value: '+25%',
+        before: '€100',
+        after: '€125',
+        unit: '',
+        source: 'Harvard Business Review',
+        sourceLink: 'https://hbr.org/2014/10/the-value-of-keeping-the-right-customers',
+      },
+      stat4: {
+        label: 'Valore Vita Cliente',
+        value: '+30%',
+        before: '€100',
+        after: '€130',
+        unit: '',
+        source: 'Bain & Company',
+        sourceLink: 'https://www.bain.com/insights/topics/loyalty/',
+      },
+      sourceLabel: 'Fonte:',
     },
 
     // For Who Section

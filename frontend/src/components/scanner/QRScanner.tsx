@@ -16,7 +16,7 @@ export default function QRScanner({
       <div className="mb-6">
         <h2 className="text-3xl font-bold mb-3 text-white flex items-center gap-2">
           <span className="text-4xl">📸</span>
-          {language === 'ro' ? 'Încadrează codul QR' : 'Frame the QR Code'}
+          {language === 'ro' ? 'Încadrează codul QR' : language === 'it' ? 'Inquadra il codice QR' : 'Frame the QR Code'}
         </h2>
         <p className="text-gray-200">
           {language === 'ro' 
@@ -46,7 +46,7 @@ export default function QRScanner({
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
-              {language === 'ro' ? 'Activează Camera' : 'Enable Camera'}
+              {language === 'ro' ? 'Activează Camera' : language === 'it' ? 'Attiva Fotocamera' : 'Enable Camera'}
             </span>
           </button>
         </div>
@@ -57,7 +57,7 @@ export default function QRScanner({
         <div className="text-center py-12">
           <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
           <p className="text-gray-300">
-            {language === 'ro' ? 'Se solicită permisiunea...' : 'Requesting permission...'}
+            {language === 'ro' ? 'Se solicită permisiunea...' : language === 'it' ? 'Richiesta permesso...' : 'Requesting permission...'}
           </p>
         </div>
       )}
@@ -67,7 +67,7 @@ export default function QRScanner({
         <div className="bg-red-500/20 border-2 border-red-400/50 rounded-xl p-6 text-center">
           <div className="text-4xl mb-3">🚫</div>
           <h3 className="text-xl font-bold text-red-200 mb-2">
-            {language === 'ro' ? 'Permisiune Cameră Refuzată' : 'Camera Permission Denied'}
+            {language === 'ro' ? 'Permisiune Cameră Refuzată' : language === 'it' ? 'Permesso Fotocamera Negato' : 'Camera Permission Denied'}
           </h3>
           <p className="text-red-100 text-sm mb-4">
             {language === 'ro' 
@@ -78,7 +78,7 @@ export default function QRScanner({
             onClick={() => window.location.reload()}
             className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-300"
           >
-            {language === 'ro' ? 'Reîncearcă' : 'Try Again'}
+            {language === 'ro' ? 'Reîncearcă' : language === 'it' ? 'Riprova' : 'Try Again'}
           </button>
         </div>
       )}
@@ -88,7 +88,7 @@ export default function QRScanner({
         <div className="relative">
           <div id="qr-reader" className="w-full rounded-2xl overflow-hidden [&>video]:w-full [&>video]:rounded-xl"></div>
           <p className="text-center text-gray-300 mt-4 text-sm">
-            {language === 'ro' ? 'Scanare în curs...' : 'Scanning...'}
+            {language === 'ro' ? 'Scanare în curs...' : language === 'it' ? 'Scansione...' : 'Scanning...'}
           </p>
         </div>
       )}

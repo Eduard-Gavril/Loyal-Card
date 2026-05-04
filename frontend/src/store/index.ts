@@ -32,6 +32,55 @@ interface ClientState {
   // Language
   language: Language
   setLanguage: (lang: Language) => void
+  languageDetected: boolean
+}
+
+// Helper function to detect language based on IP geolocation
+async function detectLanguageFromLocation(): Promise<Language> {
+  try {
+    // Use ipapi.co free API to detect country from IP (no API key required)
+    const response = await fetch('https://ipapi.co/json/', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    })
+    
+    if (!response.ok) {
+      throw new Error('Geolocation API failed')
+    }
+    
+    const data = await response.json()
+    const countryCode = data.country_code?.toUpperCase() || ''
+    
+    console.log('Detected country from IP:', countryCode)
+    
+    // Map country codes to languages
+    if (countryCode === 'IT') {
+      return 'it' // Italy → Italian
+    } else if (countryCode === 'RO') {
+      return 'ro' // Romania → Romanian
+    } else if (['US', 'GB', 'CA', 'AU', 'NZ', 'IE'].includes(countryCode)) {
+      return 'en' // English-speaking countries → English
+    }
+    
+    // Default to Romanian for any other country
+    return 'ro'
+  } catch (error) {
+    // If geolocation fails, try browser language as fallback
+    console.log('Geolocation failed, using browser language fallback:', error)
+    try {
+      const browserLang = navigator.language || navigator.languages?.[0] || ''
+      const langCode = browserLang.split('-')[0].toLowerCase()
+      
+      if (langCode === 'it') return 'it'
+      if (langCode === 'ro') return 'ro'
+      if (langCode === 'en') return 'en'
+    } catch (e) {
+      console.error('Browser language detection also failed:', e)
+    }
+    
+    // Final fallback to Romanian
+    return 'ro'
+  }
 }
 
 export const useClientStore = create<ClientState>()(
@@ -79,12 +128,25 @@ export const useClientStore = create<ClientState>()(
       replaceAllCards: (cards: CardData[]) => {
         set({ savedCards: cards })
       },
-      // Language
-      language: 'ro',
-      setLanguage: (lang: Language) => set({ language: lang })
+      // Language with auto-detection
+      language: 'ro', // Will be updated by onRehydrateStorage
+      languageDetected: false,
+      setLanguage: (lang: Language) => set({ language: lang, languageDetected: true })
     }),
     {
-      name: 'loyalcard-client-storage'
+      name: 'loyalcard-client-storage',
+      onRehydrateStorage: () => (state) => {
+        // Auto-detect language only if not already detected/set by user
+        if (state && !state.languageDetected) {
+          // Use async detection based on IP geolocation
+          detectLanguageFromLocation().then((detectedLang) => {
+            if (!state.languageDetected) {
+              state.language = detectedLang
+              state.languageDetected = true
+            }
+          })
+        }
+      }
     }
   )
 )

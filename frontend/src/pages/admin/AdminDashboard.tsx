@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 import { getProductEmoji } from '@/lib/emojiUtils'
@@ -116,10 +116,10 @@ export default function AdminDashboard() {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return language === 'ro' ? 'Acum' : 'Just now'
-    if (diffMins < 60) return language === 'ro' ? `${diffMins} min în urmă` : `${diffMins}m ago`
-    if (diffHours < 24) return language === 'ro' ? `${diffHours}h în urmă` : `${diffHours}h ago`
-    return language === 'ro' ? `${diffDays}z în urmă` : `${diffDays}d ago`
+    if (diffMins < 1) return language === 'ro' ? 'Acum' : language === 'it' ? 'Adesso' : 'Just now'
+    if (diffMins < 60) return language === 'ro' ? `${diffMins} min în urmă` : language === 'it' ? `${diffMins} min fa` : `${diffMins}m ago`
+    if (diffHours < 24) return language === 'ro' ? `${diffHours}h în urmă` : language === 'it' ? `${diffHours}h fa` : `${diffHours}h ago`
+    return language === 'ro' ? `${diffDays}z în urmă` : language === 'it' ? `${diffDays}g fa` : `${diffDays}d ago`
   }
 
   const handleLogout = async () => {
@@ -151,12 +151,12 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false })
 
       if (cardsError) {
-        alert(language === 'ro' ? `Eroare: ${cardsError.message}` : `Error: ${cardsError.message}`)
+        alert(language === 'ro' ? `Eroare: ${cardsError.message}` : language === 'it' ? `Errore: ${cardsError.message}` : `Error: ${cardsError.message}`)
         return
       }
 
       if (!cards || cards.length === 0) {
-        alert(language === 'ro' ? 'Nu există clienți de exportat' : 'No clients to export')
+        alert(language === 'ro' ? 'Nu există clienți de exportat' : language === 'it' ? 'Nessun cliente da esportare' : 'No clients to export')
         return
       }
 
@@ -227,15 +227,15 @@ export default function AdminDashboard() {
       XLSX.writeFile(wb, filename)
 
     } catch (error: any) {
-      alert(language === 'ro' ? 'Eroare la exportul datelor' : 'Error exporting data')
+      alert(language === 'ro' ? 'Eroare la exportul datelor' : language === 'it' ? 'Errore durante l\'esportazione' : 'Error exporting data')
     }
   }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil hueShift={280} speed={0.3} warpAmount={0.1} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient */}
@@ -288,7 +288,12 @@ export default function AdminDashboard() {
               className="group relative overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600 text-white py-6 sm:py-8 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 hover:scale-105 active:scale-95"
             >
               <span className="relative flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold">
-                <span className="text-2xl sm:text-3xl">📷</span>
+                <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </span>
                 {t.admin.dashboard.scanQR}
               </span>
             </button>
@@ -297,7 +302,11 @@ export default function AdminDashboard() {
               className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
             >
               <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
-                <span className="text-2xl sm:text-3xl">📊</span>
+                <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </span>
                 {t.admin.dashboard.viewReports}
               </span>
             </button>
@@ -306,7 +315,11 @@ export default function AdminDashboard() {
               className="group bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-sm"
             >
               <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
-                <span className="text-2xl sm:text-3xl">🎁</span>
+                <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                  </svg>
+                </span>
                 {t.admin.dashboard.manageRewards}
               </span>
             </button>
@@ -315,8 +328,12 @@ export default function AdminDashboard() {
               className="group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-600/40 hover:scale-105 active:scale-95"
             >
               <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
-                <span className="text-2xl sm:text-3xl">📥</span>
-                {language === 'ro' ? 'Download Report Excel' : 'Download Excel Report'}
+                <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </span>
+                {language === 'ro' ? 'Download Report Excel' : language === 'it' ? 'Scarica Report Excel' : 'Download Excel Report'}
               </span>
             </button>
           </div>
@@ -325,32 +342,40 @@ export default function AdminDashboard() {
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
             <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsTotal}</h3>
-                <span className="text-2xl sm:text-3xl">📊</span>
+              <div className="flex flex-col items-center text-center">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-purple-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">{t.admin.dashboard.statsTotal}</h3>
+                <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalScans}</p>
               </div>
-              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalScans}</p>
             </div>
             <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsClients}</h3>
-                <span className="text-2xl sm:text-3xl">👥</span>
+              <div className="flex flex-col items-center text-center">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">{t.admin.dashboard.statsClients}</h3>
+                <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalClients}</p>
               </div>
-              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalClients}</p>
             </div>
             <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsRewards}</h3>
-                <span className="text-2xl sm:text-3xl">🎁</span>
+              <div className="flex flex-col items-center text-center">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">{t.admin.dashboard.statsRewards}</h3>
+                <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalRewards}</p>
               </div>
-              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalRewards}</p>
             </div>
             <div className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6 border border-white/20 hover:bg-white/15 hover:shadow-3xl hover:scale-105 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide">{t.admin.dashboard.statsToday}</h3>
-                <span className="text-2xl sm:text-3xl">⚡</span>
+              <div className="flex flex-col items-center text-center">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-orange-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <h3 className="text-gray-200 text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">{t.admin.dashboard.statsToday}</h3>
+                <p className="text-3xl sm:text-4xl font-bold text-white">{stats.scansToday}</p>
               </div>
-              <p className="text-3xl sm:text-4xl font-bold text-white">{stats.scansToday}</p>
             </div>
           </div>
 
@@ -361,7 +386,7 @@ export default function AdminDashboard() {
               <button
                 onClick={loadRecentActivity}
                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                title={language === 'ro' ? 'Reîmprospătează' : 'Refresh'}
+                title={language === 'ro' ? 'Reîmprospătează' : language === 'it' ? 'Aggiorna' : 'Refresh'}
               >
                 <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -389,12 +414,15 @@ export default function AdminDashboard() {
                         <span className="text-white font-medium">{scan.product_name}</span>
                         {scan.reward_applied && (
                           <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-300 text-xs font-medium rounded-full flex items-center gap-1">
-                            🎁 {language === 'ro' ? 'Premiu' : 'Reward'}
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                            </svg>
+                            {language === 'ro' ? 'Premiu' : language === 'it' ? 'Premio' : 'Reward'}
                           </span>
                         )}
                       </div>
                       <p className="text-gray-400 text-sm">
-                        {language === 'ro' ? 'Client' : 'Client'} #{scan.client_id}
+                        {language === 'ro' ? 'Client' : language === 'it' ? 'Cliente' : 'Client'} #{scan.client_id}
                       </p>
                     </div>
                     
@@ -409,10 +437,10 @@ export default function AdminDashboard() {
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📭</div>
                 <p className="text-gray-300 text-lg">
-                  {language === 'ro' ? 'Nicio activitate recentă' : 'No recent activity'}
+                  {language === 'ro' ? 'Nicio activitate recentă' : language === 'it' ? 'Nessuna attività recente' : 'No recent activity'}
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
-                  {language === 'ro' ? 'Scanările vor apărea aici' : 'Scans will appear here'}
+                  {language === 'ro' ? 'Scanările vor apărea aici' : language === 'it' ? 'Le scansioni appariranno qui' : 'Scans will appear here'}
                 </p>
               </div>
             )}

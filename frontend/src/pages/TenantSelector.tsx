@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useClientStore } from '@/store'
 import { api, TenantWithDistance, Tenant } from '@/lib/supabase'
@@ -117,8 +117,8 @@ export default function TenantSelector() {
   return (
     <div className="relative min-h-screen">
       {/* Animated background */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil hueShift={180} speed={0.4} warpAmount={0.08} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient */}
@@ -150,7 +150,7 @@ export default function TenantSelector() {
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-200">
               {userLocation 
-                ? '📍 ' + (language === 'ro' ? 'Magazine aproape de tine' : 'Stores near you')
+                ? '📍 ' + (language === 'ro' ? 'Magazine aproape de tine' : language === 'it' ? 'Negozi vicino a te' : 'Stores near you')
                 : t.tenantSelector.allStores}
             </p>
           </div>
@@ -171,7 +171,7 @@ export default function TenantSelector() {
               <div className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
                 <span className="text-xl sm:text-2xl">📍</span>
                 <div className="flex-1 text-blue-100">
-                  <p className="font-semibold mb-1">{language === 'ro' ? 'Locație detectată' : 'Location detected'}</p>
+                  <p className="font-semibold mb-1">{language === 'ro' ? 'Locație detectată' : language === 'it' ? 'Posizione rilevata' : 'Location detected'}</p>
                   <p className="text-xs">Lat: {userLocation.lat.toFixed(6)}, Lon: {userLocation.lon.toFixed(6)}</p>
                 </div>
               </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 
@@ -133,8 +133,8 @@ export default function ClientWallet() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <DarkVeil hueShift={260} speed={0.4} />
+        <div className="fixed inset-0 z-0 overflow-hidden">
+          <StaticBackground />
         </div>
         <div className="relative z-10 text-white text-xl font-semibold animate-pulse">{t.wallet.loading}</div>
       </div>
@@ -143,8 +143,8 @@ export default function ClientWallet() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <DarkVeil hueShift={260} speed={0.4} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
       
       <div className="max-w-lg mx-auto relative z-10">
@@ -165,30 +165,65 @@ export default function ClientWallet() {
         {/* Title */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2 sm:mb-3 flex items-center justify-center gap-2 sm:gap-3">
-            <span>💳</span> {t.wallet.title}
+            <svg className="w-8 h-8 sm:w-12 sm:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            {t.wallet.title}
           </h1>
           <p className="text-white/80 text-base sm:text-lg">{t.wallet.subtitle}</p>
         </div>
 
         {/* Cards List */}
         {cards.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-10 text-center border border-white/50">
-            <div className="text-5xl sm:text-7xl mb-4 sm:mb-6">👋</div>
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
-              {!clientId ? t.wallet.welcome : t.wallet.noCards}
-            </h2>
-            <p className="text-gray-700 mb-6 sm:mb-8 text-base sm:text-lg leading-relaxed whitespace-pre-line">
-              {!clientId ? t.wallet.startCollecting : t.wallet.noCardsYet}
-            </p>
-            <button
-              onClick={handleAddNewCard}
-              className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 mx-auto"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              {t.wallet.createFirstCard}
-            </button>
+          <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 sm:p-12 text-center border border-white/20 overflow-hidden">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-500/20 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-blue-500/20 to-transparent rounded-full blur-3xl"></div>
+            
+            <div className="relative">
+              {/* Icon stack - multiple cards illustration */}
+              <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto">
+                {/* Card 3 - Background */}
+                <div className="absolute top-4 left-8 w-20 h-16 sm:w-24 sm:h-20 bg-gradient-to-br from-purple-400/40 to-purple-500/40 rounded-xl shadow-lg transform rotate-12 backdrop-blur-sm border border-white/10"></div>
+                {/* Card 2 - Middle */}
+                <div className="absolute top-2 left-4 w-20 h-16 sm:w-24 sm:h-20 bg-gradient-to-br from-blue-400/50 to-blue-500/50 rounded-xl shadow-lg transform rotate-6 backdrop-blur-sm border border-white/20"></div>
+                {/* Card 1 - Front (Main) */}
+                <div className="absolute top-0 left-0 w-20 h-16 sm:w-24 sm:h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl shadow-2xl transform hover:scale-105 transition-transform duration-300 border border-white/30">
+                  <div className="absolute inset-0 flex flex-col justify-between p-2 sm:p-3">
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-3 sm:w-5 sm:h-4 bg-white/30 rounded"></div>
+                      <div className="w-4 h-3 sm:w-5 sm:h-4 bg-white/30 rounded"></div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="h-1 bg-white/40 rounded w-full"></div>
+                      <div className="h-1 bg-white/40 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                  {/* Card chip */}
+                  <div className="absolute top-2 right-2 w-3 h-3 sm:w-4 sm:h-4 bg-yellow-400/90 rounded-sm shadow-lg"></div>
+                </div>
+              </div>
+
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
+                {!clientId ? t.wallet.welcome : t.wallet.noCards}
+              </h2>
+              <p className="text-white/80 mb-8 sm:mb-10 text-base sm:text-lg leading-relaxed max-w-md mx-auto whitespace-pre-line">
+                {!clientId ? t.wallet.startCollecting : t.wallet.noCardsYet}
+              </p>
+              
+              <button
+                onClick={handleAddNewCard}
+                className="group relative bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 sm:px-10 sm:py-5 rounded-2xl font-bold text-base sm:text-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 inline-flex items-center justify-center gap-3 overflow-hidden border border-white/20"
+              >
+                {/* Button glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-400 opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-300"></div>
+                
+                <svg className="w-6 h-6 relative z-10 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="relative z-10">{t.wallet.createFirstCard}</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
@@ -242,10 +277,12 @@ export default function ClientWallet() {
                         />
                       ) : (
                         <div
-                          className="w-16 h-16 rounded-full flex items-center justify-center text-2xl ring-2 ring-white/20"
+                          className="w-16 h-16 rounded-full flex items-center justify-center ring-2 ring-white/20"
                           style={{ backgroundColor: card.brandColor + '30' }}
                         >
-                          🎴
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
                         </div>
                       )}
                       

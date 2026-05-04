@@ -30,6 +30,16 @@ export default function LanguageSelector() {
       >
         RO
       </button>
+      <button
+        onClick={() => handleLanguageChange('it')}
+        className={`px-3 py-1 rounded text-sm font-semibold transition-all duration-200 ${
+          language === 'it'
+            ? 'bg-white text-gray-900'
+            : 'text-white hover:bg-white/10'
+        }`}
+      >
+        IT
+      </button>
     </div>
   )
 }

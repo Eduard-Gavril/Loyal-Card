@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
 import { translations } from '@/lib/i18n'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 
 interface Product {
   id: string
@@ -306,7 +306,7 @@ export default function AdminProducts() {
       alert(editingRule ? t.ruleUpdated : t.ruleAdded)
 
     } catch (error) {
-      alert(language === 'ro' ? 'Eroare la salvarea regulii' : 'Error saving rule')
+      alert(language === 'ro' ? 'Eroare la salvarea regulii' : language === 'it' ? 'Errore nel salvataggio della regola' : 'Error saving rule')
     }
   }
 
@@ -326,7 +326,7 @@ export default function AdminProducts() {
       alert(t.ruleDeleted)
 
     } catch (error) {
-      alert(language === 'ro' ? 'Eroare la ștergerea regulii' : 'Error deleting rule')
+      alert(language === 'ro' ? 'Eroare la ștergerea regulii' : language === 'it' ? 'Errore nell\'eliminazione della regola' : 'Error deleting rule')
     }
   }
 
@@ -363,8 +363,8 @@ export default function AdminProducts() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil hueShift={280} speed={0.3} warpAmount={0.1} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient */}
@@ -488,7 +488,7 @@ export default function AdminProducts() {
                               </span>
                             </div>
                             <p className="text-xs text-gray-400 mt-1">
-                              {language === 'ro' ? 'Cumpără' : 'Buy'} {rule.buy_count} → {language === 'ro' ? 'Primești' : 'Get'} {rule.reward_count || rule.discount_percent + '%'}
+                              {language === 'ro' ? 'Cumpără' : language === 'it' ? 'Acquista' : 'Buy'} {rule.buy_count} → {language === 'ro' ? 'Primești' : language === 'it' ? 'Ricevi' : 'Get'} {rule.reward_count || rule.discount_percent + '%'}
                             </p>
                             {rule.description && (
                               <p className="text-xs text-gray-500 mt-1">{rule.description}</p>
@@ -698,7 +698,7 @@ export default function AdminProducts() {
                             ? 'bg-green-500/20 text-green-400' 
                             : 'bg-gray-500/20 text-gray-400'
                         }`}>
-                          {rule.active ? (language === 'ro' ? 'Activă' : 'Active') : (language === 'ro' ? 'Inactivă' : 'Inactive')}
+                          {rule.active ? (language === 'ro' ? 'Activă' : language === 'it' ? 'Attiva' : 'Active') : (language === 'ro' ? 'Inactivă' : language === 'it' ? 'Inattiva' : 'Inactive')}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 mb-1">
@@ -707,7 +707,7 @@ export default function AdminProducts() {
                         </span>
                         <span className="text-gray-400 text-xs">•</span>
                         <span className="text-gray-300 text-xs">
-                          {language === 'ro' ? 'Cumpără' : 'Buy'} {rule.buy_count} → {language === 'ro' ? 'Primești' : 'Get'} {rule.reward_count || rule.discount_percent + '%'}
+                          {language === 'ro' ? 'Cumpără' : language === 'it' ? 'Acquista' : 'Buy'} {rule.buy_count} → {language === 'ro' ? 'Primești' : language === 'it' ? 'Ricevi' : 'Get'} {rule.reward_count || rule.discount_percent + '%'}
                         </span>
                       </div>
                       <p className="text-xs text-gray-400">{rule.description}</p>
@@ -750,14 +750,14 @@ export default function AdminProducts() {
                 {/* Rule Name */}
                 <div>
                   <label className="block text-xs font-medium text-gray-300 mb-1">
-                    {language === 'ro' ? 'Nume Regulă' : 'Rule Name'}
+                    {language === 'ro' ? 'Nume Regulă' : language === 'it' ? 'Nome Regola' : 'Rule Name'}
                   </label>
                   <input
                     type="text"
                     value={ruleFormData.name}
                     onChange={(e) => setRuleFormData({ ...ruleFormData, name: e.target.value })}
                     className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder={language === 'ro' ? 'Ex: Cafea gratuită' : 'Ex: Free Coffee'}
+                    placeholder={language === 'ro' ? 'Ex: Cafea gratuită' : language === 'it' ? 'Es: Caffè gratuito' : 'Ex: Free Coffee'}
                     required
                   />
                 </div>
@@ -766,7 +766,7 @@ export default function AdminProducts() {
                   {/* Priority */}
                   <div>
                     <label className="block text-xs font-medium text-gray-300 mb-1">
-                      {t.priority || (language === 'ro' ? 'Prioritate' : 'Priority')}
+                      {t.priority || (language === 'ro' ? 'Prioritate' : language === 'it' ? 'Priorità' : 'Priority')}
                     </label>
                     <input
                       type="number"
@@ -776,13 +776,13 @@ export default function AdminProducts() {
                       className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Ordine aplicare' : 'Execution order'}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Ordine aplicare' : language === 'it' ? 'Ordine di esecuzione' : 'Execution order'}</p>
                   </div>
 
                   {/* Buy Count */}
                   <div>
                     <label className="block text-xs font-medium text-gray-300 mb-1">
-                      {language === 'ro' ? 'Scanări Necesare' : 'Scans Required'}
+                      {language === 'ro' ? 'Scanări Necesare' : language === 'it' ? 'Scansioni Richieste' : 'Scans Required'}
                     </label>
                     <input
                       type="number"
@@ -792,7 +792,7 @@ export default function AdminProducts() {
                       className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Câte scanări pentru premiu' : 'Scans for reward'}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Câte scanări pentru premiu' : language === 'it' ? 'Scansioni per premio' : 'Scans for reward'}</p>
                   </div>
                 </div>
 
@@ -831,7 +831,7 @@ export default function AdminProducts() {
                 {ruleFormData.reward_type === 'free_product' ? (
                   <div>
                     <label className="block text-xs font-medium text-gray-300 mb-1">
-                      {language === 'ro' ? 'Cantitate Gratuită' : 'Free Quantity'}
+                      {language === 'ro' ? 'Cantitate Gratuită' : language === 'it' ? 'Quantità Gratuita' : 'Free Quantity'}
                     </label>
                     <input
                       type="number"
@@ -841,12 +841,12 @@ export default function AdminProducts() {
                       className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Câte produse gratuite' : 'How many free products'}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Câte produse gratuite' : language === 'it' ? 'Quanti prodotti gratuiti' : 'How many free products'}</p>
                   </div>
                 ) : (
                   <div>
                     <label className="block text-xs font-medium text-gray-300 mb-1">
-                      {t.discountValue || (language === 'ro' ? 'Valoare Discount (%)' : 'Discount Value (%)')}
+                      {t.discountValue || (language === 'ro' ? 'Valoare Discount (%)' : language === 'it' ? 'Valore Sconto (%)' : 'Discount Value (%)')}
                     </label>
                     <input
                       type="number"
@@ -857,7 +857,7 @@ export default function AdminProducts() {
                       className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Procent de discount (1-100)' : 'Discount percentage (1-100)'}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{language === 'ro' ? 'Procent de discount (1-100)' : language === 'it' ? 'Percentuale di sconto (1-100)' : 'Discount percentage (1-100)'}</p>
                   </div>
                 )}
 

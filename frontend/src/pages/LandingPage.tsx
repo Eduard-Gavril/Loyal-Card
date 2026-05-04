@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { useRef, useState, useEffect } from 'react'
-import DarkVeil from '@/components/DarkVeil'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 
@@ -10,6 +9,7 @@ export default function LandingPage() {
   const t = getTranslation(language)
   const containerRef = useRef<HTMLDivElement>(null)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [faqSectionOpen, setFaqSectionOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuClosing, setMenuClosing] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -165,21 +165,54 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div ref={containerRef} className="landing-page-container relative w-full min-h-screen overflow-y-auto overflow-x-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 z-0">
-        <DarkVeil
-          hueShift={0}
-          noiseIntensity={0}
-          scanlineIntensity={0}
-          speed={0.5}
-          scanlineFrequency={0}
-          warpAmount={0}
-        />
+    <div ref={containerRef} className="landing-page-container relative w-full min-h-screen">
+      {/* Static wave background - optimized performance */}
+      <div className="fixed inset-0 z-0 h-screen overflow-hidden">
+        {/* Base gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-pink-900"></div>
+        
+        {/* Animated gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-800/50 via-blue-800/30 to-pink-800/40 animate-pulse" style={{ animationDuration: '8s' }}></div>
+        
+        {/* SVG Wave layers */}
+        <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none" viewBox="0 0 1440 800">
+          <path fill="url(#landing-wave1)" d="M0,320 C320,380 420,280 720,320 C1020,360 1120,280 1440,320 L1440,800 L0,800 Z" opacity="0.7">
+            <animate attributeName="d" dur="20s" repeatCount="indefinite"
+              values="M0,320 C320,380 420,280 720,320 C1020,360 1120,280 1440,320 L1440,800 L0,800 Z;
+                      M0,280 C320,240 420,340 720,280 C1020,220 1120,320 1440,280 L1440,800 L0,800 Z;
+                      M0,320 C320,380 420,280 720,320 C1020,360 1120,280 1440,320 L1440,800 L0,800 Z" />
+          </path>
+          <path fill="url(#landing-wave2)" d="M0,400 C360,450 540,350 900,400 C1260,450 1440,350 1440,400 L1440,800 L0,800 Z" opacity="0.5">
+            <animate attributeName="d" dur="15s" repeatCount="indefinite"
+              values="M0,400 C360,450 540,350 900,400 C1260,450 1440,350 1440,400 L1440,800 L0,800 Z;
+                      M0,350 C360,300 540,400 900,350 C1260,300 1440,400 1440,350 L1440,800 L0,800 Z;
+                      M0,400 C360,450 540,350 900,400 C1260,450 1440,350 1440,400 L1440,800 L0,800 Z" />
+          </path>
+          <path fill="url(#landing-wave3)" d="M0,480 C400,520 640,450 1000,480 C1360,510 1440,460 1440,480 L1440,800 L0,800 Z" opacity="0.4">
+            <animate attributeName="d" dur="25s" repeatCount="indefinite"
+              values="M0,480 C400,520 640,450 1000,480 C1360,510 1440,460 1440,480 L1440,800 L0,800 Z;
+                      M0,460 C400,420 640,490 1000,460 C1360,430 1440,500 1440,460 L1440,800 L0,800 Z;
+                      M0,480 C400,520 640,450 1000,480 C1360,510 1440,460 1440,480 L1440,800 L0,800 Z" />
+          </path>
+          <defs>
+            <linearGradient id="landing-wave1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#a855f7" stopOpacity="0.8"/>
+              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.6"/>
+            </linearGradient>
+            <linearGradient id="landing-wave2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.7"/>
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.5"/>
+            </linearGradient>
+            <linearGradient id="landing-wave3" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ec4899" stopOpacity="0.6"/>
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.4"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
 
       {/* Overlay gradient for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10 h-screen pointer-events-none"></div>
 
       {/* Menu Slide-in Drawer - Moved outside z-20 wrapper */}
       {menuOpen && (
@@ -274,7 +307,7 @@ export default function LandingPage() {
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-lg">{language === 'ro' ? 'Prețuri' : 'Pricing'}</span>
+                <span className="text-lg">{language === 'ro' ? 'Prețuri' : language === 'it' ? 'Prezzi' : 'Pricing'}</span>
               </button>
 
               <button
@@ -287,7 +320,7 @@ export default function LandingPage() {
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <span className="text-lg">{language === 'ro' ? 'Contactează-ne' : 'Contact Us'}</span>
+                <span className="text-lg">{language === 'ro' ? 'Contactează-ne' : language === 'it' ? 'Contattaci' : 'Contact Us'}</span>
               </button>
 
               <button
@@ -311,10 +344,10 @@ export default function LandingPage() {
               <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
                  Language / Limba
               </div>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setLanguage('en')}
-                  className={`flex-1 py-2 px-3 rounded-lg font-semibold transition-all ${
+                  className={`py-2 px-2 rounded-lg font-semibold transition-all ${
                     language === 'en'
                       ? 'bg-primary-600 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -324,13 +357,23 @@ export default function LandingPage() {
                 </button>
                 <button
                   onClick={() => setLanguage('ro')}
-                  className={`flex-1 py-2 px-3 rounded-lg font-semibold transition-all ${
+                  className={`py-2 px-2 rounded-lg font-semibold transition-all ${
                     language === 'ro'
                       ? 'bg-primary-600 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   🇷🇴 RO
+                </button>
+                <button
+                  onClick={() => setLanguage('it')}
+                  className={`py-2 px-2 rounded-lg font-semibold transition-all ${
+                    language === 'it'
+                      ? 'bg-primary-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  🇮🇹 IT
                 </button>
               </div>
             </div>
@@ -456,150 +499,633 @@ export default function LandingPage() {
       {/* Features Section (scrollable) */}
       <section id="features" className="relative z-30 bg-white py-12 sm:py-16 md:py-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          {/* Back to top button */}
-          <button
-            onClick={scrollToTop}
-            className="mb-8 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 mx-auto"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-            {t.hero.backToTop}
-          </button>
-
           <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
             {t.features.title}
           </h3>
           
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
-            <div className="text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <span className="text-2xl sm:text-3xl">📱</span>
+          <div className="relative grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
+            {/* Step 1 */}
+            <div className="relative flex flex-col text-center group">
+              {/* Step Number Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
+                1
               </div>
-              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
-                {t.features.step1.title}
-              </h4>
-              <p className="text-sm sm:text-base text-gray-600">
-                {t.features.step1.description}
-              </p>
+              
+              {/* Card */}
+              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-purple-200">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                  {t.features.step1.title}
+                </h4>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {t.features.step1.description}
+                </p>
+              </div>
+
+              {/* Arrow - Hidden on mobile, shown on tablet+ */}
+              <div className="hidden md:flex absolute top-1/2 -right-8 -translate-y-1/2 items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full group-hover:scale-125 transition-all duration-300 shadow-md">
+                <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <span className="text-2xl sm:text-3xl">📸</span>
+            {/* Step 2 */}
+            <div className="relative flex flex-col text-center group">
+              {/* Step Number Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
+                2
               </div>
-              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
-                {t.features.step2.title}
-              </h4>
-              <p className="text-sm sm:text-base text-gray-600">
-                {t.features.step2.description}
-              </p>
+              
+              {/* Card */}
+              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-blue-200">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 12h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zM17 8h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                  {t.features.step2.title}
+                </h4>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {t.features.step2.description}
+                </p>
+              </div>
+
+              {/* Arrow - Hidden on mobile, shown on desktop */}
+              <div className="hidden md:flex absolute top-1/2 -right-8 -translate-y-1/2 items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full group-hover:scale-125 transition-all duration-300 shadow-md">
+                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
             </div>
 
-            <div className="text-center sm:col-span-2 md:col-span-1">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <span className="text-2xl sm:text-3xl">🎁</span>
+            {/* Step 3 */}
+            <div className="relative flex flex-col text-center group sm:col-span-2 md:col-span-1">
+              {/* Step Number Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-cyan-500 to-emerald-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
+                3
               </div>
-              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
-                {t.features.step3.title}
-              </h4>
-              <p className="text-sm sm:text-base text-gray-600">
-                {t.features.step3.description}
-              </p>
+              
+              {/* Card */}
+              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-emerald-200">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-cyan-100 to-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                  </svg>
+                </div>
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                  {t.features.step3.title}
+                </h4>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {t.features.step3.description}
+                </p>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Proven Results Section */}
+      <section className="relative z-30 bg-gradient-to-br from-purple-50 via-white to-blue-50 py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              {t.provenResults.title}
+            </h3>
+            <p className="text-lg text-gray-600">
+              {t.provenResults.subtitle}
+            </p>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+            {/* Stat 1 - Retention */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+              <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-6 text-center min-h-[3rem] flex items-center justify-center">
+                {t.provenResults.stat1.label}
+              </h4>
+              
+              {/* Labels e numeri con altezza fissa */}
+              <div className="flex justify-center gap-4 mb-2">
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-gray-500 mb-1 h-8 flex items-center">
+                    {t.provenResults.before}
+                  </div>
+                  <div className="text-xl font-bold text-gray-600 h-8 flex items-center">
+                    {t.provenResults.stat1.before}
+                  </div>
+                </div>
+
+                {/* Arrow spacer */}
+                <div className="w-6"></div>
+
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-purple-600 mb-1 h-8 flex items-center">
+                    {t.provenResults.after}
+                  </div>
+                  <div className="text-xl font-bold text-purple-600 h-8 flex items-center">
+                    {t.provenResults.stat1.after}
+                  </div>
+                </div>
+              </div>
+
+              {/* Barre con freccia */}
+              <div className="flex items-end justify-center gap-4 mb-4 h-32">
+                {/* Before Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '80px' }}
+                  ></div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center mb-10">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* After Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '102px' }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="text-center mb-4">
+                <div className="inline-block px-4 py-2 bg-purple-100 rounded-full">
+                  <span className="text-2xl font-bold text-purple-600">{t.provenResults.stat1.value}</span>
+                </div>
+              </div>
+
+              <a 
+                href={t.provenResults.stat1.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-purple-600 transition-colors flex items-center justify-center gap-1"
+              >
+                <span>{t.provenResults.sourceLabel}</span>
+                <span className="underline">{t.provenResults.stat1.source}</span>
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Stat 2 - Repeat Visits */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+              <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-6 text-center min-h-[3rem] flex items-center justify-center">
+                {t.provenResults.stat2.label}
+              </h4>
+              
+              {/* Labels e numeri con altezza fissa */}
+              <div className="flex justify-center gap-4 mb-2">
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-gray-500 mb-1 h-8 flex items-center">
+                    {t.provenResults.before}
+                  </div>
+                  <div className="text-xl font-bold text-gray-600 h-8 flex items-center">
+                    {t.provenResults.stat2.before}
+                  </div>
+                </div>
+
+                {/* Arrow spacer */}
+                <div className="w-6"></div>
+
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-blue-600 mb-1 h-8 flex items-center">
+                    {t.provenResults.after}
+                  </div>
+                  <div className="text-xl font-bold text-blue-600 h-8 flex items-center">
+                    {t.provenResults.stat2.after}
+                  </div>
+                </div>
+              </div>
+
+              {/* Barre con freccia */}
+              <div className="flex items-end justify-center gap-4 mb-4 h-32">
+                {/* Before Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '80px' }}
+                  ></div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center mb-10">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* After Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '128px' }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="text-center mb-4">
+                <div className="inline-block px-4 py-2 bg-blue-100 rounded-full">
+                  <span className="text-2xl font-bold text-blue-600">{t.provenResults.stat2.value}</span>
+                </div>
+              </div>
+
+              <a 
+                href={t.provenResults.stat2.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-1"
+              >
+                <span>{t.provenResults.sourceLabel}</span>
+                <span className="underline">{t.provenResults.stat2.source}</span>
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Stat 3 - Revenue */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+              <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-6 text-center min-h-[3rem] flex items-center justify-center">
+                {t.provenResults.stat3.label}
+              </h4>
+              
+              {/* Labels e numeri con altezza fissa */}
+              <div className="flex justify-center gap-4 mb-2">
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-gray-500 mb-1 h-8 flex items-center">
+                    {t.provenResults.before}
+                  </div>
+                  <div className="text-xl font-bold text-gray-600 h-8 flex items-center">
+                    {t.provenResults.stat3.before}
+                  </div>
+                </div>
+
+                {/* Arrow spacer */}
+                <div className="w-6"></div>
+
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-green-600 mb-1 h-8 flex items-center">
+                    {t.provenResults.after}
+                  </div>
+                  <div className="text-xl font-bold text-green-600 h-8 flex items-center">
+                    {t.provenResults.stat3.after}
+                  </div>
+                </div>
+              </div>
+
+              {/* Barre con freccia */}
+              <div className="flex items-end justify-center gap-4 mb-4 h-32">
+                {/* Before Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '80px' }}
+                  ></div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center mb-10">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* After Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '100px' }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="text-center mb-4">
+                <div className="inline-block px-4 py-2 bg-green-100 rounded-full">
+                  <span className="text-2xl font-bold text-green-600">{t.provenResults.stat3.value}</span>
+                </div>
+              </div>
+
+              <a 
+                href={t.provenResults.stat3.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-green-600 transition-colors flex items-center justify-center gap-1"
+              >
+                <span>{t.provenResults.sourceLabel}</span>
+                <span className="underline">{t.provenResults.stat3.source}</span>
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Stat 4 - Lifetime Value */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+              <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-6 text-center min-h-[3rem] flex items-center justify-center">
+                {t.provenResults.stat4.label}
+              </h4>
+              
+              {/* Labels e numeri con altezza fissa */}
+              <div className="flex justify-center gap-4 mb-2">
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-gray-500 mb-1 h-8 flex items-center">
+                    {t.provenResults.before}
+                  </div>
+                  <div className="text-xl font-bold text-gray-600 h-8 flex items-center">
+                    {t.provenResults.stat4.before}
+                  </div>
+                </div>
+
+                {/* Arrow spacer */}
+                <div className="w-6"></div>
+
+                <div className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-semibold text-orange-600 mb-1 h-8 flex items-center">
+                    {t.provenResults.after}
+                  </div>
+                  <div className="text-xl font-bold text-orange-600 h-8 flex items-center">
+                    {t.provenResults.stat4.after}
+                  </div>
+                </div>
+              </div>
+
+              {/* Barre con freccia */}
+              <div className="flex items-end justify-center gap-4 mb-4 h-32">
+                {/* Before Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '80px' }}
+                  ></div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center mb-10">
+                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* After Bar */}
+                <div className="flex flex-col items-center">
+                  <div 
+                    className="w-16 bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-lg transition-all duration-1000 ease-out"
+                    style={{ height: '104px' }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="text-center mb-4">
+                <div className="inline-block px-4 py-2 bg-orange-100 rounded-full">
+                  <span className="text-2xl font-bold text-orange-600">{t.provenResults.stat4.value}</span>
+                </div>
+              </div>
+
+              <a 
+                href={t.provenResults.stat4.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-orange-600 transition-colors flex items-center justify-center gap-1"
+              >
+                <span>{t.provenResults.sourceLabel}</span>
+                <span className="underline">{t.provenResults.stat4.source}</span>
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-500 italic">
+              💡 {language === 'ro' ? 'Aceste statistici sunt bazate pe cercetări independente din industria programelor de loialitate' : language === 'it' ? 'Queste statistiche sono basate su ricerche indipendenti nel settore dei programmi fedeltà' : 'These statistics are based on independent research in the loyalty programs industry'}
+            </p>
           </div>
         </div>
       </section>
 
       {/* For Who Section */}
-      <section className="relative z-30 bg-gray-50 py-16 sm:py-20 md:py-24 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
-            {t.forWho.title}
-          </h3>
+      <section className="relative z-30 bg-gradient-to-br from-purple-50 via-white to-blue-50 py-16 sm:py-20 md:py-24 px-4 sm:px-6 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full opacity-20 blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full opacity-20 blur-3xl"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative">
+          <div className="text-center mb-12 sm:mb-16">
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              {t.forWho.title}
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {language === 'ro' ? 'Soluție completă pentru ambele părți' : language === 'it' ? 'Soluzione completa per entrambe le parti' : 'Complete solution for both sides'}
+            </p>
+          </div>
           
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-            {/* For Businesses */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
-                <span className="text-3xl">🏪</span>
+          <div className="grid md:grid-cols-2 gap-8 md:gap-10">
+            {/* For Businesses - Enhanced */}
+            <div className="group relative bg-gradient-to-br from-purple-50 to-white rounded-3xl p-8 shadow-xl border-2 border-purple-200 hover:border-purple-400 hover:shadow-2xl hover:scale-105 transition-all duration-500">
+              {/* Glow effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-purple-600 rounded-3xl opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
+              
+              <div className="relative flex flex-col h-full">
+                {/* Icon with animation */}
+                <div className="relative mb-6 inline-block">
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  {/* Badge */}
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <h4 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-3">
+                  {t.forWho.businesses.title}
+                </h4>
+                <p className="text-gray-600 mb-6 text-lg">{t.forWho.businesses.subtitle}</p>
+                
+                <ul className="space-y-4 mb-8 flex-1">
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.businesses.benefit1}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.businesses.benefit2}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.businesses.benefit3}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.businesses.benefit4}</span>
+                  </li>
+                </ul>
+
+                {/* CTA Button */}
+                <button
+                  onClick={() => navigate('/contact')}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 group/btn mt-auto"
+                >
+                  <span>{language === 'ro' ? 'Începe Acum' : language === 'it' ? 'Inizia Ora' : 'Start Now'}</span>
+                  <svg className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">{t.forWho.businesses.title}</h4>
-              <p className="text-gray-600 mb-6">{t.forWho.businesses.subtitle}</p>
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.businesses.benefit1}
-                </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.businesses.benefit2}
-                </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.businesses.benefit3}
-                </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.businesses.benefit4}
-                </li>
-              </ul>
             </div>
 
-            {/* For Customers */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                <span className="text-3xl">👤</span>
+            {/* For Customers - Enhanced */}
+            <div className="group relative bg-gradient-to-br from-blue-50 to-white rounded-3xl p-8 shadow-xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:scale-105 transition-all duration-500">
+              {/* Glow effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-3xl opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500"></div>
+              
+              <div className="relative flex flex-col h-full">
+                {/* Icon with animation */}
+                <div className="relative mb-6 inline-block">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  {/* Badge */}
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+
+                <h4 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-3">
+                  {t.forWho.customers.title}
+                </h4>
+                <p className="text-gray-600 mb-6 text-lg">{t.forWho.customers.subtitle}</p>
+                
+                <ul className="space-y-4 mb-8 flex-1">
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.customers.benefit1}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.customers.benefit2}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.customers.benefit3}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-700 group/item hover:translate-x-2 transition-transform">
+                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">{t.forWho.customers.benefit4}</span>
+                  </li>
+                </ul>
+
+                {/* CTA Button */}
+                <button
+                  onClick={() => {
+                    navigate('/dashboard')
+                    setTimeout(() => window.scrollTo(0, 0), 0)
+                  }}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 group/btn mt-auto"
+                >
+                  <span>{language === 'ro' ? 'Obține Cardul' : language === 'it' ? 'Ottieni la Carta' : 'Get Card'}</span>
+                  <svg className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">{t.forWho.customers.title}</h4>
-              <p className="text-gray-600 mb-6">{t.forWho.customers.subtitle}</p>
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.customers.benefit1}
-                </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.customers.benefit2}
-                </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.customers.benefit3}
-                </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {t.forWho.customers.benefit4}
-                </li>
-              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="relative z-30 bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+      {/* FAQ Section - Collapsable */}
+      <section id="faq" className="relative z-30 bg-white py-12 sm:py-16 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
-          <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
-            {t.faq.title}
-          </h3>
+          {/* FAQ Header - Clickable Button */}
+          <button
+            onClick={() => setFaqSectionOpen(!faqSectionOpen)}
+            className="w-full group bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 mb-8"
+          >
+            <div className="flex flex-col items-center gap-4">
+              <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center">
+                {t.faq.title}
+              </h3>
+              
+              <div className="flex items-center gap-3 text-primary-600">
+                <div className="flex items-center gap-2 px-4 py-2 bg-primary-100 rounded-full">
+                  <svg
+                    className={`w-5 h-5 transition-transform duration-300 ${faqSectionOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  <span className="font-semibold text-sm">
+                    {faqSectionOpen 
+                      ? (language === 'ro' ? 'Ascunde întrebările' : language === 'it' ? 'Nascondi domande' : 'Hide questions')
+                      : (language === 'ro' ? 'Arată întrebările (8)' : language === 'it' ? 'Mostra domande (8)' : 'Show questions (8)')
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+          </button>
           
-          <div className="space-y-4">
+          {/* FAQ Content - Collapsable */}
+          {faqSectionOpen && (
+            <div className="space-y-4 animate-fadeIn">
             {[
               { q: t.faq.q1, a: t.faq.a1 },
               { q: t.faq.q2, a: t.faq.a2 },
@@ -635,7 +1161,8 @@ export default function LandingPage() {
                 )}
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -643,35 +1170,37 @@ export default function LandingPage() {
       <section className="relative z-30 bg-gradient-to-br from-purple-600 to-blue-600 py-16 sm:py-20 md:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
-            {language === 'ro' ? 'Planuri Personalizate Pentru Afacerea Ta' : 'Custom Plans For Your Business'}
+            {language === 'ro' ? 'Planuri Personalizate Pentru Afacerea Ta' : language === 'it' ? 'Piani Personalizzati Per La Tua Attività' : 'Custom Plans For Your Business'}
           </h3>
           <p className="text-xl text-purple-100 mb-12 max-w-2xl mx-auto">
             {language === 'ro' 
               ? 'De la gratuit pentru a începe, până la soluții enterprise pentru afaceri mari. Alege planul perfect pentru nevoile tale.'
+              : language === 'it'
+              ? 'Dal gratuito per iniziare, alle soluzioni enterprise per grandi aziende. Scegli il piano perfetto per le tue esigenze.'
               : 'From free to get started, to enterprise solutions for large businesses. Choose the perfect plan for your needs.'}
           </p>
 
           {/* Quick Pricing Preview - Only 3 plans */}
           <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20 hover:bg-white/15 transition-all">
-              <div className="text-green-300 font-bold text-sm mb-3">{language === 'ro' ? 'STARTER' : 'STARTER'}</div>
+              <div className="text-green-300 font-bold text-sm mb-3">STARTER</div>
               <div className="text-5xl font-bold text-white mb-2">€0</div>
-              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : '/month'}</div>
+              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : language === 'it' ? '/mese' : '/month'}</div>
             </div>
 
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-8 border-2 border-yellow-400 relative hover:bg-white/25 transition-all transform hover:scale-105">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full">
-                {language === 'ro' ? 'POPULAR' : 'POPULAR'}
+                {language === 'ro' ? 'POPULAR' : language === 'it' ? 'POPOLARE' : 'POPULAR'}
               </div>
               <div className="text-yellow-300 font-bold text-sm mb-3">BUSINESS</div>
-              <div className="text-5xl font-bold text-white mb-2">€29</div>
-              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : '/month'}</div>
+              <div className="text-5xl font-bold text-white mb-2">€30</div>
+              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : language === 'it' ? '/mese' : '/month'}</div>
             </div>
 
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20 hover:bg-white/15 transition-all">
               <div className="text-blue-300 font-bold text-sm mb-3">PROFESSIONAL</div>
-              <div className="text-5xl font-bold text-white mb-2">€59</div>
-              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : '/month'}</div>
+              <div className="text-5xl font-bold text-white mb-2">€60</div>
+              <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : language === 'it' ? '/mese' : '/month'}</div>
             </div>
           </div>
 
@@ -681,111 +1210,75 @@ export default function LandingPage() {
               onClick={() => navigate('/pricing')}
               className="px-8 py-4 bg-white text-purple-600 font-semibold rounded-xl hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
             >
-              {language === 'ro' ? 'Vezi Toate Planurile' : 'View All Plans'}
+              {language === 'ro' ? 'Vezi Toate Planurile' : language === 'it' ? 'Vedi Tutti i Piani' : 'View All Plans'}
             </button>
             <button
               onClick={() => navigate('/contact')}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 border-2 border-white/30"
             >
-              {language === 'ro' ? 'Contactează-ne' : 'Contact Us'}
+              {language === 'ro' ? 'Contactează-ne' : language === 'it' ? 'Contattaci' : 'Contact Us'}
             </button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer id="footer" className="relative z-30 bg-gray-900 text-white py-8 sm:py-10 px-4 sm:px-6">
+      <footer id="footer" className="relative z-30 bg-gray-900 text-white py-6 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          {/* Footer Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {/* Compact Footer - All in one line */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-sm text-gray-400 mb-4">
             {/* Legal Links */}
-            <div className="text-center md:text-left">
-              <h5 className="font-semibold text-lg mb-4">{t.footerNav.legal}</h5>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/privacy"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {t.footerNav.privacy}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/terms"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {t.footerNav.terms}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/cookie-policy"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {t.footerNav.cookies}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/refund"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {t.footerNav.refund}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/acceptable-use"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {t.footerNav.acceptableUse}
-                  </a>
-                </li>
-              </ul>
-            </div>
+            <a href="/privacy" className="hover:text-white transition-colors">
+              {t.footerNav.privacy}
+            </a>
+            <span className="hidden sm:inline text-gray-600">•</span>
+            <a href="/terms" className="hover:text-white transition-colors">
+              {t.footerNav.terms}
+            </a>
+            <span className="hidden sm:inline text-gray-600">•</span>
+            <a href="/cookie-policy" className="hover:text-white transition-colors">
+              {t.footerNav.cookies}
+            </a>
+            <span className="hidden sm:inline text-gray-600">•</span>
+            <a href="/refund" className="hover:text-white transition-colors">
+              {t.footerNav.refund}
+            </a>
+            <span className="hidden sm:inline text-gray-600">•</span>
+            <a href="/acceptable-use" className="hover:text-white transition-colors">
+              {t.footerNav.acceptableUse}
+            </a>
+            
+            {/* Divider */}
+            <span className="hidden sm:inline text-gray-600 mx-2">|</span>
             
             {/* Contact */}
-            <div className="text-center">
-              <h5 className="font-semibold text-lg mb-4">{t.footerNav.contact}</h5>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/contact"
-                    className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 justify-center"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    {t.footerNav.contactUs}
-                  </a>
-                </li>
-              </ul>
-            </div>
+            <a
+              href="/contact"
+              className="hover:text-white transition-colors inline-flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {t.footerNav.contactUs}
+            </a>
             
-            {/* Social Links */}
-            <div className="text-center md:text-right">
-              <h5 className="font-semibold text-lg mb-4">{t.footerNav.social}</h5>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="https://www.instagram.com/loyal.card/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 justify-center md:justify-end"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
-                    {t.footerNav.instagram}
-                  </a>
-                </li>
-              </ul>
-            </div>
+            {/* Social */}
+            <span className="hidden sm:inline text-gray-600">•</span>
+            <a
+              href="https://www.instagram.com/loyal.card/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors inline-flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              {t.footerNav.instagram}
+            </a>
           </div>
           
           {/* Copyright */}
-          <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
+          <div className="text-center text-xs text-gray-500">
             <p>{t.footerNav.copyright}</p>
           </div>
         </div>

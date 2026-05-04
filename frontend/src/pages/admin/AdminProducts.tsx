@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
 import { translations } from '@/lib/i18n'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 
 interface Product {
   id: string
@@ -363,8 +363,8 @@ export default function AdminProducts() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil hueShift={280} speed={0.3} warpAmount={0.1} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient */}

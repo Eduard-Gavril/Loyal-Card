@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useClientStore } from '@/store'
 import { api, TenantWithDistance, Tenant } from '@/lib/supabase'
@@ -117,8 +117,8 @@ export default function TenantSelector() {
   return (
     <div className="relative min-h-screen">
       {/* Animated background */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil hueShift={180} speed={0.4} warpAmount={0.08} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient */}

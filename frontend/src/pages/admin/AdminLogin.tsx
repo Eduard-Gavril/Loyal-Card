@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore, useClientStore } from '@/store'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 
@@ -84,15 +84,8 @@ export default function AdminLogin() {
   return (
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 bg-black">
       {/* Animated background */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil
-          hueShift={280}
-          noiseIntensity={0.02}
-          scanlineIntensity={0}
-          speed={0.3}
-          scanlineFrequency={0}
-          warpAmount={0.1}
-        />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient */}

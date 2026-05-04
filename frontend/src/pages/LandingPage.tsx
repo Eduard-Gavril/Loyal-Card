@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { useRef, useState, useEffect } from 'react'
-import DarkVeil from '@/components/DarkVeil'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 
@@ -167,19 +166,52 @@ export default function LandingPage() {
 
   return (
     <div ref={containerRef} className="landing-page-container relative w-full min-h-screen">
-      {/* Animated background - Fixed to viewport, not extending with content */}
-      <div className="fixed inset-0 z-0 h-screen">
-        <DarkVeil
-          hueShift={0}
-          noiseIntensity={0}
-          scanlineIntensity={0}
-          speed={0.5}
-          scanlineFrequency={0}
-          warpAmount={0}
-        />
+      {/* Static wave background - optimized performance */}
+      <div className="fixed inset-0 z-0 h-screen overflow-hidden">
+        {/* Base gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-pink-900"></div>
+        
+        {/* Animated gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-800/50 via-blue-800/30 to-pink-800/40 animate-pulse" style={{ animationDuration: '8s' }}></div>
+        
+        {/* SVG Wave layers */}
+        <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none" viewBox="0 0 1440 800">
+          <path fill="url(#wave1)" d="M0,320 C320,380 420,280 720,320 C1020,360 1120,280 1440,320 L1440,800 L0,800 Z" opacity="0.7">
+            <animate attributeName="d" dur="20s" repeatCount="indefinite"
+              values="M0,320 C320,380 420,280 720,320 C1020,360 1120,280 1440,320 L1440,800 L0,800 Z;
+                      M0,280 C320,240 420,340 720,280 C1020,220 1120,320 1440,280 L1440,800 L0,800 Z;
+                      M0,320 C320,380 420,280 720,320 C1020,360 1120,280 1440,320 L1440,800 L0,800 Z" />
+          </path>
+          <path fill="url(#wave2)" d="M0,400 C360,450 540,350 900,400 C1260,450 1440,350 1440,400 L1440,800 L0,800 Z" opacity="0.5">
+            <animate attributeName="d" dur="15s" repeatCount="indefinite"
+              values="M0,400 C360,450 540,350 900,400 C1260,450 1440,350 1440,400 L1440,800 L0,800 Z;
+                      M0,350 C360,300 540,400 900,350 C1260,300 1440,400 1440,350 L1440,800 L0,800 Z;
+                      M0,400 C360,450 540,350 900,400 C1260,450 1440,350 1440,400 L1440,800 L0,800 Z" />
+          </path>
+          <path fill="url(#wave3)" d="M0,480 C400,520 640,450 1000,480 C1360,510 1440,460 1440,480 L1440,800 L0,800 Z" opacity="0.4">
+            <animate attributeName="d" dur="25s" repeatCount="indefinite"
+              values="M0,480 C400,520 640,450 1000,480 C1360,510 1440,460 1440,480 L1440,800 L0,800 Z;
+                      M0,460 C400,420 640,490 1000,460 C1360,430 1440,500 1440,460 L1440,800 L0,800 Z;
+                      M0,480 C400,520 640,450 1000,480 C1360,510 1440,460 1440,480 L1440,800 L0,800 Z" />
+          </path>
+          <defs>
+            <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#a855f7" stopOpacity="0.8"/>
+              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.6"/>
+            </linearGradient>
+            <linearGradient id="wave2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.7"/>
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.5"/>
+            </linearGradient>
+            <linearGradient id="wave3" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ec4899" stopOpacity="0.6"/>
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.4"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
 
-      {/* Overlay gradient for better text readability - Fixed to viewport like DarkVeil */}
+      {/* Overlay gradient for better text readability */}
       <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10 h-screen pointer-events-none"></div>
 
       {/* Menu Slide-in Drawer - Moved outside z-20 wrapper */}
@@ -467,56 +499,92 @@ export default function LandingPage() {
       {/* Features Section (scrollable) */}
       <section id="features" className="relative z-30 bg-white py-12 sm:py-16 md:py-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          {/* Back to top button */}
-          <button
-            onClick={scrollToTop}
-            className="mb-8 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 mx-auto"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-            {t.hero.backToTop}
-          </button>
-
           <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
             {t.features.title}
           </h3>
           
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
-            <div className="text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <span className="text-2xl sm:text-3xl">📱</span>
+          <div className="relative grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
+            {/* Step 1 */}
+            <div className="relative flex flex-col text-center group">
+              {/* Step Number Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
+                1
               </div>
-              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
-                {t.features.step1.title}
-              </h4>
-              <p className="text-sm sm:text-base text-gray-600">
-                {t.features.step1.description}
-              </p>
+              
+              {/* Card */}
+              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-purple-200">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                  {t.features.step1.title}
+                </h4>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {t.features.step1.description}
+                </p>
+              </div>
+
+              {/* Arrow - Hidden on mobile, shown on tablet+ */}
+              <div className="hidden md:flex absolute top-1/2 -right-8 -translate-y-1/2 items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full group-hover:scale-125 transition-all duration-300 shadow-md">
+                <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <span className="text-2xl sm:text-3xl">📸</span>
+            {/* Step 2 */}
+            <div className="relative flex flex-col text-center group">
+              {/* Step Number Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
+                2
               </div>
-              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
-                {t.features.step2.title}
-              </h4>
-              <p className="text-sm sm:text-base text-gray-600">
-                {t.features.step2.description}
-              </p>
+              
+              {/* Card */}
+              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-blue-200">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 12h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zM17 8h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                  {t.features.step2.title}
+                </h4>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {t.features.step2.description}
+                </p>
+              </div>
+
+              {/* Arrow - Hidden on mobile, shown on desktop */}
+              <div className="hidden md:flex absolute top-1/2 -right-8 -translate-y-1/2 items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full group-hover:scale-125 transition-all duration-300 shadow-md">
+                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
             </div>
 
-            <div className="text-center sm:col-span-2 md:col-span-1">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <span className="text-2xl sm:text-3xl">🎁</span>
+            {/* Step 3 */}
+            <div className="relative flex flex-col text-center group sm:col-span-2 md:col-span-1">
+              {/* Step Number Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-cyan-500 to-emerald-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
+                3
               </div>
-              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
-                {t.features.step3.title}
-              </h4>
-              <p className="text-sm sm:text-base text-gray-600">
-                {t.features.step3.description}
-              </p>
+              
+              {/* Card */}
+              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-emerald-200">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-cyan-100 to-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                  </svg>
+                </div>
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                  {t.features.step3.title}
+                </h4>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {t.features.step3.description}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -876,11 +944,15 @@ export default function LandingPage() {
                 {/* Icon with animation */}
                 <div className="relative mb-6 inline-block">
                   <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                    <span className="text-4xl">🏪</span>
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
                   </div>
                   {/* Badge */}
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse">
-                    ✨
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
                   </div>
                 </div>
 
@@ -946,11 +1018,15 @@ export default function LandingPage() {
                 {/* Icon with animation */}
                 <div className="relative mb-6 inline-block">
                   <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                    <span className="text-4xl">👤</span>
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                   </div>
                   {/* Badge */}
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse">
-                    💎
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                    </svg>
                   </div>
                 </div>
 

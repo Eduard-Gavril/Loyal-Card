@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 
 interface TenantSettings {
   name: string
@@ -100,8 +100,8 @@ export default function AdminSettings() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil hueShift={320} speed={0.3} warpAmount={0.1} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient */}

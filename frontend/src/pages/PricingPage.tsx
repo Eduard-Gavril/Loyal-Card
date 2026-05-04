@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 
 export default function PricingPage() {
   const navigate = useNavigate()
@@ -129,15 +129,8 @@ export default function PricingPage() {
       {/* Dark Section with Animated Background */}
       <div className="relative w-full overflow-hidden">
         {/* Animated background */}
-        <div className="absolute inset-0 z-0">
-          <DarkVeil
-            hueShift={0}
-            noiseIntensity={0}
-            scanlineIntensity={0}
-            speed={0.5}
-            scanlineFrequency={0}
-            warpAmount={0}
-          />
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <StaticBackground />
         </div>
 
         {/* Overlay gradient for better text readability */}

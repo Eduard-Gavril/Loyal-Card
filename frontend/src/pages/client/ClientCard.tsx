@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
 import { api, Card as CardType, RewardRule } from '@/lib/supabase'
-import DarkVeil from '@/components/DarkVeil'
+import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 
@@ -178,8 +178,8 @@ export default function ClientCard() {
     return (
       <div className="relative min-h-screen overflow-hidden">
         {/* Animated background */}
-        <div className="absolute inset-0 z-0">
-          <DarkVeil hueShift={200} speed={0.4} />
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <StaticBackground />
         </div>
         
         {/* Overlay gradient */}
@@ -234,8 +234,8 @@ export default function ClientCard() {
   return (
     <div className="relative min-h-screen overflow-auto">
       {/* Animated background - fixed to cover entire viewport */}
-      <div className="fixed inset-0 z-0">
-        <DarkVeil hueShift={200} speed={0.4} />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <StaticBackground />
       </div>
 
       {/* Overlay gradient - also fixed */}

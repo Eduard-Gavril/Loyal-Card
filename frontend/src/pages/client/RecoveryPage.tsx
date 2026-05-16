@@ -199,7 +199,7 @@ export default function RecoveryPage() {
                 <form onSubmit={handleVerifyRecovery} className="space-y-4">
                   <div className="text-center mb-4">
                     <p className="text-white text-sm">
-                      Enter your 6-digit PIN to recover your account
+                      {t.recovery.pinInstructions}
                     </p>
                   </div>
 
@@ -224,7 +224,7 @@ export default function RecoveryPage() {
                   ) : (
                     <div>
                       <label className="block text-white text-sm font-medium mb-2">
-                        Backup Code
+                        {t.recovery.backupCodeLabel}
                       </label>
                       <input
                         type="text"
@@ -258,7 +258,7 @@ export default function RecoveryPage() {
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? t.recovery.verifying : 'Verify'}
+                    {loading ? t.recovery.verifying : t.recovery.verifyButton}
                   </button>
 
                   <button
@@ -266,9 +266,7 @@ export default function RecoveryPage() {
                     onClick={() => setUseBackupCode(!useBackupCode)}
                     className="w-full text-primary-400 hover:text-primary-300 text-sm"
                   >
-                    {useBackupCode 
-                      ? 'Use PIN instead' 
-                      : 'Forgot PIN? Use backup code'}
+                    {useBackupCode ? t.recovery.usePinInstead : t.recovery.forgotPin}
                   </button>
 
                   <button
@@ -281,7 +279,7 @@ export default function RecoveryPage() {
                     }}
                     className="w-full text-gray-400 hover:text-gray-300 text-sm"
                   >
-                    Try different phone number
+                    {t.recovery.tryDifferentPhone}
                   </button>
                 </form>
               )}

@@ -29,6 +29,7 @@
     
     <!-- Alternate Language Tags -->
     <link rel="alternate" hreflang="en" href="https://loyalcard.net/" />
+    <link rel="alternate" hreflang="it" href="https://loyalcard.net/?lang=it" />
     <link rel="alternate" hreflang="ro" href="https://loyalcard.net/?lang=ro" />
     <link rel="alternate" hreflang="x-default" href="https://loyalcard.net/" />
     
@@ -41,6 +42,7 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="it_IT" />
     <meta property="og:locale:alternate" content="ro_RO" />
     <meta property="og:site_name" content="LoyalCard" />
     
@@ -53,6 +55,15 @@
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Google Analytics 4 — replace G-XXXXXXXXXX with your Measurement ID -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script> -->
     
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
@@ -95,8 +106,75 @@
       "contactPoint": {
         "@type": "ContactPoint",
         "contactType": "Customer Support",
-        "availableLanguage": ["English", "Romanian"]
+        "availableLanguage": ["English", "Italian", "Romanian"]
       }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "LoyalCard Digital Loyalty Platform",
+      "provider": {
+        "@type": "Organization",
+        "name": "LoyalCard",
+        "url": "https://loyalcard.net"
+      },
+      "serviceType": "Digital Loyalty Program",
+      "description": "Create and manage digital loyalty cards for your business. Reward customers with stamps, discounts, and special offers through a mobile-first platform.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR",
+        "description": "Free digital loyalty card platform"
+      },
+      "areaServed": {
+        "@type": "Place",
+        "name": "Worldwide"
+      },
+      "availableLanguage": ["English", "Italian", "Romanian"]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is LoyalCard?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LoyalCard is a free digital loyalty card platform that helps businesses create mobile loyalty programs and reward their customers with digital punch cards — no app download required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is LoyalCard free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, LoyalCard is completely free for customers. Businesses can start a loyalty program in minutes at no cost."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the digital loyalty card work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Customers receive a digital card with a unique QR code. Every time they visit, the business scans their QR code to add stamps. Once enough stamps are collected, customers unlock rewards and discounts automatically."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to download an app to use LoyalCard?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No app download is required. LoyalCard works entirely in the browser and can be saved to your phone's home screen for quick access, just like a native app."
+          }
+        }
+      ]
     }
     </script>
   </head>

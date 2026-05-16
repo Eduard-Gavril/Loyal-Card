@@ -62,8 +62,8 @@ async function detectLanguageFromLocation(): Promise<Language> {
       return 'en' // English-speaking countries → English
     }
     
-    // Default to Romanian for any other country
-    return 'ro'
+    // Default to English for any other country
+    return 'en'
   } catch (error) {
     // If geolocation fails, try browser language as fallback
     console.log('Geolocation failed, using browser language fallback:', error)
@@ -78,8 +78,8 @@ async function detectLanguageFromLocation(): Promise<Language> {
       console.error('Browser language detection also failed:', e)
     }
     
-    // Final fallback to Romanian
-    return 'ro'
+    // Final fallback to English
+    return 'en'
   }
 }
 
@@ -129,7 +129,7 @@ export const useClientStore = create<ClientState>()(
         set({ savedCards: cards })
       },
       // Language with auto-detection
-      language: 'ro', // Will be updated by onRehydrateStorage
+      language: 'en', // Will be updated by onRehydrateStorage
       languageDetected: false,
       setLanguage: (lang: Language) => set({ language: lang, languageDetected: true })
     }),

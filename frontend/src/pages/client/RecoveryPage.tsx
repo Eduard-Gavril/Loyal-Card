@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
@@ -12,6 +12,23 @@ export default function RecoveryPage() {
   const { clientId, setClientData, replaceAllCards, language } = useClientStore()
   const t = getTranslation(language)
   
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      en: 'Account Recovery — LoyalCard',
+      it: 'Recupero Account — LoyalCard',
+      ro: 'Recuperare Cont — LoyalCard'
+    }
+    document.title = titles[language] || titles.en
+
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      document.head.appendChild(canonical)
+    }
+    canonical.href = 'https://loyalcard.net/recovery'
+  }, [language])
+
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState('')
   const [backupCode, setBackupCode] = useState('')

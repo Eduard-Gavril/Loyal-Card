@@ -113,19 +113,27 @@ export default function LandingPage() {
       en: {
         title: 'LoyalCard - Digital Loyalty Card | Free Customer Rewards Program',
         description: 'Free digital loyalty card platform for businesses. Create mobile loyalty programs, reward customers, and boost retention. No setup fees. Start in 2 minutes!',
-        keywords: 'digital loyalty card, customer rewards app, free loyalty program, digital punch card, mobile loyalty card'
+        keywords: 'digital loyalty card, customer rewards app, free loyalty program, digital punch card, mobile loyalty card',
+        canonical: 'https://loyalcard.net/'
+      },
+      it: {
+        title: 'LoyalCard - Carta Fedeltà Digitale | Programma Fedeltà Gratuito',
+        description: 'Piattaforma gratuita di carte fedeltà digitali per aziende. Crea programmi fedeltà mobile, premia i clienti e aumenta la fidelizzazione. Inizia in 2 minuti!',
+        keywords: 'carta fedeltà digitale, app premi clienti, programma fedeltà gratuito, tessera fedeltà digitale, carta fedeltà mobile',
+        canonical: 'https://loyalcard.net/?lang=it'
       },
       ro: {
         title: 'LoyalCard - Card de Fidelitate Digital | Program Loialitate Gratuit',
         description: 'Platformă gratuită de carduri de fidelitate digitale pentru afaceri. Creează programe de loialitate mobile, recompensează clienții și crește retenția. Fără costuri!',
-        keywords: 'card de fidelitate digital, aplicație recompense clienți, program loialitate gratuit, card digital puncte, card loialitate mobil'
+        keywords: 'card de fidelitate digital, aplicație recompense clienți, program loialitate gratuit, card digital puncte, card loialitate mobil',
+        canonical: 'https://loyalcard.net/?lang=ro'
       }
     }
 
     const meta = metaTags[language as keyof typeof metaTags] || metaTags.en
-    
+
     document.title = meta.title
-    
+
     const updateMetaTag = (name: string, content: string) => {
       let element = document.querySelector(`meta[name="${name}"]`)
       if (!element) {
@@ -135,10 +143,19 @@ export default function LandingPage() {
       }
       element.setAttribute('content', content)
     }
-    
+
     updateMetaTag('description', meta.description)
     updateMetaTag('keywords', meta.keywords)
-    
+
+    // Update canonical link
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      document.head.appendChild(canonical)
+    }
+    canonical.href = meta.canonical
+
     // Update html lang attribute
     document.documentElement.lang = language
   }, [language])

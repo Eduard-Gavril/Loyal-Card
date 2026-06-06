@@ -13,9 +13,9 @@ export const translations = {
       backToTop: 'Back to Top',
     },
     stats: {
-      digital: '100% Digital',
-      rewards: '∞ Rewards',
-      cost: '0€ Cost',
+      digital: 'Digital',
+      rewards: 'Rewards',
+      cost: 'Free',
     },
     features: {
       title: 'How it works',
@@ -695,9 +695,9 @@ export const translations = {
       backToTop: 'Înapoi Sus',
     },
     stats: {
-      digital: '100% Digital',
-      rewards: '∞ Premii',
-      cost: '0€ Cost',
+      digital: 'Digital',
+      rewards: 'Premii',
+      cost: 'Gratuit',
     },
     features: {
       title: 'Cum funcționează',
@@ -1376,9 +1376,9 @@ export const translations = {
       backToTop: 'Torna su',
     },
     stats: {
-      digital: '100% Digitale',
-      rewards: '∞ Premi',
-      cost: '0€ Costo',
+      digital: 'Digitale',
+      rewards: 'Premi',
+      cost: 'Gratuito',
     },
     features: {
       title: 'Come funziona',

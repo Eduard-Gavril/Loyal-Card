@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
-import { isValidPhoneNumber } from '@/lib/phoneUtils'
+import { isValidPhoneNumber, normalizePhoneNumber } from '@/lib/phoneUtils'
+import PhoneInput from '@/components/PhoneInput'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
@@ -131,7 +132,7 @@ export default function UserDashboard() {
     setPhoneError('')
 
     try {
-      const result = await api.linkPhone(clientId, phone, pin)
+      const result = await api.linkPhone(clientId, normalizePhoneNumber(phone), pin)
       if (result.success && result.backup_codes) {
         setBackupCodes(result.backup_codes)
         setShowBackupCodes(true)
@@ -438,13 +439,9 @@ export default function UserDashboard() {
                   <label className="block text-white text-sm font-medium mb-2">
                     {t.protection.phoneLabel}
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder={t.protection.phonePlaceholder}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                    required
+                    onChange={setPhone}
                   />
                 </div>
 

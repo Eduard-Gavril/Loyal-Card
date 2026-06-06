@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
-import { isValidPhoneNumber } from '@/lib/phoneUtils'
+import { isValidPhoneNumber, normalizePhoneNumber } from '@/lib/phoneUtils'
+import PhoneInput from '@/components/PhoneInput'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
@@ -52,7 +53,7 @@ export default function RecoveryPage() {
     }
 
     try {
-      const result = await api.requestRecovery(phone)
+      const result = await api.requestRecovery(normalizePhoneNumber(phone))
       
       if (result.success && result.phone_found) {
         setMode('verify')
@@ -84,7 +85,7 @@ export default function RecoveryPage() {
 
     try {
       const result = await api.verifyRecovery(
-        phone,
+        normalizePhoneNumber(phone),
         useBackupCode ? undefined : pin,
         useBackupCode ? backupCode : undefined,
         clientId || undefined
@@ -182,13 +183,9 @@ export default function RecoveryPage() {
                     <label className="block text-white text-sm font-medium mb-2">
                       {t.recovery.phoneLabel}
                     </label>
-                    <input
-                      type="tel"
+                    <PhoneInput
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder={t.recovery.phonePlaceholder}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                      required
+                      onChange={setPhone}
                     />
                   </div>
 

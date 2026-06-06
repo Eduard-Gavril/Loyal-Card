@@ -12,16 +12,21 @@
 export function normalizePhoneNumber(phone: string): string {
   // Remove all whitespace, dashes, parentheses, and dots
   let normalized = phone.replace(/[\s\-()\.]/g, '')
-  
+
   // Keep only the leading + (if present) and digits
   normalized = normalized.replace(/[^\d+]/g, '')
-  
+
   // Ensure + is only at the beginning
   if (normalized.includes('+')) {
     const digits = normalized.replace(/\+/g, '')
     normalized = '+' + digits
   }
-  
+
+  // Convert 00XX international prefix to +XX
+  if (normalized.startsWith('00')) {
+    normalized = '+' + normalized.slice(2)
+  }
+
   return normalized
 }
 

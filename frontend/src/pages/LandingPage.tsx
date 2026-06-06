@@ -113,19 +113,27 @@ export default function LandingPage() {
       en: {
         title: 'LoyalCard - Digital Loyalty Card | Free Customer Rewards Program',
         description: 'Free digital loyalty card platform for businesses. Create mobile loyalty programs, reward customers, and boost retention. No setup fees. Start in 2 minutes!',
-        keywords: 'digital loyalty card, customer rewards app, free loyalty program, digital punch card, mobile loyalty card'
+        keywords: 'digital loyalty card, customer rewards app, free loyalty program, digital punch card, mobile loyalty card',
+        canonical: 'https://loyalcard.net/'
+      },
+      it: {
+        title: 'LoyalCard - Carta Fedeltà Digitale | Programma Fedeltà Gratuito',
+        description: 'Piattaforma gratuita di carte fedeltà digitali per aziende. Crea programmi fedeltà mobile, premia i clienti e aumenta la fidelizzazione. Inizia in 2 minuti!',
+        keywords: 'carta fedeltà digitale, app premi clienti, programma fedeltà gratuito, tessera fedeltà digitale, carta fedeltà mobile',
+        canonical: 'https://loyalcard.net/?lang=it'
       },
       ro: {
         title: 'LoyalCard - Card de Fidelitate Digital | Program Loialitate Gratuit',
         description: 'Platformă gratuită de carduri de fidelitate digitale pentru afaceri. Creează programe de loialitate mobile, recompensează clienții și crește retenția. Fără costuri!',
-        keywords: 'card de fidelitate digital, aplicație recompense clienți, program loialitate gratuit, card digital puncte, card loialitate mobil'
+        keywords: 'card de fidelitate digital, aplicație recompense clienți, program loialitate gratuit, card digital puncte, card loialitate mobil',
+        canonical: 'https://loyalcard.net/?lang=ro'
       }
     }
 
     const meta = metaTags[language as keyof typeof metaTags] || metaTags.en
-    
+
     document.title = meta.title
-    
+
     const updateMetaTag = (name: string, content: string) => {
       let element = document.querySelector(`meta[name="${name}"]`)
       if (!element) {
@@ -135,10 +143,19 @@ export default function LandingPage() {
       }
       element.setAttribute('content', content)
     }
-    
+
     updateMetaTag('description', meta.description)
     updateMetaTag('keywords', meta.keywords)
-    
+
+    // Update canonical link
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      document.head.appendChild(canonical)
+    }
+    canonical.href = meta.canonical
+
     // Update html lang attribute
     document.documentElement.lang = language
   }, [language])
@@ -271,7 +288,7 @@ export default function LandingPage() {
                 onClick={() => {
                   closeMenu()
                   setTimeout(() => {
-                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })
                   }, 300)
                 }}
                 className="w-full px-6 py-2.5 text-left text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-4"
@@ -467,7 +484,7 @@ export default function LandingPage() {
 
               <button
                 onClick={() => {
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                  document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })
                 }}
                 className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white text-base sm:text-lg font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 border border-white/20"
               >
@@ -496,96 +513,277 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Features Section (scrollable) */}
-      <section id="features" className="relative z-30 bg-white py-12 sm:py-16 md:py-20 px-4 sm:px-6">
+      {/* How It Works - Example Cards Section */}
+      <section id="how-it-works" className="relative z-30 bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
-            {t.features.title}
-          </h3>
-          
-          <div className="relative grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
-            {/* Step 1 */}
-            <div className="relative flex flex-col text-center group">
-              {/* Step Number Badge */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
-                1
-              </div>
-              
-              {/* Card */}
-              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-purple-200">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          <div className="text-center mb-12 sm:mb-16">
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              {language === 'ro' ? 'Cum Funcționează?' : language === 'it' ? 'Come Funziona?' : 'How Does It Work?'}
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {language === 'ro'
+                ? 'Iată câteva exemple reale de programe de fidelitate cu LoyalCard'
+                : language === 'it'
+                ? 'Ecco alcuni esempi reali di programmi fedeltà con LoyalCard'
+                : 'Here are some real examples of loyalty programs with LoyalCard'}
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            {/* Card 1 - Coffee Shop */}
+            <div className="group relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-6 shadow-xl border-2 border-amber-200 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+              {/* Business header */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-md">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" />
                   </svg>
                 </div>
-                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
-                  {t.features.step1.title}
-                </h4>
-                <p className="text-sm sm:text-base text-gray-600">
-                  {t.features.step1.description}
-                </p>
+                <div>
+                  <div className="font-bold text-gray-900 text-lg">Café Central</div>
+                  <div className="text-xs text-gray-500">
+                    {language === 'ro' ? 'Cafenea' : language === 'it' ? 'Caffetteria' : 'Coffee Shop'}
+                  </div>
+                </div>
               </div>
 
-              {/* Arrow - Hidden on mobile, shown on tablet+ */}
-              <div className="hidden md:flex absolute top-1/2 -right-8 -translate-y-1/2 items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full group-hover:scale-125 transition-all duration-300 shadow-md">
-                <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              {/* Reward rule */}
+              <div className="bg-white/80 rounded-2xl p-4 mb-5 border border-amber-100">
+                <div className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2">
+                  {language === 'ro' ? 'Regulă de recompensă' : language === 'it' ? 'Regola premio' : 'Reward rule'}
+                </div>
+                <div className="flex items-start gap-2 text-gray-800 font-medium text-sm">
+                  <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" />
+                  </svg>
+                  <span>
+                    {language === 'ro'
+                      ? 'Cumpără 6 cafele → al 7-lea este GRATUIT'
+                      : language === 'it'
+                      ? 'Acquista 6 caffè → il 7° è GRATIS'
+                      : 'Buy 6 coffees → 7th one is FREE'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Stamp progress - almost complete (6/7) */}
+              <div className="mb-5">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-gray-600">
+                    {language === 'ro' ? 'Progres' : language === 'it' ? 'Progresso' : 'Progress'}
+                  </span>
+                  <span className="text-xs font-bold text-amber-600">6/7</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {[1,2,3,4,5,6].map(i => (
+                    <div key={i} className="w-9 h-9 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-sm">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" />
+                      </svg>
+                    </div>
+                  ))}
+                  <div className="w-9 h-9 bg-gray-100 border-2 border-dashed border-amber-300 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+                <div className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full" style={{ width: '85%' }}></div>
+              </div>
+              <div className="flex items-center justify-center gap-1.5 text-xs text-gray-500">
+                <svg className="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
+                <span>
+                  {language === 'ro'
+                    ? 'Încă 1 cafea și câștigi premiul!'
+                    : language === 'it'
+                    ? 'Ancora 1 caffè e vinci il premio!'
+                    : 'Just 1 more coffee to win the prize!'}
+                </span>
               </div>
             </div>
 
-            {/* Step 2 */}
-            <div className="relative flex flex-col text-center group">
-              {/* Step Number Badge */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
-                2
-              </div>
-              
-              {/* Card */}
-              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-blue-200">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 12h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zM17 8h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            {/* Card 2 - Restaurant */}
+            <div className="group relative bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-6 shadow-xl border-2 border-emerald-200 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+              {/* Business header */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-md">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
-                  {t.features.step2.title}
-                </h4>
-                <p className="text-sm sm:text-base text-gray-600">
-                  {t.features.step2.description}
-                </p>
+                <div>
+                  <div className="font-bold text-gray-900 text-lg">Bistro Verde</div>
+                  <div className="text-xs text-gray-500">
+                    {language === 'ro' ? 'Restaurant' : language === 'it' ? 'Ristorante' : 'Restaurant'}
+                  </div>
+                </div>
               </div>
 
-              {/* Arrow - Hidden on mobile, shown on desktop */}
-              <div className="hidden md:flex absolute top-1/2 -right-8 -translate-y-1/2 items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full group-hover:scale-125 transition-all duration-300 shadow-md">
-                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              {/* Reward rule */}
+              <div className="bg-white/80 rounded-2xl p-4 mb-5 border border-emerald-100">
+                <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wide mb-2">
+                  {language === 'ro' ? 'Regulă de recompensă' : language === 'it' ? 'Regola premio' : 'Reward rule'}
+                </div>
+                <div className="flex items-start gap-2 text-gray-800 font-medium text-sm">
+                  <svg className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span>
+                    {language === 'ro'
+                      ? '5 mese principale → desert GRATUIT sau 20% reducere'
+                      : language === 'it'
+                      ? '5 piatti principali → dessert GRATIS o 20% sconto'
+                      : '5 main dishes → FREE dessert or 20% discount'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Stamp progress - complete! (5/5) */}
+              <div className="mb-5">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-gray-600">
+                    {language === 'ro' ? 'Progres' : language === 'it' ? 'Progresso' : 'Progress'}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-bold text-emerald-600">5/5</span>
+                    <svg className="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {[1,2,3,4,5].map(i => (
+                    <div key={i} className="w-9 h-9 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center shadow-sm">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reward unlocked banner */}
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-3 text-center flex flex-col items-center gap-1">
+                <div className="flex items-center gap-2 text-white font-bold text-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                  </svg>
+                  {language === 'ro' ? 'PREMIU CÂȘTIGAT!' : language === 'it' ? 'PREMIO VINTO!' : 'REWARD EARNED!'}
+                </div>
+                <div className="text-emerald-100 text-xs">
+                  {language === 'ro'
+                    ? 'Arată cardul la casă pentru a-l valorifica'
+                    : language === 'it'
+                    ? 'Mostra la carta alla cassa per riscattarlo'
+                    : 'Show the card at checkout to redeem it'}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3 - Hair Salon */}
+            <div className="group relative bg-gradient-to-br from-pink-50 to-purple-50 rounded-3xl p-6 shadow-xl border-2 border-pink-200 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+              {/* Business header */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-md">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-bold text-gray-900 text-lg">Style Salon</div>
+                  <div className="text-xs text-gray-500">
+                    {language === 'ro' ? 'Frizerie' : language === 'it' ? 'Parrucchiere' : 'Hair Salon'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Reward rule */}
+              <div className="bg-white/80 rounded-2xl p-4 mb-5 border border-pink-100">
+                <div className="text-xs font-semibold text-pink-600 uppercase tracking-wide mb-2">
+                  {language === 'ro' ? 'Regulă de recompensă' : language === 'it' ? 'Regola premio' : 'Reward rule'}
+                </div>
+                <div className="flex items-start gap-2 text-gray-800 font-medium text-sm">
+                  <svg className="w-4 h-4 text-pink-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                  </svg>
+                  <span>
+                    {language === 'ro'
+                      ? '4 tăieturi → un spălat GRATUIT sau 30% reducere la tuns'
+                      : language === 'it'
+                      ? '4 tagli → un lavaggio GRATIS o 30% sconto sul taglio'
+                      : '4 cuts → FREE wash or 30% off your next cut'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Stamp progress (3/4) */}
+              <div className="mb-5">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-gray-600">
+                    {language === 'ro' ? 'Progres' : language === 'it' ? 'Progresso' : 'Progress'}
+                  </span>
+                  <span className="text-xs font-bold text-pink-600">3/4</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="w-9 h-9 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center shadow-sm">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                      </svg>
+                    </div>
+                  ))}
+                  <div className="w-9 h-9 bg-gray-100 border-2 border-dashed border-pink-300 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+                <div className="h-full bg-gradient-to-r from-pink-400 to-purple-500 rounded-full" style={{ width: '75%' }}></div>
+              </div>
+              <div className="flex items-center justify-center gap-1.5 text-xs text-gray-500">
+                <svg className="w-3.5 h-3.5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
+                <span>
+                  {language === 'ro'
+                    ? 'Încă 1 tuns și câștigi premiul!'
+                    : language === 'it'
+                    ? 'Ancora 1 taglio e vinci il premio!'
+                    : 'Just 1 more cut to win the prize!'}
+                </span>
               </div>
             </div>
+          </div>
 
-            {/* Step 3 */}
-            <div className="relative flex flex-col text-center group sm:col-span-2 md:col-span-1">
-              {/* Step Number Badge */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-cyan-500 to-emerald-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
-                3
-              </div>
-              
-              {/* Card */}
-              <div className="flex flex-col h-full bg-white rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-emerald-200">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-cyan-100 to-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                  </svg>
-                </div>
-                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
-                  {t.features.step3.title}
-                </h4>
-                <p className="text-sm sm:text-base text-gray-600">
-                  {t.features.step3.description}
-                </p>
-              </div>
-            </div>
+          {/* Bottom CTA */}
+          <div className="mt-12 text-center">
+            <p className="text-gray-600 mb-6 text-lg">
+              {language === 'ro'
+                ? 'Alege partenerul tău și începe să acumulezi puncte acum!'
+                : language === 'it'
+                ? 'Scegli il tuo partner e inizia ad accumulare punti ora!'
+                : 'Choose your partner and start collecting points now!'}
+            </p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/40 hover:scale-105"
+            >
+              {language === 'ro' ? 'Descoperă Parteneri' : language === 'it' ? 'Scopri i Partner' : 'Discover Partners'}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
           </div>
         </div>
       </section>

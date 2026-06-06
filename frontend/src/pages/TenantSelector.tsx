@@ -19,6 +19,23 @@ export default function TenantSelector() {
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
+    const titles: Record<string, string> = {
+      en: 'Choose a Store — LoyalCard',
+      it: 'Scegli un Negozio — LoyalCard',
+      ro: 'Alege un Magazin — LoyalCard'
+    }
+    document.title = titles[language] || titles.en
+
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      document.head.appendChild(canonical)
+    }
+    canonical.href = 'https://loyalcard.net/select-tenant'
+  }, [language])
+
+  useEffect(() => {
     requestLocation()
   }, [])
 

@@ -57,3 +57,6 @@ pnpm-debug.log*
 *.pid
 *.seed
 *.pid.lock
+
+#Todo: Add more specific ignores for your project as needed
+todo.txt

@@ -7,15 +7,15 @@ export const translations = {
     hero: {
       title: 'Your loyalty card',
       titleHighlight: 'always with you',
-      subtitle: 'Forget plastic cards. Earn points, get rewards and bring your loyalty into the future.',
+      subtitle: 'Your free loyalty card, always on your phone. Collect stamps, earn loyalty rewards. No plastic card, no app download required.',
       getCard: 'Discover Partners',
       learnMore: 'How It Works',
       backToTop: 'Back to Top',
     },
     stats: {
-      digital: '100% Digital',
-      rewards: '∞ Rewards',
-      cost: '0€ Cost',
+      digital: 'Digital',
+      rewards: 'Rewards',
+      cost: 'Free',
     },
     features: {
       title: 'How it works',
@@ -105,7 +105,7 @@ export const translations = {
 
     // FAQ Section
     faq: {
-      title: 'Frequently Asked Questions',
+      title: 'Other Frequently Asked Questions',
       q1: 'Does it cost anything?',
       a1: 'For customers, LoyalCard is completely free. Businesses can start with a generous free tier.',
       q2: 'Do I need to download an app?',
@@ -689,15 +689,15 @@ export const translations = {
     hero: {
       title: 'Cardul tău de fidelitate',
       titleHighlight: 'întotdeauna cu tine',
-      subtitle: 'Uită de cardurile de plastic. Acumulează puncte, câștigă premii și adu-ți fidelitatea în viitor.',
+      subtitle: 'Cardul tău de fidelitate gratuit, mereu pe telefon. Acumulează timbre, câștigă recompense. Fără card fizic, fără descărcare de aplicație.',
       getCard: 'Descoperă Parteneri',
       learnMore: 'Cum Funcționează',
       backToTop: 'Înapoi Sus',
     },
     stats: {
-      digital: '100% Digital',
-      rewards: '∞ Premii',
-      cost: '0€ Cost',
+      digital: 'Digital',
+      rewards: 'Premii',
+      cost: 'Gratuit',
     },
     features: {
       title: 'Cum funcționează',
@@ -787,7 +787,7 @@ export const translations = {
 
     // FAQ Section
     faq: {
-      title: 'Întrebări Frecvente',
+      title: 'Alte Întrebări Frecvente',
       q1: 'Costă ceva?',
       a1: 'Pentru clienți, LoyalCard este complet gratuit. Afacerile pot începe cu un plan generos gratuit.',
       q2: 'Trebuie să descarc o aplicație?',
@@ -1370,15 +1370,15 @@ export const translations = {
     hero: {
       title: 'La tua carta fedeltà',
       titleHighlight: 'sempre con te',
-      subtitle: 'Dimentica le carte di plastica. Accumula punti, guadagna premi e porta la tua fedeltà nel futuro.',
+      subtitle: 'La tua carta fedeltà gratuita, sempre sul telefono. Accumula timbri, guadagna premi. Senza carta fisica, senza scaricare app.',
       getCard: 'Scopri i Partner',
       learnMore: 'Come Funziona',
       backToTop: 'Torna su',
     },
     stats: {
-      digital: '100% Digitale',
-      rewards: '∞ Premi',
-      cost: '0€ Costo',
+      digital: 'Digitale',
+      rewards: 'Premi',
+      cost: 'Gratuito',
     },
     features: {
       title: 'Come funziona',
@@ -1468,7 +1468,7 @@ export const translations = {
 
     // FAQ Section
     faq: {
-      title: 'Domande Frequenti',
+      title: 'Altre Domande Frequenti',
       q1: 'Costa qualcosa?',
       a1: 'Per i clienti, LoyalCard è completamente gratuito. Le attività possono iniziare con un piano gratuito generoso.',
       q2: 'Devo scaricare un\'app?',

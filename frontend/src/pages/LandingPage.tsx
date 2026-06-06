@@ -471,7 +471,7 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/select-tenant')}
                 className="group w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-base sm:text-lg font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 hover:scale-105"
               >
                 <span className="flex items-center justify-center gap-2">
@@ -776,7 +776,7 @@ export default function LandingPage() {
                 : 'Choose your partner and start collecting points now!'}
             </p>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/select-tenant')}
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/40 hover:scale-105"
             >
               {language === 'ro' ? 'Descoperă Parteneri' : language === 'it' ? 'Scopri i Partner' : 'Discover Partners'}
@@ -1282,6 +1282,35 @@ export default function LandingPage() {
                   </svg>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What is a loyalty card - callout above FAQ */}
+      <section className="relative z-30 bg-white pt-12 sm:pt-16 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 rounded-2xl p-5 sm:p-6 flex gap-4 items-start">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900 mb-1 text-base sm:text-lg">
+                {language === 'ro'
+                  ? 'Ce este un card de fidelitate digital?'
+                  : language === 'it'
+                  ? "Cos'è una carta fedeltà digitale?"
+                  : 'What is a digital loyalty card?'}
+              </h4>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                {language === 'ro'
+                  ? 'Un card de fidelitate digital înlocuiește cardul plastic tradițional: clienții acumulează timbre sau puncte la fiecare achiziție și câștigă recompense. Cu LoyalCard, cardul tău de fidelitate este gratuit, mereu pe telefon și nu necesită descărcarea unei aplicații.'
+                  : language === 'it'
+                  ? "Una carta fedeltà digitale sostituisce quella fisica tradizionale: i clienti accumulano timbri o punti ad ogni acquisto e guadagnano premi. Con LoyalCard, la tua carta fedeltà è gratuita, sempre sul telefono e non richiede di scaricare un'app."
+                  : 'A digital loyalty card replaces the traditional plastic card: customers collect stamps or points at every purchase and earn rewards. With LoyalCard, your free loyalty rewards card is always on your phone and requires no app download.'}
+              </p>
             </div>
           </div>
         </div>

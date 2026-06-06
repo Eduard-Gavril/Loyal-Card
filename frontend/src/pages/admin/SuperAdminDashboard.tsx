@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store'
 import { supabase } from '@/lib/supabase'
+import StaticBackground from '@/components/StaticBackground'
+import { 
+  Building2, Users, Activity, Gift, TrendingUp, Calendar,
+  Search, Download, RefreshCw, Power, PowerOff,
+  Award, Zap, BarChart3, Clock, CheckCircle, XCircle,
+  Settings, Bell, Plus, Eye
+} from 'lucide-react'
 
 interface GlobalStats {
   totalTenants: number
@@ -26,6 +33,14 @@ interface TenantInfo {
   scans_today: number
 }
 
+interface ActivityLog {
+  id: string
+  action: string
+  tenant_name: string
+  timestamp: string
+  type: 'scan' | 'reward' | 'client' | 'tenant'
+}
+
 export default function SuperAdminDashboard() {
   const navigate = useNavigate()
   const { user, role, clearAuth } = useAuthStore()
@@ -42,6 +57,11 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
+  const [sortBy, setSortBy] = useState<'name' | 'scans' | 'clients' | 'created'>('scans')
+  const [showActivityLog, setShowActivityLog] = useState(false)
+  const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([])
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards')
 
   // Redirect if not super admin
   useEffect(() => {
@@ -54,8 +74,33 @@ export default function SuperAdminDashboard() {
     if (role === 'super_admin') {
       loadGlobalStats()
       loadTenants()
+      loadRecentActivity()
     }
   }, [role])
+
+  const loadRecentActivity = async () => {
+    try {
+      // Get recent scan events with tenant info
+      const { data: recentScans } = await supabase
+        .from('scan_events')
+        .select('id, scanned_at, reward_applied, tenant_id, tenants(name)')
+        .order('scanned_at', { ascending: false })
+        .limit(10)
+
+      if (recentScans) {
+        const activities: ActivityLog[] = recentScans.map((scan: any) => ({
+          id: scan.id,
+          action: scan.reward_applied ? 'Reward redeemed' : 'Scan registered',
+          tenant_name: scan.tenants?.name || 'Unknown',
+          timestamp: scan.scanned_at,
+          type: scan.reward_applied ? 'reward' : 'scan'
+        }))
+        setRecentActivity(activities)
+      }
+    } catch (err) {
+      console.error('Failed to load activity log:', err)
+    }
+  }
 
   const loadGlobalStats = async () => {
     const timeout = (p: any) => Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 8000))])
@@ -164,41 +209,126 @@ export default function SuperAdminDashboard() {
     }
   }
 
+  const refreshData = async () => {
+    setLoading(true)
+    await Promise.all([
+      loadGlobalStats(),
+      loadTenants(),
+      loadRecentActivity()
+    ])
+    setLoading(false)
+  }
+
+  const exportData = () => {
+    const csv = [
+      ['Store Name', 'Email', 'Status', 'Clients', 'Total Scans', 'Rewards', 'Scans Today', 'Created'].join(','),
+      ...filteredAndSortedTenants.map(t => 
+        [t.name, t.contact_email || '', t.active ? 'Active' : 'Inactive', 
+         t.total_clients, t.total_scans, t.total_rewards, t.scans_today,
+         new Date(t.created_at).toLocaleDateString()].join(',')
+      )
+    ].join('\n')
+    
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `loyalcard-stores-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     clearAuth()
     navigate('/admin/login')
   }
 
-  const filteredTenants = tenants.filter(tenant =>
-    tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (tenant.contact_email && tenant.contact_email.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  // Filter and sort tenants
+  const filteredAndSortedTenants = tenants
+    .filter(tenant => {
+      // Status filter
+      if (filterStatus === 'active' && !tenant.active) return false
+      if (filterStatus === 'inactive' && tenant.active) return false
+      
+      // Search filter
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase()
+        return tenant.name.toLowerCase().includes(search) ||
+               (tenant.contact_email && tenant.contact_email.toLowerCase().includes(search))
+      }
+      return true
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'scans':
+          return b.total_scans - a.total_scans
+        case 'clients':
+          return b.total_clients - a.total_clients
+        case 'created':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        default:
+          return 0
+      }
+    })
+
 
   if (role !== 'super_admin') {
     return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      {/* All content */}
-      <div className="relative">
-        {/* Header */}
-        <header className="bg-gray-800/95 backdrop-blur-sm shadow-lg sticky top-0 z-40 border-b border-purple-500/30">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 z-0">
+        <StaticBackground />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Modern Header */}
+        <header className="sticky top-0 z-50 backdrop-blur-xl bg-gray-900/80 border-b border-white/10 shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  🎛️ Super Admin Dashboard
-                </h1>
-                <p className="text-sm text-gray-300 mt-1">LoyalCard Platform Management</p>
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg">
+                  <Settings className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                    Super Admin Control Panel
+                  </h1>
+                  <p className="text-sm text-gray-300 mt-0.5 flex items-center gap-2">
+                    <Activity className="w-3 h-3" />
+                    LoyalCard Platform Management
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg text-sm font-medium"
-              >
-                Logout
-              </button>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowActivityLog(!showActivityLog)}
+                  className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-xl transition-all border border-blue-400/30"
+                >
+                  <Bell className="w-4 h-4" />
+                  <span className="text-sm font-medium">Activity</span>
+                </button>
+                <button
+                  onClick={refreshData}
+                  disabled={loading}
+                  className="p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-xl transition-all border border-purple-400/30 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl text-sm font-semibold flex items-center gap-2"
+                >
+                  <PowerOff className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -206,206 +336,360 @@ export default function SuperAdminDashboard() {
         {/* Error banner */}
         {error && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
-            <div className="bg-red-900/40 border border-red-500/50 text-red-300 px-5 py-4 rounded-xl">
-              {error}
+            <div className="bg-red-500/10 border border-red-500/30 backdrop-blur-sm text-red-300 px-5 py-4 rounded-2xl shadow-lg">
+              <div className="flex items-center gap-3">
+                <XCircle className="w-5 h-5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Global Stats */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/40 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-500/30">
-            <div className="text-4xl mb-3">🏢</div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent">
-              {globalStats.totalTenants}
+          {/* Global Stats - Redesigned */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+            <div className="col-span-2 md:col-span-2 lg:col-span-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/10 group hover:scale-105">
+              <div className="flex items-start justify-between mb-3">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                  <Building2 className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">
+                    {globalStats.totalTenants}
+                  </div>
+                  <div className="text-xs text-purple-300 font-medium mt-1">Total Stores</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                <span className="text-xs text-gray-300">Active</span>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-bold text-green-400">{globalStats.activeTenants}</span>
+                </div>
+              </div>
             </div>
-            <div className="text-sm font-medium text-purple-300 mt-1">Total Stores</div>
-            <div className="text-xs text-green-400 mt-2 font-semibold">
-              ✅ {globalStats.activeTenants} active
+
+            <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/10 group hover:scale-105">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {globalStats.totalClients}
+              </div>
+              <div className="text-xs text-blue-300 font-medium">Total Clients</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/10 group hover:scale-105">
+              <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                <Activity className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {globalStats.totalScans}
+              </div>
+              <div className="text-xs text-indigo-300 font-medium">Total Scans</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/10 group hover:scale-105">
+              <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                <Gift className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {globalStats.totalRewards}
+              </div>
+              <div className="text-xs text-pink-300 font-medium">Rewards Given</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/10 group hover:scale-105">
+              <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {globalStats.scansToday}
+              </div>
+              <div className="text-xs text-orange-300 font-medium">Today</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/10 group hover:scale-105">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {globalStats.scansThisMonth}
+              </div>
+              <div className="text-xs text-emerald-300 font-medium">This Month</div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/40 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-500/30">
-            <div className="text-4xl mb-3">👥</div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">
-              {globalStats.totalClients}
+          {/* Control Bar */}
+          <div className="mb-6 flex flex-col md:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search stores by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-xl border border-white/10 bg-gray-900/50 backdrop-blur-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-400 transition-all shadow-lg"
+              />
             </div>
-            <div className="text-sm font-medium text-blue-300 mt-1">Total Clients</div>
+
+            {/* Filters and Actions */}
+            <div className="flex gap-3 flex-wrap">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as any)}
+                className="px-4 py-3 rounded-xl border border-white/10 bg-gray-900/50 backdrop-blur-xl text-white focus:ring-2 focus:ring-purple-500 transition-all shadow-lg"
+              >
+                <option value="all">All Stores</option>
+                <option value="active">Active Only</option>
+                <option value="inactive">Inactive Only</option>
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-4 py-3 rounded-xl border border-white/10 bg-gray-900/50 backdrop-blur-xl text-white focus:ring-2 focus:ring-purple-500 transition-all shadow-lg"
+              >
+                <option value="scans">Sort by Scans</option>
+                <option value="name">Sort by Name</option>
+                <option value="clients">Sort by Clients</option>
+                <option value="created">Sort by Date</option>
+              </select>
+
+              <button
+                onClick={exportData}
+                className="px-4 py-3 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-xl transition-all border border-green-400/30 shadow-lg flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
+
+              <button
+                onClick={() => setViewMode(viewMode === 'cards' ? 'table' : 'cards')}
+                className="px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-xl transition-all border border-purple-400/30 shadow-lg flex items-center gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                <span className="hidden sm:inline">{viewMode === 'cards' ? 'Table' : 'Cards'}</span>
+              </button>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-indigo-900/40 to-indigo-800/40 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-500/30">
-            <div className="text-4xl mb-3">📊</div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
-              {globalStats.totalScans}
+          {/* Activity Log Sidebar */}
+          {showActivityLog && (
+            <div className="mb-6 bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                  Recent Activity
+                </h3>
+                <button
+                  onClick={() => setShowActivityLog(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {recentActivity.length === 0 ? (
+                  <p className="text-gray-400 text-sm">No recent activity</p>
+                ) : (
+                  recentActivity.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
+                    >
+                      <div className={`p-2 rounded-lg ${
+                        activity.type === 'reward' 
+                          ? 'bg-pink-500/20 text-pink-400' 
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {activity.type === 'reward' ? (
+                          <Gift className="w-4 h-4" />
+                        ) : (
+                          <Activity className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white font-medium">{activity.action}</p>
+                        <p className="text-xs text-gray-400 truncate">{activity.tenant_name}</p>
+                      </div>
+                      <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {new Date(activity.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-            <div className="text-sm font-medium text-indigo-300 mt-1">Total Scans</div>
-            <div className="text-xs text-orange-400 mt-2 font-semibold">
-              🔥 {globalStats.scansToday} today
-            </div>
-          </div>
+          )}
 
-          <div className="bg-gradient-to-br from-pink-900/40 to-pink-800/40 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-500/30">
-            <div className="text-4xl mb-3">🎁</div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-pink-300 bg-clip-text text-transparent">
-              {globalStats.totalRewards}
+          {/* Tenants Section */}
+          <div className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+            <div className="px-6 py-5 border-b border-white/10 bg-gradient-to-r from-purple-900/30 to-pink-900/30">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                  <Building2 className="w-6 h-6 text-purple-400" />
+                  Stores Management
+                  <span className="text-sm font-normal text-gray-400">({filteredAndSortedTenants.length})</span>
+                </h2>
+                <button
+                  onClick={() => navigate('/super-admin/create-tenant')}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg flex items-center gap-2 text-sm font-semibold"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">New Store</span>
+                </button>
+              </div>
             </div>
-            <div className="text-sm font-medium text-pink-300 mt-1">Total Rewards</div>
-          </div>
 
-          <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-green-500/30 col-span-2">
-            <div className="text-4xl mb-3">📈</div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-              {globalStats.scansThisMonth}
-            </div>
-            <div className="text-sm font-medium text-green-300 mt-1">Scans This Month</div>
-            <div className="text-xs text-gray-400 mt-2 font-medium">
-              Average: {globalStats.activeTenants > 0 
-                ? Math.round(globalStats.scansThisMonth / globalStats.activeTenants) 
-                : 0} per store
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 text-white col-span-2">
-            <div className="text-4xl mb-3">💰</div>
-            <div className="text-2xl font-bold">Platform Health</div>
-            <div className="text-sm mt-3 font-semibold">
-              {globalStats.activeTenants > 0 && globalStats.scansToday > 0 ? (
-                <span>✅ Active & Growing</span>
-              ) : globalStats.activeTenants > 0 ? (
-                <span>⚠️ Needs Activity</span>
-              ) : (
-                <span>⏳ Starting Up</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="🔍 Search stores by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-6 py-4 rounded-xl border-2 border-purple-500/30 bg-gray-800/50 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-400 transition-all duration-300 shadow-sm hover:shadow-md"
-          />
-        </div>
-
-        {/* Tenants Table */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-purple-500/30">
-          <div className="px-4 sm:px-6 py-5 border-b border-purple-500/30 bg-gradient-to-r from-purple-900/50 to-pink-900/50">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Stores Management ({filteredTenants.length})
-            </h2>
-          </div>
-
-          {loading ? (
-            <div className="p-8 text-center text-gray-400">
-              Loading stores...
-            </div>
-          ) : filteredTenants.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
-              {searchTerm ? 'No stores found' : 'No stores yet'}
-            </div>
-          ) : (
-            <>
-              {/* Mobile Card Layout */}
-              <div className="md:hidden divide-y divide-purple-500/20">
-                {filteredTenants.map((tenant) => (
-                  <div key={tenant.id} className="p-4 hover:bg-purple-900/30 transition-all duration-200">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white font-bold">
+            {loading ? (
+              <div className="p-12 text-center">
+                <RefreshCw className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-4" />
+                <p className="text-gray-400">Loading stores...</p>
+              </div>
+            ) : filteredAndSortedTenants.length === 0 ? (
+              <div className="p-12 text-center">
+                <Building2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg">
+                  {searchTerm || filterStatus !== 'all' ? 'No stores found' : 'No stores yet'}
+                </p>
+                {(searchTerm || filterStatus !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm('')
+                      setFilterStatus('all')
+                    }}
+                    className="mt-4 px-4 py-2 bg-purple-500/20 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-all"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+            ) : viewMode === 'cards' ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                {filteredAndSortedTenants.map((tenant) => (
+                  <div
+                    key={tenant.id}
+                    className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-purple-400/50 transition-all duration-300 shadow-lg hover:shadow-2xl group"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
                           {tenant.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <div>
-                          <div className="font-semibold text-white">{tenant.name}</div>
-                          {tenant.active ? (
-                            <span className="inline-flex px-2 py-0.5 mt-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
-                              ✅ Active
-                            </span>
-                          ) : (
-                            <span className="inline-flex px-2 py-0.5 mt-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
-                              ❌ Inactive
-                            </span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-lg text-white truncate mb-1">{tenant.name}</h3>
+                          {tenant.contact_email && (
+                            <p className="text-sm text-gray-400 truncate">{tenant.contact_email}</p>
                           )}
+                          <div className="mt-2">
+                            {tenant.active ? (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                                <CheckCircle className="w-3 h-3" />
+                                Active
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                                <XCircle className="w-3 h-3" />
+                                Inactive
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                      <div className="bg-gray-900/30 rounded-lg p-2">
-                        <div className="text-xs text-gray-400 mb-1">Clients</div>
-                        <div className="text-sm font-semibold text-blue-400 flex items-center gap-1">
-                          {tenant.total_clients} <span className="text-gray-500">👥</span>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Users className="w-4 h-4 text-blue-400" />
+                          <span className="text-xs text-gray-400">Clients</span>
                         </div>
+                        <div className="text-2xl font-bold text-blue-400">{tenant.total_clients}</div>
                       </div>
-                      <div className="bg-gray-900/30 rounded-lg p-2">
-                        <div className="text-xs text-gray-400 mb-1">Total Scans</div>
-                        <div className="text-sm font-semibold text-indigo-400 flex items-center gap-1">
-                          {tenant.total_scans} <span className="text-gray-500">📊</span>
+
+                      <div className="bg-indigo-500/10 rounded-xl p-3 border border-indigo-500/20">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Activity className="w-4 h-4 text-indigo-400" />
+                          <span className="text-xs text-gray-400">Scans</span>
                         </div>
+                        <div className="text-2xl font-bold text-indigo-400">{tenant.total_scans}</div>
                       </div>
-                      <div className="bg-gray-900/30 rounded-lg p-2">
-                        <div className="text-xs text-gray-400 mb-1">Rewards</div>
-                        <div className="text-sm font-semibold text-pink-400 flex items-center gap-1">
-                          {tenant.total_rewards} <span className="text-gray-500">🎁</span>
+
+                      <div className="bg-pink-500/10 rounded-xl p-3 border border-pink-500/20">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Gift className="w-4 h-4 text-pink-400" />
+                          <span className="text-xs text-gray-400">Rewards</span>
                         </div>
+                        <div className="text-2xl font-bold text-pink-400">{tenant.total_rewards}</div>
                       </div>
-                      <div className="bg-gray-900/30 rounded-lg p-2">
-                        <div className="text-xs text-gray-400 mb-1">Today</div>
-                        <div className="text-sm font-semibold">
-                          {tenant.scans_today > 0 ? (
-                            <span className="text-green-400 flex items-center gap-1">
-                              🔥 {tenant.scans_today}
-                            </span>
-                          ) : (
-                            <span className="text-gray-500">-</span>
-                          )}
+
+                      <div className="bg-orange-500/10 rounded-xl p-3 border border-orange-500/20">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Zap className="w-4 h-4 text-orange-400" />
+                          <span className="text-xs text-gray-400">Today</span>
+                        </div>
+                        <div className="text-2xl font-bold text-orange-400">
+                          {tenant.scans_today > 0 ? tenant.scans_today : '-'}
                         </div>
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => toggleTenantStatus(tenant.id, tenant.active)}
-                      className={`w-full py-2 rounded-lg text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow-md ${
-                        tenant.active
-                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'
-                          : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                      }`}
-                    >
-                      {tenant.active ? '🔴 Deactivate Store' : '✅ Activate Store'}
-                    </button>
+                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(tenant.created_at).toLocaleDateString()}
+                      </div>
+                      <button
+                        onClick={() => toggleTenantStatus(tenant.id, tenant.active)}
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-lg hover:scale-105 flex items-center gap-2 ${
+                          tenant.active
+                            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'
+                            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                        }`}
+                      >
+                        {tenant.active ? (
+                          <>
+                            <PowerOff className="w-3 h-3" />
+                            Deactivate
+                          </>
+                        ) : (
+                          <>
+                            <Power className="w-3 h-3" />
+                            Activate
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
-
-              {/* Desktop Table Layout */}
-              <div className="hidden md:block overflow-x-auto">
+            ) : (
+              <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-900/50">
+                  <thead className="bg-gray-900/50 border-b border-white/10">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Store</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Clients</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Total Scans</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Rewards</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Today</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Created</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase">Actions</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Store</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Clients</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Scans</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Rewards</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Today</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Created</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-purple-500/20">
-                    {filteredTenants.map((tenant) => (
-                      <tr key={tenant.id} className="hover:bg-purple-900/30 transition-all duration-200">
+                  <tbody className="divide-y divide-white/10">
+                    {filteredAndSortedTenants.map((tenant) => (
+                      <tr key={tenant.id} className="hover:bg-purple-500/10 transition-all duration-200 group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg group-hover:scale-110 transition-transform">
                               {tenant.name.substring(0, 2).toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                              <div className="font-medium text-white text-base truncate">{tenant.name}</div>
+                              <div className="font-semibold text-white truncate">{tenant.name}</div>
                               {tenant.contact_email && (
                                 <div className="text-sm text-gray-400 truncate">{tenant.contact_email}</div>
                               )}
@@ -414,38 +698,41 @@ export default function SuperAdminDashboard() {
                         </td>
                         <td className="px-6 py-4">
                           {tenant.active ? (
-                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-400 border border-green-500/30 whitespace-nowrap">
-                              ✅ Active
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                              <CheckCircle className="w-3 h-3" />
+                              Active
                             </span>
                           ) : (
-                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/30 whitespace-nowrap">
-                              ❌ Inactive
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                              <XCircle className="w-3 h-3" />
+                              Inactive
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-sm text-white">
-                          <div className="flex items-center gap-1">
-                            <span className="text-blue-400 font-semibold">{tenant.total_clients}</span>
-                            <span className="text-gray-500">👥</span>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-blue-400" />
+                            <span className="text-white font-semibold">{tenant.total_clients}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-white">
-                          <div className="flex items-center gap-1">
-                            <span className="text-indigo-400 font-semibold">{tenant.total_scans}</span>
-                            <span className="text-gray-500">📊</span>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-indigo-400" />
+                            <span className="text-white font-semibold">{tenant.total_scans}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-white">
-                          <div className="flex items-center gap-1">
-                            <span className="text-pink-400 font-semibold">{tenant.total_rewards}</span>
-                            <span className="text-gray-500">🎁</span>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <Gift className="w-4 h-4 text-pink-400" />
+                            <span className="text-white font-semibold">{tenant.total_rewards}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-white">
+                        <td className="px-6 py-4">
                           {tenant.scans_today > 0 ? (
-                            <span className="inline-flex px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30 whitespace-nowrap">
-                              🔥 {tenant.scans_today}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <Zap className="w-4 h-4 text-orange-400" />
+                              <span className="text-orange-400 font-semibold">{tenant.scans_today}</span>
+                            </div>
                           ) : (
                             <span className="text-gray-500">-</span>
                           )}
@@ -456,13 +743,23 @@ export default function SuperAdminDashboard() {
                         <td className="px-6 py-4">
                           <button
                             onClick={() => toggleTenantStatus(tenant.id, tenant.active)}
-                            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 shadow-sm hover:shadow-md whitespace-nowrap ${
+                            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-lg hover:scale-105 flex items-center gap-2 ${
                               tenant.active
                                 ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'
                                 : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
                             }`}
                           >
-                            {tenant.active ? '🔴 Deactivate' : '✅ Activate'}
+                            {tenant.active ? (
+                              <>
+                                <PowerOff className="w-3 h-3" />
+                                Deactivate
+                              </>
+                            ) : (
+                              <>
+                                <Power className="w-3 h-3" />
+                                Activate
+                              </>
+                            )}
                           </button>
                         </td>
                       </tr>
@@ -470,88 +767,180 @@ export default function SuperAdminDashboard() {
                   </tbody>
                 </table>
               </div>
-            </>
-          )}
-        </div>
-
-        {/* Quick Insights */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-amber-500/30">
-            <h3 className="font-bold text-amber-300 mb-4 flex items-center gap-2">
-              <span className="text-2xl">🏆</span> Top Performing Store
-            </h3>
-            {tenants.length > 0 ? (
-              (() => {
-                const topStore = [...tenants].sort((a, b) => b.total_scans - a.total_scans)[0]
-                return (
-                  <div>
-                    <div className="font-medium text-purple-300 mb-2">{topStore.name}</div>
-                    <div className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
-                      {topStore.total_scans}
-                    </div>
-                    <div className="text-sm text-amber-400 font-medium mt-1">total scans</div>
-                  </div>
-                )
-              })()
-            ) : (
-              <div className="text-amber-500">No data yet</div>
             )}
           </div>
 
-          <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-green-500/30">
-            <h3 className="font-bold text-green-300 mb-4 flex items-center gap-2">
-              <span className="text-2xl">📈</span> Most Active Today
-            </h3>
-            {tenants.length > 0 ? (
-              (() => {
-                const mostActive = [...tenants].sort((a, b) => b.scans_today - a.scans_today)[0]
-                return mostActive.scans_today > 0 ? (
-                  <div>
-                    <div className="font-medium text-green-300 mb-2">{mostActive.name}</div>
-                    <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                      {mostActive.scans_today}
+          {/* Performance Insights */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-amber-400/30 group hover:scale-105">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                  <Award className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-amber-300 text-lg">Top Performer</h3>
+              </div>
+              {tenants.length > 0 ? (
+                (() => {
+                  const topStore = [...tenants].sort((a, b) => b.total_scans - a.total_scans)[0]
+                  return (
+                    <div>
+                      <div className="font-semibold text-white text-lg mb-2 truncate">{topStore.name}</div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                          {topStore.total_scans}
+                        </span>
+                        <span className="text-sm text-amber-300 font-medium">total scans</span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-amber-400/30 flex items-center justify-between">
+                        <span className="text-xs text-gray-400">Clients</span>
+                        <span className="text-sm font-bold text-white">{topStore.total_clients}</span>
+                      </div>
                     </div>
-                    <div className="text-sm text-green-400 font-medium mt-1">scans today</div>
-                  </div>
-                ) : (
-                  <div className="text-green-500">No activity today</div>
-                )
-              })()
-            ) : (
-              <div className="text-green-500">No data yet</div>
-            )}
+                  )
+                })()
+              ) : (
+                <div className="text-amber-400/50">No data yet</div>
+              )}
+            </div>
+
+            <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-green-400/30 group hover:scale-105">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-green-300 text-lg">Most Active Today</h3>
+              </div>
+              {tenants.length > 0 ? (
+                (() => {
+                  const mostActive = [...tenants].sort((a, b) => b.scans_today - a.scans_today)[0]
+                  return mostActive.scans_today > 0 ? (
+                    <div>
+                      <div className="font-semibold text-white text-lg mb-2 truncate">{mostActive.name}</div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                          {mostActive.scans_today}
+                        </span>
+                        <span className="text-sm text-green-300 font-medium">scans today</span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-green-400/30 flex items-center justify-between">
+                        <span className="text-xs text-gray-400">Total all-time</span>
+                        <span className="text-sm font-bold text-white">{mostActive.total_scans}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-green-400/50">No activity today</div>
+                  )
+                })()
+              ) : (
+                <div className="text-green-400/50">No data yet</div>
+              )}
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-400/30 group hover:scale-105">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-blue-300 text-lg">Best Engagement</h3>
+              </div>
+              {tenants.length > 0 ? (
+                (() => {
+                  const withEngagement = tenants
+                    .filter(t => t.total_clients > 0)
+                    .map(t => ({ ...t, engagement: t.total_scans / t.total_clients }))
+                    .sort((a, b) => b.engagement - a.engagement)[0]
+                  
+                  return withEngagement ? (
+                    <div>
+                      <div className="font-semibold text-white text-lg mb-2 truncate">{withEngagement.name}</div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                          {withEngagement.engagement.toFixed(1)}
+                        </span>
+                        <span className="text-sm text-blue-300 font-medium">scans/client</span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-blue-400/30 flex items-center justify-between">
+                        <span className="text-xs text-gray-400">Rewards given</span>
+                        <span className="text-sm font-bold text-white">{withEngagement.total_rewards}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-blue-400/50">No data yet</div>
+                  )
+                })()
+              ) : (
+                <div className="text-blue-400/50">No data yet</div>
+              )}
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 backdrop-blur-sm p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-500/30">
-            <h3 className="font-bold text-blue-300 mb-4 flex items-center gap-2">
-              <span className="text-2xl">💎</span> Highest Engagement
-            </h3>
-            {tenants.length > 0 ? (
-              (() => {
-                const withEngagement = tenants
-                  .filter(t => t.total_clients > 0)
-                  .map(t => ({ ...t, engagement: t.total_scans / t.total_clients }))
-                  .sort((a, b) => b.engagement - a.engagement)[0]
-                
-                return withEngagement ? (
-                  <div>
-                    <div className="font-medium text-blue-300 mb-2">{withEngagement.name}</div>
-                    <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                      {withEngagement.engagement.toFixed(1)}
-                    </div>
-                    <div className="text-sm text-blue-400 font-medium mt-1">scans per client</div>
-                  </div>
-                ) : (
-                  <div className="text-blue-500">No data yet</div>
-                )
-              })()
-            ) : (
-              <div className="text-blue-500">No data yet</div>
-            )}
+          {/* Platform Health Summary */}
+          <div className="mt-8 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-blue-500/20 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-xl shadow-lg">
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Platform Health Status</h3>
+                  <p className="text-sm text-gray-300 mt-1">Real-time system overview</p>
+                </div>
+              </div>
+              {globalStats.activeTenants > 0 && globalStats.scansToday > 0 ? (
+                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-xl border border-green-400/30">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <span className="text-green-300 font-semibold">Healthy & Active</span>
+                </div>
+              ) : globalStats.activeTenants > 0 ? (
+                <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/20 rounded-xl border border-yellow-400/30">
+                  <Clock className="w-5 h-5 text-yellow-400" />
+                  <span className="text-yellow-300 font-semibold">Needs Activity</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 rounded-xl border border-blue-400/30">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                  <span className="text-blue-300 font-semibold">Getting Started</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-sm text-gray-400 mb-2">Avg. Scans/Store</div>
+                <div className="text-2xl font-bold text-white">
+                  {globalStats.activeTenants > 0 
+                    ? Math.round(globalStats.scansThisMonth / globalStats.activeTenants) 
+                    : 0}
+                </div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-sm text-gray-400 mb-2">Reward Rate</div>
+                <div className="text-2xl font-bold text-white">
+                  {globalStats.totalScans > 0 
+                    ? ((globalStats.totalRewards / globalStats.totalScans) * 100).toFixed(1)
+                    : 0}%
+                </div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-sm text-gray-400 mb-2">Active Rate</div>
+                <div className="text-2xl font-bold text-white">
+                  {globalStats.totalTenants > 0 
+                    ? ((globalStats.activeTenants / globalStats.totalTenants) * 100).toFixed(0)
+                    : 0}%
+                </div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-xl">
+                <div className="text-sm text-gray-400 mb-2">Avg. Clients/Store</div>
+                <div className="text-2xl font-bold text-white">
+                  {globalStats.activeTenants > 0 
+                    ? Math.round(globalStats.totalClients / globalStats.activeTenants) 
+                    : 0}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      </div> {/* Close z-10 wrapper */}
     </div>
   )
 }

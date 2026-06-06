@@ -12,7 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
     "html5-qrcode": "^2.3.8",
-    "lucide-react": "^1.14.0",
+    "lucide-react": "^1.17.0",
     "ogl": "^1.0.11",
     "qrcode": "^1.5.3",
     "react": "^18.2.0",
@@ -36,6 +36,7 @@
     "tailwindcss": "^3.4.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
+    "vite-plugin-prerender": "^1.0.8",
     "vite-plugin-pwa": "^0.17.4"
   }
 }

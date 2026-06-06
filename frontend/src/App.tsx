@@ -51,6 +51,8 @@ function App() {
     const url = import.meta.env.VITE_SUPABASE_URL || ''
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
     setIsConfigured(!!(url && key && !url.includes('placeholder')))
+    // Signal prerenderer that app has mounted
+    document.dispatchEvent(new Event('app-prerender-ready'))
   }, [])
 
   // Auto-refresh session management

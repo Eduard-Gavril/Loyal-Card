@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import StaticBackground from '@/components/StaticBackground'
-import LanguageSelector from '@/components/LanguageSelector'
 import { useClientStore } from '@/store'
 import { api, TenantWithDistance, Tenant } from '@/lib/supabase'
 import { getTranslation } from '@/lib/i18n'
 
 const CATEGORIES = [
-  'all', 'cafe', 'restaurant', 'beauty', 'gym', 'shop',
+  'all', 'cafe', 'food', 'beauty', 'gym', 'shop',
 ] as const
 
 function CategoryIcon({ type, className = 'w-4 h-4' }: { type: string; className?: string }) {
   const paths: Record<string, string> = {
     all:        'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     cafe:       'M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z',
-    restaurant: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
+    food:       'M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3M21 15v7',
     beauty:     'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
     gym:        'M13 10V3L4 14h7v7l9-11h-7z',
     shop:       'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
@@ -30,7 +29,7 @@ function categoryLabel(key: string, language: string): string {
   const labels: Record<string, Record<string, string>> = {
     all:        { en: 'All', ro: 'Toate', it: 'Tutti' },
     cafe:       { en: 'Cafés', ro: 'Cafenele', it: 'Caffè' },
-    restaurant: { en: 'Restaurants', ro: 'Restaurante', it: 'Ristoranti' },
+    food:       { en: 'Fast Food', ro: 'Fast Food', it: 'Fast Food' },
     beauty:     { en: 'Beauty', ro: 'Frumusețe', it: 'Bellezza' },
     gym:        { en: 'Gyms', ro: 'Fitness', it: 'Palestre' },
     shop:       { en: 'Shops', ro: 'Magazine', it: 'Negozi' },
@@ -149,7 +148,7 @@ export default function TenantSelector() {
   const getCategoryColor = (type: string) => {
     const colors: Record<string, string> = {
       cafe:       'bg-amber-500/20 text-amber-300 border-amber-400/30',
-      restaurant: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
+      food:       'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
       beauty:     'bg-pink-500/20 text-pink-300 border-pink-400/30',
       gym:        'bg-blue-500/20 text-blue-300 border-blue-400/30',
       shop:       'bg-purple-500/20 text-purple-300 border-purple-400/30',
@@ -177,7 +176,15 @@ export default function TenantSelector() {
               </svg>
               {language === 'ro' ? 'Înapoi' : language === 'it' ? 'Indietro' : 'Back'}
             </button>
-            <LanguageSelector />
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-indigo-400/40 font-semibold text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              {language === 'ro' ? 'Profilul Meu' : language === 'it' ? 'Il Mio Profilo' : 'My Dashboard'}
+            </button>
           </div>
         </header>
 

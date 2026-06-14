@@ -395,6 +395,22 @@ export default function LandingPage() {
               </div>
             </div>
 
+            {/* My Dashboard Button */}
+            <div className="p-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  closeMenu()
+                  setTimeout(() => navigate('/dashboard'), 300)
+                }}
+                className="w-full px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-3 font-semibold mb-3"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {t.menu.myDashboard}
+              </button>
+            </div>
+
             {/* Admin Button - In fondo */}
             <div className="p-4 border-t border-gray-200">
               <button

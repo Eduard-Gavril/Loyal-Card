@@ -133,6 +133,7 @@ export const translations = {
       faq: 'FAQ',
       footer: 'Footer',
       admin: 'Admin',
+      myDashboard: 'My Dashboard',
     },
 
     footerNav: {
@@ -814,6 +815,7 @@ export const translations = {
       faq: 'Întrebări Frecvente',
       footer: 'Footer',
       admin: 'Admin',
+      myDashboard: 'Profilul Meu',
     },
 
     // Footer
@@ -1495,6 +1497,7 @@ export const translations = {
       faq: 'Domande Frequenti',
       footer: 'Footer',
       admin: 'Admin',
+      myDashboard: 'Il Mio Profilo',
     },
 
     // Footer

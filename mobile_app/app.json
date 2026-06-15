@@ -5,8 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#1e1b4b"
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0d2e"
     },
     "ios": {
       "supportsTablet": false,
@@ -14,9 +17,11 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#1e1b4b"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f0d2e"
       },
-      "package": "net.loyalcard.app"
+      "package": "net.loyalcard.app",
+      "versionCode": 1
     },
     "plugins": [
       "expo-router",

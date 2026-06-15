@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase'
 interface TenantSettings {
   name: string
   logo_url: string
-  primary_color: string
+  brand_color: string
   welcome_message: string
   active: boolean
 }
@@ -32,58 +32,60 @@ export default function AdminSettingsScreen() {
   const [form, setForm] = useState<TenantSettings>({
     name: '',
     logo_url: '',
-    primary_color: '#7c3aed',
+    brand_color: '#7c3aed',
     welcome_message: '',
     active: true,
   })
   const [originalForm, setOriginalForm] = useState<TenantSettings | null>(null)
+  const [rawMetadata, setRawMetadata] = useState<Record<string, any>>({})
 
   useEffect(() => { loadSettings() }, [])
 
   async function loadSettings() {
+    if (!tenantId) return
     setLoading(true)
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('tenants')
-        .select('name, logo_url, primary_color, metadata, active')
-        .eq('id', tenantId!)
+        .select('name, logo_url, brand_color, metadata, active')
+        .eq('id', tenantId)
         .single()
+      if (error) throw error
       if (data) {
-        const s: TenantSettings = {
+        const meta = (data.metadata as Record<string, any>) ?? {}
+        setRawMetadata(meta)
+        const loaded: TenantSettings = {
           name: data.name ?? '',
           logo_url: data.logo_url ?? '',
-          primary_color: data.primary_color ?? '#7c3aed',
-          welcome_message: data.metadata?.welcome_message ?? '',
+          brand_color: data.brand_color ?? '#7c3aed',
+          welcome_message: meta.welcome_message ?? '',
           active: data.active ?? true,
         }
-        setForm(s)
-        setOriginalForm(s)
+        setForm(loaded)
+        setOriginalForm(loaded)
       }
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? a.errorSaveMsg)
     } finally {
       setLoading(false)
     }
   }
 
   async function handleSave() {
+    if (!tenantId) return
     if (!form.name.trim()) { Alert.alert('Error', a.shopNameLabel); return }
     setSaving(true)
     try {
-      const { data: existing } = await supabase
-        .from('tenants')
-        .select('metadata')
-        .eq('id', tenantId!)
-        .single()
-      const updatedMeta = { ...(existing?.metadata ?? {}), welcome_message: form.welcome_message.trim() || null }
       const { error } = await supabase
         .from('tenants')
         .update({
           name: form.name.trim(),
           logo_url: form.logo_url.trim() || null,
-          primary_color: form.primary_color,
-          metadata: updatedMeta,
+          brand_color: form.brand_color,
+          metadata: { ...rawMetadata, welcome_message: form.welcome_message.trim() || null },
           active: form.active,
         })
-        .eq('id', tenantId!)
+        .eq('id', tenantId)
       if (error) throw error
       setOriginalForm({ ...form })
       Alert.alert(`✅ ${a.saved}`, a.savedMsg)
@@ -154,17 +156,17 @@ export default function AdminSettingsScreen() {
               {PRESET_COLORS.map((c) => (
                 <TouchableOpacity
                   key={c}
-                  style={[s.colorDot, { backgroundColor: c }, form.primary_color === c && s.colorDotActive]}
-                  onPress={() => setForm((f) => ({ ...f, primary_color: c }))}
+                  style={[s.colorDot, { backgroundColor: c }, form.brand_color === c && s.colorDotActive]}
+                  onPress={() => setForm((f) => ({ ...f, brand_color: c }))}
                 >
-                  {form.primary_color === c && <Ionicons name="checkmark" size={14} color="#fff" />}
+                  {form.brand_color === c && <Ionicons name="checkmark" size={14} color="#fff" />}
                 </TouchableOpacity>
               ))}
             </View>
             <TextInput
               style={[s.input, { marginTop: 8 }]}
-              value={form.primary_color}
-              onChangeText={(v) => setForm((f) => ({ ...f, primary_color: v }))}
+              value={form.brand_color}
+              onChangeText={(v) => setForm((f) => ({ ...f, brand_color: v }))}
               placeholder="#7c3aed"
               placeholderTextColor="#4b5563"
               autoCapitalize="none"
@@ -216,9 +218,9 @@ export default function AdminSettingsScreen() {
               <Ionicons name="eye-outline" size={16} color="#a78bfa" />
               <Text style={s.cardTitle}>{a.previewTitle}</Text>
             </View>
-            <View style={[s.preview, { borderColor: form.primary_color + '60' }]}>
-              <View style={[s.previewBadge, { backgroundColor: form.primary_color + '22' }]}>
-                <Text style={[s.previewInitial, { color: form.primary_color }]}>
+            <View style={[s.preview, { borderColor: form.brand_color + '60' }]}>
+              <View style={[s.previewBadge, { backgroundColor: form.brand_color + '22' }]}>
+                <Text style={[s.previewInitial, { color: form.brand_color }]}>
                   {form.name.charAt(0).toUpperCase() || '?'}
                 </Text>
               </View>

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Share } from 'react-native'
+import { useEffect, useState, useRef } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Share, Animated, Easing } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -17,6 +17,8 @@ export default function CardScreen() {
   const [loading, setLoading] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const qrScale = useRef(new Animated.Value(0.6)).current
+  const qrOpacity = useRef(new Animated.Value(0)).current
 
   const existingCard = savedCards.find((c) => c.tenantId === tenantId)
 
@@ -27,6 +29,15 @@ export default function CardScreen() {
       generateCard()
     }
   }, [])
+
+  useEffect(() => {
+    if (qrCode) {
+      Animated.parallel([
+        Animated.spring(qrScale, { toValue: 1, friction: 7, tension: 50, useNativeDriver: true }),
+        Animated.timing(qrOpacity, { toValue: 1, duration: 250, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]).start()
+    }
+  }, [qrCode])
 
   async function generateCard() {
     if (!tenantId) return
@@ -43,7 +54,7 @@ export default function CardScreen() {
         tenantName: tenantName ?? undefined,
       })
     } catch (e: any) {
-      setError(e?.message ?? 'Errore nella generazione del card')
+      setError(e?.message ?? t.card.errorDefault)
     } finally {
       setLoading(false)
     }
@@ -84,13 +95,13 @@ export default function CardScreen() {
             <Text style={s.errorText}>{error}</Text>
             <TouchableOpacity style={s.retryBtn} onPress={generateCard}>
               <Ionicons name="refresh-outline" size={18} color="#fff" />
-              <Text style={s.retryText}>Riprova</Text>
+              <Text style={s.retryText}>{t.card.retry}</Text>
             </TouchableOpacity>
           </View>
         ) : qrCode ? (
           <>
             {/* Card */}
-            <View style={s.cardBox}>
+            <Animated.View style={[s.cardBox, { opacity: qrOpacity, transform: [{ scale: qrScale }] }]}>
               <Text style={s.cardLabel}>{tenantName ?? 'LoyalCard'}</Text>
               <View style={s.qrWrap}>
                 <QRCode
@@ -100,11 +111,8 @@ export default function CardScreen() {
                   color="#000000"
                 />
               </View>
-              <Text style={s.cardHint}>
-                {existingCard ? t.card.existing : t.card.new}
-              </Text>
               <Text style={s.cardId} numberOfLines={1}>#{qrCode.slice(0, 16)}...</Text>
-            </View>
+            </Animated.View>
 
             {/* Instructions */}
             <View style={s.infoBox}>

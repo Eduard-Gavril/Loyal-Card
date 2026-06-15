@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   StyleSheet, ActivityIndicator, Image, ScrollView, RefreshControl,
+  Animated, Easing,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import * as Location from 'expo-location'
@@ -22,26 +23,11 @@ const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   shop: 'bag-outline',
 }
 
-function hasDistance(t: any): t is TenantWithDistance {
-  return 'distance_km' in t
-}
 
-function getTimeGreeting(t: ReturnType<typeof getTranslation>): string {
-  const h = new Date().getHours()
-  if (h < 12) return t.home.greetingMorning
-  if (h < 18) return t.home.greetingAfternoon
-  return t.home.greetingEvening
-}
-
-function totalStamps(cards: { loyalty_state?: Record<string, { count: number; rewards: number }> }[]): number {
-  return cards.reduce((sum, c) => {
-    return sum + Object.values(c.loyalty_state ?? {}).reduce((s, v) => s + (v?.count ?? 0), 0)
-  }, 0)
-}
 
 export default function TenantSelectorScreen() {
   const router = useRouter()
-  const { language, setTenantData, savedCards, displayName } = useClientStore()
+  const { language, setTenantData, savedCards } = useClientStore()
   const t = getTranslation(language)
 
   const [tenants, setTenants] = useState<(Tenant | TenantWithDistance)[]>([])
@@ -98,34 +84,9 @@ export default function TenantSelectorScreen() {
     router.push({ pathname: '/card', params: { tenantId: tenant.id, tenantName: tenant.name } })
   }
 
-  const stamps = totalStamps(savedCards as any)
-
-  // The greeting + search + chips go inside ListHeaderComponent so they scroll with the list
+  // The search + chips go inside ListHeaderComponent so they scroll with the list
   const ListHeader = (
     <View>
-      {/* Greeting banner — only for returning users */}
-      {savedCards.length > 0 && (
-        <View style={s.greeting}>
-          <View style={s.greetingLeft}>
-            <Text style={s.greetingHello}>
-              {displayName ? `${getTimeGreeting(t)}, ${displayName}!` : `${getTimeGreeting(t)}! 👋`}
-            </Text>
-            <Text style={s.greetingSub}>
-              {t.home.cardCount(savedCards.length)}
-              {stamps > 0 ? `  ·  ${stamps} ${t.dashboard.stamps}` : ''}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={s.myCardsBtn}
-            onPress={() => router.push('/(tabs)/dashboard')}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="card-outline" size={16} color="#fff" />
-            <Text style={s.myCardsBtnText}>{t.tabs.myCards}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
       {/* Section label */}
       <Text style={s.sectionLabel}>
         {locationLoading ? t.locationSearching : t.partnersNearYou}
@@ -180,9 +141,6 @@ export default function TenantSelectorScreen() {
       {/* Static top bar with app name only */}
       <View style={s.topBar}>
         <Text style={s.appName}>{t.appName}</Text>
-        <TouchableOpacity style={s.profileBtn} onPress={() => router.push('/(tabs)/profile')}>
-          <Ionicons name="person-circle-outline" size={28} color="#a78bfa" />
-        </TouchableOpacity>
       </View>
 
       {loading ? (
@@ -227,57 +185,69 @@ export default function TenantSelectorScreen() {
               colors={['#7c3aed']}
             />
           }
-          renderItem={({ item }) => (
-            <TouchableOpacity style={s.card} activeOpacity={0.7} onPress={() => handleSelect(item)}>
-              {/* Logo */}
-              {item.logo_url ? (
-                <Image source={{ uri: item.logo_url }} style={s.logo} />
-              ) : (
-                <View style={[s.logoFallback, { backgroundColor: (item.brand_color ?? '#7c3aed') + '33' }]}>
-                  <Ionicons name={CATEGORY_ICONS[item.metadata?.type ?? 'all']} size={26} color="#fff" />
-                </View>
-              )}
-
-              {/* Info */}
-              <View style={s.cardBody}>
-                <View style={s.cardTitleRow}>
-                  <Text style={s.cardName} numberOfLines={1}>{item.name}</Text>
-                  {item.metadata?.type && (
-                    <View style={[s.badge, { backgroundColor: categoryColor(item.metadata.type) + '33', borderColor: categoryColor(item.metadata.type) + '66' }]}>
-                      <Ionicons name={CATEGORY_ICONS[item.metadata.type] ?? 'grid-outline'} size={10} color={categoryColor(item.metadata.type)} />
-                      <Text style={[s.badgeText, { color: categoryColor(item.metadata.type) }]}>
-                        {t.categories[item.metadata.type as keyof typeof t.categories] ?? item.metadata.type}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-                {item.metadata?.description && (
-                  <Text style={s.cardDesc} numberOfLines={1}>{item.metadata.description}</Text>
-                )}
-                <View style={s.cardMeta}>
-                  {item.address && (
-                    <Text style={s.cardAddress} numberOfLines={1}>
-                      📍 {item.address}{item.city ? `, ${item.city}` : ''}
-                    </Text>
-                  )}
-                  {hasDistance(item) && (
-                    <Text style={s.distance}>📏 {item.distance_km.toFixed(1)} km</Text>
-                  )}
-                </View>
-              </View>
-
-              {/* Arrow */}
-              <View style={s.cardArrow}>
-                <View style={s.arrowCircle}>
-                  <Ionicons name="chevron-forward" size={18} color="#a78bfa" />
-                </View>
-                <Text style={s.getCardText}>{t.getCard}</Text>
-              </View>
-            </TouchableOpacity>
+          renderItem={({ item, index }) => (
+            <AnimatedPartnerCard
+              item={item}
+              index={index}
+              onPress={() => handleSelect(item)}
+              t={t}
+            />
           )}
         />
       )}
     </SafeAreaView>
+  )
+}
+
+function AnimatedPartnerCard({ item, index, onPress, t }: {
+  item: any; index: number; onPress: () => void
+  t: ReturnType<typeof getTranslation>
+}) {
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const slideAnim = useRef(new Animated.Value(18)).current
+  useEffect(() => {
+    const delay = Math.min(index * 55, 350)
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 300, delay, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 300, delay, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+    ]).start()
+  }, [])
+  return (
+    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+      <TouchableOpacity style={s.card} activeOpacity={0.7} onPress={onPress}>
+        {item.logo_url ? (
+          <Image source={{ uri: item.logo_url }} style={s.logo} />
+        ) : (
+          <View style={[s.logoFallback, { backgroundColor: (item.brand_color ?? '#7c3aed') + '33' }]}>
+            <Ionicons name={CATEGORY_ICONS[item.metadata?.type ?? 'all']} size={26} color="#fff" />
+          </View>
+        )}
+        <View style={s.cardBody}>
+          <View style={s.cardTitleRow}>
+            <Text style={s.cardName} numberOfLines={1}>{item.name}</Text>
+            {item.metadata?.type && (
+              <View style={[s.badge, { backgroundColor: categoryColor(item.metadata.type) + '33', borderColor: categoryColor(item.metadata.type) + '66' }]}>
+                <Ionicons name={CATEGORY_ICONS[item.metadata.type] ?? 'grid-outline'} size={10} color={categoryColor(item.metadata.type)} />
+                <Text style={[s.badgeText, { color: categoryColor(item.metadata.type) }]}>
+                  {t.categories[item.metadata.type as keyof typeof t.categories] ?? item.metadata.type}
+                </Text>
+              </View>
+            )}
+          </View>
+          {item.metadata?.description && <Text style={s.cardDesc} numberOfLines={1}>{item.metadata.description}</Text>}
+          <View style={s.cardMeta}>
+            {item.address && <Text style={s.cardAddress} numberOfLines={1}>📍 {item.address}{item.city ? `, ${item.city}` : ''}</Text>}
+            {'distance_km' in item && <Text style={s.distance}>📏 {(item as any).distance_km.toFixed(1)} km</Text>}
+          </View>
+        </View>
+        <View style={s.cardArrow}>
+          <View style={s.arrowCircle}>
+            <Ionicons name="chevron-forward" size={18} color="#a78bfa" />
+          </View>
+          <Text style={s.getCardText}>{t.getCard}</Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   )
 }
 
@@ -292,27 +262,8 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0f0d2e' },
 
   // Top bar
-  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 },
+  topBar: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 },
   appName: { color: '#fff', fontSize: 22, fontWeight: '900', letterSpacing: -0.3 },
-  profileBtn: { padding: 2 },
-
-  // Greeting banner
-  greeting: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    marginHorizontal: 16, marginBottom: 20,
-    backgroundColor: 'rgba(124,58,237,0.14)',
-    borderRadius: 20, borderWidth: 1, borderColor: 'rgba(124,58,237,0.3)',
-    padding: 16,
-  },
-  greetingLeft: { flex: 1, gap: 4 },
-  greetingHello: { color: '#fff', fontSize: 17, fontWeight: '800' },
-  greetingSub: { color: '#a78bfa', fontSize: 13, fontWeight: '500' },
-  myCardsBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#7c3aed', borderRadius: 14,
-    paddingHorizontal: 14, paddingVertical: 9,
-  },
-  myCardsBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
   // Section label
   sectionLabel: { color: '#7c6faa', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, paddingHorizontal: 16, marginBottom: 10 },

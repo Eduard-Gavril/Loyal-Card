@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import {
   View, Text, TouchableOpacity, FlatList, StyleSheet,
-  Alert, RefreshControl,
+  Alert, RefreshControl, Image, Animated, Easing,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -9,6 +9,21 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+
+const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  all: 'grid-outline',
+  cafe: 'cafe-outline',
+  food: 'restaurant-outline',
+  beauty: 'sparkles-outline',
+  gym: 'fitness-outline',
+  shop: 'bag-outline',
+}
+
+interface TenantMeta {
+  logo_url: string | null
+  brand_color: string | null
+  category: string | null
+}
 
 interface CardProgress {
   stamps: number
@@ -38,14 +53,121 @@ function relativeDate(iso: string | null, language: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
 }
 
+// ── Animated progress bar ─────────────────────────────────────────
+function ProgressBar({ pct, reward }: { pct: number; reward: boolean }) {
+  const widthAnim = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    Animated.timing(widthAnim, {
+      toValue: pct,
+      duration: 700,
+      delay: 150,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start()
+  }, [pct])
+  const width = widthAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] })
+  return (
+    <View style={s.progressTrack}>
+      <Animated.View style={[s.progressFill, { width }, reward && s.progressFillReward]} />
+    </View>
+  )
+}
+
+// ── Animated list card ────────────────────────────────────────────
+function CardItem({
+  item, index, progress, tenantMeta, t, language, onPress, onLongPress,
+}: {
+  item: ReturnType<typeof useClientStore.getState>['savedCards'][0]
+  index: number
+  progress: CardProgress | undefined
+  tenantMeta: TenantMeta | undefined
+  t: ReturnType<typeof getTranslation>
+  language: string
+  onPress: () => void
+  onLongPress: () => void
+}) {
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const slideAnim = useRef(new Animated.Value(24)).current
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 320, delay: index * 70, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 320, delay: index * 70, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+    ]).start()
+  }, [])
+
+  const stamps = progress?.stamps ?? 0
+  const max = progress?.maxStamps ?? 10
+  const rewards = progress?.rewards ?? 0
+  const pct = max > 0 ? Math.min(stamps / max, 1) : 0
+  const hasReward = rewards > 0
+
+  return (
+    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+      <TouchableOpacity
+        style={[s.card, hasReward && s.cardGlow]}
+        activeOpacity={0.72}
+        onPress={onPress}
+        onLongPress={onLongPress}
+      >
+        <View style={s.cardTop}>
+          {tenantMeta?.logo_url ? (
+            <Image source={{ uri: tenantMeta.logo_url }} style={s.cardLogo} />
+          ) : (
+            <View style={[
+              s.cardIcon,
+              hasReward && s.cardIconReward,
+              !hasReward && tenantMeta?.brand_color ? { backgroundColor: tenantMeta.brand_color + '33' } : undefined,
+            ]}>
+              <Ionicons
+                name={CATEGORY_ICONS[tenantMeta?.category ?? 'all'] ?? 'storefront-outline'}
+                size={22}
+                color={hasReward ? '#f59e0b' : (tenantMeta?.brand_color ?? '#a78bfa')}
+              />
+            </View>
+          )}
+          <View style={s.cardMeta}>
+            <Text style={s.cardName} numberOfLines={1}>
+              {item.customName ?? item.tenantName ?? 'LoyalCard'}
+            </Text>
+            {progress?.lastScanAt ? (
+              <Text style={s.cardDate}>
+                {t.admin.lastScan}: {relativeDate(progress.lastScanAt, language)}
+              </Text>
+            ) : (
+              <Text style={s.cardDate}>#{item.qrCode.slice(0, 10)}…</Text>
+            )}
+          </View>
+          {hasReward ? (
+            <View style={s.rewardPill}>
+              <Text style={s.rewardPillText}>🎁 {rewards}</Text>
+            </View>
+          ) : (
+            <Ionicons name="chevron-forward" size={16} color="#374151" />
+          )}
+        </View>
+
+        <View style={s.progressBlock}>
+          <ProgressBar pct={pct} reward={hasReward} />
+          <Text style={s.progressText}>
+            {`${stamps} / ${max} ${t.dashboard.stamps}`}
+            {hasReward ? `  ·  🎁 ${rewards} ${t.dashboard.rewards}` : ''}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  )
+}
+
 export default function DashboardScreen() {
   const router = useRouter()
   const { language, savedCards, setTotalRewards } = useClientStore()
   const t = getTranslation(language)
 
   const [progress, setProgress] = useState<Record<string, CardProgress>>({})
+  const [tenantMeta, setTenantMeta] = useState<Record<string, TenantMeta>>({})
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const screenFade = useRef(new Animated.Value(0)).current
 
   const loadData = useCallback(async (isRefresh = false) => {
     if (savedCards.length === 0) { setLoading(false); return }
@@ -56,7 +178,7 @@ export default function DashboardScreen() {
       const tenantIds = [...new Set(savedCards.map((c) => c.tenantId))]
       const qrCodes = savedCards.map((c) => c.qrCode)
 
-      const [cardsRes, rulesRes] = await Promise.all([
+      const [cardsRes, rulesRes, tenantsRes] = await Promise.all([
         supabase
           .from('cards')
           .select('qr_code, loyalty_state, last_scan_at')
@@ -67,6 +189,10 @@ export default function DashboardScreen() {
           .in('tenant_id', tenantIds)
           .eq('active', true)
           .order('priority'),
+        supabase
+          .from('tenants')
+          .select('id, logo_url, brand_color, metadata')
+          .in('id', tenantIds),
       ])
 
       // First active rule per tenant → stamp target
@@ -92,6 +218,17 @@ export default function DashboardScreen() {
         }
       }
 
+      // Build tenant meta map
+      const metaMap: Record<string, TenantMeta> = {}
+      for (const t of tenantsRes.data ?? []) {
+        metaMap[t.id] = {
+          logo_url: t.logo_url ?? null,
+          brand_color: t.brand_color ?? null,
+          category: (t.metadata as any)?.type ?? null,
+        }
+      }
+      setTenantMeta(metaMap)
+
       setProgress(map)
       setTotalRewards(totalR)
     } catch (e) {
@@ -103,6 +240,10 @@ export default function DashboardScreen() {
   }, [savedCards])
 
   useEffect(() => { loadData() }, [loadData])
+
+  useEffect(() => {
+    Animated.timing(screenFade, { toValue: 1, duration: 400, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start()
+  }, [])
 
   const totalStamps = Object.values(progress).reduce((s, p) => s + p.stamps, 0)
   const totalRewardCount = Object.values(progress).reduce((s, p) => s + p.rewards, 0)
@@ -126,16 +267,10 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <Animated.View style={{ flex: 1, opacity: screenFade }}>
       {/* Header */}
       <View style={s.header}>
         <Text style={s.title}>{t.dashboard.title}</Text>
-        <TouchableOpacity
-          style={s.addBtn}
-          onPress={() => router.navigate('/(tabs)/' as any)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="add" size={20} color="#fff" />
-        </TouchableOpacity>
       </View>
 
       {/* Stats bar — always visible */}
@@ -185,74 +320,21 @@ export default function DashboardScreen() {
               <Text style={s.addMoreText}>{t.dashboard.discoverPartners}</Text>
             </TouchableOpacity>
           }
-          renderItem={({ item }) => {
-            const p = progress[item.qrCode]
-            const stamps = p?.stamps ?? 0
-            const max = p?.maxStamps ?? 10
-            const rewards = p?.rewards ?? 0
-            const pct = max > 0 ? Math.min(stamps / max, 1) : 0
-            const hasReward = rewards > 0
-
-            return (
-              <TouchableOpacity
-                style={[s.card, hasReward && s.cardGlow]}
-                activeOpacity={0.72}
-                onPress={() => handleOpenCard(item)}
-                onLongPress={() => handleDeleteCard(item.qrCode)}
-              >
-                {/* Top row */}
-                <View style={s.cardTop}>
-                  <View style={[s.cardIcon, hasReward && s.cardIconReward]}>
-                    <Ionicons
-                      name="storefront-outline"
-                      size={22}
-                      color={hasReward ? '#f59e0b' : '#a78bfa'}
-                    />
-                  </View>
-                  <View style={s.cardMeta}>
-                    <Text style={s.cardName} numberOfLines={1}>
-                      {item.customName ?? item.tenantName ?? 'LoyalCard'}
-                    </Text>
-                    {p?.lastScanAt ? (
-                      <Text style={s.cardDate}>
-                        {t.admin.lastScan}: {relativeDate(p.lastScanAt, language)}
-                      </Text>
-                    ) : (
-                      <Text style={s.cardDate}>#{item.qrCode.slice(0, 10)}…</Text>
-                    )}
-                  </View>
-                  {hasReward ? (
-                    <View style={s.rewardPill}>
-                      <Text style={s.rewardPillText}>🎁 {rewards}</Text>
-                    </View>
-                  ) : (
-                    <Ionicons name="chevron-forward" size={16} color="#374151" />
-                  )}
-                </View>
-
-                {/* Progress bar */}
-                <View style={s.progressBlock}>
-                  <View style={s.progressTrack}>
-                    <View
-                      style={[
-                        s.progressFill,
-                        { width: `${Math.round(pct * 100)}%` as any },
-                        hasReward && s.progressFillReward,
-                      ]}
-                    />
-                  </View>
-                  <Text style={s.progressText}>
-                    {loading
-                      ? '…'
-                      : `${stamps} / ${max} ${t.dashboard.stamps}`}
-                    {hasReward ? `  ·  🎁 ${rewards} ${t.dashboard.rewards}` : ''}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )
-          }}
+          renderItem={({ item, index }) => (
+            <CardItem
+              item={item}
+              index={index}
+              progress={progress[item.qrCode]}
+              tenantMeta={tenantMeta[item.tenantId]}
+              t={t}
+              language={language}
+              onPress={() => handleOpenCard(item)}
+              onLongPress={() => handleDeleteCard(item.qrCode)}
+            />
+          )}
         />
       )}
+      </Animated.View>
     </SafeAreaView>
   )
 }
@@ -261,14 +343,9 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0f0d2e' },
 
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4,
   },
   title: { color: '#fff', fontSize: 24, fontWeight: '900' },
-  addBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center',
-  },
 
   statsRow: {
     flexDirection: 'row', marginHorizontal: 16, marginVertical: 14,
@@ -296,6 +373,7 @@ const s = StyleSheet.create({
   },
 
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardLogo: { width: 46, height: 46, borderRadius: 14, flexShrink: 0 },
   cardIcon: {
     width: 46, height: 46, borderRadius: 14,
     backgroundColor: 'rgba(124,58,237,0.2)',

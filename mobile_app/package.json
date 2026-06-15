@@ -13,11 +13,14 @@
     "@supabase/supabase-js": "^2.39.0",
     "expo": "~54.0.0",
     "expo-camera": "~16.0.0",
+    "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.13",
+    "expo-file-system": "~19.0.23",
     "expo-linking": "~8.0.12",
     "expo-localization": "~17.0.9",
     "expo-location": "~19.0.8",
     "expo-router": "~6.0.24",
+    "expo-sharing": "~14.0.8",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
@@ -27,6 +30,7 @@
     "react-native-screens": "~4.16.0",
     "react-native-svg": "^15.15.5",
     "react-native-url-polyfill": "^2.0.0",
+    "xlsx": "^0.18.5",
     "zustand": "^4.5.4"
   },
   "devDependencies": {

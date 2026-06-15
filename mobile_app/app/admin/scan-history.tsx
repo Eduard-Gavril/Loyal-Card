@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import * as XLSX from 'xlsx'
+import { exportExcel } from '@/lib/excel'
 
 interface ScanEvent {
   id: string
@@ -25,6 +27,7 @@ export default function ScanHistoryScreen() {
 
   const [records, setRecords] = useState<ScanEvent[]>([])
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => { loadHistory() }, [])
@@ -48,6 +51,32 @@ export default function ScanHistoryScreen() {
     }
   }
 
+  async function handleExport() {
+    if (records.length === 0) return
+    setExporting(true)
+    try {
+      const rows = records.map((r) => ({
+        [a.history + ' — Data']: new Date(r.scanned_at).toLocaleString(
+          language === 'en' ? 'en-GB' : language === 'ro' ? 'ro-RO' : 'it-IT'
+        ),
+        Cliente: (r.cards as any)?.clients?.name ?? a.anonClient,
+        Prodotto: (r.products as any)?.name ?? a.productDefault,
+        Premio: r.reward_applied ? '✅' : '—',
+        'QR Code': (r.cards as any)?.qr_code ?? '',
+      }))
+      const ws = XLSX.utils.json_to_sheet(rows)
+      ws['!cols'] = [{ wch: 20 }, { wch: 22 }, { wch: 24 }, { wch: 8 }, { wch: 36 }]
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Scan History')
+      const date = new Date().toISOString().slice(0, 10)
+      await exportExcel(wb, `loyalcard_scans_${date}.xlsx`)
+    } catch (e: any) {
+      Alert.alert('Export Error', e?.message ?? 'Export failed')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   function formatDate(iso: string) {
     return new Date(iso).toLocaleString(
       language === 'en' ? 'en-GB' : language === 'ro' ? 'ro-RO' : 'it-IT',
@@ -63,9 +92,20 @@ export default function ScanHistoryScreen() {
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.title}>{a.history}</Text>
-        <TouchableOpacity style={s.refreshBtn} onPress={loadHistory}>
-          <Ionicons name="refresh-outline" size={20} color="#a78bfa" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <TouchableOpacity style={s.headerBtn} onPress={loadHistory}>
+            <Ionicons name="refresh-outline" size={18} color="#a78bfa" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[s.headerBtn, s.exportBtn, records.length === 0 && { opacity: 0.3 }]}
+            onPress={handleExport}
+            disabled={records.length === 0 || exporting}
+          >
+            {exporting
+              ? <ActivityIndicator size="small" color="#fff" />
+              : <Ionicons name="download-outline" size={18} color="#fff" />}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (
@@ -129,7 +169,8 @@ const s = StyleSheet.create({
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
   backText: { color: '#fff', fontSize: 15 },
   title: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  refreshBtn: { width: 40, alignItems: 'flex-end' },
+  headerBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.07)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  exportBtn: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 },
   loadingText: { color: '#a78bfa', fontSize: 14 },
   errorText: { color: '#f87171', fontSize: 14, textAlign: 'center' },

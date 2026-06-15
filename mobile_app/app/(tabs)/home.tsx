@@ -43,11 +43,11 @@ export default function HomeScreen() {
 
   async function handleSend() {
     if (!form.name.trim() || !form.email.trim() || !form.shop.trim()) {
-      setFormError('Compila i campi obbligatori (nome, email, negozio)')
+      setFormError(h.contactFormError)
       return
     }
     if (!form.email.includes('@')) {
-      setFormError("Inserisci un'email valida")
+      setFormError(h.contactEmailError)
       return
     }
     setSending(true)
@@ -236,12 +236,10 @@ export default function HomeScreen() {
               {sent ? (
                 <View style={s.sentBox}>
                   <Ionicons name="checkmark-circle" size={52} color="#10b981" />
-                  <Text style={s.sentTitle}>Richiesta inviata!</Text>
-                  <Text style={s.sentDesc}>
-                    Si aprirà la tua app email con il messaggio precompilato. Invia la mail per completare la richiesta.
-                  </Text>
+                  <Text style={s.sentTitle}>{h.contactSentTitle}</Text>
+                  <Text style={s.sentDesc}>{h.contactSentDesc}</Text>
                   <TouchableOpacity style={s.primaryBtn} onPress={closeContact}>
-                    <Text style={s.primaryBtnText}>Chiudi</Text>
+                    <Text style={s.primaryBtnText}>{h.contactClose}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -282,8 +280,8 @@ export default function HomeScreen() {
                   </TouchableOpacity>
 
                   <Text style={s.emailHint}>
-                    Apriremo la tua app email con i dati precompilati.{'\n'}
-                    Oppure scrivi direttamente a {CONTACT_EMAIL}
+                    {h.contactEmailHint}{'\n'}
+                    {CONTACT_EMAIL}
                   </Text>
                 </>
               )}

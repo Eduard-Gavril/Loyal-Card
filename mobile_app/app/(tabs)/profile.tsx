@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet, TextInput,
-  ScrollView, ActivityIndicator, Clipboard, Linking, RefreshControl,
+  ScrollView, ActivityIndicator, Linking, RefreshControl,
   Modal, Alert,
 } from 'react-native'
+import * as Clipboard from 'expo-clipboard'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -59,20 +60,19 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
 
   async function handleSave() {
     const trimmed = value.trim()
-    if (!trimmed) { setError('Inserisci un nome'); return }
-    if (!clientId) { setError('Apri prima una carta fedeltà'); return }
+    if (!trimmed) { setError(p.namePlaceholder); return }
+    if (!clientId) { setError(p.nameHint); return }
     setSaving(true)
     setError('')
     try {
-      const { error: dbErr } = await supabase
-        .from('clients')
-        .update({ name: trimmed })
-        .eq('id', clientId)
-      if (dbErr) throw dbErr
+      const { error: fnErr } = await supabase.functions.invoke('update-client-profile', {
+        body: { client_id: clientId, name: trimmed },
+      })
+      if (fnErr) throw fnErr
       setDisplayName(trimmed)
       setEditing(false)
     } catch (e: any) {
-      setError(e?.message ?? 'Errore durante il salvataggio')
+      setError(e?.message ?? 'Error saving')
     } finally {
       setSaving(false)
     }
@@ -89,7 +89,7 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     <View style={s.section}>
       <View style={s.sectionHeader}>
         <View style={s.iconWrap}>
-          <Ionicons name="person-outline" size={18} color="#a78bfa" />
+          <Ionicons name="person-outline" size={20} color="#a78bfa" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.sectionTitleBig}>{p.nameTitle}</Text>
@@ -132,7 +132,7 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
                 style={s.cancelBtn}
                 onPress={() => { setEditing(false); setValue(displayName); setError('') }}
               >
-                <Text style={s.cancelBtnText}>Annulla</Text>
+                <Text style={s.cancelBtnText}>{t.dashboard.cancel}</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
@@ -171,7 +171,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
       <View style={s.section}>
         <View style={s.sectionHeader}>
           <View style={[s.iconWrap, { backgroundColor: 'rgba(16,185,129,0.2)' }]}>
-            <Ionicons name="shield-checkmark-outline" size={18} color="#10b981" />
+            <Ionicons name="shield-checkmark-outline" size={20} color="#10b981" />
           </View>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
@@ -216,7 +216,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
       <View style={s.section}>
         <View style={s.sectionHeader}>
           <View style={[s.iconWrap, { backgroundColor: 'rgba(16,185,129,0.2)' }]}>
-            <Ionicons name="checkmark-circle-outline" size={18} color="#10b981" />
+            <Ionicons name="checkmark-circle-outline" size={20} color="#10b981" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={s.sectionTitleBig}>{p.phoneTitle}</Text>
@@ -232,7 +232,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
             <TouchableOpacity
               key={code}
               style={s.backupCode}
-              onPress={() => Clipboard.setString(code)}
+              onPress={() => Clipboard.setStringAsync(code)}
             >
               <Text style={s.backupCodeNum}>{i + 1}</Text>
               <Text style={s.backupCodeText}>{code}</Text>
@@ -255,7 +255,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     <View style={s.section}>
       <View style={s.sectionHeader}>
         <View style={s.iconWrap}>
-          <Ionicons name="phone-portrait-outline" size={18} color="#a78bfa" />
+          <Ionicons name="phone-portrait-outline" size={20} color="#a78bfa" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.sectionTitleBig}>{p.phoneTitle}</Text>
@@ -279,7 +279,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
         ))}
       </View>
 
-      <Text style={s.inputLabel}>Numero</Text>
+      <Text style={s.inputLabel}>{p.phoneLabel}</Text>
       <View style={s.phoneRow}>
         <View style={s.prefixDisplay}>
           <Text style={s.prefixDisplayText}>{prefix}</Text>
@@ -307,7 +307,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
         secureTextEntry
       />
 
-      <Text style={s.inputLabel}>Conferma PIN</Text>
+      <Text style={s.inputLabel}>{p.pinConfirmLabel}</Text>
       <TextInput
         style={[s.input, { marginBottom: 14 }]}
         placeholder={p.pinConfirmPlaceholder}
@@ -424,7 +424,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
         onPress={() => { setShow(!show); if (!show) reset() }}
       >
         <View style={s.iconWrap}>
-          <Ionicons name="refresh-circle-outline" size={18} color="#a78bfa" />
+          <Ionicons name="refresh-circle-outline" size={20} color="#a78bfa" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.sectionTitleBig}>{p.recoveryTitle}</Text>
@@ -462,7 +462,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
                 ))}
               </View>
 
-              <Text style={s.inputLabel}>Numero</Text>
+              <Text style={s.inputLabel}>{p.phoneLabel}</Text>
               <View style={[s.phoneRow, { marginBottom: 14 }]}>
                 <View style={s.prefixDisplay}>
                   <Text style={s.prefixDisplayText}>{prefix}</Text>
@@ -500,7 +500,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
               <TouchableOpacity style={s.phoneFoundRow} onPress={() => setStep('phone')}>
                 <Ionicons name="checkmark-circle" size={16} color="#10b981" />
                 <Text style={s.phoneFoundText}>{fullNumber}</Text>
-                <Text style={s.changeLink}>Cambia</Text>
+                <Text style={s.changeLink}>{p.change}</Text>
               </TouchableOpacity>
 
               {!useBackup ? (
@@ -523,7 +523,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
                 </>
               ) : (
                 <>
-                  <Text style={s.inputLabel}>Backup code</Text>
+                  <Text style={s.inputLabel}>{p.backupCodeLabel}</Text>
                   <TextInput
                     style={[s.input, { marginBottom: 8 }]}
                     placeholder={p.recoveryBackupPlaceholder}
@@ -631,24 +631,20 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <NameSection t={t} />
-
         <LinkPhoneSection t={t} />
         <RecoverySection t={t} />
 
         {/* Admin Access */}
-        <View style={s.section}>
-          <TouchableOpacity style={s.adminBtn} onPress={() => router.push('/admin/login')}>
-            <View style={s.adminIconWrap}>
-              <Ionicons name="shield-half-outline" size={22} color="#7c3aed" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={s.adminBtnTitle}>{p.adminAccess}</Text>
-              <Text style={s.adminBtnSub}>{p.adminSubtitle}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#7c3aed" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={s.adminBtn} onPress={() => router.push('/admin/login')}>
+          <View style={s.iconWrap}>
+            <Ionicons name="shield-half-outline" size={20} color="#7c3aed" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.adminBtnTitle}>{p.adminAccess}</Text>
+            <Text style={s.adminBtnSub}>{p.adminSubtitle}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color="#7c3aed" />
+        </TouchableOpacity>
 
         {/* Need Help */}
         <TouchableOpacity
@@ -656,7 +652,7 @@ export default function ProfileScreen() {
           onPress={() => Linking.openURL('https://loyalcard.net/contact')}
           activeOpacity={0.8}
         >
-          <View style={s.helpIconWrap}>
+          <View style={[s.iconWrap, { backgroundColor: 'rgba(59,130,246,0.15)' }]}>
             <Ionicons name="help-buoy-outline" size={20} color="#60a5fa" />
           </View>
           <View style={{ flex: 1 }}>
@@ -686,6 +682,9 @@ export default function ProfileScreen() {
             <Ionicons name="open-outline" size={13} color="#4b5563" />
           </TouchableOpacity>
         </View>
+
+        {/* Name (lower priority — edit once set) */}
+        <NameSection t={t} />
 
         {/* Delete account */}
         <TouchableOpacity
@@ -762,7 +761,7 @@ const s = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 16 },
   sectionTitleBig: { color: '#fff', fontSize: 15, fontWeight: '700', marginBottom: 2 },
   sectionDesc: { color: '#6b7280', fontSize: 12, lineHeight: 17 },
-  iconWrap: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(124,58,237,0.2)', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 },
+  iconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(124,58,237,0.2)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   toggleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   recoveryBody: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
   stepBadge: { color: '#a78bfa', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 14 },
@@ -817,16 +816,14 @@ const s = StyleSheet.create({
   cancelBtn: { paddingHorizontal: 16, paddingVertical: 13, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   cancelBtnText: { color: '#6b7280', fontWeight: '600', fontSize: 14 },
   adminBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: 'rgba(124,58,237,0.1)',
-    borderRadius: 14, padding: 14,
+    borderRadius: 18, padding: 16, marginBottom: 14,
     borderWidth: 1, borderColor: 'rgba(124,58,237,0.35)',
   },
-  adminIconWrap: { width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(124,58,237,0.2)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   adminBtnTitle: { color: '#c4b5fd', fontSize: 15, fontWeight: '700', marginBottom: 2 },
   adminBtnSub: { color: '#7c3aed', fontSize: 11 },
-  helpCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(59,130,246,0.08)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(59,130,246,0.2)', padding: 16, marginBottom: 12 },
-  helpIconWrap: { width: 42, height: 42, borderRadius: 12, backgroundColor: 'rgba(59,130,246,0.15)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  helpCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(59,130,246,0.08)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(59,130,246,0.2)', padding: 14, marginBottom: 12 },
   helpTitle: { color: '#93c5fd', fontSize: 14, fontWeight: '700', marginBottom: 2 },
   helpSub: { color: '#3b82f6', fontSize: 11, opacity: 0.85 },
   version: { color: '#374151', fontSize: 12, textAlign: 'center', marginTop: 8 },

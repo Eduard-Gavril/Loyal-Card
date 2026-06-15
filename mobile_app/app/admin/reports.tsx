@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import * as XLSX from 'xlsx'
+import { exportExcel } from '@/lib/excel'
 
 type Range = '7d' | '30d' | '90d'
 
@@ -34,6 +36,7 @@ export default function AdminReportsScreen() {
 
   const [range, setRange] = useState<Range>('30d')
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const [totalScans, setTotalScans] = useState(0)
   const [totalRewards, setTotalRewards] = useState(0)
   const [uniqueClients, setUniqueClients] = useState(0)
@@ -91,6 +94,58 @@ export default function AdminReportsScreen() {
     }
   }
 
+  async function handleExport() {
+    setExporting(true)
+    try {
+      const wb = XLSX.utils.book_new()
+      const date = new Date().toISOString().slice(0, 10)
+
+      // Sheet 1: KPI Summary
+      const kpiRows = [
+        { Metrica: a.totalScansLabel, Valore: totalScans },
+        { Metrica: a.rewardsGivenLabel, Valore: totalRewards },
+        { Metrica: a.uniqueClientsLabel, Valore: uniqueClients },
+        { Metrica: a.avgPerDayLabel, Valore: avgPerDay },
+        { Metrica: a.rewardRateLabel, Valore: `${conversionRate}%` },
+        { Metrica: 'Periodo', Valore: `Ultimi ${RANGE_DAYS[range]} giorni (fino al ${date})` },
+      ]
+      const wsKpi = XLSX.utils.json_to_sheet(kpiRows)
+      wsKpi['!cols'] = [{ wch: 28 }, { wch: 20 }]
+      XLSX.utils.book_append_sheet(wb, wsKpi, 'KPI')
+
+      // Sheet 2: Daily Stats
+      if (dailyStats.length > 0) {
+        const dailyRows = [...dailyStats].reverse().map((d) => ({
+          Data: d.date,
+          Scansioni: d.scans,
+          Premi: d.rewards,
+        }))
+        const wsDaily = XLSX.utils.json_to_sheet(dailyRows)
+        wsDaily['!cols'] = [{ wch: 14 }, { wch: 14 }, { wch: 10 }]
+        XLSX.utils.book_append_sheet(wb, wsDaily, 'Andamento Giornaliero')
+      }
+
+      // Sheet 3: Top Products
+      if (topProducts.length > 0) {
+        const prodRows = topProducts.map((p, i) => ({
+          Posizione: i + 1,
+          Prodotto: p.name,
+          Scansioni: p.scans,
+          Premi: p.rewards,
+        }))
+        const wsProd = XLSX.utils.json_to_sheet(prodRows)
+        wsProd['!cols'] = [{ wch: 10 }, { wch: 28 }, { wch: 12 }, { wch: 10 }]
+        XLSX.utils.book_append_sheet(wb, wsProd, 'Top Prodotti')
+      }
+
+      await exportExcel(wb, `loyalcard_report_${range}_${date}.xlsx`)
+    } catch (e: any) {
+      Alert.alert('Export Error', e?.message ?? 'Export failed')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const avgPerDay = totalScans > 0
     ? (totalScans / RANGE_DAYS[range]).toFixed(1)
     : '0'
@@ -108,7 +163,16 @@ export default function AdminReportsScreen() {
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>{t.admin.reports}</Text>
-        <View style={{ width: 70 }} />
+        <TouchableOpacity
+          style={[s.exportBtn, (loading || exporting) && { opacity: 0.4 }]}
+          onPress={handleExport}
+          disabled={loading || exporting || totalScans === 0}
+        >
+          {exporting
+            ? <ActivityIndicator size="small" color="#fff" />
+            : <Ionicons name="download-outline" size={18} color="#fff" />}
+          {!exporting && <Text style={s.exportBtnText}>Excel</Text>}
+        </TouchableOpacity>
       </View>
 
       {/* Range picker */}
@@ -207,6 +271,8 @@ export default function AdminReportsScreen() {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0f0d2e' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
+  exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#7c3aed', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
+  exportBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
   backText: { color: '#fff', fontSize: 15 },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },

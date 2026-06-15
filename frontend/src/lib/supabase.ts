@@ -537,6 +537,15 @@ export const api = {
   },
 
   // Link phone number to client for recovery (with PIN and backup codes)
+  async deleteAccount(clientId: string) {
+    const { data, error } = await supabase.functions.invoke('delete-account', {
+      body: { client_id: clientId },
+    })
+    if (error) throw error
+    if (data && !data.success) throw new Error(data.error || 'Failed to delete account')
+    return data
+  },
+
   async linkPhone(clientId: string, phone: string, pin: string) {
     // This is called by anonymous users (no auth needed)
     const invocationPromise = supabase.functions.invoke('link-phone', {

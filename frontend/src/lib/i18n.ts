@@ -430,6 +430,14 @@ export const translations = {
       step2: 'Show your QR code at checkout when you make a purchase',
       step3: 'Collect stamps and earn rewards automatically',
       step4: 'Redeem your rewards at the store',
+      deleteAccountTitle: 'Delete my account',
+      deleteAccountSub: 'Permanently remove all your data',
+      deleteLinkedWarning: 'Your account is linked to a phone number. All cards, stamps and personal data will be permanently deleted from our servers and cannot be recovered.',
+      deleteUnlinkedWarning: 'All your loyalty cards will be removed from this browser. Since your account is not linked to a phone, no server data is stored.',
+      deleteConfirmPrompt: 'Type DELETE to confirm',
+      deleteConfirmWord: 'DELETE',
+      deleteConfirmBtn: 'Delete permanently',
+      deleteSuccessMsg: 'All your data has been deleted.',
     },
 
     // Account Protection
@@ -1112,6 +1120,14 @@ export const translations = {
       step2: 'Arată codul QR la casă când faci o achiziție',
       step3: 'Colectează ștampile și câștigă premii automat',
       step4: 'Răscumpără premiile la magazin',
+      deleteAccountTitle: 'Șterge contul meu',
+      deleteAccountSub: 'Elimină definitiv toate datele tale',
+      deleteLinkedWarning: 'Contul tău este legat de un număr de telefon. Toate cardurile, timbrele și datele personale vor fi șterse definitiv de pe serverele noastre și nu pot fi recuperate.',
+      deleteUnlinkedWarning: 'Toate cardurile de fidelitate vor fi eliminate din browser. Deoarece contul tău nu este legat de un număr de telefon, nu există date pe server.',
+      deleteConfirmPrompt: 'Scrie STERG pentru a confirma',
+      deleteConfirmWord: 'STERG',
+      deleteConfirmBtn: 'Șterge definitiv',
+      deleteSuccessMsg: 'Toate datele tale au fost șterse.',
     },
 
     // Account Protection
@@ -1796,6 +1812,14 @@ export const translations = {
       step2: 'Mostra il tuo codice QR alla cassa quando fai un acquisto',
       step3: 'Raccogli timbri e guadagna premi automaticamente',
       step4: 'Riscatta i tuoi premi nel negozio',
+      deleteAccountTitle: 'Elimina il mio account',
+      deleteAccountSub: 'Rimuovi definitivamente tutti i tuoi dati',
+      deleteLinkedWarning: "Il tuo account è collegato a un numero di telefono. Tutte le carte, i timbri e i dati personali verranno eliminati definitivamente dai nostri server e non potranno essere recuperati.",
+      deleteUnlinkedWarning: "Tutte le tue carte fedeltà verranno rimosse dal browser. Poiché il tuo account non è collegato a un numero, non ci sono dati sul server.",
+      deleteConfirmPrompt: 'Scrivi ELIMINA per confermare',
+      deleteConfirmWord: 'ELIMINA',
+      deleteConfirmBtn: 'Elimina definitivamente',
+      deleteSuccessMsg: 'Tutti i tuoi dati sono stati eliminati.',
     },
 
     // Account Protection

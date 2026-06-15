@@ -33,6 +33,7 @@ interface ClientState {
   language: Language
   setLanguage: (lang: Language) => void
   languageDetected: boolean
+  clearAll: () => void
 }
 
 // Helper function to detect language based on IP geolocation
@@ -131,7 +132,11 @@ export const useClientStore = create<ClientState>()(
       // Language with auto-detection
       language: 'en', // Will be updated by onRehydrateStorage
       languageDetected: false,
-      setLanguage: (lang: Language) => set({ language: lang, languageDetected: true })
+      setLanguage: (lang: Language) => set({ language: lang, languageDetected: true }),
+      clearAll: () => set({
+        clientId: null, cardId: null, qrCode: null,
+        tenantId: null, tenantName: null, tenantSlug: null, savedCards: [],
+      }),
     }),
     {
       name: 'loyalcard-client-storage',

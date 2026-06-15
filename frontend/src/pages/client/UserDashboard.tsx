@@ -10,7 +10,7 @@ import { getTranslation } from '@/lib/i18n'
 
 export default function UserDashboard() {
   const navigate = useNavigate()
-  const { clientId, language } = useClientStore()
+  const { clientId, language, clearAll } = useClientStore()
   const t = getTranslation(language)
   const [loading, setLoading] = useState(true)
   const [cardCount, setCardCount] = useState(0)
@@ -19,6 +19,12 @@ export default function UserDashboard() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
   
+  // Delete account state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteInput, setDeleteInput] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+
   // Phone protection state
   const [hasPhone, setHasPhone] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
@@ -144,6 +150,23 @@ export default function UserDashboard() {
       setPhoneError(error?.message || t.protection.linkError)
     } finally {
       setSavingPhone(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      if (clientId) {
+        await api.deleteAccount(clientId)
+      }
+      clearAll()
+      setShowDeleteModal(false)
+      navigate('/')
+    } catch (err: any) {
+      setDeleteError(err?.message ?? 'Failed to delete data. Please try again.')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -333,6 +356,27 @@ export default function UserDashboard() {
               )}
             </div>
 
+            {/* Delete account */}
+            <div className="mt-4">
+              <button
+                onClick={() => { setDeleteInput(''); setDeleteError(''); setShowDeleteModal(true) }}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-red-500/5 border border-red-500/20 rounded-xl text-left hover:bg-red-500/10 transition-colors group"
+              >
+                <div className="w-8 h-8 bg-red-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <div className="text-red-400 font-semibold text-sm">{t.userDashboard.deleteAccountTitle}</div>
+                  <div className="text-red-500/60 text-xs">{t.userDashboard.deleteAccountSub}</div>
+                </div>
+                <svg className="w-4 h-4 text-red-500/40 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
             {/* Info Section */}
             <div className="mt-6 sm:mt-8 bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
               <h4 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">{t.userDashboard.howItWorksTitle}</h4>
@@ -366,6 +410,83 @@ export default function UserDashboard() {
           </div>
         </main>
       </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-gray-900 rounded-t-3xl sm:rounded-2xl p-6 w-full sm:max-w-md border border-red-500/30 shadow-2xl">
+            {/* Handle bar */}
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6 sm:hidden" />
+
+            {/* Icon */}
+            <div className="w-16 h-16 bg-red-500/10 border-2 border-red-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            <h3 className="text-xl font-bold text-white text-center mb-4">
+              {t.userDashboard.deleteAccountTitle}
+            </h3>
+
+            {/* Warning */}
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-5">
+              <p className="text-red-200 text-sm leading-relaxed">
+                {hasPhone ? t.userDashboard.deleteLinkedWarning : t.userDashboard.deleteUnlinkedWarning}
+              </p>
+            </div>
+
+            {/* Confirm input */}
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              {t.userDashboard.deleteConfirmPrompt}
+            </p>
+            <input
+              type="text"
+              value={deleteInput}
+              onChange={(e) => setDeleteInput(e.target.value.toUpperCase())}
+              placeholder={t.userDashboard.deleteConfirmWord}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              className={`w-full px-4 py-3 rounded-xl border text-white font-bold text-center text-lg tracking-widest mb-4 bg-white/5 focus:outline-none transition-colors ${
+                deleteInput === t.userDashboard.deleteConfirmWord
+                  ? 'border-red-500 bg-red-500/10 focus:ring-2 focus:ring-red-500/50'
+                  : 'border-white/20 focus:border-red-400'
+              }`}
+            />
+
+            {deleteError && (
+              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-200 text-sm">
+                {deleteError}
+              </div>
+            )}
+
+            {/* Buttons */}
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleteInput !== t.userDashboard.deleteConfirmWord || deleting}
+              className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl mb-3 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {deleting ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              )}
+              {t.userDashboard.deleteConfirmBtn}
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className="w-full py-3 bg-white/10 hover:bg-white/20 text-white/70 font-semibold rounded-xl transition-colors"
+            >
+              {t.wallet.cancel}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Phone Modal */}
       {showPhoneModal && (

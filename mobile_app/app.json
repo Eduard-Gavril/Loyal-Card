@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "LoyalCard",
+    "slug": "loyalcard",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#1e1b4b"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "net.loyalcard.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1e1b4b"
+      },
+      "package": "net.loyalcard.app"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "LoyalCard needs your location to show partners near you."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "LoyalCard Admin needs camera access to scan loyalty QR codes."
+        }
+      ]
+    ],
+    "scheme": "loyalcard"
+  }
+}

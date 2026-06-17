@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "957056af-8aaf-4ef9-9327-c5c3ceb9a7d8"
+      }
+    },
+    "android": {
+      "package": "com.eduard_gavril.loyalcard"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Image, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -12,10 +12,22 @@ export default function WelcomeScreen() {
   const t = getTranslation(language)
   const [hydrated, setHydrated] = useState(false)
   const fadeAnim = useRef(new Animated.Value(0)).current
+  const loadingScale = useRef(new Animated.Value(0.85)).current
+  const loadingOpacity = useRef(new Animated.Value(0)).current
+  const pulseAnim = useRef(new Animated.Value(1)).current
 
   useEffect(() => {
-    // Wait briefly for AsyncStorage to rehydrate the Zustand store
-    const timer = setTimeout(() => setHydrated(true), 120)
+    Animated.parallel([
+      Animated.timing(loadingOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+      Animated.spring(loadingScale, { toValue: 1, friction: 7, tension: 80, useNativeDriver: true }),
+    ]).start()
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.08, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+      ])
+    ).start()
+    const timer = setTimeout(() => setHydrated(true), 200)
     return () => clearTimeout(timer)
   }, [])
 
@@ -39,7 +51,17 @@ export default function WelcomeScreen() {
   }
 
   if (!hydrated) {
-    return <View style={s.splash} />
+    return (
+      <View style={s.splash}>
+        <Animated.View style={{ opacity: loadingOpacity, transform: [{ scale: loadingScale }], alignItems: 'center' }}>
+          <Animated.View style={[s.splashRing, { transform: [{ scale: pulseAnim }] }]}>
+            <Image source={require('../assets/logo.png')} style={s.splashLogo} resizeMode="contain" />
+          </Animated.View>
+          <Text style={s.splashAppName}>LoyalCard</Text>
+        </Animated.View>
+        <ActivityIndicator color="#7c3aed" size="small" style={s.splashSpinner} />
+      </View>
+    )
   }
 
   const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
@@ -96,7 +118,17 @@ export default function WelcomeScreen() {
 }
 
 const s = StyleSheet.create({
-  splash: { flex: 1, backgroundColor: '#0f0d2e' },
+  splash: { flex: 1, backgroundColor: '#0f0d2e', alignItems: 'center', justifyContent: 'center' },
+  splashRing: {
+    width: 140, height: 140, borderRadius: 70,
+    backgroundColor: 'rgba(124,58,237,0.15)',
+    borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.35)',
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 20,
+  },
+  splashLogo: { width: 90, height: 90 },
+  splashAppName: { color: '#fff', fontSize: 28, fontWeight: '800', letterSpacing: -0.3 },
+  splashSpinner: { position: 'absolute', bottom: 80 },
   safe: { flex: 1, backgroundColor: '#0f0d2e' },
   content: { flex: 1, paddingHorizontal: 28, justifyContent: 'space-between', paddingVertical: 32 },
   hero: { alignItems: 'center', gap: 12, marginTop: 24 },

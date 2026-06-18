@@ -1,11 +1,13 @@
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 
 export default function TabLayout() {
   const { language, totalRewards } = useClientStore()
   const t = getTranslation(language)
+  const insets = useSafeAreaInsets()
 
   return (
     <Tabs
@@ -15,8 +17,9 @@ export default function TabLayout() {
           backgroundColor: '#0f0d2e',
           borderTopColor: 'rgba(255,255,255,0.08)',
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingTop: 4,
         },
         tabBarActiveTintColor: '#7c3aed',
         tabBarInactiveTintColor: '#4b5563',

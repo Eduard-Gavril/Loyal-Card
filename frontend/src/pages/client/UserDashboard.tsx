@@ -27,8 +27,10 @@ export default function UserDashboard() {
 
   // Phone protection state
   const [hasPhone, setHasPhone] = useState(false)
+  const [clientName, setClientName] = useState('')
   const [showPhoneModal, setShowPhoneModal] = useState(false)
   const [phone, setPhone] = useState('')
+  const [name, setName] = useState('')
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [phoneError, setPhoneError] = useState('')
@@ -36,6 +38,13 @@ export default function UserDashboard() {
   const [savingPhone, setSavingPhone] = useState(false)
   const [backupCodes, setBackupCodes] = useState<string[]>([])
   const [showBackupCodes, setShowBackupCodes] = useState(false)
+
+  // Name update state (for existing users with phone but no name)
+  const [showNameModal, setShowNameModal] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [savingName, setSavingName] = useState(false)
+  const [nameError, setNameError] = useState('')
+  const [nameSuccess, setNameSuccess] = useState(false)
 
   // PWA install prompt handler
   useEffect(() => {
@@ -87,9 +96,10 @@ export default function UserDashboard() {
         return
       }
 
-      // Check if client has phone
+      // Check if client has phone and name
       const client = await api.getClient(clientId)
       setHasPhone(!!client?.phone)
+      setClientName(client?.name || '')
 
       const allCards = await api.getCardsByClient(clientId)
       setCardCount(allCards.length)
@@ -138,8 +148,9 @@ export default function UserDashboard() {
     setPhoneError('')
 
     try {
-      const result = await api.linkPhone(clientId, normalizePhoneNumber(phone), pin)
+      const result = await api.linkPhone(clientId, normalizePhoneNumber(phone), pin, name.trim() || undefined)
       if (result.success && result.backup_codes) {
+        if (name.trim()) setClientName(name.trim())
         setBackupCodes(result.backup_codes)
         setShowBackupCodes(true)
         setPhoneSuccess(true)
@@ -175,9 +186,31 @@ export default function UserDashboard() {
     setShowPhoneModal(false)
     setPhoneSuccess(false)
     setPhone('')
+    setName('')
     setPin('')
     setConfirmPin('')
     setBackupCodes([])
+  }
+
+  const handleSaveName = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!clientId || !nameInput.trim()) return
+    setSavingName(true)
+    setNameError('')
+    try {
+      await api.updateClientName(clientId, nameInput.trim())
+      setClientName(nameInput.trim())
+      setNameSuccess(true)
+      setTimeout(() => {
+        setShowNameModal(false)
+        setNameSuccess(false)
+        setNameInput('')
+      }, 1500)
+    } catch (err: any) {
+      setNameError(err?.message || t.protection.nameError)
+    } finally {
+      setSavingName(false)
+    }
   }
 
   return (
@@ -269,113 +302,145 @@ export default function UserDashboard() {
 
             {/* Protected Badge - show if phone is linked */}
             {clientId && hasPhone && !loading && (
-              <div className="mb-6 bg-green-500/10 backdrop-blur-sm rounded-xl p-3 border border-green-500/30 flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+              <div className="mb-3 bg-green-500/10 backdrop-blur-sm rounded-xl p-3 border border-green-500/30 flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                   <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
-                <span className="text-green-200 text-sm">{t.protection.accountProtected}</span>
+                <span className="text-green-200 text-sm flex-1">{t.protection.accountProtected}</span>
               </div>
             )}
 
-            {/* Action Cards */}
-            <div className="space-y-4">
-              {/* Get New Card - Main CTA */}
+            {/* Name row — always visible when clientId exists */}
+            {clientId && !loading && (
+              <div className="mb-6 bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                {clientName ? (
+                  <span className="text-white text-sm flex-1 font-medium">{clientName}</span>
+                ) : (
+                  <span className="text-gray-400 text-sm flex-1 italic">{t.protection.addNameTitle}</span>
+                )}
+                <button
+                  onClick={() => { setNameInput(clientName); setNameError(''); setNameSuccess(false); setShowNameModal(true) }}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-shrink-0"
+                  title={clientName ? t.protection.addNameTitle : t.protection.addNameTitle}
+                >
+                  <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {/* Action Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Get New Card */}
               <button
                 onClick={() => navigate('/select-tenant')}
-                className="w-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-4 sm:p-6 text-left hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-600/40 group"
+                className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-violet-500/20 to-purple-600/20 hover:from-violet-500/30 hover:to-purple-600/30 border border-violet-400/20 hover:border-violet-400/40 backdrop-blur-sm shadow-sm hover:shadow-violet-500/20 transition-all duration-200 hover:scale-[1.02]"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{t.userDashboard.getNewCard}</h3>
-                    <p className="text-primary-100">{t.userDashboard.getNewCardDesc}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 group-hover:scale-105 transition-transform duration-200">
+                  <svg className="w-4.5 h-4.5 text-white w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-white font-semibold text-sm leading-snug">{t.userDashboard.getNewCard}</div>
+                  <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.userDashboard.getNewCardDesc}</div>
                 </div>
               </button>
 
               {/* View My Cards */}
               <button
                 onClick={() => navigate('/wallet')}
-                className="w-full bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 text-left hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-blue-500/20 to-cyan-600/20 hover:from-blue-500/30 hover:to-cyan-600/30 border border-blue-400/20 hover:border-blue-400/40 backdrop-blur-sm shadow-sm hover:shadow-blue-500/20 transition-all duration-200 hover:scale-[1.02]"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{t.userDashboard.viewMyCards}</h3>
-                    <p className="text-gray-300">{t.userDashboard.viewMyCardsDesc}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform duration-200">
+                  <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-white font-semibold text-sm leading-snug">{t.userDashboard.viewMyCards}</div>
+                  <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.userDashboard.viewMyCardsDesc}</div>
                 </div>
               </button>
 
-              {/* Recover Account - always visible for users who need to restore their data */}
+              {/* Recover Account */}
               <button
                 onClick={() => navigate('/recovery')}
-                className="w-full bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-left hover:bg-white/10 transition-all duration-300 border border-white/10 group"
+                className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-amber-500/20 to-orange-600/20 hover:from-amber-500/30 hover:to-orange-600/30 border border-amber-400/20 hover:border-amber-400/40 backdrop-blur-sm shadow-sm hover:shadow-amber-500/20 transition-all duration-200 hover:scale-[1.02]"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-white/80 mb-1">{t.recovery.title}</h3>
-                    <p className="text-gray-400 text-sm">{t.recovery.dashboardDesc}</p>
-                  </div>
-                  <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                    </svg>
-                  </div>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md shadow-amber-500/30 group-hover:scale-105 transition-transform duration-200">
+                  <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-white font-semibold text-sm leading-snug">{t.recovery.title}</div>
+                  <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.recovery.dashboardDesc}</div>
                 </div>
               </button>
 
-              {/* Install App - PWA */}
-              {showInstallButton && (
+              {/* Install App or placeholder for delete */}
+              {showInstallButton ? (
                 <button
                   onClick={handleInstallClick}
-                  className="w-full bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 text-left hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                  className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 hover:from-emerald-500/30 hover:to-teal-600/30 border border-emerald-400/20 hover:border-emerald-400/40 backdrop-blur-sm shadow-sm hover:shadow-emerald-500/20 transition-all duration-200 hover:scale-[1.02]"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{t.userDashboard.installApp}</h3>
-                      <p className="text-gray-300">{t.userDashboard.installAppDesc}</p>
-                    </div>
-                    <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    </div>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-200">
+                    <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-white font-semibold text-sm leading-snug">{t.userDashboard.installApp}</div>
+                    <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.userDashboard.installAppDesc}</div>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setDeleteInput(''); setDeleteError(''); setShowDeleteModal(true) }}
+                  className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-red-500/10 to-rose-600/10 hover:from-red-500/20 hover:to-rose-600/20 border border-red-500/15 hover:border-red-500/30 backdrop-blur-sm transition-all duration-200 hover:scale-[1.02]"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500/40 to-rose-600/40 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                    <svg className="w-[18px] h-[18px] text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-red-300 font-semibold text-sm leading-snug">{t.userDashboard.deleteAccountTitle}</div>
+                    <div className="text-red-400/50 text-xs mt-0.5 leading-tight">{t.userDashboard.deleteAccountSub}</div>
                   </div>
                 </button>
               )}
             </div>
 
-            {/* Delete account */}
-            <div className="mt-4">
+            {/* Delete account row — only when install tile is occupying the 4th slot */}
+            {showInstallButton && (
               <button
                 onClick={() => { setDeleteInput(''); setDeleteError(''); setShowDeleteModal(true) }}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-red-500/5 border border-red-500/20 rounded-xl text-left hover:bg-red-500/10 transition-colors group"
+                className="mt-3 w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/5 border border-red-500/15 hover:bg-red-500/10 hover:border-red-500/25 backdrop-blur-sm transition-all duration-200 group"
               >
-                <div className="w-8 h-8 bg-red-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-7 h-7 rounded-lg bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <div className="text-red-400 font-semibold text-sm">{t.userDashboard.deleteAccountTitle}</div>
-                  <div className="text-red-500/60 text-xs">{t.userDashboard.deleteAccountSub}</div>
+                <div className="flex-1 text-left">
+                  <div className="text-red-400 font-medium text-sm">{t.userDashboard.deleteAccountTitle}</div>
+                  <div className="text-red-500/50 text-xs">{t.userDashboard.deleteAccountSub}</div>
                 </div>
-                <svg className="w-4 h-4 text-red-500/40 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-red-500/30 group-hover:text-red-400/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-            </div>
+            )}
 
             {/* Info Section */}
             <div className="mt-6 sm:mt-8 bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
@@ -488,6 +553,80 @@ export default function UserDashboard() {
         </div>
       )}
 
+      {/* Name Modal - for existing users with phone but no name */}
+      {showNameModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-white/20 shadow-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">
+                {clientName ? t.protection.editNameTitle : t.protection.addNameTitle}
+              </h3>
+              <button
+                onClick={() => { setShowNameModal(false); setNameError('') }}
+                className="text-gray-400 hover:text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {nameSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-green-200 text-lg">{t.protection.nameUpdated}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSaveName} className="space-y-4">
+                <p className="text-gray-300 text-sm">{t.protection.addNameDescription}</p>
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">
+                    {t.protection.nameLabel}
+                  </label>
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    placeholder={t.protection.namePlaceholder}
+                    maxLength={100}
+                    autoFocus
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                    required
+                  />
+                </div>
+
+                {nameError && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
+                    {nameError}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setShowNameModal(false); setNameError('') }}
+                    className="flex-1 px-4 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-colors"
+                  >
+                    {t.wallet.cancel}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingName || !nameInput.trim()}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50"
+                  >
+                    {savingName ? '...' : t.protection.saveName}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Phone Modal */}
       {showPhoneModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -555,7 +694,21 @@ export default function UserDashboard() {
             ) : (
               <form onSubmit={handleLinkPhone} className="space-y-4">
                 <p className="text-gray-300 text-sm">{t.protection.modalDescription}</p>
-                
+
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">
+                    {t.protection.nameLabel}
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={t.protection.namePlaceholder}
+                    maxLength={100}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-white text-sm font-medium mb-2">
                     {t.protection.phoneLabel}

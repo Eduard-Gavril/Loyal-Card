@@ -457,6 +457,14 @@ export const translations = {
       linkError: 'Failed to link phone number. Please try again.',
       pinSixDigits: 'PIN must be exactly 6 digits.',
       pinsMismatch: 'PINs do not match.',
+      nameLabel: 'Your name (optional)',
+      namePlaceholder: 'First Last',
+      addNameTitle: 'Add your name',
+      editNameTitle: 'Edit your name',
+      addNameDescription: 'Add your name so we can identify you if you need support.',
+      saveName: 'Save Name',
+      nameUpdated: 'Name saved successfully!',
+      nameError: 'Failed to save name. Please try again.',
     },
 
     // Account Recovery
@@ -1147,6 +1155,14 @@ export const translations = {
       linkError: 'Nu s-a putut asocia telefonul. Te rugăm să încerci din nou.',
       pinSixDigits: 'PIN-ul trebuie să aibă exact 6 cifre.',
       pinsMismatch: 'PIN-urile nu se potrivesc.',
+      nameLabel: 'Numele tău (opțional)',
+      namePlaceholder: 'Prenume Nume',
+      addNameTitle: 'Adaugă numele tău',
+      editNameTitle: 'Modifică numele tău',
+      addNameDescription: 'Adaugă numele tău ca să te putem identifica dacă ai nevoie de suport.',
+      saveName: 'Salvează Numele',
+      nameUpdated: 'Numele a fost salvat cu succes!',
+      nameError: 'Nu s-a putut salva numele. Încearcă din nou.',
     },
 
     // Account Recovery
@@ -1839,6 +1855,14 @@ export const translations = {
       linkError: 'Impossibile collegare il numero di telefono. Riprova.',
       pinSixDigits: 'Il PIN deve essere esattamente di 6 cifre.',
       pinsMismatch: 'I PIN non corrispondono.',
+      nameLabel: 'Il tuo nome (opzionale)',
+      namePlaceholder: 'Nome Cognome',
+      addNameTitle: 'Aggiungi il tuo nome',
+      editNameTitle: 'Modifica il tuo nome',
+      addNameDescription: 'Aggiungi il tuo nome così possiamo identificarti se hai bisogno di supporto.',
+      saveName: 'Salva Nome',
+      nameUpdated: 'Nome salvato con successo!',
+      nameError: 'Impossibile salvare il nome. Riprova.',
     },
 
     // Account Recovery

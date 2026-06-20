@@ -546,10 +546,30 @@ export const api = {
     return data
   },
 
-  async linkPhone(clientId: string, phone: string, pin: string) {
+  async updateClientName(clientId: string, name: string) {
+    const queryPromise = supabase
+      .from('clients')
+      .update({ name })
+      .eq('id', clientId)
+      .select()
+      .single()
+
+    const result = await Promise.race([
+      queryPromise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
+      )
+    ]) as any
+
+    const { data, error } = result
+    if (error) throw error
+    return data
+  },
+
+  async linkPhone(clientId: string, phone: string, pin: string, name?: string) {
     // This is called by anonymous users (no auth needed)
     const invocationPromise = supabase.functions.invoke('link-phone', {
-      body: { client_id: clientId, phone, pin }
+      body: { client_id: clientId, phone, pin, ...(name ? { name } : {}) }
     })
     
     const result = await Promise.race([

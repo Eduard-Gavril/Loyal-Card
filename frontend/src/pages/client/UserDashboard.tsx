@@ -255,24 +255,53 @@ export default function UserDashboard() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/20 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                  {loading ? '...' : cardCount}
+            <div className="grid grid-cols-3 gap-3 mb-6 sm:mb-8">
+              {/* Active Cards */}
+              <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-violet-500/15 to-purple-600/10 border border-violet-400/20 backdrop-blur-sm">
+                <div className="absolute -right-3 -top-3 w-16 h-16 rounded-full bg-violet-500/10 blur-xl" />
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-violet-500/30">
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                    {loading ? <span className="text-white/30">—</span> : cardCount}
+                  </span>
                 </div>
-                <div className="text-xs sm:text-sm text-gray-300">{t.userDashboard.activeCards}</div>
+                <div className="text-xs text-white/40">{t.userDashboard.activeCards}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/20 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                  {loading ? '...' : totalStamps}
+
+              {/* Total Stamps */}
+              <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-blue-500/15 to-cyan-600/10 border border-blue-400/20 backdrop-blur-sm">
+                <div className="absolute -right-3 -top-3 w-16 h-16 rounded-full bg-blue-500/10 blur-xl" />
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/30">
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                  </div>
+                  <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                    {loading ? <span className="text-white/30">—</span> : totalStamps}
+                  </span>
                 </div>
-                <div className="text-xs sm:text-sm text-gray-300">{t.userDashboard.totalStamps}</div>
+                <div className="text-xs text-white/40">{t.userDashboard.totalStamps}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/20 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                  {loading ? '...' : totalRewards}
+
+              {/* Rewards Earned */}
+              <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-amber-500/15 to-orange-600/10 border border-amber-400/20 backdrop-blur-sm">
+                <div className="absolute -right-3 -top-3 w-16 h-16 rounded-full bg-amber-500/10 blur-xl" />
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm shadow-amber-500/30">
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                    </svg>
+                  </div>
+                  <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                    {loading ? <span className="text-white/30">—</span> : totalRewards}
+                  </span>
                 </div>
-                <div className="text-xs sm:text-sm text-gray-300">{t.userDashboard.rewardsEarned}</div>
+                <div className="text-xs text-white/40">{t.userDashboard.rewardsEarned}</div>
               </div>
             </div>
 
@@ -342,80 +371,80 @@ export default function UserDashboard() {
               {/* Get New Card */}
               <button
                 onClick={() => navigate('/select-tenant')}
-                className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-violet-500/20 to-purple-600/20 hover:from-violet-500/30 hover:to-purple-600/30 border border-violet-400/20 hover:border-violet-400/40 backdrop-blur-sm shadow-sm hover:shadow-violet-500/20 transition-all duration-200 hover:scale-[1.02]"
+                className="group relative overflow-hidden rounded-2xl p-4 flex items-start gap-3 bg-gradient-to-br from-violet-500/20 to-purple-600/20 hover:from-violet-500/30 hover:to-purple-600/30 border border-violet-400/20 hover:border-violet-400/40 backdrop-blur-sm hover:shadow-lg hover:shadow-violet-500/10 transition-all duration-200 hover:scale-[1.02]"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 group-hover:scale-105 transition-transform duration-200">
-                  <svg className="w-4.5 h-4.5 text-white w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-violet-500/30 group-hover:scale-105 transition-transform duration-200 mt-0.5">
+                  <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
-                <div>
-                  <div className="text-white font-semibold text-sm leading-snug">{t.userDashboard.getNewCard}</div>
-                  <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.userDashboard.getNewCardDesc}</div>
+                <div className="text-left">
+                  <div className="text-white font-bold text-base leading-snug">{t.userDashboard.getNewCard}</div>
+                  <div className="text-white/45 text-xs mt-1 leading-snug">{t.userDashboard.getNewCardDesc}</div>
                 </div>
               </button>
 
               {/* View My Cards */}
               <button
                 onClick={() => navigate('/wallet')}
-                className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-blue-500/20 to-cyan-600/20 hover:from-blue-500/30 hover:to-cyan-600/30 border border-blue-400/20 hover:border-blue-400/40 backdrop-blur-sm shadow-sm hover:shadow-blue-500/20 transition-all duration-200 hover:scale-[1.02]"
+                className="group relative overflow-hidden rounded-2xl p-4 flex items-start gap-3 bg-gradient-to-br from-blue-500/20 to-cyan-600/20 hover:from-blue-500/30 hover:to-cyan-600/30 border border-blue-400/20 hover:border-blue-400/40 backdrop-blur-sm hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 hover:scale-[1.02]"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform duration-200">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform duration-200 mt-0.5">
                   <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                 </div>
-                <div>
-                  <div className="text-white font-semibold text-sm leading-snug">{t.userDashboard.viewMyCards}</div>
-                  <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.userDashboard.viewMyCardsDesc}</div>
+                <div className="text-left">
+                  <div className="text-white font-bold text-base leading-snug">{t.userDashboard.viewMyCards}</div>
+                  <div className="text-white/45 text-xs mt-1 leading-snug">{t.userDashboard.viewMyCardsDesc}</div>
                 </div>
               </button>
 
               {/* Recover Account */}
               <button
                 onClick={() => navigate('/recovery')}
-                className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-amber-500/20 to-orange-600/20 hover:from-amber-500/30 hover:to-orange-600/30 border border-amber-400/20 hover:border-amber-400/40 backdrop-blur-sm shadow-sm hover:shadow-amber-500/20 transition-all duration-200 hover:scale-[1.02]"
+                className="group relative overflow-hidden rounded-2xl p-4 flex items-start gap-3 bg-gradient-to-br from-amber-500/20 to-orange-600/20 hover:from-amber-500/30 hover:to-orange-600/30 border border-amber-400/20 hover:border-amber-400/40 backdrop-blur-sm hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-200 hover:scale-[1.02]"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md shadow-amber-500/30 group-hover:scale-105 transition-transform duration-200">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/30 group-hover:scale-105 transition-transform duration-200 mt-0.5">
                   <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                   </svg>
                 </div>
-                <div>
-                  <div className="text-white font-semibold text-sm leading-snug">{t.recovery.title}</div>
-                  <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.recovery.dashboardDesc}</div>
+                <div className="text-left">
+                  <div className="text-white font-bold text-base leading-snug">{t.recovery.title}</div>
+                  <div className="text-white/45 text-xs mt-1 leading-snug">{t.recovery.dashboardDesc}</div>
                 </div>
               </button>
 
-              {/* Install App or placeholder for delete */}
+              {/* Install App or Delete tile */}
               {showInstallButton ? (
                 <button
                   onClick={handleInstallClick}
-                  className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 hover:from-emerald-500/30 hover:to-teal-600/30 border border-emerald-400/20 hover:border-emerald-400/40 backdrop-blur-sm shadow-sm hover:shadow-emerald-500/20 transition-all duration-200 hover:scale-[1.02]"
+                  className="group relative overflow-hidden rounded-2xl p-4 flex items-start gap-3 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 hover:from-emerald-500/30 hover:to-teal-600/30 border border-emerald-400/20 hover:border-emerald-400/40 backdrop-blur-sm hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-200 hover:scale-[1.02]"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-200">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-200 mt-0.5">
                     <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                   </div>
-                  <div>
-                    <div className="text-white font-semibold text-sm leading-snug">{t.userDashboard.installApp}</div>
-                    <div className="text-white/40 text-xs mt-0.5 leading-tight">{t.userDashboard.installAppDesc}</div>
+                  <div className="text-left">
+                    <div className="text-white font-bold text-base leading-snug">{t.userDashboard.installApp}</div>
+                    <div className="text-white/45 text-xs mt-1 leading-snug">{t.userDashboard.installAppDesc}</div>
                   </div>
                 </button>
               ) : (
                 <button
                   onClick={() => { setDeleteInput(''); setDeleteError(''); setShowDeleteModal(true) }}
-                  className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-start gap-3 bg-gradient-to-br from-red-500/10 to-rose-600/10 hover:from-red-500/20 hover:to-rose-600/20 border border-red-500/15 hover:border-red-500/30 backdrop-blur-sm transition-all duration-200 hover:scale-[1.02]"
+                  className="group relative overflow-hidden rounded-2xl p-4 flex items-start gap-3 bg-gradient-to-br from-red-500/10 to-rose-600/10 hover:from-red-500/20 hover:to-rose-600/20 border border-red-500/15 hover:border-red-500/30 backdrop-blur-sm transition-all duration-200 hover:scale-[1.02]"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500/40 to-rose-600/40 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/40 to-rose-600/40 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-200 mt-0.5">
                     <svg className="w-[18px] h-[18px] text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </div>
-                  <div>
-                    <div className="text-red-300 font-semibold text-sm leading-snug">{t.userDashboard.deleteAccountTitle}</div>
-                    <div className="text-red-400/50 text-xs mt-0.5 leading-tight">{t.userDashboard.deleteAccountSub}</div>
+                  <div className="text-left">
+                    <div className="text-red-300 font-bold text-base leading-snug">{t.userDashboard.deleteAccountTitle}</div>
+                    <div className="text-red-400/50 text-xs mt-1 leading-snug">{t.userDashboard.deleteAccountSub}</div>
                   </div>
                 </button>
               )}

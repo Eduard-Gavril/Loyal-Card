@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
@@ -50,6 +50,7 @@ export default function ClientCard() {
   const [qrDataUrl, setQrDataUrl] = useState<string>('')
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
+  const [showRewardsPanel, setShowRewardsPanel] = useState(false)
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -324,6 +325,118 @@ export default function ClientCard() {
               >
                 {t.clientCard.selectStore}
               </button>
+            </div>
+          )}
+
+          {/* Rewards Discovery Accordion */}
+          {rules.length > 0 && (
+            <div className="mb-4">
+              <button
+                onClick={() => setShowRewardsPanel(v => !v)}
+                className="w-full flex items-center justify-between gap-3 px-5 py-4 rounded-2xl transition-all duration-200"
+                style={{
+                  background: `
+                    linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0) 60%),
+                    linear-gradient(145deg, ${brandColor}f0 0%, ${brandColor}a8 100%)
+                  `.replace(/\s+/g, ' '),
+                  border: `1px solid ${brandColor}70`,
+                }}
+              >
+                <span className="text-white/80 text-sm font-medium">
+                  {t.clientCard.discoverBtn}
+                </span>
+                <svg
+                  className={`w-4 h-4 text-white/40 flex-shrink-0 transition-transform duration-300 ${showRewardsPanel ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showRewardsPanel && (
+                <div
+                  className="mt-1.5 rounded-2xl overflow-hidden"
+                  style={{
+                    background: `
+                      linear-gradient(to top, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 50%),
+                      linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0) 60%),
+                      linear-gradient(145deg, ${brandColor}e8 0%, ${brandColor}a0 100%)
+                    `.replace(/\s+/g, ' '),
+                    border: `1px solid ${brandColor}60`,
+                  }}
+                >
+                  {/* Panel header */}
+                  <div
+                    className="px-5 pt-4 pb-2 flex items-center justify-between"
+                    style={{ borderBottom: `1px solid rgba(255,255,255,0.10)` }}
+                  >
+                    <span className="text-white/40 text-[11px] font-semibold uppercase tracking-widest">
+                      {t.clientCard.discoverTitle}
+                    </span>
+                    <span className="text-white/25 text-[11px]">{rules.length}</span>
+                  </div>
+
+                  {/* List — hidden scrollbar */}
+                  <div
+                    className="max-h-64 overflow-y-auto px-3 pb-3"
+                    style={{ scrollbarWidth: 'none' }}
+                  >
+                    <style>{`div::-webkit-scrollbar{display:none}`}</style>
+                    {rules.map((rule, idx) => {
+                      // Strip "gratuit/gratuito/gratis/free" variants from the display name
+                      const cleanName = rule.name
+                        .replace(/\b(gratuit[ăa]?|gratuito|gratis|free|gratu[iī]t)\b/gi, '')
+                        .replace(/\s{2,}/g, ' ')
+                        .trim()
+
+                      const stampsWord = t.clientCard.discoverStamps
+
+                      let taglineNode: React.ReactNode
+
+                      if (rule.discount_percent) {
+                        const text = t.clientCard.discoverDiscount
+                          .replace('{{n}}', String(rule.buy_count))
+                          .replace('{{stamps}}', stampsWord)
+                          .replace('{{pct}}', String(rule.discount_percent))
+                        taglineNode = <span className="text-white/70 text-sm">{text}</span>
+                      } else {
+                        const tpl = t.clientCard.discoverFreeProduct
+                          .replace('{{n}}', String(rule.buy_count))
+                          .replace('{{stamps}}', stampsWord)
+                        const [before, after] = tpl.split('{{name}}')
+                        taglineNode = (
+                          <span className="text-white/70 text-sm">
+                            {before}
+                            <span className="text-white font-semibold">{cleanName}</span>
+                            {after ?? ''}
+                          </span>
+                        )
+                      }
+
+                      return (
+                        <div
+                          key={rule.id}
+                          className="flex items-center gap-3 px-2 py-3"
+                          style={idx !== rules.length - 1 ? { borderBottom: `1px solid rgba(255,255,255,0.08)` } : {}}
+                        >
+                          <div
+                            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={{ background: `rgba(255,255,255,0.15)` }}
+                          >
+                            <span className="text-white/70 text-xs font-bold">{rule.buy_count}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="leading-snug">{taglineNode}</div>
+                            {rule.description && (
+                              <div className="text-white/30 text-xs mt-0.5 truncate">{rule.description}</div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -1423,8 +1423,8 @@ export default function LandingPage() {
               : 'From free to get started, to enterprise solutions for large businesses. Choose the perfect plan for your needs.'}
           </p>
 
-          {/* Quick Pricing Preview - Only 3 plans */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
+          {/* Quick Pricing Preview - annual prices */}
+          <div className="grid md:grid-cols-3 gap-6 mb-4 max-w-4xl mx-auto">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20 hover:bg-white/15 transition-all">
               <div className="text-green-300 font-bold text-sm mb-3">STARTER</div>
               <div className="text-5xl font-bold text-white mb-2">€0</div>
@@ -1436,16 +1436,25 @@ export default function LandingPage() {
                 {language === 'ro' ? 'POPULAR' : language === 'it' ? 'POPOLARE' : 'POPULAR'}
               </div>
               <div className="text-yellow-300 font-bold text-sm mb-3">BUSINESS</div>
-              <div className="text-5xl font-bold text-white mb-2">€30</div>
+              <div className="text-5xl font-bold text-white mb-2">€24</div>
               <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : language === 'it' ? '/mese' : '/month'}</div>
             </div>
 
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20 hover:bg-white/15 transition-all">
               <div className="text-blue-300 font-bold text-sm mb-3">PROFESSIONAL</div>
-              <div className="text-5xl font-bold text-white mb-2">€60</div>
+              <div className="text-5xl font-bold text-white mb-2">€48</div>
               <div className="text-purple-200 text-sm">{language === 'ro' ? '/lună' : language === 'it' ? '/mese' : '/month'}</div>
             </div>
           </div>
+
+          {/* Annual billing note */}
+          <p className="text-center text-white/35 text-xs mb-10">
+            {language === 'ro'
+              ? 'Prețuri cu abonament anual · Vezi toate opțiunile mai jos'
+              : language === 'it'
+              ? 'Prezzi con abbonamento annuale · Scopri tutte le opzioni'
+              : 'Annual billing prices · Discover all options below'}
+          </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

@@ -410,6 +410,12 @@ export const translations = {
       installDescription: 'Add to home screen for quick access',
       install: 'Install',
       rewardUnlocked: '🎉 Reward unlocked!',
+      discoverBtn: 'Discover the rewards waiting for you',
+      discoverTitle: 'What you can earn',
+      discoverStamps: 'stamps',
+      discoverFreeProduct: 'Collect {{n}} {{stamps}} and get {{name}} on us',
+      discoverDiscount: 'Every {{n}} {{stamps}} you unlock {{pct}}% off your next order',
+      discoverNoRules: 'No active rewards program for this store yet.',
     },
     // User Dashboard
     userDashboard: {
@@ -1107,6 +1113,12 @@ export const translations = {
       installDescription: 'Adaugă pe ecranul principal pentru acces rapid',
       install: 'Instalează',
       rewardUnlocked: '🎉 Premiu deblocat!',
+      discoverBtn: 'Descoperă recompensele care te așteaptă',
+      discoverTitle: 'Ce poți câștiga',
+      discoverStamps: 'ștampile',
+      discoverFreeProduct: 'La {{n}} {{stamps}}, {{name}} este cadoul tău',
+      discoverDiscount: 'La fiecare {{n}} {{stamps}} primești {{pct}}% reducere',
+      discoverNoRules: 'Niciun program de recompense activ pentru acest magazin.',
     },
 
     // User Dashboard
@@ -1807,6 +1819,12 @@ export const translations = {
       installDescription: 'Aggiungi alla schermata home per accesso rapido',
       install: 'Installa',
       rewardUnlocked: '🎉 Premio sbloccato!',
+      discoverBtn: 'Scopri le ricompense che ti aspettano',
+      discoverTitle: 'Cosa puoi guadagnare',
+      discoverStamps: 'timbri',
+      discoverFreeProduct: 'Raggiungi {{n}} {{stamps}} e {{name}} è in omaggio',
+      discoverDiscount: 'Ogni {{n}} {{stamps}} sblocchi il {{pct}}% di sconto',
+      discoverNoRules: 'Nessun programma ricompense attivo per questo negozio.',
     },
 
     // User Dashboard

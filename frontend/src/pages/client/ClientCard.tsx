@@ -471,84 +471,152 @@ export default function ClientCard() {
             {activeRules.map((rule) => {
               const progress = getRuleProgress(rule.id)
               const stamps = Array.from({ length: rule.buy_count }, (_, i) => i < progress.count)
+              const pct = Math.round((progress.count / rule.buy_count) * 100)
 
               return (
-                <div key={rule.id} className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-bold text-lg text-white">{rule.name}</h3>
-                      {rule.description && (
-                        <p className="text-sm text-gray-300 mt-0.5">{rule.description}</p>
-                      )}
-                    </div>
-                    {progress.rewards > 0 && (
-                      <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 shadow-lg shadow-yellow-500/50 flex-shrink-0 ml-2">
-                        {rule.discount_percent ? (
-                          <span>{rule.discount_percent}% OFF</span>
-                        ) : (
-                          <>
-                            <span>{progress.rewards}</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                            </svg>
-                          </>
+                <div
+                  key={rule.id}
+                  className="relative overflow-hidden rounded-2xl transition-all duration-300"
+                  style={{
+                    background: `
+                      linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0) 60%),
+                      linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.22) 100%)
+                    `.replace(/\s+/g, ' '),
+                    border: `1px solid ${brandColor}35`,
+                    boxShadow: `0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)`,
+                    backdropFilter: 'blur(16px)',
+                  }}
+                >
+                  {/* Subtle top accent line */}
+                  <div
+                    className="absolute top-0 left-0 right-0 h-0.5"
+                    style={{ background: `linear-gradient(90deg, transparent, ${brandColor}90, transparent)` }}
+                  />
+
+                  {/* Ambient glow blob */}
+                  <div
+                    className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-2xl pointer-events-none"
+                    style={{ background: `${brandColor}18` }}
+                  />
+
+                  <div className="relative p-5 sm:p-6">
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-bold text-base text-white leading-tight">{rule.name}</h3>
+                        {rule.description && (
+                          <p className="text-xs text-white/45 mt-0.5">{rule.description}</p>
                         )}
                       </div>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-semibold text-gray-200">
-                        {progress.count} {t.card.of} {rule.buy_count} {t.card.purchases}
-                      </span>
-                      {progress.count > 0 && progress.count < rule.buy_count && (
-                        <span className="text-xs text-primary-300 font-semibold">
-                          {t.card.onlyMore} {rule.buy_count - progress.count}{t.card.moreNeeded}
-                        </span>
+                      {progress.rewards > 0 && (
+                        <div
+                          className="text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 flex-shrink-0 ml-2"
+                          style={{
+                            background: `linear-gradient(135deg, #f59e0b, #d97706)`,
+                            boxShadow: '0 4px 12px rgba(245,158,11,0.45)',
+                          }}
+                        >
+                          {rule.discount_percent ? (
+                            <span>{rule.discount_percent}% OFF</span>
+                          ) : (
+                            <>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                              <span>{progress.rewards}</span>
+                            </>
+                          )}
+                        </div>
                       )}
                     </div>
-                    <div className="flex flex-wrap gap-2">
+
+                    {/* Progress bar */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-white/50">
+                          {progress.count} {t.card.of} {rule.buy_count} {t.card.purchases}
+                        </span>
+                        {progress.count > 0 && progress.count < rule.buy_count && (
+                          <span className="text-xs font-semibold" style={{ color: `${brandColor}` }}>
+                            {t.card.onlyMore} {rule.buy_count - progress.count}{t.card.moreNeeded}
+                          </span>
+                        )}
+                      </div>
+                      <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                        <div
+                          className="h-1.5 rounded-full transition-all duration-700"
+                          style={{
+                            width: `${pct}%`,
+                            background: `linear-gradient(90deg, ${brandColor}a0, ${brandColor})`,
+                            boxShadow: pct > 0 ? `0 0 8px ${brandColor}80` : 'none',
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stamps */}
+                    <div className="flex flex-wrap gap-2.5">
                       {stamps.map((isFilled, index) => (
                         <div
                           key={index}
-                          className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
-                            isFilled
-                              ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/50'
-                              : 'bg-white/10 border border-white/20 text-gray-400'
-                          }`}
+                          className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                          style={isFilled ? {
+                            border: `2px solid ${brandColor}90`,
+                            boxShadow: `0 4px 16px ${brandColor}50, inset 0 1px 0 rgba(255,255,255,0.2)`,
+                          } : {
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1.5px solid rgba(255,255,255,0.12)',
+                          }}
                         >
                           {isFilled ? (
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                            </svg>
+                            tenant?.logo_url ? (
+                              <img
+                                src={tenant.logo_url}
+                                alt=""
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            ) : (
+                              <div
+                                className="w-full h-full rounded-full flex items-center justify-center"
+                                style={{ background: `linear-gradient(135deg, ${brandColor}f0, ${brandColor}a0)` }}
+                              >
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            )
                           ) : (
-                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
-                            </svg>
+                            <span className="text-white/20 text-xs font-bold">{index + 1}</span>
                           )}
                         </div>
                       ))}
                     </div>
-                  </div>
 
-                  {progress.rewards > 0 && (
-                    <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-xl">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-7 h-7 bg-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg className="w-4 h-4 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {/* Reward ready banner */}
+                    {progress.rewards > 0 && (
+                      <div
+                        className="mt-4 p-3 rounded-xl flex items-center gap-3"
+                        style={{
+                          background: 'rgba(34,197,94,0.12)',
+                          border: '1px solid rgba(34,197,94,0.25)',
+                        }}
+                      >
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(34,197,94,0.2)' }}>
+                          <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                           </svg>
                         </div>
-                        <p className="text-sm text-green-900 font-bold">
-                          {rule.discount_percent
-                            ? `${rule.discount_percent}% ${t.clientCard.discountAvailable}`
-                            : `${progress.rewards} ${progress.rewards === 1 ? t.clientCard.rewardAvailable : t.clientCard.rewardsAvailable}`}
-                        </p>
+                        <div>
+                          <p className="text-xs font-bold text-green-300">
+                            {rule.discount_percent
+                              ? `${rule.discount_percent}% ${t.clientCard.discountAvailable}`
+                              : `${progress.rewards} ${progress.rewards === 1 ? t.clientCard.rewardAvailable : t.clientCard.rewardsAvailable}`}
+                          </p>
+                          <p className="text-xs text-green-400/70">{t.clientCard.showCardToRedeem}</p>
+                        </div>
                       </div>
-                      <p className="text-xs text-green-700">{t.clientCard.showCardToRedeem}</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )
             })}

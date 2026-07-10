@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
@@ -38,6 +38,11 @@ export default function RecoveryPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [mode, setMode] = useState<'request' | 'verify'>('request')
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => { if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current) }
+  }, [])
 
   const handleRequestRecovery = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,6 +63,8 @@ export default function RecoveryPage() {
       if (result.success && result.phone_found) {
         setMode('verify')
         setSuccess(t.recovery.checkPhone)
+      } else {
+        setError(t.recovery.phoneNotFound || 'Phone number not found. Please check and try again.')
       }
     } catch (err: any) {
       setError(err.message || t.recovery.requestError)
@@ -117,7 +124,7 @@ export default function RecoveryPage() {
           setSuccess(t.recovery.accountRecovered.replace('{count}', result.cards_count || '0') + mergeInfo)
           
           // Redirect to dashboard after 2 seconds
-          setTimeout(() => {
+          redirectTimerRef.current = setTimeout(() => {
             navigate('/dashboard')
           }, 2000)
         }

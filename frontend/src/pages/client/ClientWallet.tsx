@@ -99,7 +99,8 @@ export default function ClientWallet() {
       )
 
       setCards(cardsWithDetails.filter(c => c !== null) as SavedCard[])
-    } catch (_err) {
+    } catch (err) {
+      console.error('[ClientWallet] loadCards failed:', err)
       setCards([])
     } finally {
       setLoading(false)

@@ -48,6 +48,7 @@ export default function ClientCard() {
   const [tenant, setTenant] = useState<Tenant | null>(null)
   const [rules, setRules] = useState<RewardRule[]>([])
   const [qrDataUrl, setQrDataUrl] = useState<string>('')
+  const [qrError, setQrError] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
   const [showRewardsPanel, setShowRewardsPanel] = useState(false)
@@ -102,7 +103,9 @@ export default function ClientCard() {
             ])
             setRules(rulesData || [])
             setTenant(tenantData)
-          } catch {}
+          } catch (err) {
+            console.warn('[ClientCard] Could not load rules/tenant:', err)
+          }
           setLoading(false)
           return
         }
@@ -113,7 +116,7 @@ export default function ClientCard() {
         }
 
         // Fetch tenant info in parallel (non-blocking)
-        api.getTenant(activeTenantId).then(setTenant).catch(() => {})
+        api.getTenant(activeTenantId).then(setTenant).catch((err) => console.warn('[ClientCard] getTenant failed:', err))
 
         if (clientId) {
           const existingCard = await api.getCardByClientAndTenant(clientId, activeTenantId)
@@ -173,8 +176,11 @@ export default function ClientCard() {
         margin: 2,
         color: { dark: '#000000', light: '#FFFFFF' },
       })
-        .then(setQrDataUrl)
-        .catch(() => {})
+        .then((url) => { setQrDataUrl(url); setQrError(false) })
+        .catch((err) => {
+          console.error('[ClientCard] QR generation failed:', err)
+          setQrError(true)
+        })
     }
   }, [qrCode])
 
@@ -315,6 +321,16 @@ export default function ClientCard() {
                 <span className="text-white/50 text-xs font-mono tracking-wide">{qrCode}</span>
                 <span className="text-white/30 text-xs font-semibold tracking-wider">LOYALCARD</span>
               </div>
+            </div>
+          ) : qrError ? (
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6 text-center">
+              <p className="text-red-300 mb-4">QR code failed to generate. Please refresh the page.</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-white/20 text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/30 transition-colors"
+              >
+                Refresh
+              </button>
             </div>
           ) : (
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6 text-center">

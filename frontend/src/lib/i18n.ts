@@ -444,6 +444,7 @@ export const translations = {
       deleteConfirmWord: 'DELETE',
       deleteConfirmBtn: 'Delete permanently',
       deleteSuccessMsg: 'All your data has been deleted.',
+      retry: 'Retry',
     },
 
     // Account Protection
@@ -1149,6 +1150,7 @@ export const translations = {
       deleteConfirmWord: 'STERG',
       deleteConfirmBtn: 'Șterge definitiv',
       deleteSuccessMsg: 'Toate datele tale au fost șterse.',
+      retry: 'Reîncearcă',
     },
 
     // Account Protection
@@ -1856,6 +1858,7 @@ export const translations = {
       deleteConfirmWord: 'ELIMINA',
       deleteConfirmBtn: 'Elimina definitivamente',
       deleteSuccessMsg: 'Tutti i tuoi dati sono stati eliminati.',
+      retry: 'Riprova',
     },
 
     // Account Protection

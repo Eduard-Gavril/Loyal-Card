@@ -14,6 +14,7 @@ interface GenerateClientResponse {
   client_id?: string
   card_id?: string
   qr_code?: string
+  loyalty_state?: Record<string, any>
   error?: string
 }
 
@@ -115,7 +116,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         success: true,
         client_id: client.id,
         card_id: existingCard.id,
-        qr_code: existingCard.qr_code
+        qr_code: existingCard.qr_code,
+        loyalty_state: existingCard.loyalty_state ?? {}
       }
 
       return new Response(
@@ -157,7 +159,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       success: true,
       client_id: client.id,
       card_id: card.id,
-      qr_code: qr_code
+      qr_code: qr_code,
+      loyalty_state: {}
     }
 
     return new Response(

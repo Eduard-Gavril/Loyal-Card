@@ -87,24 +87,24 @@ export default function ClientCard() {
         const activeTenantId = tenantId || urlTenantId
 
         if (urlQrCode) {
-          const cardData = await api.getCardByQR(urlQrCode)
-          setCard(cardData)
-          setClientData({
-            clientId: cardData.client_id,
-            cardId: cardData.id,
-            qrCode: cardData.qr_code,
-            tenantId: cardData.tenant_id,
-            customName: tenantName || undefined,
-          })
           try {
+            const cardData = await api.getCardByQR(urlQrCode)
+            setCard(cardData)
+            setClientData({
+              clientId: cardData.client_id,
+              cardId: cardData.id,
+              qrCode: cardData.qr_code,
+              tenantId: cardData.tenant_id,
+              customName: tenantName || undefined,
+            })
             const [rulesData, tenantData] = await Promise.all([
-              api.getRewardRules(cardData.tenant_id),
-              api.getTenant(cardData.tenant_id),
+              api.getRewardRules(cardData.tenant_id).catch(() => []),
+              api.getTenant(cardData.tenant_id).catch(() => null),
             ])
             setRules(rulesData || [])
             setTenant(tenantData)
           } catch (err) {
-            console.warn('[ClientCard] Could not load rules/tenant:', err)
+            console.warn('[ClientCard] getCardByQR blocked by RLS, displaying QR from URL:', err)
           }
           setLoading(false)
           return
@@ -139,8 +139,14 @@ export default function ClientCard() {
                 tenantId: activeTenantId,
                 customName: tenantName || undefined,
               })
-              const cardData = await api.getCardByQR(result.qr_code)
-              setCard(cardData)
+              setCard({
+                id: result.card_id!,
+                client_id: result.client_id!,
+                tenant_id: activeTenantId,
+                qr_code: result.qr_code!,
+                loyalty_state: result.loyalty_state || {},
+                active: true,
+              } as CardType)
             }
           }
         } else {
@@ -153,8 +159,14 @@ export default function ClientCard() {
               tenantId: activeTenantId,
               customName: tenantName || undefined,
             })
-            const cardData = await api.getCardByQR(result.qr_code)
-            setCard(cardData)
+            setCard({
+              id: result.card_id!,
+              client_id: result.client_id!,
+              tenant_id: activeTenantId,
+              qr_code: result.qr_code!,
+              loyalty_state: result.loyalty_state || {},
+              active: true,
+            } as CardType)
           }
         }
 
@@ -170,8 +182,9 @@ export default function ClientCard() {
   }, [])
 
   useEffect(() => {
-    if (qrCode) {
-      QRCode.toDataURL(qrCode, {
+    const activeQr = urlQrCode || qrCode
+    if (activeQr) {
+      QRCode.toDataURL(activeQr, {
         width: 300,
         margin: 2,
         color: { dark: '#000000', light: '#FFFFFF' },
@@ -182,7 +195,7 @@ export default function ClientCard() {
           setQrError(true)
         })
     }
-  }, [qrCode])
+  }, [qrCode, urlQrCode])
 
   const getRuleProgress = (ruleId: string) => {
     if (!card?.loyalty_state[ruleId]) return { count: 0, rewards: 0 }
@@ -318,7 +331,7 @@ export default function ClientCard() {
 
               {/* Card footer */}
               <div className="relative bg-black/25 px-6 py-3 flex items-center justify-between">
-                <span className="text-white/50 text-xs font-mono tracking-wide">{qrCode}</span>
+                <span className="text-white/50 text-xs font-mono tracking-wide">{urlQrCode || qrCode}</span>
                 <span className="text-white/30 text-xs font-semibold tracking-wider">LOYALCARD</span>
               </div>
             </div>

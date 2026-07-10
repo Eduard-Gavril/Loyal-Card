@@ -140,19 +140,31 @@ export interface ScanEvent {
   scanned_at: string
 }
 
+// Wraps functions.invoke and extracts the real error message from the response body
+// (the Supabase client otherwise throws a generic "Edge Function returned a non-2xx status code")
+async function invokeEdgeFunction(name: string, body: Record<string, unknown>) {
+  const { data, error } = await supabase.functions.invoke(name, { body })
+  if (error) {
+    try {
+      const responseBody = await (error as any).context?.json?.()
+      if (responseBody?.error) throw new Error(responseBody.error)
+    } catch (e) {
+      if (e instanceof Error && e.message !== error.message) throw e
+    }
+    throw error
+  }
+  if (data && !data.success && data.error) throw new Error(data.error)
+  return data
+}
+
 // API helper functions
 export const api = {
   // Generate anonymous client ID via Edge Function
   async generateClientId(tenantId: string, existingClientId?: string) {
-    // This is called by anonymous users (no auth needed)
-    const { data, error } = await supabase.functions.invoke('generate-client-id', {
-      body: { 
-        tenant_id: tenantId,
-        client_id: existingClientId // Pass existing client_id if user already has cards
-      }
+    return invokeEdgeFunction('generate-client-id', {
+      tenant_id: tenantId,
+      client_id: existingClientId
     })
-    if (error) throw error
-    return data
   },
 
   // Register scan
@@ -538,12 +550,7 @@ export const api = {
 
   // Link phone number to client for recovery (with PIN and backup codes)
   async deleteAccount(clientId: string) {
-    const { data, error } = await supabase.functions.invoke('delete-account', {
-      body: { client_id: clientId },
-    })
-    if (error) throw error
-    if (data && !data.success) throw new Error(data.error || 'Failed to delete account')
-    return data
+    return invokeEdgeFunction('delete-account', { client_id: clientId })
   },
 
   async updateClientName(clientId: string, name: string) {
@@ -567,24 +574,7 @@ export const api = {
   },
 
   async linkPhone(clientId: string, phone: string, pin: string, name?: string) {
-    // This is called by anonymous users (no auth needed)
-    const invocationPromise = supabase.functions.invoke('link-phone', {
-      body: { client_id: clientId, phone, pin, ...(name ? { name } : {}) }
-    })
-    
-    const result = await Promise.race([
-      invocationPromise,
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
-      )
-    ]) as any
-    
-    const { data, error } = result
-    if (error) throw error
-    if (data && !data.success) {
-      throw new Error(data.error || 'Failed to link phone')
-    }
-    return data  // Returns { success: true, backup_codes: ['XXX-XXX', ...] }
+    return invokeEdgeFunction('link-phone', { client_id: clientId, phone, pin, ...(name ? { name } : {}) })
   },
 
   // Get client by ID
@@ -610,53 +600,17 @@ export const api = {
     return data
   },
 
-  // Request account recovery (checks if phone exists)
   async requestRecovery(phone: string) {
-    // This is called by anonymous users (no auth needed)
-    const invocationPromise = supabase.functions.invoke('recover-client', {
-      body: { action: 'request', phone }
-    })
-    
-    const result = await Promise.race([
-      invocationPromise,
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
-      )
-    ]) as any
-    
-    const { data, error } = result
-    if (error) throw error
-    if (data && !data.success) {
-      throw new Error(data.error || 'Recovery request failed')
-    }
-    return data
+    return invokeEdgeFunction('recover-client', { action: 'request', phone })
   },
 
-  // Verify recovery with PIN or backup code
   async verifyRecovery(phone: string, pin?: string, backupCode?: string, newClientId?: string) {
-    // This is called by anonymous users (no auth needed)
-    const invocationPromise = supabase.functions.invoke('recover-client', {
-      body: { 
-        action: 'verify', 
-        phone,
-        pin,
-        backup_code: backupCode,
-        new_client_id: newClientId 
-      }
+    return invokeEdgeFunction('recover-client', {
+      action: 'verify',
+      phone,
+      pin,
+      backup_code: backupCode,
+      new_client_id: newClientId
     })
-    
-    const result = await Promise.race([
-      invocationPromise,
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
-      )
-    ]) as any
-    
-    const { data, error } = result
-    if (error) throw error
-    if (data && !data.success) {
-      throw new Error(data.error || 'Recovery verification failed')
-    }
-    return data
   }
 }

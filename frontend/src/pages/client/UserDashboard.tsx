@@ -13,6 +13,7 @@ export default function UserDashboard() {
   const { clientId, language, clearAll } = useClientStore()
   const t = getTranslation(language)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [cardCount, setCardCount] = useState(0)
   const [totalStamps, setTotalStamps] = useState(0)
   const [totalRewards, setTotalRewards] = useState(0)
@@ -86,6 +87,7 @@ export default function UserDashboard() {
 
   const loadStats = async () => {
     setLoading(true)
+    setLoadError('')
     try {
       if (!clientId) {
         setCardCount(0)
@@ -96,12 +98,12 @@ export default function UserDashboard() {
         return
       }
 
-      // Check if client has phone and name
       const client = await api.getClient(clientId)
       setHasPhone(!!client?.phone)
       setClientName(client?.name || '')
 
       const allCards = await api.getCardsByClient(clientId)
+      console.debug('[dashboard] clientId:', clientId, '| cards found:', allCards.length)
       setCardCount(allCards.length)
 
       let stamps = 0
@@ -117,8 +119,9 @@ export default function UserDashboard() {
 
       setTotalStamps(stamps)
       setTotalRewards(rewards)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading stats:', error)
+      setLoadError(error?.message || 'Failed to load profile data')
     }
     setLoading(false)
   }
@@ -253,6 +256,19 @@ export default function UserDashboard() {
                 {t.userDashboard.subtitle}
               </p>
             </div>
+
+            {/* Load error banner */}
+            {loadError && (
+              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-400/20 flex items-center justify-between gap-3">
+                <p className="text-red-300 text-sm">{loadError}</p>
+                <button
+                  onClick={loadStats}
+                  className="text-xs text-white bg-red-500/30 hover:bg-red-500/50 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                >
+                  {t.userDashboard.retry || 'Retry'}
+                </button>
+              </div>
+            )}
 
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-3 mb-6 sm:mb-8">

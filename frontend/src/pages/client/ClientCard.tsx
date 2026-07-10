@@ -157,8 +157,8 @@ export default function ClientCard() {
 
         const rulesData = await api.getRewardRules(activeTenantId)
         setRules(rulesData)
-      } catch {
-        // silently handled
+      } catch (err) {
+        console.error('[ClientCard] init error:', err)
       } finally {
         setLoading(false)
       }

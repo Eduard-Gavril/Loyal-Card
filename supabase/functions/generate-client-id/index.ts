@@ -138,7 +138,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         client_id: client.id,
         tenant_id: tenant_id,
         qr_code: qr_code,
-        loyalty_state: {}
+        loyalty_state: {},
+        active: true
       })
       .select()
       .single()

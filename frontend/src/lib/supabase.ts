@@ -329,7 +329,7 @@ export const api = {
   async getCardByQR(qrCode: string) {
     const queryPromise = supabase
       .from('cards')
-      .select('*, clients(*)')
+      .select('*')
       .eq('qr_code', qrCode)
       .single()
     
@@ -349,24 +349,25 @@ export const api = {
   async getCardByClientAndTenant(clientId: string, tenantId: string) {
     const queryPromise = supabase
       .from('cards')
-      .select('*, clients(*)')
+      .select('*')
       .eq('client_id', clientId)
       .eq('tenant_id', tenantId)
       .single()
-    
+
     const result = await Promise.race([
       queryPromise,
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
       )
     ]) as any
-    
+
     const { data, error } = result
-    
+
     if (error) {
-      // If not found, return null instead of throwing
       if (error.code === 'PGRST116') return null
-      throw error
+      // Treat any DB/RLS error as "not found" so the caller can create a new card
+      console.warn('[getCardByClientAndTenant] error:', error.message || error)
+      return null
     }
     return data
   },
@@ -375,9 +376,8 @@ export const api = {
   async getCardsByClient(clientId: string) {
     const queryPromise = supabase
       .from('cards')
-      .select('*, clients(*)')
+      .select('*')
       .eq('client_id', clientId)
-      .eq('active', true)
     
     const result = await Promise.race([
       queryPromise,
@@ -594,8 +594,9 @@ export const api = {
     
     const { data, error } = result
     if (error) {
-      if (error.code === 'PGRST116') return null
-      throw error
+      // Return null for any error (not-found, RLS block, 406) so callers degrade gracefully
+      console.warn('[getClient] error:', error.message || error)
+      return null
     }
     return data
   },

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  View, Text, TouchableOpacity, StyleSheet, FlatList,
+  View, Text, TouchableOpacity, StyleSheet,
   Alert, ActivityIndicator, ScrollView,
 } from 'react-native'
 import { useRouter } from 'expo-router'
@@ -9,7 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { CameraView, Camera } from 'expo-camera'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { supabase } from '@/lib/supabase'
+import { api, supabase } from '@/lib/supabase'
+import { colors, radius, shadows } from '@/theme'
 
 interface Product {
   id: string
@@ -136,10 +137,7 @@ export default function AdminScannerScreen() {
     try {
       for (const item of cart) {
         for (let i = 0; i < item.qty; i++) {
-          const { data, error } = await supabase.functions.invoke('register-scan', {
-            body: { qr_code: scannedQr, product_id: item.product.id },
-          })
-          if (error) throw error
+          const data = await api.registerScan(scannedQr, item.product.id)
           if (data?.reward_earned) {
             rewarded.push(`🎁 ${data.reward_earned.rule_name} (×${data.reward_earned.reward_count})`)
           }
@@ -166,10 +164,7 @@ export default function AdminScannerScreen() {
   async function handleRedeem(ruleId: string, ruleName: string) {
     setRedeemLoading(true)
     try {
-      const { data, error } = await supabase.functions.invoke('redeem-reward', {
-        body: { qr_code: scannedQr, reward_rule_id: ruleId },
-      })
-      if (error) throw error
+      const data = await api.redeemReward(scannedQr, ruleId)
       Alert.alert(
         `✅ ${ruleName}`,
         `${a.availableLabel}: ${data.remaining_rewards ?? 0}`
@@ -199,7 +194,6 @@ export default function AdminScannerScreen() {
           onBarcodeScanned={handleBarcode}
         />
         <SafeAreaView style={{ flex: 1 }}>
-          {/* Close button — properly below notch */}
           <View style={s.cameraTopBar}>
             <TouchableOpacity
               style={s.cameraClose}
@@ -209,7 +203,6 @@ export default function AdminScannerScreen() {
               <Ionicons name="close" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
-          {/* Scan frame centered */}
           <View style={s.cameraCenter}>
             <View style={s.scanFrame} />
             <Text style={s.scanHint}>{a.scanHint}</Text>
@@ -230,7 +223,7 @@ export default function AdminScannerScreen() {
       <SafeAreaView style={s.safe}>
         <View style={s.header}>
           <TouchableOpacity style={s.backBtn} onPress={() => setMode('cart')}>
-            <Ionicons name="chevron-back" size={22} color="#fff" />
+            <Ionicons name="chevron-back" size={22} color={colors.ink} />
             <Text style={s.backText}>{t.back}</Text>
           </TouchableOpacity>
           <Text style={s.headerTitle}>{a.redeemRewardTitle}</Text>
@@ -239,7 +232,7 @@ export default function AdminScannerScreen() {
         <ScrollView contentContainerStyle={s.body}>
           {redeemableRules.length === 0 ? (
             <View style={s.emptyBox}>
-              <Ionicons name="gift-outline" size={48} color="#374151" />
+              <Ionicons name="gift-outline" size={48} color={colors.inkFaint} />
               <Text style={s.emptyText}>{a.noRewardsMsg}</Text>
             </View>
           ) : redeemableRules.map((r) => {
@@ -274,7 +267,7 @@ export default function AdminScannerScreen() {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>{a.scanCard}</Text>
@@ -284,8 +277,10 @@ export default function AdminScannerScreen() {
       <ScrollView contentContainerStyle={s.body}>
         {/* Result banner */}
         {result && (
-          <View style={result.rewarded.length > 0 ? s.resultBannerGold : s.resultBannerGreen}>
-            <Text style={s.resultMsg}>{result.message}</Text>
+          <View style={result.rewarded.length > 0 ? s.resultBannerReward : s.resultBannerOk}>
+            <Text style={[s.resultMsg, result.rewarded.length > 0 && { color: colors.onNight }]}>
+              {result.message}
+            </Text>
             {result.rewarded.map((r) => <Text key={r} style={s.resultReward}>{r}</Text>)}
             <TouchableOpacity style={s.newScanBtn} onPress={startScan}>
               <Text style={s.newScanText}>{a.newScan}</Text>
@@ -319,10 +314,12 @@ export default function AdminScannerScreen() {
         ) : (
           <TouchableOpacity style={s.scanPrompt} onPress={startScan} disabled={cardLoading}>
             {cardLoading ? (
-              <ActivityIndicator size="large" color="#7c3aed" />
+              <ActivityIndicator size="large" color={colors.primary} />
             ) : (
               <>
-                <Ionicons name="qr-code-outline" size={56} color="#a78bfa" />
+                <View style={s.scanIconWrap}>
+                  <Ionicons name="qr-code-outline" size={44} color={colors.primary} />
+                </View>
                 <Text style={s.scanPromptTitle}>{a.scanCardTitle}</Text>
                 <Text style={s.scanPromptSub}>{a.scanCardSub}</Text>
               </>
@@ -335,7 +332,7 @@ export default function AdminScannerScreen() {
           <>
             <Text style={s.sectionLabel}>{a.selectProductsLabel}</Text>
             {productsLoading ? (
-              <ActivityIndicator color="#7c3aed" style={{ margin: 20 }} />
+              <ActivityIndicator color={colors.primary} style={{ margin: 20 }} />
             ) : products.length === 0 ? (
               <View style={s.emptyBox}>
                 <Text style={s.emptyText}>{a.noProductsMsg}</Text>
@@ -373,11 +370,11 @@ export default function AdminScannerScreen() {
                     <Text style={s.cartEmoji}>{item.product.metadata?.emoji ?? '🛍️'}</Text>
                     <Text style={s.cartName}>{item.product.name}</Text>
                     <TouchableOpacity style={s.cartMinus} onPress={() => removeFromCart(item.product.id)}>
-                      <Ionicons name="remove" size={14} color="#f87171" />
+                      <Ionicons name="remove" size={14} color={colors.danger} />
                     </TouchableOpacity>
                     <Text style={s.cartQty}>×{item.qty}</Text>
                     <TouchableOpacity style={s.cartPlus} onPress={() => addToCart(item.product)}>
-                      <Ionicons name="add" size={14} color="#10b981" />
+                      <Ionicons name="add" size={14} color={colors.success} />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -395,7 +392,7 @@ export default function AdminScannerScreen() {
 
             {/* Scan again */}
             <TouchableOpacity style={s.reScanBtn} onPress={startScan}>
-              <Ionicons name="refresh-outline" size={16} color="#a78bfa" />
+              <Ionicons name="refresh-outline" size={16} color={colors.primary} />
               <Text style={s.reScanText}>{a.scanAnotherCard}</Text>
             </TouchableOpacity>
           </>
@@ -406,19 +403,18 @@ export default function AdminScannerScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
-  backText: { color: '#fff', fontSize: 15 },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
-  body: { padding: 16, gap: 16, paddingBottom: 40 },
-
-  // Camera overlay — restructured for reliable close button
-  cameraTopBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 16,
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
   },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  headerTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' },
+  body: { padding: 20, gap: 16, paddingBottom: 40 },
+
+  // Camera overlay
+  cameraTopBar: { flexDirection: 'row', justifyContent: 'flex-end', padding: 16 },
   cameraClose: {
     width: 48, height: 48, borderRadius: 24,
     backgroundColor: 'rgba(0,0,0,0.65)',
@@ -426,63 +422,141 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   cameraCenter: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 20 },
-  scanFrame: { width: 240, height: 240, borderWidth: 3, borderColor: '#7c3aed', borderRadius: 16 },
-  scanHint: { color: '#fff', fontWeight: '600', backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10 },
+  scanFrame: { width: 240, height: 240, borderWidth: 3, borderColor: colors.violet, borderRadius: radius.lg },
+  scanHint: {
+    color: '#fff', fontWeight: '600',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: radius.sm,
+  },
 
-  resultBannerGreen: { backgroundColor: 'rgba(5,150,105,0.2)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(5,150,105,0.4)', gap: 6 },
-  resultBannerGold: { backgroundColor: 'rgba(217,119,6,0.2)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(217,119,6,0.4)', gap: 6 },
-  resultMsg: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  resultReward: { color: '#fbbf24', fontWeight: '600', fontSize: 14 },
-  newScanBtn: { marginTop: 8, alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 7, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 10 },
-  newScanText: { color: '#fff', fontWeight: '600', fontSize: 13 },
+  resultBannerOk: {
+    backgroundColor: colors.successSoft, borderRadius: radius.lg,
+    padding: 16, borderWidth: 1, borderColor: colors.successBorder, gap: 6,
+  },
+  resultBannerReward: {
+    backgroundColor: colors.night, borderRadius: radius.lg,
+    padding: 16, gap: 6,
+    ...shadows.night,
+  },
+  resultMsg: { color: colors.ink, fontWeight: '700', fontSize: 16 },
+  resultReward: { color: colors.violetLight, fontWeight: '700', fontSize: 14 },
+  newScanBtn: {
+    marginTop: 8, alignSelf: 'flex-start',
+    paddingHorizontal: 14, paddingVertical: 8,
+    backgroundColor: colors.primary, borderRadius: radius.sm,
+  },
+  newScanText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
-  customerCard: { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 14 },
+  customerCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14,
+    ...shadows.card,
+  },
   customerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatarWrap: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(124,58,237,0.3)', alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { color: '#a78bfa', fontSize: 20, fontWeight: '800' },
-  customerName: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  customerPhone: { color: '#6b7280', fontSize: 12, marginTop: 2 },
+  avatarWrap: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarLetter: { color: colors.primary, fontSize: 20, fontWeight: '800' },
+  customerName: { color: colors.ink, fontWeight: '700', fontSize: 16 },
+  customerPhone: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
   customerStats: { alignItems: 'center' },
-  statNum: { color: '#fff', fontSize: 20, fontWeight: '800' },
-  statLbl: { color: '#6b7280', fontSize: 11 },
-  redeemPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#d97706', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  statNum: { color: colors.ink, fontSize: 20, fontWeight: '800' },
+  statLbl: { color: colors.inkSoft, fontSize: 11 },
+  redeemPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: colors.primary, borderRadius: radius.sm,
+    paddingHorizontal: 10, paddingVertical: 6,
+  },
   redeemPillText: { color: '#fff', fontWeight: '700', fontSize: 12 },
 
-  scanPrompt: { alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 24, borderWidth: 2, borderColor: 'rgba(167,139,250,0.3)', borderStyle: 'dashed', padding: 40 },
-  scanPromptTitle: { color: '#fff', fontSize: 18, fontWeight: '700' },
-  scanPromptSub: { color: '#6b7280', fontSize: 13 },
+  scanPrompt: {
+    alignItems: 'center', justifyContent: 'center', gap: 10,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: 2, borderColor: colors.primaryBorder, borderStyle: 'dashed',
+    padding: 40,
+  },
+  scanIconWrap: {
+    width: 84, height: 84, borderRadius: 42,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 4,
+  },
+  scanPromptTitle: { color: colors.ink, fontSize: 18, fontWeight: '700' },
+  scanPromptSub: { color: colors.inkSoft, fontSize: 13 },
 
-  sectionLabel: { color: '#7c6faa', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
+  sectionLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
   productGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  productCard: { width: '30%', flexGrow: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 12, gap: 4, position: 'relative' },
-  productCardActive: { borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.2)' },
+  productCard: {
+    width: '30%', flexGrow: 1, alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    padding: 12, gap: 4, position: 'relative',
+    ...shadows.card,
+  },
+  productCardActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft, borderWidth: 1.5 },
   productEmoji: { fontSize: 28 },
-  productName: { color: '#fff', fontWeight: '600', fontSize: 12, textAlign: 'center' },
-  productPrice: { color: '#6b7280', fontSize: 11 },
-  qtyBadge: { position: 'absolute', top: 6, right: 6, backgroundColor: '#7c3aed', borderRadius: 8, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  productName: { color: colors.ink, fontWeight: '600', fontSize: 12, textAlign: 'center' },
+  productPrice: { color: colors.inkSoft, fontSize: 11 },
+  qtyBadge: {
+    position: 'absolute', top: 6, right: 6,
+    backgroundColor: colors.primary, borderRadius: 8,
+    minWidth: 18, height: 18,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4,
+  },
   qtyText: { color: '#fff', fontSize: 10, fontWeight: '800' },
 
-  cartBox: { backgroundColor: 'rgba(124,58,237,0.1)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(124,58,237,0.3)', padding: 14, gap: 10 },
-  cartTitle: { color: '#a78bfa', fontWeight: '700', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.8 },
+  cartBox: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.primaryBorder,
+    padding: 14, gap: 10,
+  },
+  cartTitle: { color: colors.primary, fontWeight: '700', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.8 },
   cartRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   cartEmoji: { fontSize: 18 },
-  cartName: { flex: 1, color: '#fff', fontSize: 14 },
-  cartMinus: { width: 26, height: 26, borderRadius: 8, backgroundColor: 'rgba(248,113,113,0.2)', alignItems: 'center', justifyContent: 'center' },
-  cartPlus: { width: 26, height: 26, borderRadius: 8, backgroundColor: 'rgba(16,185,129,0.2)', alignItems: 'center', justifyContent: 'center' },
-  cartQty: { color: '#fff', fontWeight: '700', fontSize: 15, width: 28, textAlign: 'center' },
-  confirmBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#7c3aed', borderRadius: 14, paddingVertical: 13, marginTop: 4 },
+  cartName: { flex: 1, color: colors.ink, fontSize: 14, fontWeight: '500' },
+  cartMinus: {
+    width: 26, height: 26, borderRadius: 8,
+    backgroundColor: colors.dangerSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  cartPlus: {
+    width: 26, height: 26, borderRadius: 8,
+    backgroundColor: colors.successSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  cartQty: { color: colors.ink, fontWeight: '700', fontSize: 15, width: 28, textAlign: 'center' },
+  confirmBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: colors.primary, borderRadius: radius.md,
+    paddingVertical: 13, marginTop: 4,
+    ...shadows.primaryBtn,
+  },
   confirmBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
   reScanBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  reScanText: { color: '#a78bfa', fontWeight: '600', fontSize: 13 },
+  reScanText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
 
   emptyBox: { alignItems: 'center', gap: 8, paddingVertical: 20 },
-  emptyText: { color: '#6b7280', fontSize: 13, textAlign: 'center' },
-  redeemRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 14, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  emptyText: { color: colors.inkSoft, fontSize: 13, textAlign: 'center' },
+  redeemRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, padding: 14, gap: 12,
+    borderWidth: 1, borderColor: colors.border,
+    ...shadows.card,
+  },
   redeemInfo: { flex: 1 },
-  redeemName: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  redeemCount: { color: '#d97706', fontSize: 12, marginTop: 2 },
-  redeemBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#d97706', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 9 },
+  redeemName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
+  redeemCount: { color: colors.primary, fontSize: 12, marginTop: 2, fontWeight: '600' },
+  redeemBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: colors.primary, borderRadius: radius.sm,
+    paddingHorizontal: 14, paddingVertical: 9,
+  },
   redeemBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   btnDisabled: { opacity: 0.6 },
 })

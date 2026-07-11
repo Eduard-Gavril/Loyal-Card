@@ -1,12 +1,46 @@
 import { useEffect, useState, useRef } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Share, Animated, Easing } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Animated, Easing } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import QRCode from 'react-native-qrcode-svg'
-import { api } from '@/lib/supabase'
+import { api, RewardRule } from '@/lib/supabase'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
+import { colors, radius, shadows } from '@/theme'
+
+// Strips "gratuit/gratuito/gratis/free" variants from the reward name so it
+// reads naturally inside the "Collect N stamps and get X on us" sentence.
+function cleanRuleName(name: string): string {
+  return name
+    .replace(/\b(gratuit[ăa]?|gratuito|gratis|free|gratu[iī]t)\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+function RuleTagline({ rule, t }: { rule: RewardRule; t: ReturnType<typeof getTranslation> }) {
+  const stampsWord = t.card.discoverStamps
+
+  if (rule.discount_percent) {
+    const text = t.card.discoverDiscount
+      .replace('{{n}}', String(rule.buy_count))
+      .replace('{{stamps}}', stampsWord)
+      .replace('{{pct}}', String(rule.discount_percent))
+    return <Text style={s.offerTagline}>{text}</Text>
+  }
+
+  const tpl = t.card.discoverFreeProduct
+    .replace('{{n}}', String(rule.buy_count))
+    .replace('{{stamps}}', stampsWord)
+  const [before, after] = tpl.split('{{name}}')
+  return (
+    <Text style={s.offerTagline}>
+      {before}
+      <Text style={s.offerTaglineStrong}>{cleanRuleName(rule.name)}</Text>
+      {after ?? ''}
+    </Text>
+  )
+}
 
 export default function CardScreen() {
   const router = useRouter()
@@ -17,6 +51,8 @@ export default function CardScreen() {
   const [loading, setLoading] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [rules, setRules] = useState<RewardRule[]>([])
+  const [showOffers, setShowOffers] = useState(false)
   const qrScale = useRef(new Animated.Value(0.6)).current
   const qrOpacity = useRef(new Animated.Value(0)).current
 
@@ -29,6 +65,11 @@ export default function CardScreen() {
       generateCard()
     }
   }, [])
+
+  useEffect(() => {
+    if (!tenantId) return
+    api.getRewardRules(tenantId).then(setRules).catch(() => {})
+  }, [tenantId])
 
   useEffect(() => {
     if (qrCode) {
@@ -60,105 +101,245 @@ export default function CardScreen() {
     }
   }
 
-  async function handleShare() {
-    if (!qrCode) return
-    try {
-      await Share.share({ message: `Il mio codice LoyalCard: ${qrCode}` })
-    } catch {}
-  }
-
   return (
     <SafeAreaView style={s.safe}>
       {/* Header */}
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle} numberOfLines={1}>{tenantName ?? 'LoyalCard'}</Text>
-        {qrCode ? (
-          <TouchableOpacity style={s.shareBtn} onPress={handleShare}>
-            <Ionicons name="share-outline" size={22} color="#a78bfa" />
-          </TouchableOpacity>
-        ) : <View style={{ width: 40 }} />}
+        <View style={{ width: 80 }} />
       </View>
 
-      <View style={s.body}>
-        {loading ? (
-          <>
-            <ActivityIndicator size="large" color="#7c3aed" />
-            <Text style={s.loadingText}>{t.card.generating}</Text>
-          </>
-        ) : error ? (
-          <View style={s.errorBox}>
-            <Text style={{ fontSize: 48 }}>⚠️</Text>
-            <Text style={s.errorText}>{error}</Text>
-            <TouchableOpacity style={s.retryBtn} onPress={generateCard}>
-              <Ionicons name="refresh-outline" size={18} color="#fff" />
-              <Text style={s.retryText}>{t.card.retry}</Text>
-            </TouchableOpacity>
+      {loading ? (
+        <View style={s.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={s.loadingText}>{t.card.generating}</Text>
+        </View>
+      ) : error ? (
+        <View style={s.center}>
+          <View style={s.errorIconWrap}>
+            <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
           </View>
-        ) : qrCode ? (
-          <>
-            {/* Card */}
-            <Animated.View style={[s.cardBox, { opacity: qrOpacity, transform: [{ scale: qrScale }] }]}>
-              <Text style={s.cardLabel}>{tenantName ?? 'LoyalCard'}</Text>
-              <View style={s.qrWrap}>
-                <QRCode
-                  value={qrCode}
-                  size={200}
-                  backgroundColor="#FFFFFF"
-                  color="#000000"
-                />
-              </View>
-              <Text style={s.cardId} numberOfLines={1}>#{qrCode.slice(0, 16)}...</Text>
-            </Animated.View>
+          <Text style={s.errorText}>{error}</Text>
+          <TouchableOpacity style={s.retryBtn} onPress={generateCard}>
+            <Ionicons name="refresh-outline" size={18} color="#fff" />
+            <Text style={s.retryText}>{t.card.retry}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : qrCode ? (
+        <ScrollView contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>
+          {/* Night loyalty card */}
+          <Animated.View style={[s.cardBox, { opacity: qrOpacity, transform: [{ scale: qrScale }] }]}>
+            <View style={s.cardBlob1} pointerEvents="none" />
+            <View style={s.cardBlob2} pointerEvents="none" />
 
-            {/* Instructions */}
-            <View style={s.infoBox}>
-              <Ionicons name="information-circle-outline" size={18} color="#a78bfa" />
-              <Text style={s.infoText}>{t.card.instructions}</Text>
+            <View style={s.cardHeader}>
+              <Text style={s.cardBrand}>LOYALCARD</Text>
+              <Text style={s.cardLabel} numberOfLines={1}>{tenantName ?? ''}</Text>
             </View>
 
-            {/* Dashboard button */}
-            <TouchableOpacity style={s.dashBtn} onPress={() => router.push('/(tabs)/dashboard')}>
-              <Ionicons name="grid-outline" size={18} color="#fff" />
-              <Text style={s.dashBtnText}>{t.myDashboard}</Text>
-            </TouchableOpacity>
+            <View style={s.qrWrap}>
+              <QRCode
+                value={qrCode}
+                size={196}
+                backgroundColor="#FFFFFF"
+                color={colors.night}
+              />
+            </View>
 
-            <TouchableOpacity style={s.backToListBtn} onPress={() => router.push('/(tabs)/')}>
-              <Ionicons name="compass-outline" size={18} color="#a78bfa" />
-              <Text style={s.backToListText}>{t.discoverPartners}</Text>
-            </TouchableOpacity>
-          </>
-        ) : null}
-      </View>
+            <Text style={s.cardId} selectable>{qrCode}</Text>
+          </Animated.View>
+
+          {/* Instructions */}
+          <View style={s.infoBox}>
+            <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
+            <Text style={s.infoText}>{t.card.instructions}</Text>
+          </View>
+
+          {/* Offers accordion */}
+          {rules.length > 0 && (
+            <View style={s.offersSection}>
+              <TouchableOpacity
+                style={s.offersToggle}
+                onPress={() => setShowOffers((v) => !v)}
+                activeOpacity={0.8}
+              >
+                <View style={s.offersToggleIconWrap}>
+                  <Ionicons name="pricetags-outline" size={18} color={colors.primary} />
+                </View>
+                <Text style={s.offersToggleTitle}>{t.card.discoverBtn}</Text>
+                <View style={s.offersCountBadge}>
+                  <Text style={s.offersCountText}>{rules.length}</Text>
+                </View>
+                <Ionicons
+                  name={showOffers ? 'chevron-up' : 'chevron-down'}
+                  size={18}
+                  color={colors.inkFaint}
+                />
+              </TouchableOpacity>
+
+              {showOffers && (
+                <View style={s.offersList}>
+                  <Text style={s.offersListLabel}>{t.card.discoverTitle}</Text>
+                  {rules.map((rule, idx) => (
+                    <View
+                      key={rule.id}
+                      style={[s.offerRow, idx < rules.length - 1 && s.offerRowBorder]}
+                    >
+                      <View style={s.offerBadge}>
+                        <Text style={s.offerBadgeText}>{rule.buy_count}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <RuleTagline rule={rule} t={t} />
+                        {rule.description ? (
+                          <Text style={s.offerDesc}>{rule.description}</Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Actions */}
+          <TouchableOpacity style={s.dashBtn} onPress={() => router.push('/(tabs)/dashboard')}>
+            <Ionicons name="wallet-outline" size={18} color="#fff" />
+            <Text style={s.dashBtnText}>{t.myDashboard}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={s.backToListBtn} onPress={() => router.push('/(tabs)/')}>
+            <Ionicons name="compass-outline" size={18} color={colors.primary} />
+            <Text style={s.backToListText}>{t.discoverPartners}</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      ) : null}
     </SafeAreaView>
   )
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 70 },
-  backText: { color: '#fff', fontSize: 15 },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'center' },
-  shareBtn: { width: 40, alignItems: 'flex-end' },
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, gap: 16 },
-  loadingText: { color: '#a78bfa', marginTop: 12, fontSize: 14 },
-  errorBox: { alignItems: 'center', gap: 12 },
-  errorText: { color: '#f87171', textAlign: 'center', fontSize: 14 },
-  retryBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#7c3aed', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12 },
-  retryText: { color: '#fff', fontWeight: '600' },
-  cardBox: { backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', padding: 28, alignItems: 'center', gap: 16, width: '100%' },
-  cardLabel: { color: '#fff', fontSize: 20, fontWeight: '800' },
-  qrWrap: { padding: 16, backgroundColor: '#FFFFFF', borderRadius: 16 },
-  cardHint: { color: '#a78bfa', fontSize: 14, fontWeight: '600' },
-  cardId: { color: '#4b5563', fontSize: 11 },
-  infoBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(124,58,237,0.15)', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', width: '100%' },
-  infoText: { color: '#c4b5fd', fontSize: 13, flex: 1 },
-  dashBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#4f46e5', paddingHorizontal: 24, paddingVertical: 13, borderRadius: 14, width: '100%', justifyContent: 'center' },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+  },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  headerTitle: { color: colors.ink, fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'center' },
+
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, gap: 14 },
+  loadingText: { color: colors.inkSoft, marginTop: 4, fontSize: 14 },
+
+  errorIconWrap: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: colors.dangerSoft,
+    borderWidth: 1, borderColor: colors.dangerBorder,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  errorText: { color: colors.inkMid, textAlign: 'center', fontSize: 14, lineHeight: 20 },
+  retryBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 22, paddingVertical: 11, borderRadius: radius.md,
+    ...shadows.primaryBtn,
+  },
+  retryText: { color: '#fff', fontWeight: '700' },
+
+  body: {
+    flexGrow: 1, alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 24, paddingVertical: 20, gap: 16,
+  },
+
+  // Night card
+  cardBox: {
+    backgroundColor: colors.night,
+    borderRadius: 28,
+    padding: 26,
+    alignItems: 'center',
+    gap: 18,
+    width: '100%',
+    overflow: 'hidden',
+    ...shadows.night,
+  },
+  cardBlob1: { position: 'absolute', top: -80, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(124,58,237,0.35)' },
+  cardBlob2: { position: 'absolute', bottom: -100, left: -70, width: 240, height: 240, borderRadius: 120, backgroundColor: 'rgba(124,58,237,0.15)' },
+  cardHeader: { alignItems: 'center', gap: 4 },
+  cardBrand: { color: colors.onNightSoft, fontSize: 11, fontWeight: '800', letterSpacing: 3 },
+  cardLabel: { color: colors.onNight, fontSize: 21, fontWeight: '800', letterSpacing: -0.3 },
+  qrWrap: {
+    padding: 16, backgroundColor: '#FFFFFF', borderRadius: radius.lg,
+  },
+  cardId: {
+    color: colors.onNightSoft, fontSize: 13, fontFamily: 'monospace',
+    letterSpacing: 1, textAlign: 'center',
+  },
+
+  infoBox: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.md, padding: 12,
+    borderWidth: 1, borderColor: colors.primaryBorder,
+    width: '100%',
+  },
+  infoText: { color: colors.inkMid, fontSize: 13, flex: 1, lineHeight: 18 },
+
+  // Offers accordion
+  offersSection: { width: '100%' },
+  offersToggle: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    paddingHorizontal: 14, paddingVertical: 13,
+    ...shadows.card,
+  },
+  offersToggleIconWrap: {
+    width: 34, height: 34, borderRadius: radius.sm,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  offersToggleTitle: { flex: 1, color: colors.ink, fontWeight: '700', fontSize: 13.5, lineHeight: 18 },
+  offersCountBadge: {
+    minWidth: 22, height: 22, borderRadius: 11,
+    backgroundColor: colors.primary,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
+  },
+  offersCountText: { color: '#fff', fontSize: 11, fontWeight: '800' },
+
+  offersList: {
+    marginTop: 8,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14,
+    ...shadows.card,
+  },
+  offersListLabel: {
+    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8,
+  },
+  offerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 10 },
+  offerRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+  offerBadge: {
+    width: 30, height: 30, borderRadius: radius.sm,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1,
+  },
+  offerBadgeText: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  offerTagline: { color: colors.inkMid, fontSize: 13.5, lineHeight: 19 },
+  offerTaglineStrong: { color: colors.ink, fontWeight: '700' },
+  offerDesc: { color: colors.inkFaint, fontSize: 12, marginTop: 3 },
+
+  dashBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24, paddingVertical: 14, borderRadius: radius.lg,
+    width: '100%', justifyContent: 'center',
+    ...shadows.primaryBtn,
+  },
   dashBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  backToListBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center' },
-  backToListText: { color: '#a78bfa', fontWeight: '600', fontSize: 14 },
+  backToListBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center', paddingVertical: 4 },
+  backToListText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
 })

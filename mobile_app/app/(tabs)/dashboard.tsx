@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import { colors, radius, shadows } from '@/theme'
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   all: 'grid-outline',
@@ -54,7 +55,7 @@ function relativeDate(iso: string | null, language: string): string {
 }
 
 // ── Animated progress bar ─────────────────────────────────────────
-function ProgressBar({ pct, reward }: { pct: number; reward: boolean }) {
+function ProgressBar({ pct, onNight }: { pct: number; onNight: boolean }) {
   const widthAnim = useRef(new Animated.Value(0)).current
   useEffect(() => {
     Animated.timing(widthAnim, {
@@ -67,8 +68,8 @@ function ProgressBar({ pct, reward }: { pct: number; reward: boolean }) {
   }, [pct])
   const width = widthAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] })
   return (
-    <View style={s.progressTrack}>
-      <Animated.View style={[s.progressFill, { width }, reward && s.progressFillReward]} />
+    <View style={[s.progressTrack, onNight && s.progressTrackNight]}>
+      <Animated.View style={[s.progressFill, { width }, onNight && s.progressFillNight]} />
     </View>
   )
 }
@@ -99,13 +100,14 @@ function CardItem({
   const max = progress?.maxStamps ?? 10
   const rewards = progress?.rewards ?? 0
   const pct = max > 0 ? Math.min(stamps / max, 1) : 0
-  const hasReward = rewards > 0
+  // Reward ready → premium "night" card
+  const night = rewards > 0
 
   return (
     <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
       <TouchableOpacity
-        style={[s.card, hasReward && s.cardGlow]}
-        activeOpacity={0.72}
+        style={[s.card, night && s.cardNight]}
+        activeOpacity={0.75}
         onPress={onPress}
         onLongPress={onLongPress}
       >
@@ -113,44 +115,41 @@ function CardItem({
           {tenantMeta?.logo_url ? (
             <Image source={{ uri: tenantMeta.logo_url }} style={s.cardLogo} />
           ) : (
-            <View style={[
-              s.cardIcon,
-              hasReward && s.cardIconReward,
-              !hasReward && tenantMeta?.brand_color ? { backgroundColor: tenantMeta.brand_color + '33' } : undefined,
-            ]}>
+            <View style={[s.cardIcon, night && s.cardIconNight]}>
               <Ionicons
                 name={CATEGORY_ICONS[tenantMeta?.category ?? 'all'] ?? 'storefront-outline'}
                 size={22}
-                color={hasReward ? '#f59e0b' : (tenantMeta?.brand_color ?? '#a78bfa')}
+                color={night ? colors.violetLight : colors.primary}
               />
             </View>
           )}
           <View style={s.cardMeta}>
-            <Text style={s.cardName} numberOfLines={1}>
+            <Text style={[s.cardName, night && s.cardNameNight]} numberOfLines={1}>
               {item.customName ?? item.tenantName ?? 'LoyalCard'}
             </Text>
             {progress?.lastScanAt ? (
-              <Text style={s.cardDate}>
+              <Text style={[s.cardDate, night && s.cardDateNight]}>
                 {t.admin.lastScan}: {relativeDate(progress.lastScanAt, language)}
               </Text>
             ) : (
-              <Text style={s.cardDate}>#{item.qrCode.slice(0, 10)}…</Text>
+              <Text style={[s.cardDate, night && s.cardDateNight]}>#{item.qrCode.slice(0, 10)}…</Text>
             )}
           </View>
-          {hasReward ? (
+          {night ? (
             <View style={s.rewardPill}>
-              <Text style={s.rewardPillText}>🎁 {rewards}</Text>
+              <Ionicons name="gift" size={13} color="#fff" />
+              <Text style={s.rewardPillText}>{rewards}</Text>
             </View>
           ) : (
-            <Ionicons name="chevron-forward" size={16} color="#374151" />
+            <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />
           )}
         </View>
 
         <View style={s.progressBlock}>
-          <ProgressBar pct={pct} reward={hasReward} />
-          <Text style={s.progressText}>
+          <ProgressBar pct={pct} onNight={night} />
+          <Text style={[s.progressText, night && s.progressTextNight]}>
             {`${stamps} / ${max} ${t.dashboard.stamps}`}
-            {hasReward ? `  ·  🎁 ${rewards} ${t.dashboard.rewards}` : ''}
+            {night ? `  ·  ${rewards} ${t.dashboard.rewards}` : ''}
           </Text>
         </View>
       </TouchableOpacity>
@@ -218,7 +217,6 @@ export default function DashboardScreen() {
         }
       }
 
-      // Build tenant meta map
       const metaMap: Record<string, TenantMeta> = {}
       for (const t of tenantsRes.data ?? []) {
         metaMap[t.id] = {
@@ -268,151 +266,164 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <Animated.View style={{ flex: 1, opacity: screenFade }}>
-      {/* Header */}
-      <View style={s.header}>
-        <Text style={s.title}>{t.dashboard.title}</Text>
-      </View>
-
-      {/* Stats bar — always visible */}
-      <View style={s.statsRow}>
-        {[
-          { value: savedCards.length, label: t.dashboard.totalCards, color: '#a78bfa' },
-          { value: loading ? '…' : totalStamps, label: t.dashboard.totalStamps, color: '#60a5fa' },
-          { value: loading ? '…' : totalRewardCount, label: t.dashboard.rewards, color: totalRewardCount > 0 ? '#f59e0b' : '#6b7280', highlight: totalRewardCount > 0 },
-        ].map((stat, i) => (
-          <View key={i} style={s.statCell}>
-            <Text style={[s.statN, { color: stat.color }]}>{stat.value}</Text>
-            <Text style={s.statL}>{stat.label}</Text>
-          </View>
-        ))}
-      </View>
-
-      {savedCards.length === 0 ? (
-        <View style={s.empty}>
-          <Ionicons name="card-outline" size={64} color="#1f2937" />
-          <Text style={s.emptyTitle}>{t.dashboard.noCards}</Text>
-          <Text style={s.emptySubtitle}>{t.dashboard.noCardsSubtitle}</Text>
-          <TouchableOpacity style={s.emptyBtn} onPress={() => router.push('/(tabs)/home')}>
-            <Ionicons name="compass-outline" size={18} color="#fff" />
-            <Text style={s.emptyBtnText}>{t.dashboard.discoverPartners}</Text>
-          </TouchableOpacity>
+        {/* Header */}
+        <View style={s.header}>
+          <Text style={s.title}>{t.dashboard.title}</Text>
         </View>
-      ) : (
-        <FlatList
-          data={savedCards}
-          keyExtractor={(item) => item.qrCode}
-          contentContainerStyle={s.list}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => loadData(true)}
-              tintColor="#7c3aed"
-              colors={['#7c3aed']}
-            />
-          }
-          ListFooterComponent={
-            <TouchableOpacity
-              style={s.addMoreBtn}
-              onPress={() => router.navigate('/(tabs)/' as any)}
-            >
-              <Ionicons name="add-circle-outline" size={18} color="#a78bfa" />
-              <Text style={s.addMoreText}>{t.dashboard.discoverPartners}</Text>
+
+        {/* Stats bar */}
+        <View style={s.statsRow}>
+          {[
+            { value: savedCards.length, label: t.dashboard.totalCards, highlight: false },
+            { value: loading ? '…' : totalStamps, label: t.dashboard.totalStamps, highlight: false },
+            { value: loading ? '…' : totalRewardCount, label: t.dashboard.rewards, highlight: totalRewardCount > 0 },
+          ].map((stat, i) => (
+            <View key={i} style={[s.statCell, i < 2 && s.statCellBorder]}>
+              <Text style={[s.statN, stat.highlight && { color: colors.primary }]}>{stat.value}</Text>
+              <Text style={s.statL}>{stat.label}</Text>
+            </View>
+          ))}
+        </View>
+
+        {savedCards.length === 0 ? (
+          <View style={s.empty}>
+            <View style={s.emptyIconWrap}>
+              <Ionicons name="card-outline" size={40} color={colors.inkFaint} />
+            </View>
+            <Text style={s.emptyTitle}>{t.dashboard.noCards}</Text>
+            <Text style={s.emptySubtitle}>{t.dashboard.noCardsSubtitle}</Text>
+            <TouchableOpacity style={s.emptyBtn} onPress={() => router.navigate('/(tabs)/' as any)}>
+              <Ionicons name="compass-outline" size={18} color="#fff" />
+              <Text style={s.emptyBtnText}>{t.dashboard.discoverPartners}</Text>
             </TouchableOpacity>
-          }
-          renderItem={({ item, index }) => (
-            <CardItem
-              item={item}
-              index={index}
-              progress={progress[item.qrCode]}
-              tenantMeta={tenantMeta[item.tenantId]}
-              t={t}
-              language={language}
-              onPress={() => handleOpenCard(item)}
-              onLongPress={() => handleDeleteCard(item.qrCode)}
-            />
-          )}
-        />
-      )}
+          </View>
+        ) : (
+          <FlatList
+            data={savedCards}
+            keyExtractor={(item) => item.qrCode}
+            contentContainerStyle={s.list}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => loadData(true)}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
+              />
+            }
+            ListFooterComponent={
+              <TouchableOpacity
+                style={s.addMoreBtn}
+                onPress={() => router.navigate('/(tabs)/' as any)}
+              >
+                <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+                <Text style={s.addMoreText}>{t.dashboard.discoverPartners}</Text>
+              </TouchableOpacity>
+            }
+            renderItem={({ item, index }) => (
+              <CardItem
+                item={item}
+                index={index}
+                progress={progress[item.qrCode]}
+                tenantMeta={tenantMeta[item.tenantId]}
+                t={t}
+                language={language}
+                onPress={() => handleOpenCard(item)}
+                onLongPress={() => handleDeleteCard(item.qrCode)}
+              />
+            )}
+          />
+        )}
       </Animated.View>
     </SafeAreaView>
   )
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
+  safe: { flex: 1, backgroundColor: colors.bg },
 
-  header: {
-    paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4,
-  },
-  title: { color: '#fff', fontSize: 24, fontWeight: '900' },
+  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
+  title: { color: colors.ink, fontSize: 26, fontWeight: '800', letterSpacing: -0.5 },
 
   statsRow: {
-    flexDirection: 'row', marginHorizontal: 16, marginVertical: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    flexDirection: 'row',
+    marginHorizontal: 20, marginVertical: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
     overflow: 'hidden',
+    ...shadows.card,
   },
-  statCell: {
-    flex: 1, alignItems: 'center', paddingVertical: 16, gap: 4,
-    borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.07)',
-  },
-  statN: { fontSize: 26, fontWeight: '800' },
-  statL: { color: '#6b7280', fontSize: 11, fontWeight: '600', textAlign: 'center' },
+  statCell: { flex: 1, alignItems: 'center', paddingVertical: 16, gap: 3 },
+  statCellBorder: { borderRightWidth: 1, borderRightColor: colors.border },
+  statN: { fontSize: 24, fontWeight: '800', color: colors.ink },
+  statL: { color: colors.inkSoft, fontSize: 11, fontWeight: '600', textAlign: 'center' },
 
-  list: { paddingHorizontal: 16, paddingBottom: 40, gap: 12 },
+  list: { paddingHorizontal: 20, paddingBottom: 40, gap: 12 },
 
   card: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.09)',
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border,
     padding: 16, gap: 14,
+    ...shadows.card,
   },
-  cardGlow: {
-    borderColor: 'rgba(245,158,11,0.45)',
-    backgroundColor: 'rgba(245,158,11,0.07)',
+  cardNight: {
+    backgroundColor: colors.night,
+    borderColor: colors.nightBorder,
+    ...shadows.night,
   },
 
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cardLogo: { width: 46, height: 46, borderRadius: 14, flexShrink: 0 },
+  cardLogo: { width: 46, height: 46, borderRadius: radius.md, flexShrink: 0, backgroundColor: colors.bgDeep },
   cardIcon: {
-    width: 46, height: 46, borderRadius: 14,
-    backgroundColor: 'rgba(124,58,237,0.2)',
+    width: 46, height: 46, borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
-  cardIconReward: { backgroundColor: 'rgba(245,158,11,0.2)' },
+  cardIconNight: { backgroundColor: 'rgba(124,58,237,0.28)' },
   cardMeta: { flex: 1, gap: 3 },
-  cardName: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  cardDate: { color: '#4b5563', fontSize: 11 },
+  cardName: { color: colors.ink, fontWeight: '700', fontSize: 16 },
+  cardNameNight: { color: colors.onNight },
+  cardDate: { color: colors.inkFaint, fontSize: 11 },
+  cardDateNight: { color: colors.onNightSoft },
   rewardPill: {
-    backgroundColor: 'rgba(245,158,11,0.2)',
-    borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5,
-    borderWidth: 1, borderColor: 'rgba(245,158,11,0.4)',
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: colors.violet,
+    borderRadius: radius.pill, paddingHorizontal: 11, paddingVertical: 6,
   },
-  rewardPillText: { color: '#f59e0b', fontSize: 13, fontWeight: '700' },
+  rewardPillText: { color: '#fff', fontSize: 13, fontWeight: '800' },
 
   progressBlock: { gap: 7 },
   progressTrack: {
-    height: 6, backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 6, backgroundColor: colors.bgDeep,
     borderRadius: 3, overflow: 'hidden',
   },
-  progressFill: { height: '100%', backgroundColor: '#7c3aed', borderRadius: 3 },
-  progressFillReward: { backgroundColor: '#f59e0b' },
-  progressText: { color: '#6b7280', fontSize: 12 },
+  progressTrackNight: { backgroundColor: 'rgba(255,255,255,0.12)' },
+  progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
+  progressFillNight: { backgroundColor: colors.violetLight },
+  progressText: { color: colors.inkSoft, fontSize: 12 },
+  progressTextNight: { color: colors.onNightSoft },
 
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, paddingHorizontal: 32 },
-  emptyTitle: { color: '#fff', fontSize: 22, fontWeight: '800', textAlign: 'center' },
-  emptySubtitle: { color: '#6b7280', fontSize: 14, textAlign: 'center', lineHeight: 22 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 32 },
+  emptyIconWrap: {
+    width: 84, height: 84, borderRadius: 42,
+    backgroundColor: colors.bgDeep,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  emptyTitle: { color: colors.ink, fontSize: 21, fontWeight: '800', textAlign: 'center' },
+  emptySubtitle: { color: colors.inkSoft, fontSize: 14, textAlign: 'center', lineHeight: 21 },
   emptyBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#7c3aed', paddingHorizontal: 24, paddingVertical: 14,
-    borderRadius: 16, marginTop: 4,
+    backgroundColor: colors.primary, paddingHorizontal: 24, paddingVertical: 14,
+    borderRadius: radius.lg, marginTop: 6,
+    ...shadows.primaryBtn,
   },
   emptyBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
   addMoreBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, marginTop: 4, padding: 14, borderRadius: 14,
-    borderWidth: 1, borderColor: 'rgba(167,139,250,0.3)', borderStyle: 'dashed',
+    gap: 8, marginTop: 4, padding: 14, borderRadius: radius.md,
+    borderWidth: 1.5, borderColor: colors.primaryBorder, borderStyle: 'dashed',
+    backgroundColor: colors.primarySoft,
   },
-  addMoreText: { color: '#a78bfa', fontWeight: '600', fontSize: 14 },
+  addMoreText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
 })

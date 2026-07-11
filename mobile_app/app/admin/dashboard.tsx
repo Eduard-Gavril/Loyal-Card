@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import { colors, radius, shadows } from '@/theme'
 
 interface Stats {
   totalCards: number
@@ -140,13 +141,13 @@ export default function AdminDashboardScreen() {
     ])
   }
 
-  const NAV_GRID = [
-    { icon: 'qr-code-outline', label: a.scanCard, route: '/admin/scanner', color: '#7c3aed' },
-    { icon: 'cube-outline', label: a.products, route: '/admin/products', color: '#0891b2' },
-    { icon: 'people-outline', label: a.clients, route: '/admin/clients', color: '#059669' },
-    { icon: 'time-outline', label: a.history, route: '/admin/scan-history', color: '#d97706' },
-    { icon: 'bar-chart-outline', label: a.reports, route: '/admin/reports', color: '#7c3aed' },
-    { icon: 'settings-outline', label: a.settings, route: '/admin/settings', color: '#6b7280' },
+  const NAV_GRID: { icon: keyof typeof Ionicons.glyphMap; label: string; route: string }[] = [
+    { icon: 'qr-code-outline', label: a.scanCard, route: '/admin/scanner' },
+    { icon: 'cube-outline', label: a.products, route: '/admin/products' },
+    { icon: 'people-outline', label: a.clients, route: '/admin/clients' },
+    { icon: 'time-outline', label: a.history, route: '/admin/scan-history' },
+    { icon: 'bar-chart-outline', label: a.reports, route: '/admin/reports' },
+    { icon: 'settings-outline', label: a.settings, route: '/admin/settings' },
   ]
 
   return (
@@ -160,11 +161,11 @@ export default function AdminDashboardScreen() {
         <View style={s.headerActions}>
           <TouchableOpacity style={s.exportBtn} onPress={handleExport} disabled={exporting}>
             {exporting
-              ? <ActivityIndicator size="small" color="#a78bfa" />
-              : <Ionicons name="download-outline" size={20} color="#a78bfa" />}
+              ? <ActivityIndicator size="small" color={colors.primary} />
+              : <Ionicons name="download-outline" size={20} color={colors.primary} />}
           </TouchableOpacity>
           <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={20} color="#f87171" />
+            <Ionicons name="log-out-outline" size={20} color={colors.danger} />
           </TouchableOpacity>
         </View>
       </View>
@@ -174,20 +175,20 @@ export default function AdminDashboardScreen() {
         <Text style={s.sectionLabel}>{a.summaryLabel}</Text>
         {loading ? (
           <View style={s.loadingRow}>
-            <ActivityIndicator color="#7c3aed" />
+            <ActivityIndicator color={colors.primary} />
             <Text style={s.loadingText}>{t.loading}</Text>
           </View>
         ) : (
           <View style={s.statsGrid}>
-            {[
-              { label: a.cardsLabel, value: stats.totalCards, icon: 'card-outline', color: '#7c3aed' },
-              { label: a.scansTodayLabel, value: stats.scansToday, icon: 'scan-outline', color: '#059669' },
-              { label: a.rewards, value: stats.totalRewards, icon: 'gift-outline', color: '#d97706' },
-              { label: a.totalScansLabel, value: stats.totalScans, icon: 'analytics-outline', color: '#0891b2' },
-            ].map((stat) => (
-              <View key={stat.label} style={[s.statCard, { borderLeftColor: stat.color, borderLeftWidth: 3 }]}>
-                <View style={[s.statIcon, { backgroundColor: stat.color + '22' }]}>
-                  <Ionicons name={stat.icon as any} size={18} color={stat.color} />
+            {([
+              { label: a.cardsLabel, value: stats.totalCards, icon: 'card-outline' },
+              { label: a.scansTodayLabel, value: stats.scansToday, icon: 'scan-outline' },
+              { label: a.rewards, value: stats.totalRewards, icon: 'gift-outline' },
+              { label: a.totalScansLabel, value: stats.totalScans, icon: 'analytics-outline' },
+            ] as const).map((stat) => (
+              <View key={stat.label} style={s.statCard}>
+                <View style={s.statIcon}>
+                  <Ionicons name={stat.icon} size={17} color={colors.primary} />
                 </View>
                 <Text style={s.statValue}>{stat.value}</Text>
                 <Text style={s.statLabel}>{stat.label}</Text>
@@ -199,20 +200,20 @@ export default function AdminDashboardScreen() {
         {/* Navigation grid */}
         <Text style={s.sectionLabel}>{a.sectionsLabel}</Text>
         <View style={s.navGrid}>
-          {NAV_GRID.map((item) => (
+          {NAV_GRID.map((item, i) => (
             <TouchableOpacity
               key={item.route}
-              style={[s.navBtn, { borderColor: item.color + '55', backgroundColor: item.color + '18' }]}
+              style={[s.navBtn, i === 0 && s.navBtnPrimary]}
               onPress={() => router.push(item.route as any)}
-              activeOpacity={0.65}
+              activeOpacity={0.7}
             >
               <View style={s.navBtnTop}>
-                <View style={[s.navIcon, { backgroundColor: item.color + '30' }]}>
-                  <Ionicons name={item.icon as any} size={24} color={item.color} />
+                <View style={[s.navIcon, i === 0 && s.navIconPrimary]}>
+                  <Ionicons name={item.icon} size={22} color={i === 0 ? '#fff' : colors.primary} />
                 </View>
-                <Ionicons name="chevron-forward" size={14} color={item.color + 'aa'} />
+                <Ionicons name="chevron-forward" size={14} color={i === 0 ? 'rgba(255,255,255,0.6)' : colors.inkFaint} />
               </View>
-              <Text style={[s.navLabel, { color: '#fff' }]}>{item.label}</Text>
+              <Text style={[s.navLabel, i === 0 && s.navLabelPrimary]}>{item.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -220,30 +221,32 @@ export default function AdminDashboardScreen() {
         {/* Recent activity */}
         {recent.length > 0 && (
           <View style={s.recentSection}>
-            <Text style={s.sectionTitle}>{a.recentActivityTitle}</Text>
-            {recent.map((e) => (
-              <View key={e.id} style={s.recentRow}>
-                <View style={[s.recentDot, { backgroundColor: e.reward_applied ? '#d97706' : '#059669' }]} />
-                <View style={s.recentBody}>
-                  <Text style={s.recentClient} numberOfLines={1}>
-                    {(e as any).clients?.name ?? a.anonClient}
-                  </Text>
-                  <Text style={s.recentProduct} numberOfLines={1}>
-                    {(e as any).products?.metadata?.emoji ?? '🛍️'} {(e as any).products?.name ?? a.productDefault}
-                    {e.reward_applied && ' · 🎁 ' + a.rewardLabel}
+            <Text style={s.sectionLabelInline}>{a.recentActivityTitle}</Text>
+            <View style={s.recentCard}>
+              {recent.map((e, i) => (
+                <View key={e.id} style={[s.recentRow, i < recent.length - 1 && s.recentRowBorder]}>
+                  <View style={[s.recentDot, { backgroundColor: e.reward_applied ? colors.violet : colors.success }]} />
+                  <View style={s.recentBody}>
+                    <Text style={s.recentClient} numberOfLines={1}>
+                      {(e as any).clients?.name ?? a.anonClient}
+                    </Text>
+                    <Text style={s.recentProduct} numberOfLines={1}>
+                      {(e as any).products?.metadata?.emoji ?? '🛍️'} {(e as any).products?.name ?? a.productDefault}
+                      {e.reward_applied && ' · 🎁 ' + a.rewardLabel}
+                    </Text>
+                  </View>
+                  <Text style={s.recentTime}>
+                    {new Date(e.scanned_at).toLocaleTimeString(
+                      language === 'ro' ? 'ro-RO' : language === 'en' ? 'en-GB' : 'it-IT',
+                      { hour: '2-digit', minute: '2-digit' }
+                    )}
                   </Text>
                 </View>
-                <Text style={s.recentTime}>
-                  {new Date(e.scanned_at).toLocaleTimeString(
-                    language === 'ro' ? 'ro-RO' : language === 'en' ? 'en-GB' : 'it-IT',
-                    { hour: '2-digit', minute: '2-digit' }
-                  )}
-                </Text>
-              </View>
-            ))}
-            <TouchableOpacity style={s.seeAllBtn} onPress={() => router.push('/admin/scan-history')}>
-              <Text style={s.seeAllText}>{a.viewAllHistory}</Text>
-            </TouchableOpacity>
+              ))}
+              <TouchableOpacity style={s.seeAllBtn} onPress={() => router.push('/admin/scan-history')}>
+                <Text style={s.seeAllText}>{a.viewAllHistory}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -252,34 +255,88 @@ export default function AdminDashboardScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
-  title: { color: '#fff', fontSize: 20, fontWeight: '800' },
-  sub: { color: '#7c6faa', fontSize: 12, marginTop: 2 },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 20, paddingVertical: 14,
+  },
+  title: { color: colors.ink, fontSize: 21, fontWeight: '800', letterSpacing: -0.4 },
+  sub: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
   headerActions: { flexDirection: 'row', gap: 8 },
-  exportBtn: { padding: 8, backgroundColor: 'rgba(167,139,250,0.1)', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)' },
-  logoutBtn: { padding: 8, backgroundColor: 'rgba(248,113,113,0.1)', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(248,113,113,0.2)' },
+  exportBtn: {
+    padding: 9, backgroundColor: colors.primarySoft, borderRadius: radius.sm,
+    borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  logoutBtn: {
+    padding: 9, backgroundColor: colors.dangerSoft, borderRadius: radius.sm,
+    borderWidth: 1, borderColor: colors.dangerBorder,
+  },
   loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 24, justifyContent: 'center' },
-  loadingText: { color: '#a78bfa', fontSize: 14 },
-  sectionLabel: { color: '#7c6faa', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, paddingHorizontal: 16, marginBottom: 10 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 16, marginBottom: 20 },
-  statCard: { flex: 1, minWidth: '45%', backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', padding: 14, gap: 6, overflow: 'hidden' },
-  statIcon: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  statValue: { color: '#fff', fontSize: 26, fontWeight: '800' },
-  statLabel: { color: '#7c6faa', fontSize: 12 },
-  navGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 16, marginBottom: 20 },
-  navBtn: { flex: 1, minWidth: '45%', gap: 10, borderRadius: 18, borderWidth: 1.5, padding: 16 },
+  loadingText: { color: colors.inkSoft, fontSize: 14 },
+
+  sectionLabel: {
+    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 1,
+    paddingHorizontal: 20, marginBottom: 10, marginTop: 4,
+  },
+  sectionLabelInline: {
+    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10,
+  },
+
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 20, marginBottom: 20 },
+  statCard: {
+    flex: 1, minWidth: '45%',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14, gap: 6,
+    ...shadows.card,
+  },
+  statIcon: {
+    width: 32, height: 32, borderRadius: 9,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  statValue: { color: colors.ink, fontSize: 26, fontWeight: '800' },
+  statLabel: { color: colors.inkSoft, fontSize: 12 },
+
+  navGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 20, marginBottom: 24 },
+  navBtn: {
+    flex: 1, minWidth: '45%', gap: 10,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: 16,
+    ...shadows.card,
+  },
+  navBtnPrimary: {
+    backgroundColor: colors.night,
+    borderColor: colors.night,
+    ...shadows.night,
+  },
   navBtnTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  navIcon: { width: 46, height: 46, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
-  navLabel: { fontWeight: '700', fontSize: 14 },
-  recentSection: { paddingHorizontal: 16, marginBottom: 32 },
-  sectionTitle: { color: '#7c6faa', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 },
-  recentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
+  navIcon: {
+    width: 44, height: 44, borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  navIconPrimary: { backgroundColor: 'rgba(124,58,237,0.4)' },
+  navLabel: { fontWeight: '700', fontSize: 14, color: colors.ink },
+  navLabelPrimary: { color: colors.onNight },
+
+  recentSection: { paddingHorizontal: 20, marginBottom: 32 },
+  recentCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    paddingHorizontal: 14,
+    ...shadows.card,
+  },
+  recentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 },
+  recentRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
   recentDot: { width: 8, height: 8, borderRadius: 4 },
   recentBody: { flex: 1 },
-  recentClient: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  recentProduct: { color: '#6b7280', fontSize: 12, marginTop: 1 },
-  recentTime: { color: '#4b5563', fontSize: 12 },
+  recentClient: { color: colors.ink, fontWeight: '600', fontSize: 14 },
+  recentProduct: { color: colors.inkSoft, fontSize: 12, marginTop: 1 },
+  recentTime: { color: colors.inkFaint, fontSize: 12 },
   seeAllBtn: { paddingVertical: 12, alignItems: 'center' },
-  seeAllText: { color: '#7c3aed', fontWeight: '600', fontSize: 13 },
+  seeAllText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
 })

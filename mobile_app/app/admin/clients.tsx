@@ -10,6 +10,7 @@ import { useAdminStore } from '@/store'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import { colors, radius, shadows } from '@/theme'
 
 interface ClientRecord {
   id: string
@@ -39,7 +40,6 @@ export default function ClientsScreen() {
     setLoading(true)
     setError('')
     try {
-      // Query cards filtered by tenant, then join clients
       const { data: cards, error: dbErr } = await supabase
         .from('cards')
         .select('id, loyalty_state, clients(id, name, phone, created_at)')
@@ -49,7 +49,6 @@ export default function ClientsScreen() {
         .limit(300)
       if (dbErr) throw dbErr
 
-      // Group cards by client
       const byClient = new Map<string, ClientRecord>()
       for (const card of (cards as any[]) ?? []) {
         const cl = card.clients
@@ -87,40 +86,40 @@ export default function ClientsScreen() {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.title}>{a.clients}</Text>
         <TouchableOpacity style={s.refreshBtn} onPress={loadClients}>
-          <Ionicons name="refresh-outline" size={20} color="#a78bfa" />
+          <Ionicons name="refresh-outline" size={20} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
       {/* Search */}
       <View style={s.searchWrap}>
-        <Ionicons name="search-outline" size={16} color="#9ca3af" />
+        <Ionicons name="search-outline" size={16} color={colors.inkFaint} />
         <TextInput
           style={s.searchInput}
           placeholder="Cerca per nome o telefono..."
-          placeholderTextColor="#6b7280"
+          placeholderTextColor={colors.inkFaint}
           value={search}
           onChangeText={setSearch}
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={16} color="#6b7280" />
+            <Ionicons name="close-circle" size={16} color={colors.inkFaint} />
           </TouchableOpacity>
         )}
       </View>
 
       {loading ? (
         <View style={s.center}>
-          <ActivityIndicator size="large" color="#7c3aed" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={s.loadingText}>{t.loading}</Text>
         </View>
       ) : error ? (
         <View style={s.center}>
-          <Ionicons name="alert-circle-outline" size={48} color="#f87171" />
+          <Ionicons name="alert-circle-outline" size={48} color={colors.danger} />
           <Text style={s.errorText}>{error}</Text>
           <TouchableOpacity style={s.retryBtn} onPress={loadClients}>
             <Text style={s.retryText}>Riprova</Text>
@@ -128,7 +127,7 @@ export default function ClientsScreen() {
         </View>
       ) : filtered.length === 0 ? (
         <View style={s.center}>
-          <Ionicons name="people-outline" size={56} color="#374151" />
+          <Ionicons name="people-outline" size={56} color={colors.inkFaint} />
           <Text style={s.emptyText}>{a.noClients}</Text>
         </View>
       ) : (
@@ -188,32 +187,56 @@ export default function ClientsScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
-  backText: { color: '#fff', fontSize: 15 },
-  title: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+  },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  title: { color: colors.ink, fontSize: 18, fontWeight: '800' },
   refreshBtn: { width: 40, alignItems: 'flex-end' },
-  searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: 16, marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 12, paddingVertical: 10 },
-  searchInput: { flex: 1, color: '#fff', fontSize: 14 },
+  searchWrap: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginHorizontal: 20, marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderStrong,
+    paddingHorizontal: 12, paddingVertical: 10,
+    ...shadows.card,
+  },
+  searchInput: { flex: 1, color: colors.ink, fontSize: 14, padding: 0 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingText: { color: '#a78bfa', fontSize: 14 },
-  errorText: { color: '#f87171', fontSize: 14, textAlign: 'center' },
-  retryBtn: { backgroundColor: '#7c3aed', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12 },
-  retryText: { color: '#fff', fontWeight: '600' },
-  emptyText: { color: '#6b7280', fontSize: 15, textAlign: 'center' },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(124,58,237,0.3)', alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { color: '#a78bfa', fontSize: 20, fontWeight: '800' },
+  loadingText: { color: colors.inkSoft, fontSize: 14 },
+  errorText: { color: colors.danger, fontSize: 14, textAlign: 'center' },
+  retryBtn: { backgroundColor: colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: radius.md },
+  retryText: { color: '#fff', fontWeight: '700' },
+  emptyText: { color: colors.inkSoft, fontSize: 15, textAlign: 'center' },
+  list: { paddingHorizontal: 20, paddingBottom: 24, gap: 10 },
+  row: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, padding: 14,
+    borderWidth: 1, borderColor: colors.border,
+    ...shadows.card,
+  },
+  avatar: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarLetter: { color: colors.primary, fontSize: 20, fontWeight: '800' },
   rowBody: { flex: 1, gap: 4 },
-  clientName: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  clientPhone: { color: '#6b7280', fontSize: 12 },
+  clientName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
+  clientPhone: { color: colors.inkSoft, fontSize: 12 },
   statsRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
   stat: { alignItems: 'center', gap: 1 },
-  statNum: { color: '#c4b5fd', fontSize: 14, fontWeight: '700' },
-  statLabel: { color: '#4b5563', fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-  statDivider: { width: 1, height: 20, backgroundColor: 'rgba(255,255,255,0.1)' },
-  stampBtn: { alignItems: 'center', gap: 3, backgroundColor: '#7c3aed', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8 },
+  statNum: { color: colors.primary, fontSize: 14, fontWeight: '800' },
+  statLabel: { color: colors.inkFaint, fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+  statDivider: { width: 1, height: 20, backgroundColor: colors.border },
+  stampBtn: {
+    alignItems: 'center', gap: 3,
+    backgroundColor: colors.primary, borderRadius: radius.sm,
+    paddingHorizontal: 10, paddingVertical: 8,
+  },
   stampBtnText: { color: '#fff', fontSize: 9, fontWeight: '700' },
 })

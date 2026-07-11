@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import { useAdminStore } from '@/store'
+import { colors } from '@/theme'
 
 export default function AdminLayout() {
   const router = useRouter()
@@ -16,6 +17,6 @@ export default function AdminLayout() {
   }, [user, tenantId, segments])
 
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#0f0d2e' } }} />
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
   )
 }

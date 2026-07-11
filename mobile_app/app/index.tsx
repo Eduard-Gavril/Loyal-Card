@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
+import { colors, radius, shadows } from '@/theme'
 
 export default function WelcomeScreen() {
   const router = useRouter()
@@ -14,19 +15,12 @@ export default function WelcomeScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current
   const loadingScale = useRef(new Animated.Value(0.85)).current
   const loadingOpacity = useRef(new Animated.Value(0)).current
-  const pulseAnim = useRef(new Animated.Value(1)).current
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(loadingOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
       Animated.spring(loadingScale, { toValue: 1, friction: 7, tension: 80, useNativeDriver: true }),
     ]).start()
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.08, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
-      ])
-    ).start()
     const timer = setTimeout(() => setHydrated(true), 200)
     return () => clearTimeout(timer)
   }, [])
@@ -54,12 +48,10 @@ export default function WelcomeScreen() {
     return (
       <View style={s.splash}>
         <Animated.View style={{ opacity: loadingOpacity, transform: [{ scale: loadingScale }], alignItems: 'center' }}>
-          <Animated.View style={[s.splashRing, { transform: [{ scale: pulseAnim }] }]}>
-            <Image source={require('../assets/logo.png')} style={s.splashLogo} resizeMode="contain" />
-          </Animated.View>
+          <Image source={require('../assets/logo.png')} style={s.splashLogo} resizeMode="contain" />
           <Text style={s.splashAppName}>LoyalCard</Text>
         </Animated.View>
-        <ActivityIndicator color="#7c3aed" size="small" style={s.splashSpinner} />
+        <ActivityIndicator color={colors.primary} size="small" style={s.splashSpinner} />
       </View>
     )
   }
@@ -75,11 +67,7 @@ export default function WelcomeScreen() {
       <Animated.View style={[s.content, { opacity: fadeAnim }]}>
         {/* Hero */}
         <View style={s.hero}>
-          <View style={s.logoRing}>
-            <View style={s.logoInner}>
-              <Ionicons name="card" size={52} color="#a78bfa" />
-            </View>
-          </View>
+          <Image source={require('../assets/logo.png')} style={s.heroLogo} resizeMode="contain" />
           <Text style={s.appName}>{t.appName}</Text>
           <Text style={s.tagline}>{t.welcome.tagline}</Text>
         </View>
@@ -89,7 +77,7 @@ export default function WelcomeScreen() {
           {FEATURES.map((f) => (
             <View key={f.text} style={s.featureRow}>
               <View style={s.featureIcon}>
-                <Ionicons name={f.icon} size={20} color="#a78bfa" />
+                <Ionicons name={f.icon} size={20} color={colors.primary} />
               </View>
               <Text style={s.featureText}>{f.text}</Text>
             </View>
@@ -105,7 +93,7 @@ export default function WelcomeScreen() {
 
           {savedCards.length > 0 && (
             <TouchableOpacity style={s.secondaryBtn} onPress={handleMyCards} activeOpacity={0.85}>
-              <Ionicons name="card-outline" size={18} color="#a78bfa" />
+              <Ionicons name="card-outline" size={18} color={colors.primary} />
               <Text style={s.secondaryBtnText}>
                 {t.welcome.myCardsBtn} ({savedCards.length})
               </Text>
@@ -118,58 +106,47 @@ export default function WelcomeScreen() {
 }
 
 const s = StyleSheet.create({
-  splash: { flex: 1, backgroundColor: '#0f0d2e', alignItems: 'center', justifyContent: 'center' },
-  splashRing: {
-    width: 140, height: 140, borderRadius: 70,
-    backgroundColor: 'rgba(124,58,237,0.15)',
-    borderWidth: 1.5, borderColor: 'rgba(167,139,250,0.35)',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 20,
-  },
-  splashLogo: { width: 90, height: 90 },
-  splashAppName: { color: '#fff', fontSize: 28, fontWeight: '800', letterSpacing: -0.3 },
+  splash: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
+  splashLogo: { width: 132, height: 132, marginBottom: 8 },
+  splashAppName: { color: colors.ink, fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
   splashSpinner: { position: 'absolute', bottom: 80 },
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
+
+  safe: { flex: 1, backgroundColor: colors.bg },
   content: { flex: 1, paddingHorizontal: 28, justifyContent: 'space-between', paddingVertical: 32 },
-  hero: { alignItems: 'center', gap: 12, marginTop: 24 },
-  logoRing: {
-    width: 120, height: 120, borderRadius: 60,
-    backgroundColor: 'rgba(124,58,237,0.15)',
-    borderWidth: 1, borderColor: 'rgba(167,139,250,0.3)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  logoInner: {
-    width: 90, height: 90, borderRadius: 45,
-    backgroundColor: 'rgba(124,58,237,0.25)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  appName: { color: '#fff', fontSize: 36, fontWeight: '900', letterSpacing: -0.5 },
-  tagline: { color: '#9ca3af', fontSize: 16, textAlign: 'center', lineHeight: 24 },
-  features: { gap: 14 },
+
+  hero: { alignItems: 'center', gap: 10, marginTop: 24 },
+  heroLogo: { width: 120, height: 120 },
+  appName: { color: colors.ink, fontSize: 36, fontWeight: '900', letterSpacing: -0.8 },
+  tagline: { color: colors.inkSoft, fontSize: 16, textAlign: 'center', lineHeight: 24 },
+
+  features: { gap: 12 },
   featureRow: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16, padding: 16,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, padding: 16,
+    borderWidth: 1, borderColor: colors.border,
+    ...shadows.card,
   },
   featureIcon: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: 'rgba(124,58,237,0.2)',
+    width: 42, height: 42, borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
     alignItems: 'center', justifyContent: 'center',
   },
-  featureText: { color: '#e5e7eb', fontSize: 14, flex: 1, lineHeight: 20 },
+  featureText: { color: colors.inkMid, fontSize: 14, flex: 1, lineHeight: 20, fontWeight: '500' },
+
   ctas: { gap: 12 },
   primaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#7c3aed', borderRadius: 16,
+    backgroundColor: colors.primary, borderRadius: radius.lg,
     paddingVertical: 16,
+    ...shadows.primaryBtn,
   },
   primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 17 },
   secondaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: 'rgba(167,139,250,0.1)',
-    borderRadius: 16, paddingVertical: 14,
-    borderWidth: 1, borderColor: 'rgba(167,139,250,0.25)',
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.lg, paddingVertical: 14,
+    borderWidth: 1, borderColor: colors.primaryBorder,
   },
-  secondaryBtnText: { color: '#a78bfa', fontWeight: '600', fontSize: 15 },
+  secondaryBtnText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
 })

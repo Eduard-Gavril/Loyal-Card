@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import { colors, radius, shadows } from '@/theme'
 
 interface TenantSettings {
   name: string
@@ -102,7 +103,7 @@ export default function AdminSettingsScreen() {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>{t.admin.settings}</Text>
@@ -119,7 +120,7 @@ export default function AdminSettingsScreen() {
 
       {loading ? (
         <View style={s.center}>
-          <ActivityIndicator size="large" color="#7c3aed" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={s.loadingText}>{t.loading}</Text>
         </View>
       ) : (
@@ -127,7 +128,7 @@ export default function AdminSettingsScreen() {
           {/* Branding */}
           <View style={s.card}>
             <View style={s.cardHeader}>
-              <Ionicons name="storefront-outline" size={16} color="#a78bfa" />
+              <Ionicons name="storefront-outline" size={16} color={colors.primary} />
               <Text style={s.cardTitle}>{a.brandingTitle}</Text>
             </View>
 
@@ -137,7 +138,7 @@ export default function AdminSettingsScreen() {
               value={form.name}
               onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
               placeholder="Nome del negozio"
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
             />
 
             <Text style={s.fieldLabel}>{a.logoUrlLabel}</Text>
@@ -146,7 +147,7 @@ export default function AdminSettingsScreen() {
               value={form.logo_url}
               onChangeText={(v) => setForm((f) => ({ ...f, logo_url: v }))}
               placeholder="https://..."
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
               autoCapitalize="none"
               keyboardType="url"
             />
@@ -168,7 +169,7 @@ export default function AdminSettingsScreen() {
               value={form.brand_color}
               onChangeText={(v) => setForm((f) => ({ ...f, brand_color: v }))}
               placeholder="#7c3aed"
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
               autoCapitalize="none"
             />
           </View>
@@ -176,7 +177,7 @@ export default function AdminSettingsScreen() {
           {/* Messaggio */}
           <View style={s.card}>
             <View style={s.cardHeader}>
-              <Ionicons name="chatbubble-outline" size={16} color="#a78bfa" />
+              <Ionicons name="chatbubble-outline" size={16} color={colors.primary} />
               <Text style={s.cardTitle}>{a.welcomeMsgTitle}</Text>
             </View>
             <TextInput
@@ -184,7 +185,7 @@ export default function AdminSettingsScreen() {
               value={form.welcome_message}
               onChangeText={(v) => setForm((f) => ({ ...f, welcome_message: v }))}
               placeholder={a.welcomeMsgPlaceholder}
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
               multiline
               numberOfLines={3}
             />
@@ -193,7 +194,7 @@ export default function AdminSettingsScreen() {
           {/* Status */}
           <View style={s.card}>
             <View style={s.cardHeader}>
-              <Ionicons name="toggle-outline" size={16} color="#a78bfa" />
+              <Ionicons name="toggle-outline" size={16} color={colors.primary} />
               <Text style={s.cardTitle}>{a.shopStatusTitle}</Text>
             </View>
             <View style={s.switchRow}>
@@ -206,7 +207,7 @@ export default function AdminSettingsScreen() {
               <Switch
                 value={form.active}
                 onValueChange={(v) => setForm((f) => ({ ...f, active: v }))}
-                trackColor={{ false: '#374151', true: '#7c3aed' }}
+                trackColor={{ false: colors.borderStrong, true: colors.primary }}
                 thumbColor="#fff"
               />
             </View>
@@ -215,11 +216,11 @@ export default function AdminSettingsScreen() {
           {/* Preview */}
           <View style={s.card}>
             <View style={s.cardHeader}>
-              <Ionicons name="eye-outline" size={16} color="#a78bfa" />
+              <Ionicons name="eye-outline" size={16} color={colors.primary} />
               <Text style={s.cardTitle}>{a.previewTitle}</Text>
             </View>
-            <View style={[s.preview, { borderColor: form.brand_color + '60' }]}>
-              <View style={[s.previewBadge, { backgroundColor: form.brand_color + '22' }]}>
+            <View style={[s.preview, { borderColor: form.brand_color + '55' }]}>
+              <View style={[s.previewBadge, { backgroundColor: form.brand_color + '1E' }]}>
                 <Text style={[s.previewInitial, { color: form.brand_color }]}>
                   {form.name.charAt(0).toUpperCase() || '?'}
                 </Text>
@@ -230,7 +231,7 @@ export default function AdminSettingsScreen() {
                   <Text style={s.previewMsg} numberOfLines={2}>{form.welcome_message}</Text>
                 ) : null}
               </View>
-              <View style={[s.previewDot, { backgroundColor: form.active ? '#10b981' : '#6b7280' }]} />
+              <View style={[s.previewDot, { backgroundColor: form.active ? colors.success : colors.inkFaint }]} />
             </View>
           </View>
         </ScrollView>
@@ -240,33 +241,66 @@ export default function AdminSettingsScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
-  backText: { color: '#fff', fontSize: 15 },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  saveBtn: { backgroundColor: '#7c3aed', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10, minWidth: 60, alignItems: 'center' },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+  },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' },
+  saveBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: radius.sm,
+    minWidth: 60, alignItems: 'center',
+    ...shadows.primaryBtn,
+  },
   saveBtnDisabled: { opacity: 0.4 },
   saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingText: { color: '#a78bfa', fontSize: 14 },
-  body: { padding: 16, gap: 16, paddingBottom: 40 },
-  card: { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', padding: 16, gap: 4 },
+  loadingText: { color: colors.inkSoft, fontSize: 14 },
+  body: { padding: 20, gap: 16, paddingBottom: 40 },
+
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 16, gap: 4,
+    ...shadows.card,
+  },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  cardTitle: { color: '#a78bfa', fontWeight: '700', fontSize: 13 },
-  fieldLabel: { color: '#7c6faa', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 10, marginBottom: 6 },
-  input: { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 14, paddingVertical: 11, fontSize: 15 },
+  cardTitle: { color: colors.ink, fontWeight: '700', fontSize: 14 },
+  fieldLabel: {
+    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 0.8,
+    marginTop: 10, marginBottom: 6,
+  },
+  input: {
+    backgroundColor: colors.bgDeep,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    color: colors.ink, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15,
+  },
   inputMultiline: { minHeight: 80, textAlignVertical: 'top', paddingTop: 12 },
   colorRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap', marginTop: 8 },
-  colorDot: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'transparent' },
-  colorDotActive: { borderColor: '#fff' },
+  colorDot: {
+    width: 34, height: 34, borderRadius: 17,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: 'transparent',
+  },
+  colorDotActive: { borderColor: colors.ink },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
-  switchLabel: { color: '#fff', fontWeight: '600', fontSize: 15 },
-  switchDesc: { color: '#6b7280', fontSize: 12, marginTop: 2 },
-  preview: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderRadius: 14, padding: 14, marginTop: 4 },
-  previewBadge: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  switchLabel: { color: colors.ink, fontWeight: '600', fontSize: 15 },
+  switchDesc: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
+  preview: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderWidth: 1, borderRadius: radius.md, padding: 14, marginTop: 4,
+    backgroundColor: colors.bg,
+  },
+  previewBadge: {
+    width: 48, height: 48, borderRadius: radius.md,
+    alignItems: 'center', justifyContent: 'center',
+  },
   previewInitial: { fontSize: 24, fontWeight: '800' },
-  previewName: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  previewMsg: { color: '#6b7280', fontSize: 12, marginTop: 2 },
+  previewName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
+  previewMsg: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
   previewDot: { width: 8, height: 8, borderRadius: 4 },
 })

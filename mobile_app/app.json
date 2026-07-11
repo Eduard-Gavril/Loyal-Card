@@ -4,12 +4,12 @@
     "slug": "loyalcard",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0f0d2e"
+      "backgroundColor": "#FAF9F6"
     },
     "ios": {
       "supportsTablet": false,
@@ -18,7 +18,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0f0d2e"
+        "backgroundColor": "#FAF9F6"
       },
       "package": "net.loyalcard.app",
       "versionCode": 1,

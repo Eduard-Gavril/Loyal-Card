@@ -8,6 +8,7 @@ import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
 import * as XLSX from 'xlsx'
 import { exportExcel } from '@/lib/excel'
+import { colors, radius, shadows } from '@/theme'
 
 interface ScanEvent {
   id: string
@@ -88,13 +89,13 @@ export default function ScanHistoryScreen() {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.title}>{a.history}</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <TouchableOpacity style={s.headerBtn} onPress={loadHistory}>
-            <Ionicons name="refresh-outline" size={18} color="#a78bfa" />
+            <Ionicons name="refresh-outline" size={18} color={colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.headerBtn, s.exportBtn, records.length === 0 && { opacity: 0.3 }]}
@@ -110,12 +111,12 @@ export default function ScanHistoryScreen() {
 
       {loading ? (
         <View style={s.center}>
-          <ActivityIndicator size="large" color="#7c3aed" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={s.loadingText}>{t.loading}</Text>
         </View>
       ) : error ? (
         <View style={s.center}>
-          <Ionicons name="alert-circle-outline" size={48} color="#f87171" />
+          <Ionicons name="alert-circle-outline" size={48} color={colors.danger} />
           <Text style={s.errorText}>{error}</Text>
           <TouchableOpacity style={s.retryBtn} onPress={loadHistory}>
             <Text style={s.retryText}>Riprova</Text>
@@ -123,7 +124,7 @@ export default function ScanHistoryScreen() {
         </View>
       ) : records.length === 0 ? (
         <View style={s.center}>
-          <Ionicons name="time-outline" size={56} color="#374151" />
+          <Ionicons name="time-outline" size={56} color={colors.inkFaint} />
           <Text style={s.emptyText}>{a.noHistory}</Text>
         </View>
       ) : (
@@ -152,7 +153,7 @@ export default function ScanHistoryScreen() {
                 <Ionicons
                   name={isReward ? 'gift-outline' : 'checkmark-circle'}
                   size={20}
-                  color={isReward ? '#d97706' : '#10b981'}
+                  color={isReward ? colors.primary : colors.success}
                 />
               </View>
             )
@@ -164,27 +165,44 @@ export default function ScanHistoryScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
-  backText: { color: '#fff', fontSize: 15 },
-  title: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  headerBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.07)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  exportBtn: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+  },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  title: { color: colors.ink, fontSize: 18, fontWeight: '800' },
+  headerBtn: {
+    width: 36, height: 36, borderRadius: radius.sm,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  exportBtn: { backgroundColor: colors.primary, borderColor: colors.primary },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 },
-  loadingText: { color: '#a78bfa', fontSize: 14 },
-  errorText: { color: '#f87171', fontSize: 14, textAlign: 'center' },
-  retryBtn: { backgroundColor: '#7c3aed', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12 },
-  retryText: { color: '#fff', fontWeight: '600' },
-  emptyText: { color: '#6b7280', fontSize: 15, textAlign: 'center' },
-  list: { paddingHorizontal: 16, paddingBottom: 40, gap: 10 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
-  badge: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  badgeScan: { backgroundColor: 'rgba(16,185,129,0.15)' },
-  badgeReward: { backgroundColor: 'rgba(217,119,6,0.2)' },
+  loadingText: { color: colors.inkSoft, fontSize: 14 },
+  errorText: { color: colors.danger, fontSize: 14, textAlign: 'center' },
+  retryBtn: { backgroundColor: colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: radius.md },
+  retryText: { color: '#fff', fontWeight: '700' },
+  emptyText: { color: colors.inkSoft, fontSize: 15, textAlign: 'center' },
+  list: { paddingHorizontal: 20, paddingBottom: 40, gap: 10 },
+  row: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, padding: 14,
+    borderWidth: 1, borderColor: colors.border,
+    ...shadows.card,
+  },
+  badge: {
+    width: 48, height: 48, borderRadius: radius.md,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  badgeScan: { backgroundColor: colors.bgDeep },
+  badgeReward: { backgroundColor: colors.primarySoft },
   badgeEmoji: { fontSize: 22 },
   rowBody: { flex: 1, gap: 2 },
-  clientName: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  productName: { color: '#a78bfa', fontSize: 12 },
-  rowDate: { color: '#6b7280', fontSize: 11, marginTop: 2 },
+  clientName: { color: colors.ink, fontWeight: '700', fontSize: 14 },
+  productName: { color: colors.primary, fontSize: 12, fontWeight: '600' },
+  rowDate: { color: colors.inkFaint, fontSize: 11, marginTop: 2 },
 })

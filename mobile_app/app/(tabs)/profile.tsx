@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation, Language } from '@/lib/i18n'
 import { api, supabase } from '@/lib/supabase'
+import { colors, radius, shadows } from '@/theme'
 
 const LANGUAGES: { code: Language; label: string; flag: string }[] = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -26,7 +27,6 @@ const PREFIXES = [
 ]
 
 function maskPhone(phone: string): string {
-  // Show first 3 chars and last 2, mask the rest: +39 ***...89
   if (phone.length <= 5) return phone
   const visible = phone.slice(0, 3)
   const tail = phone.slice(-2)
@@ -45,7 +45,6 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  // On mount, if we have no local name but have a clientId, try to load from DB
   useEffect(() => {
     if (!displayName && clientId) {
       supabase.from('clients').select('name').eq('id', clientId).single().then(({ data }) => {
@@ -65,10 +64,7 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     setSaving(true)
     setError('')
     try {
-      const { error: fnErr } = await supabase.functions.invoke('update-client-profile', {
-        body: { client_id: clientId, name: trimmed },
-      })
-      if (fnErr) throw fnErr
+      await api.updateClientName(clientId, trimmed)
       setDisplayName(trimmed)
       setEditing(false)
     } catch (e: any) {
@@ -89,7 +85,7 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     <View style={s.section}>
       <View style={s.sectionHeader}>
         <View style={s.iconWrap}>
-          <Ionicons name="person-outline" size={20} color="#a78bfa" />
+          <Ionicons name="person-outline" size={20} color={colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.sectionTitleBig}>{p.nameTitle}</Text>
@@ -97,7 +93,7 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
         </View>
         {!editing && displayName && (
           <TouchableOpacity style={s.editBtn} onPress={startEdit} activeOpacity={0.7}>
-            <Ionicons name="pencil-outline" size={14} color="#a78bfa" />
+            <Ionicons name="pencil-outline" size={14} color={colors.primary} />
             <Text style={s.editBtnText}>{p.nameEdit}</Text>
           </TouchableOpacity>
         )}
@@ -113,7 +109,7 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
             ref={inputRef}
             style={s.input}
             placeholder={p.namePlaceholder}
-            placeholderTextColor="#4b5563"
+            placeholderTextColor={colors.inkFaint}
             value={value}
             onChangeText={(v) => { setValue(v); setError('') }}
             autoCapitalize="words"
@@ -122,7 +118,7 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
           />
           {error ? (
             <View style={[s.errorBox, { marginBottom: 10 }]}>
-              <Ionicons name="alert-circle-outline" size={15} color="#f87171" />
+              <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
               <Text style={s.errorText}>{error}</Text>
             </View>
           ) : null}
@@ -165,19 +161,19 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
   const [backupCodes, setBackupCodes] = useState<string[]>([])
   const [showingCodes, setShowingCodes] = useState(false)
 
-  // ── Already linked ──────────────────────────────────────────
+  // Already linked
   if (linkedPhone && !showingCodes) {
     return (
       <View style={s.section}>
         <View style={s.sectionHeader}>
-          <View style={[s.iconWrap, { backgroundColor: 'rgba(16,185,129,0.2)' }]}>
-            <Ionicons name="shield-checkmark-outline" size={20} color="#10b981" />
+          <View style={[s.iconWrap, { backgroundColor: colors.successSoft }]}>
+            <Ionicons name="shield-checkmark-outline" size={20} color={colors.success} />
           </View>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
               <Text style={s.sectionTitleBig}>{p.linkedStatus}</Text>
               <View style={s.linkedBadge}>
-                <Ionicons name="lock-closed" size={10} color="#10b981" />
+                <Ionicons name="lock-closed" size={10} color={colors.success} />
                 <Text style={s.linkedBadgeText}>{p.linkedBadge}</Text>
               </View>
             </View>
@@ -215,16 +211,16 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     return (
       <View style={s.section}>
         <View style={s.sectionHeader}>
-          <View style={[s.iconWrap, { backgroundColor: 'rgba(16,185,129,0.2)' }]}>
-            <Ionicons name="checkmark-circle-outline" size={20} color="#10b981" />
+          <View style={[s.iconWrap, { backgroundColor: colors.successSoft }]}>
+            <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={s.sectionTitleBig}>{p.phoneTitle}</Text>
-            <Text style={[s.sectionDesc, { color: '#10b981' }]}>{p.phoneDone}</Text>
+            <Text style={[s.sectionDesc, { color: colors.success }]}>{p.phoneDone}</Text>
           </View>
         </View>
         <View style={s.backupWarn}>
-          <Ionicons name="warning-outline" size={16} color="#f59e0b" />
+          <Ionicons name="warning-outline" size={16} color={colors.primary} />
           <Text style={s.backupWarnText}>{p.phoneBackupWarning}</Text>
         </View>
         <View style={s.backupGrid}>
@@ -236,7 +232,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
             >
               <Text style={s.backupCodeNum}>{i + 1}</Text>
               <Text style={s.backupCodeText}>{code}</Text>
-              <Ionicons name="copy-outline" size={13} color="#6b7280" />
+              <Ionicons name="copy-outline" size={13} color={colors.inkFaint} />
             </TouchableOpacity>
           ))}
         </View>
@@ -255,7 +251,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     <View style={s.section}>
       <View style={s.sectionHeader}>
         <View style={s.iconWrap}>
-          <Ionicons name="phone-portrait-outline" size={20} color="#a78bfa" />
+          <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.sectionTitleBig}>{p.phoneTitle}</Text>
@@ -287,7 +283,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
         <TextInput
           style={s.phoneInput}
           placeholder={p.phonePlaceholder}
-          placeholderTextColor="#4b5563"
+          placeholderTextColor={colors.inkFaint}
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
@@ -299,7 +295,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
       <TextInput
         style={s.input}
         placeholder={p.pinPlaceholder}
-        placeholderTextColor="#4b5563"
+        placeholderTextColor={colors.inkFaint}
         value={pin}
         onChangeText={setPin}
         keyboardType="number-pad"
@@ -311,7 +307,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
       <TextInput
         style={[s.input, { marginBottom: 14 }]}
         placeholder={p.pinConfirmPlaceholder}
-        placeholderTextColor="#4b5563"
+        placeholderTextColor={colors.inkFaint}
         value={pinConfirm}
         onChangeText={setPinConfirm}
         keyboardType="number-pad"
@@ -321,7 +317,7 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
 
       {error ? (
         <View style={s.errorBox}>
-          <Ionicons name="alert-circle-outline" size={15} color="#f87171" />
+          <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
           <Text style={s.errorText}>{error}</Text>
         </View>
       ) : null}
@@ -378,16 +374,8 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
     setLoading(true)
     setError('')
     try {
-      const body = useBackup
-        ? { phone: fullNumber, backup_code: credential }
-        : { phone: fullNumber, pin: credential }
-      // Pass current clientId so any local cards get merged server-side
       const result = await api.recoverVerify(fullNumber, useBackup ? '' : credential, clientId ?? undefined)
-
-      // Fetch the actual cards from DB for the recovered client
       const cards = await api.getCardsForClient(result.clientId)
-
-      // Replace local cards with recovered ones (clears duplicates)
       const mapped = cards.map((c: any) => ({
         clientId: result.clientId,
         cardId: c.id,
@@ -424,20 +412,20 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
         onPress={() => { setShow(!show); if (!show) reset() }}
       >
         <View style={s.iconWrap}>
-          <Ionicons name="refresh-circle-outline" size={20} color="#a78bfa" />
+          <Ionicons name="refresh-circle-outline" size={20} color={colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.sectionTitleBig}>{p.recoveryTitle}</Text>
           <Text style={s.sectionDesc} numberOfLines={2}>{p.recoveryDesc}</Text>
         </View>
-        <Ionicons name={show ? 'chevron-up' : 'chevron-down'} size={18} color="#4b5563" />
+        <Ionicons name={show ? 'chevron-up' : 'chevron-down'} size={18} color={colors.inkFaint} />
       </TouchableOpacity>
 
       {show && (
         <View style={s.recoveryBody}>
           {done ? (
             <View style={s.successBox}>
-              <Ionicons name="checkmark-circle" size={28} color="#10b981" />
+              <Ionicons name="checkmark-circle" size={28} color={colors.success} />
               <View style={{ flex: 1 }}>
                 <Text style={s.successText}>{p.recoveryDone(restoredCount)}</Text>
               </View>
@@ -470,7 +458,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
                 <TextInput
                   style={s.phoneInput}
                   placeholder={p.phonePlaceholder}
-                  placeholderTextColor="#4b5563"
+                  placeholderTextColor={colors.inkFaint}
                   value={phone}
                   onChangeText={setPhone}
                   keyboardType="phone-pad"
@@ -479,7 +467,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
 
               {error ? (
                 <View style={s.errorBox}>
-                  <Ionicons name="alert-circle-outline" size={15} color="#f87171" />
+                  <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
                   <Text style={s.errorText}>{error}</Text>
                 </View>
               ) : null}
@@ -498,7 +486,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
             <>
               <Text style={s.stepBadge}>{p.recoveryStep2}</Text>
               <TouchableOpacity style={s.phoneFoundRow} onPress={() => setStep('phone')}>
-                <Ionicons name="checkmark-circle" size={16} color="#10b981" />
+                <Ionicons name="checkmark-circle" size={16} color={colors.success} />
                 <Text style={s.phoneFoundText}>{fullNumber}</Text>
                 <Text style={s.changeLink}>{p.change}</Text>
               </TouchableOpacity>
@@ -509,7 +497,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
                   <TextInput
                     style={[s.input, { marginBottom: 8 }]}
                     placeholder="••••••"
-                    placeholderTextColor="#4b5563"
+                    placeholderTextColor={colors.inkFaint}
                     value={pin}
                     onChangeText={setPin}
                     keyboardType="number-pad"
@@ -527,7 +515,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
                   <TextInput
                     style={[s.input, { marginBottom: 8 }]}
                     placeholder={p.recoveryBackupPlaceholder}
-                    placeholderTextColor="#4b5563"
+                    placeholderTextColor={colors.inkFaint}
                     value={backupCode}
                     onChangeText={setBackupCode}
                     autoCapitalize="characters"
@@ -541,7 +529,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
 
               {error ? (
                 <View style={[s.errorBox, { marginTop: 8 }]}>
-                  <Ionicons name="alert-circle-outline" size={15} color="#f87171" />
+                  <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
                   <Text style={s.errorText}>{error}</Text>
                 </View>
               ) : null}
@@ -578,11 +566,7 @@ export default function ProfileScreen() {
     setDeleting(true)
     try {
       if (clientId) {
-        const { data, error } = await supabase.functions.invoke('delete-account', {
-          body: { client_id: clientId },
-        })
-        if (error) throw error
-        if (!data?.success) throw new Error(data?.error ?? 'Server error')
+        await api.deleteAccount(clientId)
       }
       clearAll()
       setDeleteModal(false)
@@ -608,8 +592,8 @@ export default function ProfileScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#7c3aed"
-            colors={['#7c3aed']}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       >
@@ -634,32 +618,32 @@ export default function ProfileScreen() {
         <LinkPhoneSection t={t} />
         <RecoverySection t={t} />
 
-        {/* Admin Access */}
+        {/* Admin access */}
         <TouchableOpacity style={s.adminBtn} onPress={() => router.push('/admin/login')}>
-          <View style={s.iconWrap}>
-            <Ionicons name="shield-half-outline" size={20} color="#7c3aed" />
+          <View style={s.adminIconWrap}>
+            <Ionicons name="shield-half-outline" size={20} color={colors.onNight} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={s.adminBtnTitle}>{p.adminAccess}</Text>
             <Text style={s.adminBtnSub}>{p.adminSubtitle}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#7c3aed" />
+          <Ionicons name="chevron-forward" size={16} color={colors.onNightSoft} />
         </TouchableOpacity>
 
-        {/* Need Help */}
+        {/* Need help */}
         <TouchableOpacity
           style={s.helpCard}
           onPress={() => Linking.openURL('https://loyalcard.net/contact')}
           activeOpacity={0.8}
         >
-          <View style={[s.iconWrap, { backgroundColor: 'rgba(59,130,246,0.15)' }]}>
-            <Ionicons name="help-buoy-outline" size={20} color="#60a5fa" />
+          <View style={s.iconWrap}>
+            <Ionicons name="help-buoy-outline" size={20} color={colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={s.helpTitle}>{p.needHelp}</Text>
             <Text style={s.helpSub}>{p.needHelpSub}</Text>
           </View>
-          <Ionicons name="open-outline" size={16} color="#3b82f6" />
+          <Ionicons name="open-outline" size={15} color={colors.inkFaint} />
         </TouchableOpacity>
 
         {/* Legal */}
@@ -669,21 +653,20 @@ export default function ProfileScreen() {
             style={s.legalRow}
             onPress={() => Linking.openURL('https://loyalcard.net/privacy')}
           >
-            <Ionicons name="document-text-outline" size={16} color="#6b7280" />
+            <Ionicons name="document-text-outline" size={16} color={colors.inkSoft} />
             <Text style={s.legalText}>{p.privacyPolicy}</Text>
-            <Ionicons name="open-outline" size={13} color="#4b5563" />
+            <Ionicons name="open-outline" size={13} color={colors.inkFaint} />
           </TouchableOpacity>
           <TouchableOpacity
             style={s.legalRow}
             onPress={() => Linking.openURL('https://loyalcard.net/cookie-policy')}
           >
-            <Ionicons name="shield-outline" size={16} color="#6b7280" />
+            <Ionicons name="shield-outline" size={16} color={colors.inkSoft} />
             <Text style={s.legalText}>{p.cookiePolicy}</Text>
-            <Ionicons name="open-outline" size={13} color="#4b5563" />
+            <Ionicons name="open-outline" size={13} color={colors.inkFaint} />
           </TouchableOpacity>
         </View>
 
-        {/* Name (lower priority — edit once set) */}
         <NameSection t={t} />
 
         {/* Delete account */}
@@ -692,24 +675,24 @@ export default function ProfileScreen() {
           onPress={() => { setDeleteInput(''); setDeleteModal(true) }}
           activeOpacity={0.7}
         >
-          <Ionicons name="trash-outline" size={16} color="#f87171" />
+          <Ionicons name="trash-outline" size={16} color={colors.danger} />
           <View style={{ flex: 1 }}>
             <Text style={s.deleteBtnTitle}>{p.deleteAccountTitle}</Text>
             <Text style={s.deleteBtnSub}>{p.deleteAccountSub}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={14} color="#f87171" />
+          <Ionicons name="chevron-forward" size={14} color={colors.danger} />
         </TouchableOpacity>
 
         <Text style={s.version}>{p.appVersion}</Text>
       </ScrollView>
 
-      {/* ── Delete confirmation modal ─────────────────────────── */}
+      {/* Delete confirmation modal */}
       <Modal visible={deleteModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setDeleteModal(false)}>
         <View style={s.modalWrap}>
           <View style={s.modalHandle} />
 
           <View style={s.modalIconWrap}>
-            <Ionicons name="warning" size={36} color="#f87171" />
+            <Ionicons name="warning" size={34} color={colors.danger} />
           </View>
           <Text style={s.modalTitle}>{p.deleteAccountTitle}</Text>
 
@@ -725,7 +708,7 @@ export default function ProfileScreen() {
             value={deleteInput}
             onChangeText={(v) => setDeleteInput(v.toUpperCase())}
             placeholder={p.deleteConfirmWord}
-            placeholderTextColor="#4b5563"
+            placeholderTextColor={colors.inkFaint}
             autoCapitalize="characters"
             autoCorrect={false}
           />
@@ -750,113 +733,219 @@ export default function ProfileScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  scroll: { padding: 16, paddingBottom: 40 },
-  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, paddingTop: 8 },
-  headerTitle: { color: '#fff', fontSize: 28, fontWeight: '800' },
-  headerSub: { color: '#7c6faa', fontSize: 14, marginTop: 4 },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  scroll: { padding: 20, paddingBottom: 40 },
+  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 },
+  headerTitle: { color: colors.ink, fontSize: 26, fontWeight: '800', letterSpacing: -0.5 },
+  headerSub: { color: colors.inkSoft, fontSize: 14, marginTop: 4 },
 
-  section: { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', padding: 16, marginBottom: 14 },
-  sectionLabel: { color: '#a78bfa', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 },
-  sectionHeader: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 16 },
-  sectionTitleBig: { color: '#fff', fontSize: 15, fontWeight: '700', marginBottom: 2 },
-  sectionDesc: { color: '#6b7280', fontSize: 12, lineHeight: 17 },
-  iconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(124,58,237,0.2)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  section: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 16, marginBottom: 14,
+    ...shadows.card,
+  },
+  sectionHeader: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 14 },
+  sectionTitleBig: { color: colors.ink, fontSize: 15, fontWeight: '700', marginBottom: 2 },
+  sectionDesc: { color: colors.inkSoft, fontSize: 12, lineHeight: 17 },
+  iconWrap: {
+    width: 40, height: 40, borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
   toggleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  recoveryBody: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
-  stepBadge: { color: '#a78bfa', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 14 },
-  phoneFoundRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(16,185,129,0.1)', borderRadius: 10, padding: 10, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)' },
-  phoneFoundText: { color: '#fff', fontWeight: '600', flex: 1 },
-  changeLink: { color: '#7c3aed', fontSize: 12, fontWeight: '600' },
+  recoveryBody: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
+  stepBadge: { color: colors.primary, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 14 },
+  phoneFoundRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: colors.successSoft, borderRadius: radius.sm,
+    padding: 10, marginBottom: 14,
+    borderWidth: 1, borderColor: colors.successBorder,
+  },
+  phoneFoundText: { color: colors.ink, fontWeight: '600', flex: 1 },
+  changeLink: { color: colors.primary, fontSize: 12, fontWeight: '700' },
   altLink: { marginBottom: 4 },
-  altLinkText: { color: '#7c3aed', fontSize: 13, fontWeight: '600' },
+  altLinkText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
 
   langFlags: { flexDirection: 'row', gap: 6, alignItems: 'flex-start', paddingTop: 6 },
-  flagBtn: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  flagBtnActive: { backgroundColor: 'rgba(124,58,237,0.25)', borderColor: '#7c3aed' },
-  flagText: { fontSize: 19 },
+  flagBtn: {
+    width: 36, height: 36, borderRadius: radius.sm,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1, borderColor: colors.borderStrong,
+  },
+  flagBtnActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
+  flagText: { fontSize: 18 },
 
-  inputLabel: { color: '#6b7280', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 },
+  inputLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 },
   prefixRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
-  prefixBtn: { flex: 1, alignItems: 'center', paddingVertical: 9, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', gap: 2 },
-  prefixBtnActive: { backgroundColor: 'rgba(124,58,237,0.25)', borderColor: '#7c3aed' },
+  prefixBtn: {
+    flex: 1, alignItems: 'center', paddingVertical: 9,
+    borderRadius: radius.sm, backgroundColor: colors.bgDeep,
+    borderWidth: 1, borderColor: colors.border, gap: 2,
+  },
+  prefixBtnActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
   prefixFlag: { fontSize: 18 },
-  prefixCode: { color: '#6b7280', fontSize: 11, fontWeight: '700' },
-  prefixCodeActive: { color: '#c4b5fd' },
+  prefixCode: { color: colors.inkSoft, fontSize: 11, fontWeight: '700' },
+  prefixCodeActive: { color: colors.primary },
   phoneRow: { flexDirection: 'row', gap: 8 },
-  prefixDisplay: { backgroundColor: 'rgba(124,58,237,0.15)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.3)', paddingHorizontal: 12, justifyContent: 'center' },
-  prefixDisplayText: { color: '#a78bfa', fontWeight: '700', fontSize: 15 },
-  phoneInput: { flex: 1, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 14, paddingVertical: 11, fontSize: 15 },
-  input: { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 14, paddingVertical: 11, fontSize: 15, marginBottom: 12 },
+  prefixDisplay: {
+    backgroundColor: colors.primarySoft, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.primaryBorder,
+    paddingHorizontal: 12, justifyContent: 'center',
+  },
+  prefixDisplayText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
+  phoneInput: {
+    flex: 1, backgroundColor: colors.bgDeep,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    color: colors.ink, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15,
+  },
+  input: {
+    backgroundColor: colors.bgDeep,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    color: colors.ink, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15, marginBottom: 12,
+  },
 
-  errorBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: 'rgba(248,113,113,0.1)', borderRadius: 10, padding: 10, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(248,113,113,0.25)' },
-  errorText: { color: '#f87171', fontSize: 13, flex: 1 },
-  successBox: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(16,185,129,0.15)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)' },
-  successText: { color: '#10b981', fontWeight: '600', fontSize: 14 },
+  errorBox: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    backgroundColor: colors.dangerSoft, borderRadius: radius.sm,
+    padding: 10, marginBottom: 10,
+    borderWidth: 1, borderColor: colors.dangerBorder,
+  },
+  errorText: { color: colors.danger, fontSize: 13, flex: 1 },
+  successBox: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: colors.successSoft, borderRadius: radius.md,
+    padding: 14, borderWidth: 1, borderColor: colors.successBorder,
+  },
+  successText: { color: colors.success, fontWeight: '700', fontSize: 14 },
 
-  backupWarn: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: 'rgba(245,158,11,0.1)', borderRadius: 10, padding: 10, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)' },
-  backupWarnText: { color: '#fbbf24', fontSize: 12, flex: 1, lineHeight: 18 },
+  backupWarn: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    backgroundColor: colors.primarySoft, borderRadius: radius.sm,
+    padding: 10, marginBottom: 14,
+    borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  backupWarnText: { color: colors.inkMid, fontSize: 12, flex: 1, lineHeight: 18 },
   backupGrid: { gap: 8, marginBottom: 16 },
-  backupCode: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
-  backupCodeNum: { color: '#6b7280', fontSize: 12, fontWeight: '700', width: 16 },
-  backupCodeText: { flex: 1, color: '#e5e7eb', fontFamily: 'monospace', fontSize: 16, fontWeight: '700', letterSpacing: 2 },
+  backupCode: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: colors.night, borderRadius: radius.sm,
+    padding: 12, borderWidth: 1, borderColor: colors.nightBorder,
+  },
+  backupCodeNum: { color: colors.onNightSoft, fontSize: 12, fontWeight: '700', width: 16 },
+  backupCodeText: { flex: 1, color: colors.onNight, fontFamily: 'monospace', fontSize: 16, fontWeight: '700', letterSpacing: 2 },
 
-  primaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#7c3aed', borderRadius: 14, paddingVertical: 13 },
+  primaryBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: 13,
+    ...shadows.primaryBtn,
+  },
   btnDisabled: { opacity: 0.6 },
   primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
-  linkedBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(16,185,129,0.15)', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)' },
-  linkedBadgeText: { color: '#10b981', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  linkedPhone: { color: '#e5e7eb', fontSize: 16, fontWeight: '700', fontFamily: 'monospace', letterSpacing: 1, marginBottom: 6 },
-  nameDisplay: { backgroundColor: 'rgba(124,58,237,0.12)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', paddingHorizontal: 14, paddingVertical: 12 },
-  nameDisplayText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  linkedBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: colors.successSoft, borderRadius: 8,
+    paddingHorizontal: 7, paddingVertical: 3,
+    borderWidth: 1, borderColor: colors.successBorder,
+  },
+  linkedBadgeText: { color: colors.success, fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  linkedPhone: { color: colors.ink, fontSize: 16, fontWeight: '700', fontFamily: 'monospace', letterSpacing: 1, marginBottom: 6 },
+  nameDisplay: {
+    backgroundColor: colors.bgDeep, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border,
+    paddingHorizontal: 14, paddingVertical: 12,
+  },
+  nameDisplayText: { color: colors.ink, fontSize: 17, fontWeight: '700' },
   nameActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(167,139,250,0.12)', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(167,139,250,0.25)' },
-  editBtnText: { color: '#a78bfa', fontSize: 12, fontWeight: '600' },
-  cancelBtn: { paddingHorizontal: 16, paddingVertical: 13, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  cancelBtnText: { color: '#6b7280', fontWeight: '600', fontSize: 14 },
+  editBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: colors.primarySoft, borderRadius: radius.sm,
+    paddingHorizontal: 10, paddingVertical: 6,
+    borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  editBtnText: { color: colors.primary, fontSize: 12, fontWeight: '700' },
+  cancelBtn: {
+    paddingHorizontal: 16, paddingVertical: 13, borderRadius: radius.md,
+    backgroundColor: colors.bgDeep,
+    borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  cancelBtnText: { color: colors.inkSoft, fontWeight: '600', fontSize: 14 },
+
   adminBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: 'rgba(124,58,237,0.1)',
-    borderRadius: 18, padding: 16, marginBottom: 14,
-    borderWidth: 1, borderColor: 'rgba(124,58,237,0.35)',
+    backgroundColor: colors.night,
+    borderRadius: radius.lg, padding: 16, marginBottom: 14,
+    ...shadows.night,
   },
-  adminBtnTitle: { color: '#c4b5fd', fontSize: 15, fontWeight: '700', marginBottom: 2 },
-  adminBtnSub: { color: '#7c3aed', fontSize: 11 },
-  helpCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(59,130,246,0.08)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(59,130,246,0.2)', padding: 14, marginBottom: 12 },
-  helpTitle: { color: '#93c5fd', fontSize: 14, fontWeight: '700', marginBottom: 2 },
-  helpSub: { color: '#3b82f6', fontSize: 11, opacity: 0.85 },
-  version: { color: '#374151', fontSize: 12, textAlign: 'center', marginTop: 8 },
+  adminIconWrap: {
+    width: 40, height: 40, borderRadius: radius.md,
+    backgroundColor: 'rgba(124,58,237,0.35)',
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  adminBtnTitle: { color: colors.onNight, fontSize: 15, fontWeight: '700', marginBottom: 2 },
+  adminBtnSub: { color: colors.onNightSoft, fontSize: 11 },
 
-  // Legal section
+  helpCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14, marginBottom: 12,
+    ...shadows.card,
+  },
+  helpTitle: { color: colors.ink, fontSize: 14, fontWeight: '700', marginBottom: 2 },
+  helpSub: { color: colors.inkSoft, fontSize: 11 },
+  version: { color: colors.inkFaint, fontSize: 12, textAlign: 'center', marginTop: 8 },
+
   legalSection: { marginBottom: 12, paddingHorizontal: 4 },
-  legalTitle: { color: '#374151', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 },
-  legalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.04)' },
-  legalText: { flex: 1, color: '#4b5563', fontSize: 13 },
+  legalTitle: { color: colors.inkFaint, fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 },
+  legalRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  legalText: { flex: 1, color: colors.inkMid, fontSize: 13 },
 
-  // Delete account button
   deleteBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: 'rgba(248,113,113,0.06)',
-    borderRadius: 14, padding: 14, marginBottom: 12,
-    borderWidth: 1, borderColor: 'rgba(248,113,113,0.2)',
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.md, padding: 14, marginBottom: 12,
+    borderWidth: 1, borderColor: colors.dangerBorder,
   },
-  deleteBtnTitle: { color: '#f87171', fontSize: 14, fontWeight: '700', marginBottom: 1 },
-  deleteBtnSub: { color: '#7f1d1d', fontSize: 11 },
+  deleteBtnTitle: { color: colors.danger, fontSize: 14, fontWeight: '700', marginBottom: 1 },
+  deleteBtnSub: { color: colors.danger, fontSize: 11, opacity: 0.7 },
 
-  // Delete modal
-  modalWrap: { flex: 1, backgroundColor: '#0f0d2e', padding: 24, paddingTop: 16 },
-  modalHandle: { width: 36, height: 4, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 2, alignSelf: 'center', marginBottom: 28 },
-  modalIconWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(248,113,113,0.12)', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 16, borderWidth: 2, borderColor: 'rgba(248,113,113,0.25)' },
-  modalTitle: { color: '#fff', fontSize: 22, fontWeight: '800', textAlign: 'center', marginBottom: 20 },
-  modalWarnBox: { backgroundColor: 'rgba(248,113,113,0.08)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(248,113,113,0.2)', padding: 16, marginBottom: 24 },
-  modalWarnText: { color: '#fca5a5', fontSize: 14, lineHeight: 21 },
-  modalPrompt: { color: '#6b7280', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
-  modalInput: { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 12, borderWidth: 1.5, borderColor: 'rgba(248,113,113,0.3)', color: '#fff', paddingHorizontal: 16, paddingVertical: 13, fontSize: 18, fontWeight: '700', letterSpacing: 2, textAlign: 'center', marginBottom: 20 },
-  modalInputValid: { borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.08)' },
-  modalDeleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#dc2626', borderRadius: 14, paddingVertical: 14, marginBottom: 12 },
+  modalWrap: { flex: 1, backgroundColor: colors.bg, padding: 24, paddingTop: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: colors.borderStrong, borderRadius: 2, alignSelf: 'center', marginBottom: 28 },
+  modalIconWrap: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: colors.dangerSoft,
+    alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 16,
+    borderWidth: 1, borderColor: colors.dangerBorder,
+  },
+  modalTitle: { color: colors.ink, fontSize: 22, fontWeight: '800', textAlign: 'center', marginBottom: 20 },
+  modalWarnBox: {
+    backgroundColor: colors.dangerSoft, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.dangerBorder,
+    padding: 16, marginBottom: 24,
+  },
+  modalWarnText: { color: colors.inkMid, fontSize: 14, lineHeight: 21 },
+  modalPrompt: { color: colors.inkSoft, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
+  modalInput: {
+    backgroundColor: colors.surface, borderRadius: radius.md,
+    borderWidth: 1.5, borderColor: colors.dangerBorder,
+    color: colors.ink, paddingHorizontal: 16, paddingVertical: 13,
+    fontSize: 18, fontWeight: '700', letterSpacing: 2, textAlign: 'center', marginBottom: 20,
+  },
+  modalInputValid: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
+  modalDeleteBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: colors.danger, borderRadius: radius.md,
+    paddingVertical: 14, marginBottom: 12,
+  },
   modalDeleteBtnDisabled: { opacity: 0.35 },
   modalDeleteBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
   modalCancelBtn: { alignItems: 'center', paddingVertical: 14 },
-  modalCancelText: { color: '#6b7280', fontSize: 15, fontWeight: '600' },
+  modalCancelText: { color: colors.inkSoft, fontSize: 15, fontWeight: '600' },
 })

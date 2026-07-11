@@ -8,6 +8,7 @@ import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
 import * as XLSX from 'xlsx'
 import { exportExcel } from '@/lib/excel'
+import { colors, radius, shadows } from '@/theme'
 
 type Range = '7d' | '30d' | '90d'
 
@@ -62,12 +63,10 @@ export default function AdminReportsScreen() {
 
       const rows = (events as any[]) ?? []
 
-      // Aggregates
       setTotalScans(rows.length)
       setTotalRewards(rows.filter((r) => r.reward_applied).length)
       setUniqueClients(new Set(rows.map((r) => r.card_id)).size)
 
-      // Top products
       const prodMap = new Map<string, ProductStat>()
       for (const e of rows) {
         const name = e.products?.name ?? a.productDefault
@@ -79,7 +78,6 @@ export default function AdminReportsScreen() {
       }
       setTopProducts([...prodMap.values()].sort((a, b) => b.scans - a.scans).slice(0, 5))
 
-      // Daily breakdown
       const dayMap = new Map<string, DayStat>()
       for (const e of rows) {
         const day = e.scanned_at.slice(0, 10)
@@ -159,7 +157,7 @@ export default function AdminReportsScreen() {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>{t.admin.reports}</Text>
@@ -190,23 +188,23 @@ export default function AdminReportsScreen() {
 
       {loading ? (
         <View style={s.center}>
-          <ActivityIndicator size="large" color="#7c3aed" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={s.loadingText}>{t.loading}</Text>
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.body}>
           {/* KPI grid */}
           <View style={s.kpiGrid}>
-            {[
-              { label: a.totalScansLabel, value: totalScans, icon: 'scan-outline', color: '#7c3aed' },
-              { label: a.rewardsGivenLabel, value: totalRewards, icon: 'gift-outline', color: '#d97706' },
-              { label: a.uniqueClientsLabel, value: uniqueClients, icon: 'people-outline', color: '#059669' },
-              { label: a.avgPerDayLabel, value: avgPerDay, icon: 'trending-up-outline', color: '#0891b2' },
-              { label: a.rewardRateLabel, value: `${conversionRate}%`, icon: 'trophy-outline', color: '#7c3aed' },
-            ].map((kpi) => (
+            {([
+              { label: a.totalScansLabel, value: totalScans, icon: 'scan-outline' },
+              { label: a.rewardsGivenLabel, value: totalRewards, icon: 'gift-outline' },
+              { label: a.uniqueClientsLabel, value: uniqueClients, icon: 'people-outline' },
+              { label: a.avgPerDayLabel, value: avgPerDay, icon: 'trending-up-outline' },
+              { label: a.rewardRateLabel, value: `${conversionRate}%`, icon: 'trophy-outline' },
+            ] as const).map((kpi) => (
               <View key={kpi.label} style={s.kpiCard}>
-                <View style={[s.kpiIcon, { backgroundColor: kpi.color + '22' }]}>
-                  <Ionicons name={kpi.icon as any} size={16} color={kpi.color} />
+                <View style={s.kpiIcon}>
+                  <Ionicons name={kpi.icon} size={16} color={colors.primary} />
                 </View>
                 <Text style={s.kpiValue}>{kpi.value}</Text>
                 <Text style={s.kpiLabel}>{kpi.label}</Text>
@@ -258,7 +256,7 @@ export default function AdminReportsScreen() {
 
           {totalScans === 0 && (
             <View style={s.emptyBox}>
-              <Ionicons name="bar-chart-outline" size={48} color="#374151" />
+              <Ionicons name="bar-chart-outline" size={48} color={colors.inkFaint} />
               <Text style={s.emptyText}>{a.noScansMsg}</Text>
             </View>
           )}
@@ -269,41 +267,83 @@ export default function AdminReportsScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#7c3aed', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+  },
+  exportBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.sm,
+    ...shadows.primaryBtn,
+  },
   exportBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
-  backText: { color: '#fff', fontSize: 15 },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  rangePicker: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginBottom: 16 },
-  rangeBtn: { flex: 1, paddingVertical: 9, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center' },
-  rangeBtnActive: { backgroundColor: 'rgba(124,58,237,0.25)', borderColor: '#7c3aed' },
-  rangeBtnText: { color: '#6b7280', fontWeight: '600', fontSize: 13 },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' },
+
+  rangePicker: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, marginBottom: 16 },
+  rangeBtn: {
+    flex: 1, paddingVertical: 9, borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1, borderColor: colors.borderStrong,
+    alignItems: 'center',
+  },
+  rangeBtnActive: { backgroundColor: colors.ink, borderColor: colors.ink },
+  rangeBtnText: { color: colors.inkMid, fontWeight: '600', fontSize: 13 },
   rangeBtnTextActive: { color: '#fff' },
+
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingText: { color: '#a78bfa', fontSize: 14 },
-  body: { paddingHorizontal: 16, paddingBottom: 40, gap: 20 },
+  loadingText: { color: colors.inkSoft, fontSize: 14 },
+  body: { paddingHorizontal: 20, paddingBottom: 40, gap: 20 },
+
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  kpiCard: { flex: 1, minWidth: '45%', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', padding: 14, gap: 5 },
-  kpiIcon: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  kpiValue: { color: '#fff', fontSize: 24, fontWeight: '800', marginTop: 4 },
-  kpiLabel: { color: '#7c6faa', fontSize: 11 },
+  kpiCard: {
+    flex: 1, minWidth: '45%',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14, gap: 5,
+    ...shadows.card,
+  },
+  kpiIcon: {
+    width: 32, height: 32, borderRadius: 9,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  kpiValue: { color: colors.ink, fontSize: 24, fontWeight: '800', marginTop: 4 },
+  kpiLabel: { color: colors.inkSoft, fontSize: 11 },
+
   section: { gap: 12 },
-  sectionTitle: { color: '#7c6faa', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8 },
-  chartWrap: { flexDirection: 'row', alignItems: 'flex-end', height: 100, gap: 3, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: 10 },
+  sectionTitle: { color: colors.inkSoft, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8 },
+  chartWrap: {
+    flexDirection: 'row', alignItems: 'flex-end',
+    height: 110, gap: 3,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 12,
+    ...shadows.card,
+  },
   barCol: { flex: 1, alignItems: 'center', gap: 4 },
   barTrack: { flex: 1, width: '100%', justifyContent: 'flex-end' },
-  barFill: { width: '100%', backgroundColor: '#7c3aed', borderRadius: 3, minHeight: 3 },
-  barLabel: { color: '#4b5563', fontSize: 8 },
-  prodRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 12 },
-  prodRank: { color: '#4b5563', fontWeight: '700', fontSize: 14, width: 24, textAlign: 'center' },
+  barFill: { width: '100%', backgroundColor: colors.primary, borderRadius: 3, minHeight: 3 },
+  barLabel: { color: colors.inkFaint, fontSize: 8 },
+
+  prodRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    padding: 12,
+    ...shadows.card,
+  },
+  prodRank: { color: colors.inkFaint, fontWeight: '800', fontSize: 14, width: 24, textAlign: 'center' },
   prodEmoji: { fontSize: 22 },
-  prodName: { flex: 1, color: '#fff', fontWeight: '600', fontSize: 14 },
+  prodName: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 14 },
   prodStats: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  prodStat: { color: '#6b7280', fontSize: 12 },
-  prodStatNum: { color: '#a78bfa', fontWeight: '700' },
-  prodReward: { color: '#d97706', fontSize: 12 },
+  prodStat: { color: colors.inkSoft, fontSize: 12 },
+  prodStatNum: { color: colors.primary, fontWeight: '800' },
+  prodReward: { color: colors.primary, fontSize: 12, fontWeight: '600' },
+
   emptyBox: { alignItems: 'center', gap: 12, paddingVertical: 40 },
-  emptyText: { color: '#6b7280', fontSize: 14, textAlign: 'center' },
+  emptyText: { color: colors.inkSoft, fontSize: 14, textAlign: 'center' },
 })

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { supabase } from '@/lib/supabase'
 import { useAdminStore } from '@/store'
+import { colors, radius, shadows } from '@/theme'
 
 export default function AdminLoginScreen() {
   const router = useRouter()
@@ -50,23 +51,23 @@ export default function AdminLoginScreen() {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>Indietro</Text>
         </TouchableOpacity>
       </View>
 
       <View style={s.body}>
         <View style={s.iconWrap}>
-          <Ionicons name="shield-checkmark-outline" size={48} color="#7c3aed" />
+          <Ionicons name="shield-checkmark-outline" size={40} color={colors.onNight} />
         </View>
         <Text style={s.title}>Admin Login</Text>
         <Text style={s.sub}>Accesso riservato agli amministratori</Text>
 
-        <View style={s.form}>
+        <View style={s.formCard}>
           <TextInput
             style={s.input}
             placeholder="Email"
-            placeholderTextColor="#4b5563"
+            placeholderTextColor={colors.inkFaint}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -75,22 +76,22 @@ export default function AdminLoginScreen() {
           />
           <View style={s.passWrap}>
             <TextInput
-              style={[s.input, { flex: 1, marginBottom: 0 }]}
+              style={[s.input, { flex: 1, marginBottom: 0, borderWidth: 0, backgroundColor: 'transparent' }]}
               placeholder="Password"
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPass}
               autoComplete="password"
             />
             <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPass(!showPass)}>
-              <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color="#4b5563" />
+              <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.inkFaint} />
             </TouchableOpacity>
           </View>
 
           {error ? (
             <View style={s.errorBox}>
-              <Ionicons name="alert-circle-outline" size={16} color="#f87171" />
+              <Ionicons name="alert-circle-outline" size={16} color={colors.danger} />
               <Text style={s.errorText}>{error}</Text>
             </View>
           ) : null}
@@ -111,21 +112,50 @@ export default function AdminLoginScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
+  safe: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  backText: { color: '#fff', fontSize: 15 },
-  body: { flex: 1, paddingHorizontal: 24, justifyContent: 'center', gap: 8 },
-  iconWrap: { alignItems: 'center', marginBottom: 8 },
-  title: { color: '#fff', fontSize: 28, fontWeight: '800', textAlign: 'center' },
-  sub: { color: '#6b7280', fontSize: 14, textAlign: 'center', marginBottom: 24 },
-  form: { gap: 12 },
-  input: { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, marginBottom: 0 },
-  passWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', paddingRight: 12 },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  body: { flex: 1, paddingHorizontal: 24, justifyContent: 'center', gap: 8, paddingBottom: 60 },
+  iconWrap: {
+    width: 84, height: 84, borderRadius: 24,
+    backgroundColor: colors.night,
+    alignItems: 'center', justifyContent: 'center',
+    alignSelf: 'center', marginBottom: 10,
+    ...shadows.night,
+  },
+  title: { color: colors.ink, fontSize: 28, fontWeight: '800', textAlign: 'center', letterSpacing: -0.5 },
+  sub: { color: colors.inkSoft, fontSize: 14, textAlign: 'center', marginBottom: 24 },
+
+  formCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border,
+    padding: 18, gap: 12,
+    ...shadows.card,
+  },
+  input: {
+    backgroundColor: colors.bgDeep,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    color: colors.ink, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15,
+  },
+  passWrap: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: colors.bgDeep,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    paddingRight: 12,
+  },
   eyeBtn: { padding: 4 },
-  errorBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(248,113,113,0.1)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(248,113,113,0.3)' },
-  errorText: { color: '#f87171', fontSize: 13, flex: 1 },
-  loginBtn: { backgroundColor: '#7c3aed', borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 4 },
+  errorBox: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: colors.dangerSoft, borderRadius: radius.sm,
+    padding: 12, borderWidth: 1, borderColor: colors.dangerBorder,
+  },
+  errorText: { color: colors.danger, fontSize: 13, flex: 1 },
+  loginBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.md,
+    paddingVertical: 15, alignItems: 'center', marginTop: 4,
+    ...shadows.primaryBtn,
+  },
   loginBtnDisabled: { opacity: 0.6 },
   loginBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 })

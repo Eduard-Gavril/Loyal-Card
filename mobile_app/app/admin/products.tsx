@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import { colors, radius, shadows } from '@/theme'
 
 const EMOJIS = ['☕', '🍕', '🍔', '🍰', '🥗', '🍜', '🛍️', '💄', '💪', '🎁', '🥤', '🍦', '🌮', '🥩', '🍺', '✂️']
 
@@ -235,7 +236,7 @@ export default function AdminProductsScreen() {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>{a.products}</Text>
@@ -245,7 +246,7 @@ export default function AdminProductsScreen() {
       </View>
 
       {loading ? (
-        <View style={s.center}><ActivityIndicator size="large" color="#7c3aed" /></View>
+        <View style={s.center}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : (
         <FlatList
           data={products}
@@ -254,7 +255,7 @@ export default function AdminProductsScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={s.center}>
-              <Ionicons name="cube-outline" size={48} color="#374151" />
+              <Ionicons name="cube-outline" size={48} color={colors.inkFaint} />
               <Text style={s.emptyText}>{a.noProductsMsg}</Text>
             </View>
           }
@@ -262,7 +263,9 @@ export default function AdminProductsScreen() {
             <View style={s.productCard}>
               <View style={s.productTop}>
                 <View style={s.productLeft}>
-                  <Text style={s.productEmoji}>{p.metadata?.emoji ?? '🛍️'}</Text>
+                  <View style={s.productEmojiWrap}>
+                    <Text style={s.productEmoji}>{p.metadata?.emoji ?? '🛍️'}</Text>
+                  </View>
                   <View>
                     <Text style={s.productName}>{p.name}</Text>
                     {p.metadata?.category && <Text style={s.productCat}>{p.metadata.category}</Text>}
@@ -272,7 +275,7 @@ export default function AdminProductsScreen() {
                 <Switch
                   value={p.active}
                   onValueChange={() => toggleProductActive(p)}
-                  trackColor={{ false: '#374151', true: '#7c3aed' }}
+                  trackColor={{ false: colors.borderStrong, true: colors.primary }}
                   thumbColor="#fff"
                 />
               </View>
@@ -282,7 +285,11 @@ export default function AdminProductsScreen() {
                 <View style={s.rulesList}>
                   {productRules(p.id).map((r) => (
                     <View key={r.id} style={s.ruleChip}>
-                      <Text style={s.ruleChipIcon}>{r.active ? '✅' : '⏸️'}</Text>
+                      <Ionicons
+                        name={r.active ? 'checkmark-circle' : 'pause-circle-outline'}
+                        size={13}
+                        color={r.active ? colors.primary : colors.inkFaint}
+                      />
                       <Text style={s.ruleChipText} numberOfLines={1}>
                         {r.name} · {r.buy_count} → {r.reward_count > 0 ? `×${r.reward_count}` : `${r.discount_percent}%`}
                       </Text>
@@ -294,16 +301,16 @@ export default function AdminProductsScreen() {
               {/* Actions */}
               <View style={s.productActions}>
                 <TouchableOpacity style={s.actionBtn} onPress={() => openRules(p)}>
-                  <Ionicons name="trophy-outline" size={15} color="#a78bfa" />
+                  <Ionicons name="trophy-outline" size={15} color={colors.primary} />
                   <Text style={s.actionText}>Regole</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={s.actionBtn} onPress={() => openEditProduct(p)}>
-                  <Ionicons name="pencil-outline" size={15} color="#a78bfa" />
+                  <Ionicons name="pencil-outline" size={15} color={colors.primary} />
                   <Text style={s.actionText}>Modifica</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[s.actionBtn, s.actionBtnDanger]} onPress={() => handleDeleteProduct(p)}>
-                  <Ionicons name="trash-outline" size={15} color="#f87171" />
-                  <Text style={[s.actionText, { color: '#f87171' }]}>Elimina</Text>
+                  <Ionicons name="trash-outline" size={15} color={colors.danger} />
+                  <Text style={[s.actionText, { color: colors.danger }]}>Elimina</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -316,11 +323,11 @@ export default function AdminProductsScreen() {
         <SafeAreaView style={s.modal}>
           <View style={s.modalHeader}>
             <TouchableOpacity onPress={() => setProductModal(false)}>
-              <Ionicons name="close" size={24} color="#fff" />
+              <Ionicons name="close" size={24} color={colors.ink} />
             </TouchableOpacity>
-            <Text style={s.modalTitle}>{editingProduct ? 'Edit product' : 'New product'}</Text>
+            <Text style={s.modalTitle}>{editingProduct ? 'Modifica prodotto' : 'Nuovo prodotto'}</Text>
             <TouchableOpacity onPress={handleSaveProduct} disabled={savingProduct}>
-              {savingProduct ? <ActivityIndicator color="#7c3aed" /> : <Text style={s.modalSave}>{a.save}</Text>}
+              {savingProduct ? <ActivityIndicator color={colors.primary} /> : <Text style={s.modalSave}>{a.save}</Text>}
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={s.modalBody}>
@@ -328,7 +335,7 @@ export default function AdminProductsScreen() {
             <TextInput
               style={s.input}
               placeholder="Nome prodotto"
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
               value={productForm.name}
               onChangeText={(v) => setProductForm((f) => ({ ...f, name: v }))}
             />
@@ -350,7 +357,7 @@ export default function AdminProductsScreen() {
             <TextInput
               style={s.input}
               placeholder="es. Bevande, Cibo, Servizi..."
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
               value={productForm.category}
               onChangeText={(v) => setProductForm((f) => ({ ...f, category: v }))}
             />
@@ -359,7 +366,7 @@ export default function AdminProductsScreen() {
             <TextInput
               style={s.input}
               placeholder="0.00 lei"
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={colors.inkFaint}
               value={productForm.price}
               onChangeText={(v) => setProductForm((f) => ({ ...f, price: v }))}
               keyboardType="decimal-pad"
@@ -371,7 +378,7 @@ export default function AdminProductsScreen() {
                 <TextInput
                   style={s.input}
                   placeholder="5"
-                  placeholderTextColor="#4b5563"
+                  placeholderTextColor={colors.inkFaint}
                   value={productForm.scansRequired}
                   onChangeText={(v) => setProductForm((f) => ({ ...f, scansRequired: v }))}
                   keyboardType="number-pad"
@@ -387,11 +394,11 @@ export default function AdminProductsScreen() {
         <SafeAreaView style={s.modal}>
           <View style={s.modalHeader}>
             <TouchableOpacity onPress={() => setRulesModal(false)}>
-              <Ionicons name="close" size={24} color="#fff" />
+              <Ionicons name="close" size={24} color={colors.ink} />
             </TouchableOpacity>
-            <Text style={s.modalTitle}>Regole — {selectedProduct?.name}</Text>
+            <Text style={s.modalTitle} numberOfLines={1}>Regole — {selectedProduct?.name}</Text>
             <TouchableOpacity onPress={openAddRule}>
-              <Ionicons name="add-circle" size={26} color="#7c3aed" />
+              <Ionicons name="add-circle" size={26} color={colors.primary} />
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={s.modalBody}>
@@ -411,19 +418,19 @@ export default function AdminProductsScreen() {
                   <Switch
                     value={r.active}
                     onValueChange={() => toggleRuleActive(r)}
-                    trackColor={{ false: '#374151', true: '#7c3aed' }}
+                    trackColor={{ false: colors.borderStrong, true: colors.primary }}
                     thumbColor="#fff"
                     style={{ transform: [{ scale: 0.8 }] }}
                   />
                 </View>
                 <View style={s.ruleActions}>
                   <TouchableOpacity style={s.actionBtn} onPress={() => openEditRule(r)}>
-                    <Ionicons name="pencil-outline" size={14} color="#a78bfa" />
+                    <Ionicons name="pencil-outline" size={14} color={colors.primary} />
                     <Text style={s.actionText}>Modifica</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[s.actionBtn, s.actionBtnDanger]} onPress={() => handleDeleteRule(r)}>
-                    <Ionicons name="trash-outline" size={14} color="#f87171" />
-                    <Text style={[s.actionText, { color: '#f87171' }]}>Elimina</Text>
+                    <Ionicons name="trash-outline" size={14} color={colors.danger} />
+                    <Text style={[s.actionText, { color: colors.danger }]}>Elimina</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -435,15 +442,15 @@ export default function AdminProductsScreen() {
                 <Text style={s.ruleFormTitle}>{editingRule ? 'Modifica regola' : 'Nuova regola'}</Text>
 
                 <Text style={s.fieldLabel}>Nome regola *</Text>
-                <TextInput style={s.input} placeholder="es. Caffè gratuito" placeholderTextColor="#4b5563"
+                <TextInput style={s.input} placeholder="es. Caffè gratuito" placeholderTextColor={colors.inkFaint}
                   value={ruleForm.name} onChangeText={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
 
                 <Text style={s.fieldLabel}>Descrizione</Text>
-                <TextInput style={s.input} placeholder="Descrizione opzionale" placeholderTextColor="#4b5563"
+                <TextInput style={s.input} placeholder="Descrizione opzionale" placeholderTextColor={colors.inkFaint}
                   value={ruleForm.description} onChangeText={(v) => setRuleForm((f) => ({ ...f, description: v }))} />
 
                 <Text style={s.fieldLabel}>Scansioni necessarie</Text>
-                <TextInput style={s.input} placeholder="5" placeholderTextColor="#4b5563"
+                <TextInput style={s.input} placeholder="5" placeholderTextColor={colors.inkFaint}
                   value={ruleForm.buy_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, buy_count: v }))}
                   keyboardType="number-pad" />
 
@@ -465,21 +472,21 @@ export default function AdminProductsScreen() {
                 {ruleForm.reward_type === 'free_product' ? (
                   <>
                     <Text style={s.fieldLabel}>Quantità gratuita</Text>
-                    <TextInput style={s.input} placeholder="1" placeholderTextColor="#4b5563"
+                    <TextInput style={s.input} placeholder="1" placeholderTextColor={colors.inkFaint}
                       value={ruleForm.reward_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, reward_count: v }))}
                       keyboardType="number-pad" />
                   </>
                 ) : (
                   <>
                     <Text style={s.fieldLabel}>Percentuale sconto (1-100)</Text>
-                    <TextInput style={s.input} placeholder="10" placeholderTextColor="#4b5563"
+                    <TextInput style={s.input} placeholder="10" placeholderTextColor={colors.inkFaint}
                       value={ruleForm.discount_percent} onChangeText={(v) => setRuleForm((f) => ({ ...f, discount_percent: v }))}
                       keyboardType="number-pad" />
                   </>
                 )}
 
                 <Text style={s.fieldLabel}>Priorità</Text>
-                <TextInput style={s.input} placeholder="1" placeholderTextColor="#4b5563"
+                <TextInput style={s.input} placeholder="1" placeholderTextColor={colors.inkFaint}
                   value={ruleForm.priority} onChangeText={(v) => setRuleForm((f) => ({ ...f, priority: v }))}
                   keyboardType="number-pad" />
 
@@ -501,67 +508,138 @@ export default function AdminProductsScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f0d2e' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, width: 80 },
-  backText: { color: '#fff', fontSize: 15 },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  addBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center' },
-  list: { padding: 16, gap: 12, paddingBottom: 40 },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+  },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
+  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
+  headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' },
+  addBtn: {
+    width: 36, height: 36, borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+    ...shadows.primaryBtn,
+  },
+  list: { padding: 20, gap: 12, paddingBottom: 40 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 40 },
-  emptyText: { color: '#6b7280', fontSize: 14, textAlign: 'center' },
+  emptyText: { color: colors.inkSoft, fontSize: 14, textAlign: 'center' },
 
-  productCard: { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', padding: 14, gap: 12 },
+  productCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14, gap: 12,
+    ...shadows.card,
+  },
   productTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   productLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  productEmoji: { fontSize: 32 },
-  productName: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  productCat: { color: '#6b7280', fontSize: 12, marginTop: 2 },
-  productPrice: { color: '#a78bfa', fontSize: 13, marginTop: 2 },
+  productEmojiWrap: {
+    width: 48, height: 48, borderRadius: radius.md,
+    backgroundColor: colors.bgDeep,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  productEmoji: { fontSize: 26 },
+  productName: { color: colors.ink, fontWeight: '700', fontSize: 16 },
+  productCat: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
+  productPrice: { color: colors.primary, fontSize: 13, marginTop: 2, fontWeight: '600' },
 
   rulesList: { gap: 6 },
-  ruleChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(124,58,237,0.1)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
-  ruleChipIcon: { fontSize: 12 },
-  ruleChipText: { color: '#c4b5fd', fontSize: 12, flex: 1 },
+  ruleChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: colors.primarySoft, borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 6,
+  },
+  ruleChipText: { color: colors.inkMid, fontSize: 12, flex: 1 },
 
   productActions: { flexDirection: 'row', gap: 8 },
-  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 7, borderRadius: 10, backgroundColor: 'rgba(167,139,250,0.1)', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)' },
-  actionBtnDanger: { backgroundColor: 'rgba(248,113,113,0.1)', borderColor: 'rgba(248,113,113,0.2)' },
-  actionText: { color: '#a78bfa', fontWeight: '600', fontSize: 12 },
+  actionBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
+    paddingVertical: 8, borderRadius: radius.sm,
+    backgroundColor: colors.primarySoft,
+    borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  actionBtnDanger: { backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder },
+  actionText: { color: colors.primary, fontWeight: '700', fontSize: 12 },
 
-  modal: { flex: 1, backgroundColor: '#0f0d2e' },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
-  modalTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
-  modalSave: { color: '#7c3aed', fontWeight: '700', fontSize: 16 },
-  modalBody: { padding: 16, gap: 4, paddingBottom: 40 },
+  modal: { flex: 1, backgroundColor: colors.bg },
+  modalHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
+    gap: 12,
+  },
+  modalTitle: { color: colors.ink, fontSize: 17, fontWeight: '800', flex: 1, textAlign: 'center' },
+  modalSave: { color: colors.primary, fontWeight: '700', fontSize: 16 },
+  modalBody: { padding: 20, gap: 4, paddingBottom: 40 },
 
-  fieldLabel: { color: '#7c6faa', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 12, marginBottom: 6 },
-  input: { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 14, paddingVertical: 11, fontSize: 15 },
+  fieldLabel: {
+    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 0.8,
+    marginTop: 12, marginBottom: 6,
+  },
+  input: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderStrong,
+    color: colors.ink, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15,
+  },
 
   emojiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  emojiBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  emojiBtnActive: { borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.25)' },
+  emojiBtn: {
+    width: 44, height: 44,
+    alignItems: 'center', justifyContent: 'center',
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1, borderColor: colors.borderStrong,
+  },
+  emojiBtnActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft, borderWidth: 1.5 },
   emojiChar: { fontSize: 22 },
 
-  ruleCard: { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', padding: 12, marginBottom: 10, gap: 10 },
+  ruleCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    padding: 12, marginBottom: 10, gap: 10,
+    ...shadows.card,
+  },
   ruleCardTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  ruleName: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  ruleSub: { color: '#a78bfa', fontSize: 12, marginTop: 2 },
-  ruleDesc: { color: '#6b7280', fontSize: 12, marginTop: 4 },
+  ruleName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
+  ruleSub: { color: colors.primary, fontSize: 12, marginTop: 2, fontWeight: '600' },
+  ruleDesc: { color: colors.inkSoft, fontSize: 12, marginTop: 4 },
   ruleActions: { flexDirection: 'row', gap: 8 },
-  ruleFormBox: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', padding: 14, marginTop: 8, gap: 4 },
-  ruleFormTitle: { color: '#a78bfa', fontWeight: '700', fontSize: 14, marginBottom: 4 },
+  ruleFormBox: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1.5, borderColor: colors.primaryBorder,
+    padding: 14, marginTop: 8, gap: 4,
+    ...shadows.card,
+  },
+  ruleFormTitle: { color: colors.primary, fontWeight: '700', fontSize: 14, marginBottom: 4 },
 
   rewardTypeRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
-  rewardTypeBtn: { flex: 1, padding: 10, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center' },
-  rewardTypeBtnActive: { backgroundColor: 'rgba(124,58,237,0.25)', borderColor: '#7c3aed' },
-  rewardTypeText: { color: '#6b7280', fontWeight: '600', fontSize: 13 },
-  rewardTypeTextActive: { color: '#fff' },
+  rewardTypeBtn: {
+    flex: 1, padding: 10, borderRadius: radius.sm,
+    backgroundColor: colors.bgDeep,
+    borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center',
+  },
+  rewardTypeBtnActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
+  rewardTypeText: { color: colors.inkSoft, fontWeight: '600', fontSize: 13 },
+  rewardTypeTextActive: { color: colors.primary },
 
   ruleFormActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.07)', alignItems: 'center' },
-  cancelBtnText: { color: '#6b7280', fontWeight: '600', fontSize: 14 },
-  saveBtn: { flex: 2, padding: 12, borderRadius: 12, backgroundColor: '#7c3aed', alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  cancelBtn: {
+    flex: 1, padding: 12, borderRadius: radius.md,
+    backgroundColor: colors.bgDeep, alignItems: 'center',
+    borderWidth: 1, borderColor: colors.border,
+  },
+  cancelBtnText: { color: colors.inkSoft, fontWeight: '600', fontSize: 14 },
+  saveBtn: {
+    flex: 2, padding: 12, borderRadius: radius.md,
+    backgroundColor: colors.primary,
+    alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8,
+    ...shadows.primaryBtn,
+  },
   saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   btnDisabled: { opacity: 0.6 },
 })

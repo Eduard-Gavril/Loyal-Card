@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
+import { colors } from '@/theme'
 
 export default function TabLayout() {
   const { language, totalRewards } = useClientStore()
@@ -13,16 +14,17 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        sceneStyle: { backgroundColor: colors.bg },
         tabBarStyle: {
-          backgroundColor: '#0f0d2e',
-          borderTopColor: 'rgba(255,255,255,0.08)',
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
-          height: 60 + insets.bottom,
+          height: 62 + insets.bottom,
           paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-          paddingTop: 4,
+          paddingTop: 6,
         },
-        tabBarActiveTintColor: '#7c3aed',
-        tabBarInactiveTintColor: '#4b5563',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.inkFaint,
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
@@ -31,8 +33,8 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarLabel: t.tabs.home,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
           ),
         }}
       />
@@ -41,8 +43,8 @@ export default function TabLayout() {
         options={{
           title: t.discoverPartners,
           tabBarLabel: t.tabs.partners,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="compass-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={size} color={color} />
           ),
         }}
       />
@@ -52,9 +54,9 @@ export default function TabLayout() {
           title: t.dashboard.title,
           tabBarLabel: t.tabs.myCards,
           tabBarBadge: totalRewards > 0 ? totalRewards : undefined,
-          tabBarBadgeStyle: { backgroundColor: '#f59e0b', color: '#000', fontSize: 10 },
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="card-outline" size={size} color={color} />
+          tabBarBadgeStyle: { backgroundColor: colors.primary, color: '#fff', fontSize: 10, fontWeight: '700' },
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'card' : 'card-outline'} size={size} color={color} />
           ),
         }}
       />
@@ -63,8 +65,8 @@ export default function TabLayout() {
         options={{
           title: t.profile.title,
           tabBarLabel: t.tabs.profile,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
           ),
         }}
       />

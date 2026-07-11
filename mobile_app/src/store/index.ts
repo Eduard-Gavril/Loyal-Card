@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { getLocales } from 'expo-localization'
 import type { Language } from '@/lib/i18n'
 
 interface CardData {
@@ -41,17 +40,6 @@ interface ClientState {
   clearAll: () => void
 }
 
-function detectLanguage(): Language {
-  try {
-    const locale = getLocales()[0]?.languageCode ?? 'en'
-    if (locale === 'it') return 'it'
-    if (locale === 'ro') return 'ro'
-    return 'en'
-  } catch {
-    return 'en'
-  }
-}
-
 export const useClientStore = create<ClientState>()(
   persist(
     (set, get) => ({
@@ -62,7 +50,7 @@ export const useClientStore = create<ClientState>()(
       tenantName: null,
       tenantSlug: null,
       savedCards: [],
-      language: detectLanguage(),
+      language: 'en',
       hasOnboarded: false,
       linkedPhone: null,
       displayName: null,

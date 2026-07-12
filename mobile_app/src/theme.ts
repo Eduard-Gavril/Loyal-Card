@@ -1,10 +1,11 @@
 // ─────────────────────────────────────────────────────────────────
-// LoyalCard design system — "Ivory"
+// LoyalCard design system — "Ivory" (light) / "Midnight" (dark)
 // Base: warm white / ivory surfaces, near-black ink.
 // Accent: violet only. Black ("night") for premium surfaces.
 // ─────────────────────────────────────────────────────────────────
+import { useClientStore } from '@/store'
 
-export const colors = {
+const lightColors = {
   // Surfaces
   bg: '#FAF9F6',          // ivory app background
   bgDeep: '#F3F1EB',      // inset / recessed areas
@@ -43,7 +44,71 @@ export const colors = {
   danger: '#DC2626',
   dangerSoft: '#FDEDED',
   dangerBorder: '#F6CFCF',
-} as const
+}
+
+export type Palette = { [K in keyof typeof lightColors]: string }
+
+// Static light palette — admin screens (always light) and the type/shadow
+// tokens below keep importing this directly.
+export const colors: Palette = lightColors
+
+// "Midnight" — neutral near-black dark theme. Backgrounds and surfaces stay
+// gray (no violet cast); violet lives only in interactive accents.
+export const darkColors: Palette = {
+  bg: '#0F0F13',
+  bgDeep: '#18181D',
+  surface: '#1B1B21',
+  overlay: 'rgba(0,0,0,0.6)',
+
+  ink: '#F2F2F4',
+  inkMid: '#C4C4CC',
+  inkSoft: '#8F8F99',
+  inkFaint: '#5D5D67',
+
+  border: '#27272E',
+  borderStrong: '#36363F',
+
+  primary: '#8B5CF6',
+  primaryPressed: '#A78BFA',
+  primarySoft: '#211E2D',     // barely-violet tinted surface
+  primaryBorder: '#332D47',
+  violet: '#8B5CF6',
+  violetLight: '#A78BFA',
+
+  // Night surfaces sit slightly above the dark background
+  night: '#222229',
+  nightSoft: '#2B2B33',
+  nightBorder: '#3C3C46',
+  onNight: '#FFFFFF',
+  onNightSoft: '#ABABB6',
+
+  success: '#34D399',
+  successSoft: '#122A20',
+  successBorder: '#1E4634',
+  danger: '#F87171',
+  dangerSoft: '#331519',
+  dangerBorder: '#55232A',
+}
+
+// Active palette for the client app; admin screens stay on the static light
+// `colors` export.
+export function useTheme(): Palette {
+  const darkMode = useClientStore((st) => st.darkMode)
+  return darkMode ? darkColors : colors
+}
+
+// Wraps a style factory with a per-palette cache so StyleSheet.create runs at
+// most once per theme instead of on every render.
+export function createThemedStyles<T>(factory: (colors: Palette) => T): (colors: Palette) => T {
+  const cache = new WeakMap<object, T>()
+  return (palette) => {
+    const cached = cache.get(palette)
+    if (cached) return cached
+    const built = factory(palette)
+    cache.set(palette, built)
+    return built
+  }
+}
 
 export const radius = {
   sm: 10,

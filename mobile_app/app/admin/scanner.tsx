@@ -10,7 +10,7 @@ import { CameraView, Camera } from 'expo-camera'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { api, supabase } from '@/lib/supabase'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 interface Product {
   id: string
@@ -39,6 +39,8 @@ interface CartItem { product: Product; qty: number }
 type Mode = 'idle' | 'scanning' | 'cart' | 'redeem'
 
 export default function AdminScannerScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
@@ -402,7 +404,7 @@ export default function AdminScannerScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -559,4 +561,4 @@ const s = StyleSheet.create({
   },
   redeemBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   btnDisabled: { opacity: 0.6 },
-})
+}))

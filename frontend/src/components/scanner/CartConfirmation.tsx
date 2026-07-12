@@ -1,4 +1,5 @@
 import { CartItem } from '@/types/scanner'
+import { ShoppingCart, X, Check } from 'lucide-react'
 
 interface CartConfirmationProps {
   cart: CartItem[]
@@ -30,7 +31,7 @@ export default function CartConfirmation({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          <span className="text-2xl">🛒</span>
+          <ShoppingCart className="w-6 h-6" />
           {t.scanner.orderSummary}
         </h2>
         <button
@@ -77,7 +78,7 @@ export default function CartConfirmation({
                   onClick={() => onRemoveItem(item.productId)}
                   className="w-8 h-8 flex items-center justify-center bg-red-500/30 hover:bg-red-500/50 text-red-200 rounded-lg transition-all duration-200 ml-2"
                 >
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -119,7 +120,10 @@ export default function CartConfirmation({
               {t.scanner.registering}
             </span>
           ) : (
-            `✓ ${t.scanner.confirmProducts} ${getTotalItems()} ${t.scanner.products}`
+            <span className="flex items-center justify-center gap-2">
+              <Check className="w-5 h-5" strokeWidth={3} />
+              {`${t.scanner.confirmProducts} ${getTotalItems()} ${t.scanner.products}`}
+            </span>
           )}
         </button>
         <button

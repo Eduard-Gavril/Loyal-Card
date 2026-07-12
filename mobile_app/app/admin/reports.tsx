@@ -8,7 +8,7 @@ import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
 import * as XLSX from 'xlsx'
 import { exportExcel } from '@/lib/excel'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 type Range = '7d' | '30d' | '90d'
 
@@ -29,6 +29,8 @@ const RANGE_DAYS: Record<Range, number> = { '7d': 7, '30d': 30, '90d': 90 }
 const RANGE_LABELS: Record<Range, string> = { '7d': '7d', '30d': '30d', '90d': '90d' }
 
 export default function AdminReportsScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
@@ -266,7 +268,7 @@ export default function AdminReportsScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -292,7 +294,8 @@ const s = StyleSheet.create({
   },
   rangeBtnActive: { backgroundColor: colors.ink, borderColor: colors.ink },
   rangeBtnText: { color: colors.inkMid, fontWeight: '600', fontSize: 13 },
-  rangeBtnTextActive: { color: '#fff' },
+  // Inverse of ink: readable on the ink-filled active button in both themes
+  rangeBtnTextActive: { color: colors.bg },
 
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   loadingText: { color: colors.inkSoft, fontSize: 14 },
@@ -346,4 +349,4 @@ const s = StyleSheet.create({
 
   emptyBox: { alignItems: 'center', gap: 12, paddingVertical: 40 },
   emptyText: { color: colors.inkSoft, fontSize: 14, textAlign: 'center' },
-})
+}))

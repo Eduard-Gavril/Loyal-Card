@@ -4,6 +4,7 @@ import { useAuthStore, useClientStore } from '@/store'
 import { supabase, Product, RewardRule } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import { getProductEmoji } from '@/lib/emojiUtils'
+import { Gift, Inbox } from 'lucide-react'
 
 export default function AdminRewards() {
   const navigate = useNavigate()
@@ -109,8 +110,9 @@ export default function AdminRewards() {
               </svg>
               <span className="hidden sm:inline">{language === 'ro' ? 'Înapoi' : language === 'it' ? 'Indietro' : 'Back'}</span>
             </button>
-            <h1 className="text-xl sm:text-4xl font-bold text-white tracking-tight flex-1">
-              🎁 {language === 'ro' ? 'Gestionare Premii' : language === 'it' ? 'Gestione Premi' : 'Manage Rewards'}
+            <h1 className="text-xl sm:text-4xl font-bold text-white tracking-tight flex-1 flex items-center gap-2 sm:gap-3">
+              <Gift className="w-6 h-6 sm:w-9 sm:h-9" />
+              {language === 'ro' ? 'Gestionare Premii' : language === 'it' ? 'Gestione Premi' : 'Manage Rewards'}
             </h1>
           </div>
         </header>
@@ -241,7 +243,7 @@ export default function AdminRewards() {
                   </div>
                 ) : (
                   <div className="text-center py-8 sm:py-12">
-                    <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📭</div>
+                    <Inbox className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
                     <p className="text-gray-300 text-base sm:text-lg">
                       {language === 'ro' ? 'Nicio regulă de premii configurată' : language === 'it' ? 'Nessuna regola premi configurata' : 'No reward rules configured'}
                     </p>

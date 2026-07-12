@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 interface TenantSettings {
   name: string
@@ -22,6 +22,8 @@ interface TenantSettings {
 const PRESET_COLORS = ['#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#db2777', '#2563eb', '#4f46e5']
 
 export default function AdminSettingsScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
@@ -240,7 +242,7 @@ export default function AdminSettingsScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -303,4 +305,4 @@ const s = StyleSheet.create({
   previewName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
   previewMsg: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
   previewDot: { width: 8, height: 8, borderRadius: 4 },
-})
+}))

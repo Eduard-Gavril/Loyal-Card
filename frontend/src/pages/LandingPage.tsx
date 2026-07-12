@@ -436,8 +436,8 @@ export default function LandingPage() {
         {/* Header */}
         <header className="pt-6 sm:pt-8 pl-0 pr-4 sm:px-6">
           <div className="max-w-6xl sm:mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-0 -ml-1">
-              <img src="/logo.png" alt="Logo" className="h-16 sm:h-20 w-auto -mr-6 sm:-mr-8" />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <img src="/logo.png" alt="Logo" className="h-16 sm:h-20 w-auto" />
               <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 {t.appName}
               </h1>

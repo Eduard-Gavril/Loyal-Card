@@ -4,6 +4,7 @@ import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
 import { translations } from '@/lib/i18n'
 import StaticBackground from '@/components/StaticBackground'
+import { ShoppingBag, Pencil, Trash2, Settings2, Gift, BadgePercent, Info } from 'lucide-react'
 
 interface Product {
   id: string
@@ -385,8 +386,9 @@ export default function AdminProducts() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                  🛍️ {t.title}
+                <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                  <ShoppingBag className="w-7 h-7 sm:w-8 sm:h-8" />
+                  {t.title}
                 </h1>
                 <p className="text-sm text-gray-300 mt-1">
                   {t.subtitle}
@@ -414,7 +416,7 @@ export default function AdminProducts() {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12 sm:py-20">
-              <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🛍️</div>
+              <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
               <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
                 {t.noProducts}
               </h3>
@@ -483,8 +485,10 @@ export default function AdminProducts() {
                               <span className="text-sm text-gray-300 font-medium">
                                 {rule.name}
                               </span>
-                              <span className="text-xs text-purple-400">
-                                {rule.reward_type === 'free_product' ? '🎁' : '💰'}
+                              <span className="text-purple-400">
+                                {rule.reward_type === 'free_product'
+                                  ? <Gift className="w-4 h-4" />
+                                  : <BadgePercent className="w-4 h-4" />}
                               </span>
                             </div>
                             <p className="text-xs text-gray-400 mt-1">
@@ -506,21 +510,21 @@ export default function AdminProducts() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => openEditModal(product)}
-                        className="flex-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors border border-blue-500/30 text-xs font-semibold"
+                        className="flex-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors border border-blue-500/30 text-xs font-semibold flex items-center justify-center gap-1.5"
                       >
-                        ✏️ {t.edit}
+                        <Pencil className="w-3.5 h-3.5" /> {t.edit}
                       </button>
                       <button
                         onClick={() => setShowRulesModal(product.id)}
-                        className="flex-1 px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors border border-purple-500/30 text-xs font-semibold"
+                        className="flex-1 px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors border border-purple-500/30 text-xs font-semibold flex items-center justify-center gap-1.5"
                       >
-                        ⚙️ {t.rules}
+                        <Settings2 className="w-3.5 h-3.5" /> {t.rules}
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
-                        className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30 text-xs font-semibold"
+                        className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30 text-xs font-semibold flex items-center justify-center"
                       >
-                        🗑️
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -634,10 +638,11 @@ export default function AdminProducts() {
               {/* Info when editing - rules are managed separately */}
               {editingProduct && (
                 <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                  <p className="text-blue-300 text-sm">
-                    ℹ️ {language === 'ro' 
-                      ? 'Pentru a modifica regulile de loialitate, folosește butonul "⚙️ Reguli" de pe card-ul produsului.' 
-                      : 'To modify loyalty rules, use the "⚙️ Rules" button on the product card.'}
+                  <p className="text-blue-300 text-sm flex items-start gap-2">
+                    <Info className="w-4 h-4 mt-0.5 shrink-0" />
+                    {language === 'ro'
+                      ? 'Pentru a modifica regulile de loialitate, folosește butonul "Reguli" de pe card-ul produsului.'
+                      : 'To modify loyalty rules, use the "Rules" button on the product card.'}
                   </p>
                 </div>
               )}
@@ -679,7 +684,10 @@ export default function AdminProducts() {
             
             {/* Info and Example */}
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
-              <p className="text-blue-300 text-sm mb-1">💡 {t.rulesInfo}</p>
+              <p className="text-blue-300 text-sm mb-1 flex items-start gap-2">
+                <Info className="w-4 h-4 mt-0.5 shrink-0" />
+                {t.rulesInfo}
+              </p>
               <p className="text-blue-200 text-xs">{t.rulesExample}</p>
             </div>
             
@@ -722,15 +730,15 @@ export default function AdminProducts() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => openEditRuleForm(rule)}
-                        className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 text-xs"
+                        className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30"
                       >
-                        ✏️
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteRule(rule.id)}
-                        className="px-2 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 text-xs"
+                        className="px-2 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30"
                       >
-                        🗑️
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -811,7 +819,9 @@ export default function AdminProducts() {
                           : 'bg-white/10 text-gray-400 border border-white/20 hover:bg-white/20'
                       }`}
                     >
-                      🎁 {t.freeProduct}
+                      <span className="flex items-center justify-center gap-1.5">
+                        <Gift className="w-4 h-4" /> {t.freeProduct}
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -822,7 +832,9 @@ export default function AdminProducts() {
                           : 'bg-white/10 text-gray-400 border border-white/20 hover:bg-white/20'
                       }`}
                     >
-                      💰 {t.percentageDiscount}
+                      <span className="flex items-center justify-center gap-1.5">
+                        <BadgePercent className="w-4 h-4" /> {t.percentageDiscount}
+                      </span>
                     </button>
                   </div>
                 </div>

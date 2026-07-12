@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
+import { Settings } from 'lucide-react'
 
 interface TenantSettings {
   name: string
@@ -121,8 +122,9 @@ export default function AdminSettings() {
               </svg>
               {language === 'ro' ? 'Înapoi' : language === 'it' ? 'Indietro' : 'Back'}
             </button>
-            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1">
-              ⚙️ {language === 'ro' ? 'Setări' : language === 'it' ? 'Impostazioni' : 'Settings'}
+            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1 flex items-center gap-2 sm:gap-3">
+              <Settings className="w-7 h-7 sm:w-9 sm:h-9" />
+              {language === 'ro' ? 'Setări' : language === 'it' ? 'Impostazioni' : 'Settings'}
             </h1>
           </div>
         </header>

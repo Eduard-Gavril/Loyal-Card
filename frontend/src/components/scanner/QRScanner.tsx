@@ -1,4 +1,5 @@
 import { CameraPermission } from '@/types/scanner'
+import { Camera, Ban } from 'lucide-react'
 
 interface QRScannerProps {
   cameraPermission: CameraPermission
@@ -15,7 +16,7 @@ export default function QRScanner({
     <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
       <div className="mb-6">
         <h2 className="text-3xl font-bold mb-3 text-white flex items-center gap-2">
-          <span className="text-4xl">📸</span>
+          <Camera className="w-9 h-9 text-primary-300" />
           {language === 'ro' ? 'Încadrează codul QR' : language === 'it' ? 'Inquadra il codice QR' : 'Frame the QR Code'}
         </h2>
         <p className="text-gray-200">
@@ -65,7 +66,7 @@ export default function QRScanner({
       {/* Camera Permission Denied Warning */}
       {cameraPermission === 'denied' && (
         <div className="bg-red-500/20 border-2 border-red-400/50 rounded-xl p-6 text-center">
-          <div className="text-4xl mb-3">🚫</div>
+          <Ban className="w-10 h-10 text-red-300 mx-auto mb-3" />
           <h3 className="text-xl font-bold text-red-200 mb-2">
             {language === 'ro' ? 'Permisiune Cameră Refuzată' : language === 'it' ? 'Permesso Fotocamera Negato' : 'Camera Permission Denied'}
           </h3>

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet, TextInput,
   ScrollView, ActivityIndicator, Linking, RefreshControl,
-  Modal, Alert,
+  Modal, Alert, Switch,
 } from 'react-native'
 import * as Clipboard from 'expo-clipboard'
 import { useRouter } from 'expo-router'
@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation, Language } from '@/lib/i18n'
 import { api, supabase } from '@/lib/supabase'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 const LANGUAGES: { code: Language; label: string; flag: string }[] = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -36,6 +36,8 @@ function maskPhone(phone: string): string {
 
 // ─── Name section ───────────────────────────────────────────────
 function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const { clientId, displayName, setDisplayName } = useClientStore()
   const p = t.profile
   const inputRef = useRef<TextInput>(null)
@@ -149,6 +151,8 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
 
 // ─── Link phone section ─────────────────────────────────────────
 function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const { clientId, linkedPhone, setLinkedPhone } = useClientStore()
   const p = t.profile
 
@@ -337,6 +341,8 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
 
 // ─── Recovery section ───────────────────────────────────────────
 function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const { clientId, replaceAllCards, setClientId, setLinkedPhone } = useClientStore()
   const p = t.profile
 
@@ -554,9 +560,11 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
 // ─── Main screen ────────────────────────────────────────────────
 export default function ProfileScreen() {
   const router = useRouter()
-  const { language, setLanguage, savedCards, displayName, clientId, linkedPhone, clearAll } = useClientStore()
+  const { language, setLanguage, savedCards, displayName, clientId, linkedPhone, clearAll, darkMode, setDarkMode } = useClientStore()
   const t = getTranslation(language)
   const p = t.profile
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const [refreshing, setRefreshing] = useState(false)
   const [deleteModal, setDeleteModal] = useState(false)
   const [deleteInput, setDeleteInput] = useState('')
@@ -584,7 +592,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       <ScrollView
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
@@ -613,6 +621,20 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* Dark mode */}
+        <View style={s.darkModeRow}>
+          <View style={s.iconWrap}>
+            <Ionicons name={darkMode ? 'moon' : 'moon-outline'} size={20} color={colors.primary} />
+          </View>
+          <Text style={s.darkModeLabel}>{p.darkMode}</Text>
+          <Switch
+            value={darkMode}
+            onValueChange={setDarkMode}
+            trackColor={{ false: colors.borderStrong, true: colors.primary }}
+            thumbColor="#fff"
+          />
         </View>
 
         <LinkPhoneSection t={t} />
@@ -732,7 +754,15 @@ export default function ProfileScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
+  darkModeRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14, marginBottom: 14,
+    ...shadows.card,
+  },
+  darkModeLabel: { flex: 1, color: colors.ink, fontWeight: '700', fontSize: 14.5 },
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: 20, paddingBottom: 40 },
   header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 },
@@ -948,4 +978,4 @@ const s = StyleSheet.create({
   modalDeleteBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
   modalCancelBtn: { alignItems: 'center', paddingVertical: 14 },
   modalCancelText: { color: colors.inkSoft, fontSize: 15, fontWeight: '600' },
-})
+}))

@@ -6,6 +6,7 @@ import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 import { getProductEmoji } from '@/lib/emojiUtils'
+import { Inbox } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
 interface Stats {
@@ -435,7 +436,7 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">📭</div>
+                <Inbox className="w-14 h-14 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-300 text-lg">
                   {language === 'ro' ? 'Nicio activitate recentă' : language === 'it' ? 'Nessuna attività recente' : 'No recent activity'}
                 </p>

@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 const CONTACT_EMAIL = 'eduardgavril.1999@gmail.com'
 const WEBSITE_URL = 'https://loyalcard.net'
@@ -27,6 +27,8 @@ export default function HomeScreen() {
   const { language, savedCards, displayName } = useClientStore()
   const t = getTranslation(language)
   const h = t.home
+  const colors = useTheme()
+  const s = themedStyles(colors)
 
   const [contactOpen, setContactOpen] = useState(false)
   const [form, setForm] = useState({ name: displayName ?? '', email: '', shop: '', city: '', message: '' })
@@ -73,7 +75,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       <ScrollView
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
@@ -311,6 +313,8 @@ function Field({
   placeholder?: string; multiline?: boolean; numberOfLines?: number
   keyboardType?: any; autoCapitalize?: any
 }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   return (
     <View style={s.field}>
       <Text style={s.fieldLabel}>{label}</Text>
@@ -329,7 +333,7 @@ function Field({
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { paddingHorizontal: 20, paddingBottom: 48, paddingTop: 8 },
 
@@ -505,4 +509,4 @@ const s = StyleSheet.create({
   },
   sentTitle: { color: colors.ink, fontSize: 22, fontWeight: '800' },
   sentDesc: { color: colors.inkSoft, fontSize: 14, textAlign: 'center', lineHeight: 20, paddingHorizontal: 16 },
-})
+}))

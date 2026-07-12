@@ -1,12 +1,13 @@
 import { useEffect } from 'react'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import { useAdminStore } from '@/store'
-import { colors } from '@/theme'
+import { useTheme } from '@/theme'
 
 export default function AdminLayout() {
   const router = useRouter()
   const segments = useSegments()
   const { user, tenantId } = useAdminStore()
+  const colors = useTheme()
 
   useEffect(() => {
     const isLoginScreen = segments.at(-1) === 'login'

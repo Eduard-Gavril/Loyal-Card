@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 interface Stats {
   totalCards: number
@@ -27,6 +27,8 @@ interface RecentEvent {
 }
 
 export default function AdminDashboardScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { user, tenantId, role, clearAuth } = useAdminStore()
   const { language } = useClientStore()
@@ -207,13 +209,12 @@ export default function AdminDashboardScreen() {
               onPress={() => router.push(item.route as any)}
               activeOpacity={0.7}
             >
-              <View style={s.navBtnTop}>
-                <View style={[s.navIcon, i === 0 && s.navIconPrimary]}>
-                  <Ionicons name={item.icon} size={22} color={i === 0 ? '#fff' : colors.primary} />
-                </View>
-                <Ionicons name="chevron-forward" size={14} color={i === 0 ? 'rgba(255,255,255,0.6)' : colors.inkFaint} />
+              <View style={[s.navIcon, i === 0 && s.navIconPrimary]}>
+                <Ionicons name={item.icon} size={20} color={i === 0 ? '#fff' : colors.primary} />
               </View>
-              <Text style={[s.navLabel, i === 0 && s.navLabelPrimary]}>{item.label}</Text>
+              <Text style={[s.navLabel, i === 0 && s.navLabelPrimary]} numberOfLines={1}>
+                {item.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -254,7 +255,7 @@ export default function AdminDashboardScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -284,28 +285,36 @@ const s = StyleSheet.create({
     textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10,
   },
 
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 20, marginBottom: 20 },
+  // Fixed percentage widths: flex+minWidth% doesn't wrap reliably in RN
+  statsGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
+    rowGap: 10, paddingHorizontal: 20, marginBottom: 20,
+  },
   statCard: {
-    flex: 1, minWidth: '45%',
+    width: '48.5%',
     backgroundColor: colors.surface,
     borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, gap: 6,
+    padding: 12, gap: 4,
     ...shadows.card,
   },
   statIcon: {
-    width: 32, height: 32, borderRadius: 9,
+    width: 28, height: 28, borderRadius: 8,
     backgroundColor: colors.primarySoft,
     alignItems: 'center', justifyContent: 'center',
   },
-  statValue: { color: colors.ink, fontSize: 26, fontWeight: '800' },
-  statLabel: { color: colors.inkSoft, fontSize: 12 },
+  statValue: { color: colors.ink, fontSize: 24, fontWeight: '800' },
+  statLabel: { color: colors.inkSoft, fontSize: 11 },
 
-  navGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 20, marginBottom: 24 },
+  navGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
+    rowGap: 10, paddingHorizontal: 20, marginBottom: 24,
+  },
   navBtn: {
-    flex: 1, minWidth: '45%', gap: 10,
+    width: '31.5%',
     borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
     backgroundColor: colors.surface,
-    padding: 16,
+    paddingVertical: 14, paddingHorizontal: 6,
+    alignItems: 'center', gap: 8,
     ...shadows.card,
   },
   navBtnPrimary: {
@@ -313,14 +322,13 @@ const s = StyleSheet.create({
     borderColor: colors.night,
     ...shadows.night,
   },
-  navBtnTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navIcon: {
-    width: 44, height: 44, borderRadius: radius.md,
+    width: 40, height: 40, borderRadius: radius.md,
     backgroundColor: colors.primarySoft,
     alignItems: 'center', justifyContent: 'center',
   },
   navIconPrimary: { backgroundColor: 'rgba(124,58,237,0.4)' },
-  navLabel: { fontWeight: '700', fontSize: 14, color: colors.ink },
+  navLabel: { fontWeight: '700', fontSize: 12, color: colors.ink, textAlign: 'center' },
   navLabelPrimary: { color: colors.onNight },
 
   recentSection: { paddingHorizontal: 20, marginBottom: 32 },
@@ -339,4 +347,4 @@ const s = StyleSheet.create({
   recentTime: { color: colors.inkFaint, fontSize: 12 },
   seeAllBtn: { paddingVertical: 12, alignItems: 'center' },
   seeAllText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
-})
+}))

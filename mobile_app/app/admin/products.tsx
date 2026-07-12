@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 const EMOJIS = ['☕', '🍕', '🍔', '🍰', '🥗', '🍜', '🛍️', '💄', '💪', '🎁', '🥤', '🍦', '🌮', '🥩', '🍺', '✂️']
 
@@ -37,6 +37,8 @@ const emptyProduct = { name: '', emoji: '🛍️', category: '', price: '', scan
 const emptyRule = { name: '', description: '', buy_count: '5', reward_count: '1', discount_percent: '', priority: '1', reward_type: 'free_product' as 'free_product' | 'percentage_discount' }
 
 export default function AdminProductsScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
@@ -507,7 +509,7 @@ export default function AdminProductsScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -642,4 +644,4 @@ const s = StyleSheet.create({
   },
   saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   btnDisabled: { opacity: 0.6 },
-})
+}))

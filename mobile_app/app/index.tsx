@@ -5,12 +5,14 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 export default function WelcomeScreen() {
   const router = useRouter()
   const { hasOnboarded, savedCards, language, setHasOnboarded } = useClientStore()
   const t = getTranslation(language)
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const [hydrated, setHydrated] = useState(false)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const loadingScale = useRef(new Animated.Value(0.85)).current
@@ -47,11 +49,11 @@ export default function WelcomeScreen() {
   if (!hydrated) {
     return (
       <View style={s.splash}>
-        <Animated.View style={{ opacity: loadingOpacity, transform: [{ scale: loadingScale }], alignItems: 'center' }}>
+        <Animated.View style={{ opacity: loadingOpacity, transform: [{ scale: loadingScale }], alignItems: 'center', gap: 18 }}>
           <Image source={require('../assets/logo.png')} style={s.splashLogo} resizeMode="contain" />
           <Text style={s.splashAppName}>LoyalCard</Text>
+          <ActivityIndicator color={colors.primary} size="large" />
         </Animated.View>
-        <ActivityIndicator color={colors.primary} size="small" style={s.splashSpinner} />
       </View>
     )
   }
@@ -105,11 +107,10 @@ export default function WelcomeScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   splash: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
-  splashLogo: { width: 132, height: 132, marginBottom: 8 },
+  splashLogo: { width: 120, height: 120 },
   splashAppName: { color: colors.ink, fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
-  splashSpinner: { position: 'absolute', bottom: 80 },
 
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { flex: 1, paddingHorizontal: 28, justifyContent: 'space-between', paddingVertical: 32 },
@@ -149,4 +150,4 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.primaryBorder,
   },
   secondaryBtnText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
-})
+}))

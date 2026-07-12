@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   all: 'grid-outline',
@@ -31,6 +31,30 @@ interface CardProgress {
   maxStamps: number
   rewards: number
   lastScanAt: string | null
+}
+
+type LoyaltyState = Record<string, { count?: number; rewards?: number } | undefined>
+interface TenantRule { id: string; buy_count: number }
+
+// Progress shown per card: the highest-priority rule (rules arrive sorted by
+// priority) still in progress — never a sum across rules, which can exceed a
+// single rule's target (e.g. "9/6")
+function computeStampProgress(state: LoyaltyState, rules: TenantRule[]) {
+  if (rules.length === 0) {
+    const inProgress = Object.values(state).find((s) => (s?.count ?? 0) > 0)
+    return { stamps: Math.min(inProgress?.count ?? 0, 10), maxStamps: 10 }
+  }
+
+  const notCompleted = rules.filter((r) => (state[r.id]?.count ?? 0) < r.buy_count)
+  const displayRule =
+    notCompleted.find((r) => (state[r.id]?.count ?? 0) > 0) ||
+    notCompleted[0] ||
+    rules.find((r) => (state[r.id]?.count ?? 0) > 0 || (state[r.id]?.rewards ?? 0) > 0)
+
+  return {
+    stamps: displayRule ? Math.min(state[displayRule.id]?.count ?? 0, displayRule.buy_count) : 0,
+    maxStamps: displayRule?.buy_count ?? 10,
+  }
 }
 
 function relativeDate(iso: string | null, language: string): string {
@@ -56,6 +80,8 @@ function relativeDate(iso: string | null, language: string): string {
 
 // ── Animated progress bar ─────────────────────────────────────────
 function ProgressBar({ pct, onNight }: { pct: number; onNight: boolean }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const widthAnim = useRef(new Animated.Value(0)).current
   useEffect(() => {
     Animated.timing(widthAnim, {
@@ -87,6 +113,8 @@ function CardItem({
   onPress: () => void
   onLongPress: () => void
 }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(24)).current
   useEffect(() => {
@@ -159,8 +187,10 @@ function CardItem({
 
 export default function DashboardScreen() {
   const router = useRouter()
-  const { language, savedCards, setTotalRewards } = useClientStore()
+  const { language, savedCards, setTotalRewards, recordLoyaltyProgress, lifetimeStamps, lifetimeRewards } = useClientStore()
   const t = getTranslation(language)
+  const colors = useTheme()
+  const s = themedStyles(colors)
 
   const [progress, setProgress] = useState<Record<string, CardProgress>>({})
   const [tenantMeta, setTenantMeta] = useState<Record<string, TenantMeta>>({})
@@ -184,7 +214,7 @@ export default function DashboardScreen() {
           .in('qr_code', qrCodes),
         supabase
           .from('reward_rules')
-          .select('tenant_id, buy_count')
+          .select('id, tenant_id, buy_count')
           .in('tenant_id', tenantIds)
           .eq('active', true)
           .order('priority'),
@@ -194,28 +224,31 @@ export default function DashboardScreen() {
           .in('id', tenantIds),
       ])
 
-      // First active rule per tenant → stamp target
-      const rulesMap: Record<string, number> = {}
+      // Active rules per tenant, already sorted by priority
+      const rulesByTenant: Record<string, TenantRule[]> = {}
       for (const rule of rulesRes.data ?? []) {
-        if (!(rule.tenant_id in rulesMap)) rulesMap[rule.tenant_id] = rule.buy_count
+        ;(rulesByTenant[rule.tenant_id] ??= []).push({ id: rule.id, buy_count: rule.buy_count })
       }
 
       const map: Record<string, CardProgress> = {}
+      const stateByQr: Record<string, LoyaltyState> = {}
       let totalR = 0
 
       for (const card of cardsRes.data ?? []) {
-        const state = card.loyalty_state ?? {}
-        const stamps = Object.values(state).reduce((s: number, v: any) => s + (v?.count ?? 0), 0)
-        const rewards = Object.values(state).reduce((s: number, v: any) => s + (v?.rewards ?? 0), 0)
+        const state: LoyaltyState = card.loyalty_state ?? {}
+        stateByQr[card.qr_code] = state
+        const rewards = Object.values(state).reduce((s: number, v) => s + (v?.rewards ?? 0), 0)
         totalR += rewards
         const saved = savedCards.find((c) => c.qrCode === card.qr_code)
         map[card.qr_code] = {
-          stamps,
-          maxStamps: saved ? (rulesMap[saved.tenantId] ?? 10) : 10,
+          ...computeStampProgress(state, saved ? (rulesByTenant[saved.tenantId] ?? []) : []),
           rewards,
           lastScanAt: card.last_scan_at ?? null,
         }
       }
+
+      // Feed the persistent lifetime counters (never decrease)
+      recordLoyaltyProgress(stateByQr)
 
       const metaMap: Record<string, TenantMeta> = {}
       for (const t of tenantsRes.data ?? []) {
@@ -243,8 +276,8 @@ export default function DashboardScreen() {
     Animated.timing(screenFade, { toValue: 1, duration: 400, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start()
   }, [])
 
-  const totalStamps = Object.values(progress).reduce((s, p) => s + p.stamps, 0)
-  const totalRewardCount = Object.values(progress).reduce((s, p) => s + p.rewards, 0)
+  // Available rewards drive the highlight; the stat numbers are lifetime totals
+  const availableRewards = Object.values(progress).reduce((s, p) => s + p.rewards, 0)
 
   function handleOpenCard(card: typeof savedCards[0]) {
     router.push({ pathname: '/card', params: { tenantId: card.tenantId, tenantName: card.tenantName ?? '' } })
@@ -264,7 +297,7 @@ export default function DashboardScreen() {
   }
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       <Animated.View style={{ flex: 1, opacity: screenFade }}>
         {/* Header */}
         <View style={s.header}>
@@ -275,8 +308,8 @@ export default function DashboardScreen() {
         <View style={s.statsRow}>
           {[
             { value: savedCards.length, label: t.dashboard.totalCards, highlight: false },
-            { value: loading ? '…' : totalStamps, label: t.dashboard.totalStamps, highlight: false },
-            { value: loading ? '…' : totalRewardCount, label: t.dashboard.rewards, highlight: totalRewardCount > 0 },
+            { value: loading ? '…' : lifetimeStamps, label: t.dashboard.totalStamps, highlight: false },
+            { value: loading ? '…' : lifetimeRewards, label: t.dashboard.rewards, highlight: availableRewards > 0 },
           ].map((stat, i) => (
             <View key={i} style={[s.statCell, i < 2 && s.statCellBorder]}>
               <Text style={[s.statN, stat.highlight && { color: colors.primary }]}>{stat.value}</Text>
@@ -339,7 +372,7 @@ export default function DashboardScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
 
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
@@ -426,4 +459,4 @@ const s = StyleSheet.create({
     backgroundColor: colors.primarySoft,
   },
   addMoreText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
-})
+}))

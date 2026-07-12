@@ -4,6 +4,7 @@ import { useAuthStore, useClientStore } from '@/store'
 import { supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import { getProductEmoji } from '@/lib/emojiUtils'
+import { BarChart3 } from 'lucide-react'
 
 interface DailyStats {
   date: string
@@ -160,8 +161,9 @@ export default function AdminReports() {
               </svg>
               {language === 'ro' ? 'Înapoi' : language === 'it' ? 'Indietro' : 'Back'}
             </button>
-            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1">
-              📊 {language === 'ro' ? 'Rapoarte' : language === 'it' ? 'Report' : 'Reports'}
+            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1 flex items-center gap-2 sm:gap-3">
+              <BarChart3 className="w-7 h-7 sm:w-9 sm:h-9" />
+              {language === 'ro' ? 'Rapoarte' : language === 'it' ? 'Report' : 'Reports'}
             </h1>
           </div>
         </header>

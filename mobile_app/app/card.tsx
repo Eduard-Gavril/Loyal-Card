@@ -4,10 +4,20 @@ import { useRouter, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import QRCode from 'react-native-qrcode-svg'
-import { api, RewardRule } from '@/lib/supabase'
+import { api, supabase, RewardRule } from '@/lib/supabase'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+
+type LoyaltyState = Record<string, { count?: number; rewards?: number } | undefined>
+
+interface LoyaltyProgressItem {
+  id: string
+  name: string | null
+  buyCount: number
+  count: number
+  rewards: number
+}
 
 // Strips "gratuit/gratuito/gratis/free" variants from the reward name so it
 // reads naturally inside the "Collect N stamps and get X on us" sentence.
@@ -19,6 +29,8 @@ function cleanRuleName(name: string): string {
 }
 
 function RuleTagline({ rule, t }: { rule: RewardRule; t: ReturnType<typeof getTranslation> }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const stampsWord = t.card.discoverStamps
 
   if (rule.discount_percent) {
@@ -45,13 +57,16 @@ function RuleTagline({ rule, t }: { rule: RewardRule; t: ReturnType<typeof getTr
 export default function CardScreen() {
   const router = useRouter()
   const { tenantId, tenantName } = useLocalSearchParams<{ tenantId: string; tenantName: string }>()
-  const { language, savedCards, clientId: storedClientId, setClientData } = useClientStore()
+  const { language, savedCards, clientId: storedClientId, setClientData, recordLoyaltyProgress } = useClientStore()
   const t = getTranslation(language)
+  const colors = useTheme()
+  const s = themedStyles(colors)
 
   const [loading, setLoading] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [rules, setRules] = useState<RewardRule[]>([])
+  const [loyaltyState, setLoyaltyState] = useState<LoyaltyState>({})
   const [showOffers, setShowOffers] = useState(false)
   const qrScale = useRef(new Animated.Value(0.6)).current
   const qrOpacity = useRef(new Animated.Value(0)).current
@@ -70,6 +85,44 @@ export default function CardScreen() {
     if (!tenantId) return
     api.getRewardRules(tenantId).then(setRules).catch(() => {})
   }, [tenantId])
+
+  useEffect(() => {
+    if (!qrCode) return
+    supabase
+      .from('cards')
+      .select('loyalty_state')
+      .eq('qr_code', qrCode)
+      .maybeSingle()
+      .then(({ data }) => {
+        const state = (data?.loyalty_state as LoyaltyState) ?? {}
+        setLoyaltyState(state)
+        recordLoyaltyProgress({ [qrCode]: state })
+      })
+  }, [qrCode])
+
+  // Per-rule progress, ordered by rule priority (rules arrive sorted); entries
+  // whose rule was deleted/deactivated are still shown so stamps never vanish
+  const loyaltyItems: LoyaltyProgressItem[] = [
+    ...rules
+      .filter((r) => (loyaltyState[r.id]?.count ?? 0) > 0 || (loyaltyState[r.id]?.rewards ?? 0) > 0)
+      .map((r) => ({
+        id: r.id,
+        name: r.name,
+        buyCount: r.buy_count,
+        count: loyaltyState[r.id]?.count ?? 0,
+        rewards: loyaltyState[r.id]?.rewards ?? 0,
+      })),
+    ...Object.entries(loyaltyState)
+      .filter(([ruleId, st]) =>
+        !rules.some((r) => r.id === ruleId) && ((st?.count ?? 0) > 0 || (st?.rewards ?? 0) > 0))
+      .map(([ruleId, st]) => ({
+        id: ruleId,
+        name: null,
+        buyCount: 6,
+        count: st?.count ?? 0,
+        rewards: st?.rewards ?? 0,
+      })),
+  ]
 
   useEffect(() => {
     if (qrCode) {
@@ -159,6 +212,50 @@ export default function CardScreen() {
             <Text style={s.infoText}>{t.card.instructions}</Text>
           </View>
 
+          {/* Per-reward progress */}
+          {loyaltyItems.length > 0 && (
+            <View style={s.progressSection}>
+              <Text style={s.progressSectionTitle}>{t.card.progressTitle}</Text>
+              {loyaltyItems.map((item) => {
+                const capped = Math.min(item.count, item.buyCount)
+                const pct = item.buyCount > 0 ? capped / item.buyCount : 0
+                const ready = item.rewards > 0
+                return (
+                  <View key={item.id} style={s.progressCard}>
+                    <View style={s.progressHeader}>
+                      <Text style={s.progressName} numberOfLines={1}>
+                        {item.name ?? tenantName ?? 'LoyalCard'}
+                      </Text>
+                      <Text style={s.progressCountText}>
+                        {`${capped} / ${item.buyCount} ${t.card.discoverStamps}`}
+                      </Text>
+                    </View>
+                    <View style={s.progressTrack}>
+                      <View
+                        style={[
+                          s.progressFill,
+                          { width: `${pct * 100}%` },
+                          ready && s.progressFillDone,
+                        ]}
+                      />
+                    </View>
+                    {ready && (
+                      <View style={s.rewardBanner}>
+                        <Ionicons name="gift" size={16} color={colors.success} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={s.rewardBannerTitle}>
+                            {`${item.rewards} ${item.rewards === 1 ? t.card.rewardReady : t.card.rewardsReady}`}
+                          </Text>
+                          <Text style={s.rewardBannerSub}>{t.card.showAtCheckout}</Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                )
+              })}
+            </View>
+          )}
+
           {/* Offers accordion */}
           {rules.length > 0 && (
             <View style={s.offersSection}>
@@ -221,7 +318,7 @@ export default function CardScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -287,6 +384,32 @@ const s = StyleSheet.create({
   },
   infoText: { color: colors.inkMid, fontSize: 13, flex: 1, lineHeight: 18 },
 
+  // Per-reward progress
+  progressSection: { width: '100%', gap: 10 },
+  progressSectionTitle: {
+    color: colors.ink, fontSize: 16, fontWeight: '800', letterSpacing: -0.2, marginBottom: 2,
+  },
+  progressCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14, gap: 10,
+    ...shadows.card,
+  },
+  progressHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  progressName: { flex: 1, color: colors.ink, fontWeight: '700', fontSize: 14 },
+  progressCountText: { color: colors.inkSoft, fontSize: 12, fontWeight: '600' },
+  progressTrack: { height: 6, backgroundColor: colors.bgDeep, borderRadius: 3, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
+  progressFillDone: { backgroundColor: colors.success },
+  rewardBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: colors.successSoft,
+    borderWidth: 1, borderColor: colors.successBorder,
+    borderRadius: radius.md, padding: 10,
+  },
+  rewardBannerTitle: { color: colors.success, fontWeight: '800', fontSize: 13 },
+  rewardBannerSub: { color: colors.inkMid, fontSize: 11.5, marginTop: 2, lineHeight: 15 },
+
   // Offers accordion
   offersSection: { width: '100%' },
   offersToggle: {
@@ -342,4 +465,4 @@ const s = StyleSheet.create({
   dashBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   backToListBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center', paddingVertical: 4 },
   backToListText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
-})
+}))

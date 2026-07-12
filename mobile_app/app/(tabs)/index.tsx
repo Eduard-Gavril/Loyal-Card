@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { api, Tenant, TenantWithDistance } from '@/lib/supabase'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 const CATEGORIES = ['all', 'cafe', 'food', 'beauty', 'gym', 'shop'] as const
 
@@ -28,6 +28,8 @@ export default function TenantSelectorScreen() {
   const router = useRouter()
   const { language, setTenantData } = useClientStore()
   const t = getTranslation(language)
+  const colors = useTheme()
+  const s = themedStyles(colors)
 
   const [tenants, setTenants] = useState<(Tenant | TenantWithDistance)[]>([])
   const [loading, setLoading] = useState(true)
@@ -123,7 +125,7 @@ export default function TenantSelectorScreen() {
             <Ionicons
               name={CATEGORY_ICONS[cat]}
               size={14}
-              color={category === cat ? '#fff' : colors.inkMid}
+              color={category === cat ? colors.bg : colors.inkMid}
             />
             <Text style={[s.chipText, category === cat && s.chipTextActive]}>
               {t.categories[cat as keyof typeof t.categories]}
@@ -135,7 +137,7 @@ export default function TenantSelectorScreen() {
   )
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       {/* Top bar */}
       <View style={s.topBar}>
         <Text style={s.pageTitle}>{t.discoverPartners}</Text>
@@ -203,6 +205,8 @@ function AnimatedPartnerCard({ item, index, onPress, t }: {
   item: any; index: number; onPress: () => void
   t: ReturnType<typeof getTranslation>
 }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(18)).current
   useEffect(() => {
@@ -256,7 +260,7 @@ function AnimatedPartnerCard({ item, index, onPress, t }: {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
 
   topBar: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 },
@@ -295,7 +299,8 @@ const s = StyleSheet.create({
   },
   chipActive: { backgroundColor: colors.ink, borderColor: colors.ink },
   chipText: { color: colors.inkMid, fontWeight: '600', fontSize: 13 },
-  chipTextActive: { color: '#fff' },
+  // Inverse of ink: readable on the ink-filled active chip in both themes
+  chipTextActive: { color: colors.bg },
 
   // List — no horizontal padding here: the header already insets itself
   // (see note above), and card items get their own marginHorizontal below.
@@ -356,4 +361,4 @@ const s = StyleSheet.create({
     backgroundColor: colors.primarySoft,
     alignItems: 'center', justifyContent: 'center',
   },
-})
+}))

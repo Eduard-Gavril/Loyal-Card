@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
-import { api } from '@/lib/supabase'
+import { api, RewardRule } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
+
+type LoyaltyState = Record<string, { count: number; rewards: number }>
 
 interface SavedCard {
   clientId: string
@@ -14,9 +16,50 @@ interface SavedCard {
   tenantName: string
   tenantLogo?: string
   brandColor: string
-  loyaltyState: Record<string, number>
-  totalStamps: number
+  loyaltyState: LoyaltyState
+  progressCount: number
+  progressTarget: number
+  hasProgress: boolean
+  rewardsAvailable: number
   customName?: string
+}
+
+// Progress shown in the wallet list: the highest-priority rule (lowest number,
+// rules arrive sorted) still in progress — never a sum across rules, which can
+// exceed a single rule's target (e.g. "9/6")
+function computeProgress(loyaltyState: LoyaltyState, rules: RewardRule[]) {
+  const states = Object.values(loyaltyState)
+  const hasProgress = states.some(s => (s?.count || 0) > 0 || (s?.rewards || 0) > 0)
+  const rewardsAvailable = states.reduce((sum, s) => sum + (s?.rewards || 0), 0)
+
+  if (rules.length === 0) {
+    // Rules unavailable (fetch failed): fall back to the first entry in progress
+    const inProgress = states.find(s => (s?.count || 0) > 0)
+    return {
+      hasProgress,
+      rewardsAvailable,
+      progressCount: Math.min(inProgress?.count || 0, 6),
+      progressTarget: 6,
+    }
+  }
+
+  const notCompleted = rules.filter(r => (loyaltyState[r.id]?.count || 0) < r.buy_count)
+  const displayRule =
+    notCompleted.find(r => (loyaltyState[r.id]?.count || 0) > 0) ||
+    notCompleted[0] ||
+    rules.find(r => {
+      const s = loyaltyState[r.id]
+      return (s?.count || 0) > 0 || (s?.rewards || 0) > 0
+    })
+
+  return {
+    hasProgress,
+    rewardsAvailable,
+    progressCount: displayRule
+      ? Math.min(loyaltyState[displayRule.id]?.count || 0, displayRule.buy_count)
+      : 0,
+    progressTarget: displayRule?.buy_count || 6,
+  }
 }
 
 export default function ClientWallet() {
@@ -50,19 +93,16 @@ export default function ClientWallet() {
       // Fetch tenant details for each card
       const cardsWithDetails = await Promise.all(
         allCards.map(async (cardData: any) => {
+          const loyaltyState: LoyaltyState = cardData.loyalty_state || {}
+          // Get customName from store if available
+          const savedCard = savedCards.find(c => c.qrCode === cardData.qr_code)
+
           try {
-            const tenant = await api.getTenant(cardData.tenant_id)
-            
-            // Count total stamps/points
-            const loyaltyState = cardData.loyalty_state || {}
-            const totalStamps = Object.values(loyaltyState).reduce(
-              (sum: number, state: any) => sum + (state?.count || 0), 
-              0
-            )
-            
-            // Get customName from store if available
-            const savedCard = savedCards.find(c => c.qrCode === cardData.qr_code)
-            
+            const [tenant, rules] = await Promise.all([
+              api.getTenant(cardData.tenant_id),
+              api.getRewardRules(cardData.tenant_id).catch(() => [] as RewardRule[])
+            ])
+
             return {
               clientId: cardData.client_id,
               cardId: cardData.id,
@@ -72,12 +112,10 @@ export default function ClientWallet() {
               tenantLogo: tenant.logo_url,
               brandColor: tenant.brand_color,
               loyaltyState,
-              totalStamps,
+              ...computeProgress(loyaltyState, rules || []),
               customName: savedCard?.customName
             }
           } catch (_err) {
-            // Get customName from store if available
-            const savedCard = savedCards.find(c => c.qrCode === cardData.qr_code)
             // Return card even if tenant fetch fails, with fallback values
             return {
               clientId: cardData.client_id,
@@ -87,11 +125,8 @@ export default function ClientWallet() {
               tenantName: t.wallet.store,
               tenantLogo: undefined,
               brandColor: '#6366f1',
-              loyaltyState: cardData.loyalty_state || {},
-              totalStamps: Object.values(cardData.loyalty_state || {}).reduce(
-                (sum: number, state: any) => sum + (state?.count || 0), 
-                0
-              ),
+              loyaltyState,
+              ...computeProgress(loyaltyState, []),
               customName: savedCard?.customName
             }
           }
@@ -296,21 +331,35 @@ export default function ClientWallet() {
                         </p>
                         
                         {/* Progress Indicator */}
-                        {card.totalStamps > 0 ? (
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              {[...Array(Math.min(card.totalStamps, 5))].map((_, i) => (
-                                <span key={i} className="text-yellow-400 text-lg">⭐</span>
+                        {card.hasProgress ? (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-0.5">
+                              {[...Array(card.progressTarget)].map((_, i) => (
+                                i < card.progressCount ? (
+                                  <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.364 1.118l1.287 3.957c.3.922-.755 1.688-1.539 1.118l-3.367-2.445a1 1 0 00-1.175 0l-3.367 2.445c-.783.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.363-1.118L2.075 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.274-3.958z" />
+                                  </svg>
+                                ) : (
+                                  <svg key={i} className="w-4 h-4 text-white/30" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.364 1.118l1.287 3.957c.3.922-.755 1.688-1.539 1.118l-3.367-2.445a1 1 0 00-1.175 0l-3.367 2.445c-.783.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.363-1.118L2.075 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.274-3.958z" />
+                                  </svg>
+                                )
                               ))}
-                              {card.totalStamps > 5 && (
-                                <span className="text-sm font-semibold text-white">
-                                  +{card.totalStamps - 5}
-                                </span>
-                              )}
                             </div>
                             <span className="text-xs text-gray-400">
-                              {card.totalStamps} {card.totalStamps === 1 ? t.wallet.stamp : t.wallet.stamps}
+                              {card.progressCount}/{card.progressTarget} {t.wallet.stamps}
                             </span>
+                            {card.rewardsAvailable > 0 && (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-semibold"
+                                title={`${card.rewardsAvailable} ${card.rewardsAvailable === 1 ? t.wallet.rewardReady : t.wallet.rewardsReady}`}
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                </svg>
+                                {card.rewardsAvailable}
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <p className="text-xs text-gray-400 italic">{t.wallet.noStamps}</p>

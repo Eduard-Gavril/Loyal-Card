@@ -6,6 +6,7 @@ import { api, Product, Card, RewardRule } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
+import { Camera, Ban, Check, Package, Gift, ShoppingCart, X, PartyPopper, Star } from 'lucide-react'
 
 // Cart item interface for multiple product selection
 interface CartItem {
@@ -467,7 +468,7 @@ export default function AdminScanner() {
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-8 border border-white/20">
               <div className="mb-4 sm:mb-6">
                 <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-white flex items-center gap-2">
-                  <span className="text-3xl sm:text-4xl">📸</span>
+                  <Camera className="w-7 h-7 sm:w-9 sm:h-9 text-primary-300" />
                   {t.admin.scanner.frameQR}
                 </h2>
                 <p className="text-sm sm:text-base text-gray-200">
@@ -521,7 +522,7 @@ export default function AdminScanner() {
               {/* Camera Permission Denied Warning */}
               {cameraPermission === 'denied' && (
                 <div className="bg-red-500/20 border-2 border-red-400/50 rounded-xl p-6 text-center">
-                  <div className="text-4xl mb-3">🚫</div>
+                  <Ban className="w-10 h-10 text-red-300 mx-auto mb-3" />
                   <h3 className="text-xl font-bold text-red-200 mb-2">
                     {language === 'ro' ? 'Permisiune Cameră Refuzată' : language === 'it' ? 'Permesso Fotocamera Negato' : 'Camera Permission Denied'}
                   </h3>
@@ -556,7 +557,7 @@ export default function AdminScanner() {
               {/* QR Code scanned info */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-8 border border-white/20 mb-6">
                 <h2 className="text-xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white flex items-center gap-2">
-                  <span className="text-green-400">✓</span>
+                  <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" strokeWidth={3} />
                   {t.admin.scanner.qrScanned}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-200 font-mono bg-black/30 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/10 break-all">
@@ -577,7 +578,7 @@ export default function AdminScanner() {
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
-                      <span className="text-lg sm:text-xl">📦</span>
+                      <Package className="w-5 h-5 sm:w-6 sm:h-6" />
                       <span className="leading-tight">{t.admin.scanner.registerPurchase}</span>
                     </span>
                   </button>
@@ -590,7 +591,7 @@ export default function AdminScanner() {
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
-                      <span className="text-lg sm:text-xl">🎁</span>
+                      <Gift className="w-5 h-5 sm:w-6 sm:h-6" />
                       <span className="leading-tight">{t.admin.scanner.redeemReward}</span>
                     </span>
                   </button>
@@ -604,7 +605,7 @@ export default function AdminScanner() {
                       <div className="mb-4 p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl">🛒</span>
+                            <ShoppingCart className="w-6 h-6 text-primary-300" />
                             <div>
                               <span className="font-semibold text-white">{getTotalItems()} {t.scanner.productsInCart}</span>
                               <div className="text-xs text-gray-300 mt-1">
@@ -725,8 +726,8 @@ export default function AdminScanner() {
                                       <div className="flex items-center gap-2">
                                         <div className="font-semibold text-white">{product.name}</div>
                                         {usageCount > 0 && (
-                                          <span className="text-xs bg-green-500/30 text-green-200 px-2 py-1 rounded-full">
-                                            ⭐ {usageCount}
+                                          <span className="text-xs bg-green-500/30 text-green-200 px-2 py-1 rounded-full inline-flex items-center gap-1">
+                                            <Star className="w-3 h-3" /> {usageCount}
                                           </span>
                                         )}
                                       </div>
@@ -817,7 +818,7 @@ export default function AdminScanner() {
                   <div>
                     <div className="flex items-center justify-between mb-4 sm:mb-6 gap-2">
                       <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-                        <span className="text-xl sm:text-2xl">🛒</span>
+                        <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                         {t.scanner.orderSummary}
                       </h2>
                       <button
@@ -864,7 +865,7 @@ export default function AdminScanner() {
                                 onClick={() => removeFromCart(item.productId)}
                                 className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-500/30 hover:bg-red-500/50 text-red-200 rounded-lg transition-all duration-200 ml-1 sm:ml-2"
                               >
-                                ✕
+                                <X className="w-4 h-4" />
                               </button>
                             </div>
                           </div>
@@ -906,7 +907,10 @@ export default function AdminScanner() {
                             {t.scanner.registering}
                           </span>
                         ) : (
-                          `✓ ${t.scanner.confirmProducts} ${getTotalItems()} ${t.scanner.products}`
+                          <span className="flex items-center justify-center gap-2">
+                            <Check className="w-5 h-5" strokeWidth={3} />
+                            {`${t.scanner.confirmProducts} ${getTotalItems()} ${t.scanner.products}`}
+                          </span>
                         )}
                       </button>
                       <button
@@ -932,7 +936,7 @@ export default function AdminScanner() {
                         return state && state.rewards > 0
                       }).length === 0 ? (
                       <div className="text-center py-6 sm:py-8 text-gray-200 bg-white/5 rounded-xl border-2 border-dashed border-white/20">
-                        <span className="text-3xl sm:text-4xl mb-2 block">🎁</span>
+                        <Gift className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2" />
                         {t.admin.scanner.noRewards}
                       </div>
                     ) : (
@@ -963,7 +967,7 @@ export default function AdminScanner() {
                                     </div>
                                   </div>
 
-                                  <div className="text-xl sm:text-2xl">🎁</div>
+                                  <Gift className="w-6 h-6 text-yellow-400" />
                                 </div>
                               </button>
                             )
@@ -1000,8 +1004,11 @@ export default function AdminScanner() {
             {/* Success/Result message */}
             {result && (
               <div className={`bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border-2 ${result.redeemed ? 'border-yellow-400/50' : 'border-green-400/50'}`}>
-                <h2 className={`text-4xl font-bold mb-6 ${result.redeemed ? 'text-yellow-300' : 'text-green-300'}`}>
-                  {result.redeemed ? `🎁 ${t.admin.scanner.rewardRedeemed}` : `✓ ${t.admin.scanner.purchaseRegistered}`}
+                <h2 className={`text-3xl sm:text-4xl font-bold mb-6 flex items-center gap-3 ${result.redeemed ? 'text-yellow-300' : 'text-green-300'}`}>
+                  {result.redeemed
+                    ? <Gift className="w-8 h-8 sm:w-10 sm:h-10 shrink-0" />
+                    : <Check className="w-8 h-8 sm:w-10 sm:h-10 shrink-0" strokeWidth={3} />}
+                  {result.redeemed ? t.admin.scanner.rewardRedeemed : t.admin.scanner.purchaseRegistered}
                 </h2>
 
                 {result.redeemed ? (
@@ -1021,7 +1028,7 @@ export default function AdminScanner() {
                     {result.multipleItems && (
                       <div className="bg-green-500/20 border-2 border-green-400/50 p-3 sm:p-4 rounded-xl mb-3 sm:mb-4">
                         <p className="text-green-200 text-base sm:text-lg font-semibold flex items-center gap-2">
-                          <span className="text-xl sm:text-2xl">📦</span>
+                          <Package className="w-5 h-5 sm:w-6 sm:h-6" />
                           {result.totalItemsProcessed} {t.scanner.products} {t.scanner.success}
                         </p>
                       </div>
@@ -1030,7 +1037,7 @@ export default function AdminScanner() {
                     {result.reward_earned ? (
                       <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-2 border-yellow-400/50 p-4 sm:p-6 rounded-xl mb-4 sm:mb-6">
                         <p className="text-xl sm:text-2xl font-bold text-yellow-300 mb-2 sm:mb-3 flex items-center gap-2">
-                          <span className="text-2xl sm:text-3xl">🎉</span>
+                          <PartyPopper className="w-6 h-6 sm:w-8 sm:h-8" />
                           {t.admin.scanner.rewardEarned}
                         </p>
                         <p className="text-yellow-200 text-base sm:text-lg mb-2">
@@ -1043,7 +1050,7 @@ export default function AdminScanner() {
                     ) : result.milestone_reached ? (
                       <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border-2 border-orange-400/50 p-4 sm:p-6 rounded-xl mb-4 sm:mb-6">
                         <p className="text-xl sm:text-2xl font-bold text-orange-300 mb-2 sm:mb-3 flex items-center gap-2">
-                          <span className="text-2xl sm:text-3xl">⭐</span>
+                          <Star className="w-6 h-6 sm:w-8 sm:h-8" />
                           {t.admin.scanner.milestoneReached}
                         </p>
                         <p className="text-orange-200 text-base sm:text-lg">
@@ -1051,8 +1058,9 @@ export default function AdminScanner() {
                         </p>
                       </div>
                     ) : !result.multipleItems && (
-                      <p className="text-green-200 text-base sm:text-lg mb-4 sm:mb-6 bg-green-500/20 rounded-xl p-3 sm:p-4 border border-green-400/30">
-                        ✓ {t.admin.scanner.pointsAdded}
+                      <p className="text-green-200 text-base sm:text-lg mb-4 sm:mb-6 bg-green-500/20 rounded-xl p-3 sm:p-4 border border-green-400/30 flex items-center gap-2">
+                        <Check className="w-5 h-5 shrink-0" strokeWidth={3} />
+                        {t.admin.scanner.pointsAdded}
                       </p>
                     )}
                   </div>

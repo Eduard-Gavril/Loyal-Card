@@ -1,3 +1,5 @@
+import { Check, X } from 'lucide-react'
+
 interface ScanResultProps {
   success: boolean
   message: string
@@ -18,9 +20,9 @@ export default function ScanResult({
           ? 'bg-gradient-to-br from-green-400 to-green-500 shadow-lg shadow-green-500/50' 
           : 'bg-gradient-to-br from-red-400 to-red-500 shadow-lg shadow-red-500/50'
       }`}>
-        <span className="text-5xl text-white">
-          {success ? '✓' : '✗'}
-        </span>
+        {success
+          ? <Check className="w-12 h-12 text-white" strokeWidth={3} />
+          : <X className="w-12 h-12 text-white" strokeWidth={3} />}
       </div>
       
       <h3 className={`text-2xl font-bold mb-3 ${success ? 'text-green-300' : 'text-red-300'}`}>

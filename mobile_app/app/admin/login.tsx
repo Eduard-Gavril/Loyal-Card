@@ -5,9 +5,11 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { supabase } from '@/lib/supabase'
 import { useAdminStore } from '@/store'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 export default function AdminLoginScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { setAuth } = useAdminStore()
 
@@ -111,7 +113,7 @@ export default function AdminLoginScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: 16, paddingVertical: 12 },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2 },
@@ -158,4 +160,4 @@ const s = StyleSheet.create({
   },
   loginBtnDisabled: { opacity: 0.6 },
   loginBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-})
+}))

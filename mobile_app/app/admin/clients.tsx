@@ -10,7 +10,7 @@ import { useAdminStore } from '@/store'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 interface ClientRecord {
   id: string
@@ -21,6 +21,8 @@ interface ClientRecord {
 }
 
 export default function ClientsScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
@@ -186,7 +188,7 @@ export default function ClientsScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -239,4 +241,4 @@ const s = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 8,
   },
   stampBtnText: { color: '#fff', fontSize: 9, fontWeight: '700' },
-})
+}))

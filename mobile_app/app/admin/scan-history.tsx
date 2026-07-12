@@ -8,7 +8,7 @@ import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
 import * as XLSX from 'xlsx'
 import { exportExcel } from '@/lib/excel'
-import { colors, radius, shadows } from '@/theme'
+import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 interface ScanEvent {
   id: string
@@ -20,6 +20,8 @@ interface ScanEvent {
 }
 
 export default function ScanHistoryScreen() {
+  const colors = useTheme()
+  const s = themedStyles(colors)
   const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
@@ -164,7 +166,7 @@ export default function ScanHistoryScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -205,4 +207,4 @@ const s = StyleSheet.create({
   clientName: { color: colors.ink, fontWeight: '700', fontSize: 14 },
   productName: { color: colors.primary, fontSize: 12, fontWeight: '600' },
   rowDate: { color: colors.inkFaint, fontSize: 11, marginTop: 2 },
-})
+}))

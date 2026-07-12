@@ -3,12 +3,13 @@ import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { colors } from '@/theme'
+import { useTheme } from '@/theme'
 
 export default function TabLayout() {
   const { language, totalRewards } = useClientStore()
   const t = getTranslation(language)
   const insets = useSafeAreaInsets()
+  const colors = useTheme()
 
   return (
     <Tabs

@@ -1,5 +1,6 @@
 import { Product } from '@/lib/supabase'
 import { CartItem, MACRO_CATEGORIES } from '@/types/scanner'
+import { ShoppingCart } from 'lucide-react'
 
 interface ProductSelectorProps {
   products: Product[]
@@ -58,7 +59,7 @@ export default function ProductSelector({
         <div className="mb-4 p-4 bg-primary-500/20 border-2 border-primary-400/50 rounded-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🛒</span>
+              <ShoppingCart className="w-6 h-6 text-primary-300" />
               <div>
                 <span className="font-semibold text-white">{getTotalItems()} {t.scanner.productsInCart}</span>
                 <div className="text-xs text-gray-300 mt-1">

@@ -1,4 +1,5 @@
 import { RewardRule } from '@/lib/supabase'
+import { Gift, Check } from 'lucide-react'
 
 interface RewardRedemptionProps {
   rewardRules: RewardRule[]
@@ -24,7 +25,7 @@ export default function RewardRedemption({
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-        <span className="text-2xl">🎁</span>
+        <Gift className="w-6 h-6" />
         {t.admin.scanner.selectReward}
       </h2>
       
@@ -41,7 +42,7 @@ export default function RewardRedemption({
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">🎁</span>
+                <Gift className="w-8 h-8 text-yellow-400" />
                 <div>
                   <div className="font-semibold text-white text-lg">{rule.name}</div>
                   <div className="text-sm text-white/60">
@@ -50,7 +51,7 @@ export default function RewardRedemption({
                 </div>
               </div>
               {selectedReward?.id === rule.id && (
-                <span className="text-2xl">✓</span>
+                <Check className="w-6 h-6 text-primary-300" strokeWidth={3} />
               )}
             </div>
           </button>

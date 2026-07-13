@@ -8,6 +8,7 @@ import { api, supabase, RewardRule } from '@/lib/supabase'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import TiltCard from '@/components/TiltCard'
 
 type LoyaltyState = Record<string, { count?: number; rewards?: number } | undefined>
 
@@ -184,8 +185,8 @@ export default function CardScreen() {
         </View>
       ) : qrCode ? (
         <ScrollView contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>
-          {/* Night loyalty card */}
-          <Animated.View style={[s.cardBox, { opacity: qrOpacity, transform: [{ scale: qrScale }] }]}>
+          {/* Night loyalty card — tilts in 3D with the phone's motion */}
+          <TiltCard style={s.cardBox} opacity={qrOpacity} scale={qrScale}>
             <View style={s.cardBlob1} pointerEvents="none" />
             <View style={s.cardBlob2} pointerEvents="none" />
 
@@ -204,7 +205,7 @@ export default function CardScreen() {
             </View>
 
             <Text style={s.cardId} selectable>{qrCode}</Text>
-          </Animated.View>
+          </TiltCard>
 
           {/* Instructions */}
           <View style={s.infoBox}>

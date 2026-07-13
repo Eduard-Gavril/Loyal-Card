@@ -13,7 +13,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "net.loyalcard.app"
+      "bundleIdentifier": "net.loyalcard.app",
+      "infoPlist": {
+        "NSMotionUsageDescription": "LoyalCard uses motion data to add a subtle 3D tilt effect to your loyalty card."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,8 +28,7 @@
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.CAMERA"
       ]
     },
     "plugins": [

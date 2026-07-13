@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import TiltCard from '@/components/TiltCard'
 
 const CONTACT_EMAIL = 'eduardgavril.1999@gmail.com'
 const WEBSITE_URL = 'https://loyalcard.net'
@@ -121,8 +122,10 @@ export default function HomeScreen() {
           <Text style={s.subtitle}>{h.subtitle}</Text>
         </View>
 
-        {/* Night loyalty-card visual */}
-        <View style={s.nightCard}>
+        {/* Night loyalty-card visuals — two examples: in progress, and
+            completed with a reward ready. Each tilts in 3D with the phone's
+            motion, same effect as the real QR card. */}
+        <TiltCard style={s.nightCard}>
           <View style={s.nightBlob1} pointerEvents="none" />
           <View style={s.nightBlob2} pointerEvents="none" />
           <View style={s.nightTop}>
@@ -130,39 +133,68 @@ export default function HomeScreen() {
             <Ionicons name="qr-code" size={22} color={colors.violetLight} />
           </View>
           <View style={s.nightStamps}>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <View key={i} style={[s.stampDot, i < 5 && s.stampDotFilled]}>
-                {i < 5 && <Ionicons name="checkmark" size={12} color="#fff" />}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <View key={i} style={[s.stampDot, i < 4 && s.stampDotFilled]}>
+                {i < 4 && <Ionicons name="checkmark" size={12} color="#fff" />}
               </View>
             ))}
           </View>
           <View style={s.nightBottom}>
             <View>
               <Text style={s.nightLabel}>{t.dashboard.stamps.toUpperCase()}</Text>
-              <Text style={s.nightValue}>5 / 8</Text>
+              <Text style={s.nightValue}>4 / 6</Text>
             </View>
             <View style={s.nightReward}>
               <Ionicons name="gift-outline" size={14} color={colors.violetLight} />
               <Text style={s.nightRewardText}>{t.dashboard.rewards}</Text>
             </View>
           </View>
-        </View>
+        </TiltCard>
 
-        {/* Stats */}
-        <View style={s.statsRow}>
-          {[
-            { val: h.stat1Val, label: h.stat1Label },
-            { val: h.stat2Val, label: h.stat2Label },
-            { val: h.stat3Val, label: h.stat3Label },
-          ].map((stat) => (
-            <View key={stat.label} style={s.statBox}>
-              <Text style={s.statVal}>{stat.val}</Text>
-              <Text style={s.statLabel}>{stat.label}</Text>
+        <TiltCard style={s.nightCard}>
+          <View style={[s.nightBlob1, s.nightBlob1Done]} pointerEvents="none" />
+          <View style={[s.nightBlob2, s.nightBlob2Done]} pointerEvents="none" />
+          <View style={s.nightTop}>
+            <Text style={s.nightBrand}>LOYALCARD</Text>
+            <Ionicons name="qr-code" size={22} color={colors.violetLight} />
+          </View>
+          <View style={s.nightStamps}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <View key={i} style={[s.stampDot, s.stampDotFilled]}>
+                <Ionicons name="checkmark" size={12} color="#fff" />
+              </View>
+            ))}
+          </View>
+          <View style={s.nightBottom}>
+            <View>
+              <Text style={s.nightLabel}>{t.dashboard.stamps.toUpperCase()}</Text>
+              <Text style={s.nightValue}>6 / 6</Text>
             </View>
-          ))}
-        </View>
+            <View style={s.nightRewardReady}>
+              <Ionicons name="gift" size={14} color="#6EE7B7" />
+              <Text style={s.nightRewardReadyText}>{t.card.rewardReady}</Text>
+            </View>
+          </View>
+        </TiltCard>
 
-        {/* CTAs */}
+        {/* Stats — conversion pitch for first-time visitors only; someone
+            with cards already knows the app is free and digital */}
+        {!hasCards && (
+          <View style={s.statsRow}>
+            {[
+              { val: h.stat1Val, label: h.stat1Label },
+              { val: h.stat2Val, label: h.stat2Label },
+              { val: h.stat3Val, label: h.stat3Label },
+            ].map((stat) => (
+              <View key={stat.label} style={s.statBox}>
+                <Text style={s.statVal}>{stat.val}</Text>
+                <Text style={s.statLabel}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* One primary action */}
         <View style={s.ctas}>
           <TouchableOpacity
             style={s.primaryBtn}
@@ -177,45 +209,41 @@ export default function HomeScreen() {
               <Ionicons name="arrow-forward" size={14} color={colors.primary} />
             </View>
           </TouchableOpacity>
+        </View>
 
+        {/* Secondary/utility links — grouped at equal, lower weight so they
+            don't compete with the primary action above */}
+        <View style={s.moreCard}>
           <TouchableOpacity
-            style={s.secondaryBtn}
+            style={s.moreRow}
             onPress={() => { setContactOpen(true); setSent(false) }}
-            activeOpacity={0.85}
+            activeOpacity={0.7}
           >
-            <View style={s.secondaryIconCircle}>
-              <Ionicons name="storefront-outline" size={18} color={colors.primary} />
-            </View>
-            <Text style={s.secondaryBtnText}>{h.partnerBtn}</Text>
+            <Ionicons name="storefront-outline" size={18} color={colors.inkSoft} style={s.moreRowIcon} />
+            <Text style={s.moreRowText}>{h.partnerBtn}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />
           </TouchableOpacity>
-
+          <View style={s.moreDivider} />
           <TouchableOpacity
-            style={s.learnMoreBtn}
+            style={s.moreRow}
+            onPress={() => Linking.openURL(HELP_URL)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="help-buoy-outline" size={18} color={colors.inkSoft} style={s.moreRowIcon} />
+            <Text style={s.moreRowText}>{t.profile.needHelp}</Text>
+            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
+          </TouchableOpacity>
+          <View style={s.moreDivider} />
+          <TouchableOpacity
+            style={s.moreRow}
             onPress={() => Linking.openURL(WEBSITE_URL)}
             activeOpacity={0.7}
           >
-            <Ionicons name="globe-outline" size={15} color={colors.inkSoft} />
-            <Text style={s.learnMoreText}>{h.learnMore}</Text>
-            <Ionicons name="open-outline" size={13} color={colors.inkSoft} />
+            <Ionicons name="globe-outline" size={18} color={colors.inkSoft} style={s.moreRowIcon} />
+            <Text style={s.moreRowText}>{h.learnMore}</Text>
+            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
           </TouchableOpacity>
         </View>
-
-        {/* Need help */}
-        <TouchableOpacity
-          style={s.helpCard}
-          onPress={() => Linking.openURL(HELP_URL)}
-          activeOpacity={0.8}
-        >
-          <View style={s.helpIconWrap}>
-            <Ionicons name="help-buoy-outline" size={20} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.helpTitle}>{t.profile.needHelp}</Text>
-            <Text style={s.helpSub}>{t.profile.needHelpSub}</Text>
-          </View>
-          <Ionicons name="open-outline" size={15} color={colors.inkFaint} />
-        </TouchableOpacity>
 
         <Text style={s.footer}>LoyalCard • loyalcard.net</Text>
       </ScrollView>
@@ -370,6 +398,9 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   },
   nightBlob1: { position: 'absolute', top: -70, right: -50, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(124,58,237,0.35)' },
   nightBlob2: { position: 'absolute', bottom: -90, left: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(124,58,237,0.16)' },
+  // Completed-card example: green tint instead of violet, reinforcing "done"
+  nightBlob1Done: { backgroundColor: 'rgba(52,211,153,0.30)' },
+  nightBlob2Done: { backgroundColor: 'rgba(52,211,153,0.14)' },
   nightTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   nightBrand: { color: colors.onNightSoft, fontSize: 12, fontWeight: '800', letterSpacing: 3 },
   nightStamps: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
@@ -389,6 +420,13 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
     borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6,
   },
   nightRewardText: { color: colors.violetLight, fontSize: 12, fontWeight: '700', textTransform: 'capitalize' },
+  nightRewardReady: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: 'rgba(52,211,153,0.22)',
+    borderWidth: 1, borderColor: 'rgba(52,211,153,0.45)',
+    borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6,
+  },
+  nightRewardReadyText: { color: '#6EE7B7', fontSize: 12, fontWeight: '700', textTransform: 'capitalize' },
 
   // Stats
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
@@ -402,8 +440,8 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   statVal: { color: colors.ink, fontSize: 21, fontWeight: '900' },
   statLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: '600' },
 
-  // CTAs
-  ctas: { gap: 12, marginBottom: 20 },
+  // CTA
+  ctas: { marginBottom: 14 },
   primaryBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: colors.primary, borderRadius: radius.lg,
@@ -421,39 +459,17 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center', justifyContent: 'center',
   },
-  secondaryBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
+  // Secondary/utility links — one grouped card, equal low weight throughout
+  moreCard: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    paddingHorizontal: 16, paddingVertical: 14,
+    marginBottom: 16, overflow: 'hidden',
     ...shadows.card,
   },
-  secondaryIconCircle: {
-    width: 36, height: 36, borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  secondaryBtnText: { flex: 1, color: colors.ink, fontWeight: '700', fontSize: 15 },
-  learnMoreBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
-    paddingVertical: 12,
-  },
-  learnMoreText: { color: colors.inkSoft, fontWeight: '600', fontSize: 13 },
-
-  // Help card
-  helpCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: colors.primarySoft,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.primaryBorder,
-    padding: 16, marginBottom: 16,
-  },
-  helpIconWrap: {
-    width: 42, height: 42, borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  helpTitle: { color: colors.ink, fontSize: 14, fontWeight: '700', marginBottom: 2 },
-  helpSub: { color: colors.inkSoft, fontSize: 12 },
+  moreRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  moreRowIcon: { width: 20 },
+  moreRowText: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 14.5 },
+  moreDivider: { height: 1, backgroundColor: colors.border, marginLeft: 48 },
 
   footer: { color: colors.inkFaint, fontSize: 12, textAlign: 'center', marginTop: 8 },
 

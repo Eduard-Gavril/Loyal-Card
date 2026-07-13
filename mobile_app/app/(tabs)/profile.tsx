@@ -13,10 +13,10 @@ import { getTranslation, Language } from '@/lib/i18n'
 import { api, supabase } from '@/lib/supabase'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
-const LANGUAGES: { code: Language; label: string; flag: string }[] = [
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'ro', label: 'Română', flag: '🇷🇴' },
-  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+const LANGUAGES: { code: Language; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'ro', label: 'Română' },
+  { code: 'it', label: 'Italiano' },
 ]
 
 const PREFIXES = [
@@ -606,37 +606,11 @@ export default function ProfileScreen() {
         }
       >
         <View style={s.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.headerTitle}>{displayName ? displayName : p.title}</Text>
-            <Text style={s.headerSub}>{savedCards.length} {p.savedCards}</Text>
-          </View>
-          <View style={s.langFlags}>
-            {LANGUAGES.map((l) => (
-              <TouchableOpacity
-                key={l.code}
-                style={[s.flagBtn, language === l.code && s.flagBtnActive]}
-                onPress={() => setLanguage(l.code)}
-              >
-                <Text style={s.flagText}>{l.flag}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <Text style={s.headerTitle}>{displayName ? displayName : p.title}</Text>
+          <Text style={s.headerSub}>{savedCards.length} {p.savedCards}</Text>
         </View>
 
-        {/* Dark mode */}
-        <View style={s.darkModeRow}>
-          <View style={s.iconWrap}>
-            <Ionicons name={darkMode ? 'moon' : 'moon-outline'} size={20} color={colors.primary} />
-          </View>
-          <Text style={s.darkModeLabel}>{p.darkMode}</Text>
-          <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
-            trackColor={{ false: colors.borderStrong, true: colors.primary }}
-            thumbColor="#fff"
-          />
-        </View>
-
+        <NameSection t={t} />
         <LinkPhoneSection t={t} />
         <RecoverySection t={t} />
 
@@ -652,58 +626,86 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={16} color={colors.onNightSoft} />
         </TouchableOpacity>
 
-        {/* Need help */}
-        <TouchableOpacity
-          style={s.helpCard}
-          onPress={() => Linking.openURL('https://loyalcard.net/contact')}
-          activeOpacity={0.8}
-        >
-          <View style={s.iconWrap}>
-            <Ionicons name="help-buoy-outline" size={20} color={colors.primary} />
+        {/* Settings — one grouped list: language, appearance, support, legal,
+            account deletion. Kept inside the existing Profile tab, not a new
+            menu entry. */}
+        <Text style={s.settingsTitle}>{p.settingsTitle}</Text>
+        <View style={s.settingsCard}>
+          <View style={s.settingsRow}>
+            <Ionicons name="language-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
+            <Text style={s.settingsRowText}>{p.language}</Text>
+            <View style={s.langSegment}>
+              {LANGUAGES.map((l) => (
+                <TouchableOpacity
+                  key={l.code}
+                  style={[s.langSegmentBtn, language === l.code && s.langSegmentBtnActive]}
+                  onPress={() => setLanguage(l.code)}
+                  accessibilityLabel={l.label}
+                >
+                  <Text style={[s.langSegmentText, language === l.code && s.langSegmentTextActive]}>
+                    {l.code.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.helpTitle}>{p.needHelp}</Text>
-            <Text style={s.helpSub}>{p.needHelpSub}</Text>
-          </View>
-          <Ionicons name="open-outline" size={15} color={colors.inkFaint} />
-        </TouchableOpacity>
+          <View style={s.settingsDivider} />
 
-        {/* Legal */}
-        <View style={s.legalSection}>
-          <Text style={s.legalTitle}>{p.legalTitle}</Text>
+          <View style={s.settingsRow}>
+            <Ionicons name={darkMode ? 'moon' : 'moon-outline'} size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
+            <Text style={s.settingsRowText}>{p.darkMode}</Text>
+            <Switch
+              value={darkMode}
+              onValueChange={setDarkMode}
+              trackColor={{ false: colors.borderStrong, true: colors.primary }}
+              thumbColor="#fff"
+            />
+          </View>
+          <View style={s.settingsDivider} />
+
           <TouchableOpacity
-            style={s.legalRow}
-            onPress={() => Linking.openURL('https://loyalcard.net/privacy')}
+            style={s.settingsRow}
+            onPress={() => Linking.openURL('https://loyalcard.net/contact')}
+            activeOpacity={0.7}
           >
-            <Ionicons name="document-text-outline" size={16} color={colors.inkSoft} />
-            <Text style={s.legalText}>{p.privacyPolicy}</Text>
-            <Ionicons name="open-outline" size={13} color={colors.inkFaint} />
+            <Ionicons name="help-buoy-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
+            <Text style={s.settingsRowText}>{p.needHelp}</Text>
+            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
           </TouchableOpacity>
+          <View style={s.settingsDivider} />
+
           <TouchableOpacity
-            style={s.legalRow}
-            onPress={() => Linking.openURL('https://loyalcard.net/cookie-policy')}
+            style={s.settingsRow}
+            onPress={() => Linking.openURL('https://loyalcard.net/privacy')}
+            activeOpacity={0.7}
           >
-            <Ionicons name="shield-outline" size={16} color={colors.inkSoft} />
-            <Text style={s.legalText}>{p.cookiePolicy}</Text>
-            <Ionicons name="open-outline" size={13} color={colors.inkFaint} />
+            <Ionicons name="document-text-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
+            <Text style={s.settingsRowText}>{p.privacyPolicy}</Text>
+            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
+          </TouchableOpacity>
+          <View style={s.settingsDivider} />
+
+          <TouchableOpacity
+            style={s.settingsRow}
+            onPress={() => Linking.openURL('https://loyalcard.net/cookie-policy')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="shield-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
+            <Text style={s.settingsRowText}>{p.cookiePolicy}</Text>
+            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
+          </TouchableOpacity>
+          <View style={s.settingsDivider} />
+
+          <TouchableOpacity
+            style={s.settingsRow}
+            onPress={() => { setDeleteInput(''); setDeleteModal(true) }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="trash-outline" size={18} color={colors.danger} style={s.settingsRowIcon} />
+            <Text style={[s.settingsRowText, s.settingsRowTextDanger]}>{p.deleteAccountTitle}</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.danger} />
           </TouchableOpacity>
         </View>
-
-        <NameSection t={t} />
-
-        {/* Delete account */}
-        <TouchableOpacity
-          style={s.deleteBtn}
-          onPress={() => { setDeleteInput(''); setDeleteModal(true) }}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="trash-outline" size={16} color={colors.danger} />
-          <View style={{ flex: 1 }}>
-            <Text style={s.deleteBtnTitle}>{p.deleteAccountTitle}</Text>
-            <Text style={s.deleteBtnSub}>{p.deleteAccountSub}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={14} color={colors.danger} />
-        </TouchableOpacity>
 
         <Text style={s.version}>{p.appVersion}</Text>
       </ScrollView>
@@ -755,17 +757,9 @@ export default function ProfileScreen() {
 }
 
 const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  darkModeRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, marginBottom: 14,
-    ...shadows.card,
-  },
-  darkModeLabel: { flex: 1, color: colors.ink, fontWeight: '700', fontSize: 14.5 },
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: 20, paddingBottom: 40 },
-  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 },
+  header: { marginBottom: 20, paddingTop: 8 },
   headerTitle: { color: colors.ink, fontSize: 26, fontWeight: '800', letterSpacing: -0.5 },
   headerSub: { color: colors.inkSoft, fontSize: 14, marginTop: 4 },
 
@@ -796,16 +790,6 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   changeLink: { color: colors.primary, fontSize: 12, fontWeight: '700' },
   altLink: { marginBottom: 4 },
   altLinkText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
-
-  langFlags: { flexDirection: 'row', gap: 6, alignItems: 'flex-start', paddingTop: 6 },
-  flagBtn: {
-    width: 36, height: 36, borderRadius: radius.sm,
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1, borderColor: colors.borderStrong,
-  },
-  flagBtnActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
-  flagText: { fontSize: 18 },
 
   inputLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 },
   prefixRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
@@ -918,33 +902,34 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   adminBtnTitle: { color: colors.onNight, fontSize: 15, fontWeight: '700', marginBottom: 2 },
   adminBtnSub: { color: colors.onNightSoft, fontSize: 11 },
 
-  helpCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, marginBottom: 12,
-    ...shadows.card,
-  },
-  helpTitle: { color: colors.ink, fontSize: 14, fontWeight: '700', marginBottom: 2 },
-  helpSub: { color: colors.inkSoft, fontSize: 11 },
   version: { color: colors.inkFaint, fontSize: 12, textAlign: 'center', marginTop: 8 },
 
-  legalSection: { marginBottom: 12, paddingHorizontal: 4 },
-  legalTitle: { color: colors.inkFaint, fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 },
-  legalRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border,
+  // Settings group — one card, equal-weight rows, matches the pattern used
+  // for secondary links on the Home tab
+  settingsTitle: {
+    color: colors.inkFaint, fontSize: 10, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8, paddingHorizontal: 4,
   },
-  legalText: { flex: 1, color: colors.inkMid, fontSize: 13 },
+  settingsCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    marginBottom: 14, overflow: 'hidden',
+    ...shadows.card,
+  },
+  settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  settingsRowIcon: { width: 20 },
+  settingsRowText: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 14.5 },
+  settingsRowTextDanger: { color: colors.danger },
+  settingsDivider: { height: 1, backgroundColor: colors.border, marginLeft: 48 },
 
-  deleteBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.dangerSoft,
-    borderRadius: radius.md, padding: 14, marginBottom: 12,
-    borderWidth: 1, borderColor: colors.dangerBorder,
+  langSegment: {
+    flexDirection: 'row', backgroundColor: colors.bgDeep,
+    borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, padding: 2, gap: 2,
   },
-  deleteBtnTitle: { color: colors.danger, fontSize: 14, fontWeight: '700', marginBottom: 1 },
-  deleteBtnSub: { color: colors.danger, fontSize: 11, opacity: 0.7 },
+  langSegmentBtn: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.sm - 2 },
+  langSegmentBtnActive: { backgroundColor: colors.primary },
+  langSegmentText: { color: colors.inkSoft, fontSize: 12, fontWeight: '700' },
+  langSegmentTextActive: { color: '#fff' },
 
   modalWrap: { flex: 1, backgroundColor: colors.bg, padding: 24, paddingTop: 16 },
   modalHandle: { width: 36, height: 4, backgroundColor: colors.borderStrong, borderRadius: 2, alignSelf: 'center', marginBottom: 28 },

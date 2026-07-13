@@ -99,7 +99,7 @@ export default function AdminProductsScreen() {
   }
 
   async function handleSaveProduct() {
-    if (!productForm.name.trim()) { Alert.alert('Error', 'Enter product name'); return }
+    if (!productForm.name.trim()) { Alert.alert(a.errorTitle, a.enterProductNameMsg); return }
     setSavingProduct(true)
     try {
       const payload = {
@@ -130,14 +130,14 @@ export default function AdminProductsScreen() {
       setProductModal(false)
       await loadData()
     } catch (e: any) {
-      Alert.alert('Error', e?.message ?? a.errorSaveMsg)
+      Alert.alert(a.errorTitle, e?.message ?? a.errorSaveMsg)
     } finally {
       setSavingProduct(false)
     }
   }
 
   async function handleDeleteProduct(p: Product) {
-    Alert.alert(`${t.dashboard.deleteCard}`, `Delete "${p.name}"?`, [
+    Alert.alert(a.deleteProductTitle, a.confirmDeleteMsg(p.name), [
       { text: t.dashboard.cancel, style: 'cancel' },
       {
         text: t.dashboard.delete, style: 'destructive',
@@ -185,7 +185,7 @@ export default function AdminProductsScreen() {
   }
 
   async function handleSaveRule() {
-    if (!ruleForm.name.trim()) { Alert.alert('Error', 'Enter rule name'); return }
+    if (!ruleForm.name.trim()) { Alert.alert(a.errorTitle, a.enterRuleNameMsg); return }
     setSavingRule(true)
     try {
       const payload = {
@@ -207,14 +207,14 @@ export default function AdminProductsScreen() {
       setRuleFormVisible(false)
       await loadData()
     } catch (e: any) {
-      Alert.alert('Error', e?.message ?? a.errorSaveMsg)
+      Alert.alert(a.errorTitle, e?.message ?? a.errorSaveMsg)
     } finally {
       setSavingRule(false)
     }
   }
 
   async function handleDeleteRule(r: Rule) {
-    Alert.alert(`Delete rule`, `Delete "${r.name}"?`, [
+    Alert.alert(a.deleteRuleTitle, a.confirmDeleteMsg(r.name), [
       { text: t.dashboard.cancel, style: 'cancel' },
       {
         text: t.dashboard.delete, style: 'destructive',
@@ -304,15 +304,15 @@ export default function AdminProductsScreen() {
               <View style={s.productActions}>
                 <TouchableOpacity style={s.actionBtn} onPress={() => openRules(p)}>
                   <Ionicons name="trophy-outline" size={15} color={colors.primary} />
-                  <Text style={s.actionText}>Regole</Text>
+                  <Text style={s.actionText}>{a.rulesBtn}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={s.actionBtn} onPress={() => openEditProduct(p)}>
                   <Ionicons name="pencil-outline" size={15} color={colors.primary} />
-                  <Text style={s.actionText}>Modifica</Text>
+                  <Text style={s.actionText}>{a.edit}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[s.actionBtn, s.actionBtnDanger]} onPress={() => handleDeleteProduct(p)}>
                   <Ionicons name="trash-outline" size={15} color={colors.danger} />
-                  <Text style={[s.actionText, { color: colors.danger }]}>Elimina</Text>
+                  <Text style={[s.actionText, { color: colors.danger }]}>{t.dashboard.delete}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -327,16 +327,16 @@ export default function AdminProductsScreen() {
             <TouchableOpacity onPress={() => setProductModal(false)}>
               <Ionicons name="close" size={24} color={colors.ink} />
             </TouchableOpacity>
-            <Text style={s.modalTitle}>{editingProduct ? 'Modifica prodotto' : 'Nuovo prodotto'}</Text>
+            <Text style={s.modalTitle}>{editingProduct ? a.editProductTitle : a.newProductTitle}</Text>
             <TouchableOpacity onPress={handleSaveProduct} disabled={savingProduct}>
               {savingProduct ? <ActivityIndicator color={colors.primary} /> : <Text style={s.modalSave}>{a.save}</Text>}
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={s.modalBody}>
-            <Text style={s.fieldLabel}>Nome *</Text>
+            <Text style={s.fieldLabel}>{a.productNameLabel}</Text>
             <TextInput
               style={s.input}
-              placeholder="Nome prodotto"
+              placeholder={a.productNamePlaceholder}
               placeholderTextColor={colors.inkFaint}
               value={productForm.name}
               onChangeText={(v) => setProductForm((f) => ({ ...f, name: v }))}
@@ -355,16 +355,16 @@ export default function AdminProductsScreen() {
               ))}
             </View>
 
-            <Text style={s.fieldLabel}>Categoria</Text>
+            <Text style={s.fieldLabel}>{a.categoryLabel}</Text>
             <TextInput
               style={s.input}
-              placeholder="es. Bevande, Cibo, Servizi..."
+              placeholder={a.categoryPlaceholder}
               placeholderTextColor={colors.inkFaint}
               value={productForm.category}
               onChangeText={(v) => setProductForm((f) => ({ ...f, category: v }))}
             />
 
-            <Text style={s.fieldLabel}>Prezzo in lei (opzionale)</Text>
+            <Text style={s.fieldLabel}>{a.priceLabel}</Text>
             <TextInput
               style={s.input}
               placeholder="0.00 lei"
@@ -376,7 +376,7 @@ export default function AdminProductsScreen() {
 
             {!editingProduct && (
               <>
-                <Text style={s.fieldLabel}>Scansioni per premio (regola default)</Text>
+                <Text style={s.fieldLabel}>{a.scansForRewardLabel}</Text>
                 <TextInput
                   style={s.input}
                   placeholder="5"
@@ -398,7 +398,7 @@ export default function AdminProductsScreen() {
             <TouchableOpacity onPress={() => setRulesModal(false)}>
               <Ionicons name="close" size={24} color={colors.ink} />
             </TouchableOpacity>
-            <Text style={s.modalTitle} numberOfLines={1}>Regole — {selectedProduct?.name}</Text>
+            <Text style={s.modalTitle} numberOfLines={1}>{a.rulesBtn} — {selectedProduct?.name}</Text>
             <TouchableOpacity onPress={openAddRule}>
               <Ionicons name="add-circle" size={26} color={colors.primary} />
             </TouchableOpacity>
@@ -411,9 +411,11 @@ export default function AdminProductsScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={s.ruleName}>{r.name}</Text>
                     <Text style={s.ruleSub}>
-                      {r.buy_count} scansioni →{' '}
-                      {r.reward_count > 0 ? `×${r.reward_count} gratis` : `${r.discount_percent}% sconto`}
-                      {' '}· priorità {r.priority}
+                      {a.ruleSummaryLine(
+                        r.buy_count,
+                        r.reward_count > 0 ? a.freeRewardLabel(r.reward_count) : a.discountRewardLabel(r.discount_percent ?? 0),
+                        r.priority
+                      )}
                     </Text>
                     {r.description && <Text style={s.ruleDesc}>{r.description}</Text>}
                   </View>
@@ -428,11 +430,11 @@ export default function AdminProductsScreen() {
                 <View style={s.ruleActions}>
                   <TouchableOpacity style={s.actionBtn} onPress={() => openEditRule(r)}>
                     <Ionicons name="pencil-outline" size={14} color={colors.primary} />
-                    <Text style={s.actionText}>Modifica</Text>
+                    <Text style={s.actionText}>{a.edit}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[s.actionBtn, s.actionBtnDanger]} onPress={() => handleDeleteRule(r)}>
                     <Ionicons name="trash-outline" size={14} color={colors.danger} />
-                    <Text style={[s.actionText, { color: colors.danger }]}>Elimina</Text>
+                    <Text style={[s.actionText, { color: colors.danger }]}>{t.dashboard.delete}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -441,22 +443,22 @@ export default function AdminProductsScreen() {
             {/* Rule form */}
             {ruleFormVisible && (
               <View style={s.ruleFormBox}>
-                <Text style={s.ruleFormTitle}>{editingRule ? 'Modifica regola' : 'Nuova regola'}</Text>
+                <Text style={s.ruleFormTitle}>{editingRule ? a.ruleFormEditTitle : a.ruleFormNewTitle}</Text>
 
-                <Text style={s.fieldLabel}>Nome regola *</Text>
-                <TextInput style={s.input} placeholder="es. Caffè gratuito" placeholderTextColor={colors.inkFaint}
+                <Text style={s.fieldLabel}>{a.ruleNameLabel}</Text>
+                <TextInput style={s.input} placeholder={a.ruleNamePlaceholder} placeholderTextColor={colors.inkFaint}
                   value={ruleForm.name} onChangeText={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
 
-                <Text style={s.fieldLabel}>Descrizione</Text>
-                <TextInput style={s.input} placeholder="Descrizione opzionale" placeholderTextColor={colors.inkFaint}
+                <Text style={s.fieldLabel}>{a.descriptionLabel}</Text>
+                <TextInput style={s.input} placeholder={a.descriptionPlaceholder} placeholderTextColor={colors.inkFaint}
                   value={ruleForm.description} onChangeText={(v) => setRuleForm((f) => ({ ...f, description: v }))} />
 
-                <Text style={s.fieldLabel}>Scansioni necessarie</Text>
+                <Text style={s.fieldLabel}>{a.scansNeededLabel}</Text>
                 <TextInput style={s.input} placeholder="5" placeholderTextColor={colors.inkFaint}
                   value={ruleForm.buy_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, buy_count: v }))}
                   keyboardType="number-pad" />
 
-                <Text style={s.fieldLabel}>Tipo di premio</Text>
+                <Text style={s.fieldLabel}>{a.rewardTypeLabel}</Text>
                 <View style={s.rewardTypeRow}>
                   {(['free_product', 'percentage_discount'] as const).map((type) => (
                     <TouchableOpacity
@@ -465,7 +467,7 @@ export default function AdminProductsScreen() {
                       onPress={() => setRuleForm((f) => ({ ...f, reward_type: type }))}
                     >
                       <Text style={[s.rewardTypeText, ruleForm.reward_type === type && s.rewardTypeTextActive]}>
-                        {type === 'free_product' ? '🎁 Prodotto gratis' : '% Sconto'}
+                        {type === 'free_product' ? a.freeProductOption : a.discountOption}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -473,31 +475,31 @@ export default function AdminProductsScreen() {
 
                 {ruleForm.reward_type === 'free_product' ? (
                   <>
-                    <Text style={s.fieldLabel}>Quantità gratuita</Text>
+                    <Text style={s.fieldLabel}>{a.freeQuantityLabel}</Text>
                     <TextInput style={s.input} placeholder="1" placeholderTextColor={colors.inkFaint}
                       value={ruleForm.reward_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, reward_count: v }))}
                       keyboardType="number-pad" />
                   </>
                 ) : (
                   <>
-                    <Text style={s.fieldLabel}>Percentuale sconto (1-100)</Text>
+                    <Text style={s.fieldLabel}>{a.discountPercentLabel}</Text>
                     <TextInput style={s.input} placeholder="10" placeholderTextColor={colors.inkFaint}
                       value={ruleForm.discount_percent} onChangeText={(v) => setRuleForm((f) => ({ ...f, discount_percent: v }))}
                       keyboardType="number-pad" />
                   </>
                 )}
 
-                <Text style={s.fieldLabel}>Priorità</Text>
+                <Text style={s.fieldLabel}>{a.priorityLabel}</Text>
                 <TextInput style={s.input} placeholder="1" placeholderTextColor={colors.inkFaint}
                   value={ruleForm.priority} onChangeText={(v) => setRuleForm((f) => ({ ...f, priority: v }))}
                   keyboardType="number-pad" />
 
                 <View style={s.ruleFormActions}>
                   <TouchableOpacity style={s.cancelBtn} onPress={() => setRuleFormVisible(false)}>
-                    <Text style={s.cancelBtnText}>Annulla</Text>
+                    <Text style={s.cancelBtnText}>{t.dashboard.cancel}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[s.saveBtn, savingRule && s.btnDisabled]} onPress={handleSaveRule} disabled={savingRule}>
-                    {savingRule ? <ActivityIndicator size="small" color="#fff" /> : <Text style={s.saveBtnText}>Salva regola</Text>}
+                    {savingRule ? <ActivityIndicator size="small" color="#fff" /> : <Text style={s.saveBtnText}>{a.saveRuleBtn}</Text>}
                   </TouchableOpacity>
                 </View>
               </View>

@@ -698,6 +698,17 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={s.settingsRow}
+            onPress={() => Linking.openURL('https://loyalcard.net/terms')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="reader-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
+            <Text style={s.settingsRowText}>{p.termsOfService}</Text>
+            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
+          </TouchableOpacity>
+          <View style={s.settingsDivider} />
+
+          <TouchableOpacity
+            style={s.settingsRow}
             onPress={() => { setDeleteInput(''); setDeleteModal(true) }}
             activeOpacity={0.7}
           >

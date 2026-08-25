@@ -1,4 +1,4 @@
-# Fidelix - Digital Loyalty Platform
+# LoyalCard - Digital Loyalty Platform
 
 A modern, app-less digital loyalty platform built with React PWA + QR codes + Supabase.
 
@@ -63,7 +63,7 @@ Fidelix is a multi-tenant SaaS platform for digital loyalty programs that:
 ## Project Structure
 
 ```
-fidelix/
+loyalcard/
 ├── frontend/                # React PWA application
 │   ├── src/
 │   │   ├── components/      # Reusable UI components
@@ -97,7 +97,7 @@ fidelix/
 ```bash
 # Clone the repository
 git clone <repo-url>
-cd Fidelix
+cd loyalcard
 
 # Install frontend dependencies
 cd frontend

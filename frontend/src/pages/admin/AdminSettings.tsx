@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
-import { supabase } from '@/lib/supabase'
+import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
-import { Settings } from 'lucide-react'
+import { Settings, Users, QrCode } from 'lucide-react'
 
 interface TenantSettings {
   name: string
@@ -14,8 +14,9 @@ interface TenantSettings {
 
 export default function AdminSettings() {
   const navigate = useNavigate()
-  const { tenantId } = useAuthStore()
+  const { tenantId, role } = useAuthStore()
   const { language } = useClientStore()
+  const isOwner = role === 'owner'
   const [settings, setSettings] = useState<TenantSettings>({
     name: '',
     logo_url: '',
@@ -26,6 +27,30 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+
+  // Staff (scan-only) account creation
+  const [staffEmail, setStaffEmail] = useState('')
+  const [staffPassword, setStaffPassword] = useState('')
+  const [creatingStaff, setCreatingStaff] = useState(false)
+  const [staffError, setStaffError] = useState('')
+  const [staffCreated, setStaffCreated] = useState(false)
+
+  const handleCreateStaff = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCreatingStaff(true)
+    setStaffError('')
+    setStaffCreated(false)
+    try {
+      await api.createStaffAdmin(staffEmail.trim(), staffPassword)
+      setStaffCreated(true)
+      setStaffEmail('')
+      setStaffPassword('')
+    } catch (err: any) {
+      setStaffError(err?.message || 'Failed to create staff account')
+    } finally {
+      setCreatingStaff(false)
+    }
+  }
 
   useEffect(() => {
     loadSettings()
@@ -258,6 +283,77 @@ export default function AdminSettings() {
                   </div>
                 </div>
               </div>
+
+              {/* Staff (scan-only) accounts */}
+              {isOwner && (
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                    <Users className="w-6 h-6 sm:w-7 sm:h-7" />
+                    {language === 'ro' ? 'Personal' : language === 'it' ? 'Personale' : 'Staff'}
+                  </h2>
+                  <p className="text-sm text-gray-300 mb-4 sm:mb-6 flex items-center gap-2">
+                    <QrCode className="w-4 h-4 flex-shrink-0" />
+                    {language === 'ro'
+                      ? 'Creează un cont separat care poate doar scana coduri QR'
+                      : language === 'it'
+                      ? 'Crea un account separato che può solo scansionare i QR'
+                      : 'Create a separate login that can only scan QR codes'}
+                  </p>
+
+                  <form onSubmit={handleCreateStaff} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {language === 'ro' ? 'Email' : 'Email'}
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={staffEmail}
+                        onChange={(e) => setStaffEmail(e.target.value)}
+                        disabled={creatingStaff}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none transition-colors"
+                        placeholder="staff@example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {language === 'ro' ? 'Parolă' : language === 'it' ? 'Password' : 'Password'}
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        value={staffPassword}
+                        onChange={(e) => setStaffPassword(e.target.value)}
+                        disabled={creatingStaff}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none transition-colors"
+                        placeholder="••••••••"
+                      />
+                    </div>
+
+                    {staffError && (
+                      <div className="bg-red-500/20 border border-red-500/50 rounded-xl px-4 py-3 text-red-300 text-sm">
+                        {staffError}
+                      </div>
+                    )}
+                    {staffCreated && (
+                      <div className="bg-green-500/20 border border-green-500/50 rounded-xl px-4 py-3 text-green-300 text-sm">
+                        {language === 'ro' ? 'Cont creat cu succes' : language === 'it' ? 'Account creato con successo' : 'Account created successfully'}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={creatingStaff}
+                      className="w-full py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {creatingStaff
+                        ? (language === 'ro' ? 'Se creează...' : language === 'it' ? 'Creazione...' : 'Creating...')
+                        : (language === 'ro' ? 'Creează Cont' : language === 'it' ? 'Crea Account' : 'Create Account')}
+                    </button>
+                  </form>
+                </div>
+              )}
 
               {/* Error message */}
               {error && (

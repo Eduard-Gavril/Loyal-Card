@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import { useAuthStore, useClientStore } from '@/store'
-import { api, Product, Card, RewardRule } from '@/lib/supabase'
+import { api, supabase, Product, Card, RewardRule } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
@@ -18,8 +18,20 @@ interface CartItem {
 
 export default function AdminScanner() {
   const navigate = useNavigate()
-  const { tenantId } = useAuthStore()
+  const { tenantId, role, clearAuth } = useAuthStore()
   const { language } = useClientStore()
+  const isStaffOnly = role === 'staff'
+
+  const handleBackOrLogout = async () => {
+    if (isStaffOnly) {
+      // A 'staff' admin has no other admin screen to go back to.
+      await supabase.auth.signOut()
+      clearAuth()
+      navigate('/admin/login')
+    } else {
+      navigate('/admin/dashboard')
+    }
+  }
   const t = getTranslation(language)
   const [scannedQR, setScannedQR] = useState<string>('')
   const [card, setCard] = useState<Card | null>(null)
@@ -450,13 +462,21 @@ export default function AdminScanner() {
         <header className="pt-4 sm:pt-6 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4">
             <button
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={handleBackOrLogout}
               className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-white/20 text-sm sm:text-base"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                {isStaffOnly ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                )}
               </svg>
-              <span className="hidden sm:inline">{t.admin.scanner.back}</span>
+              <span className="hidden sm:inline">
+                {isStaffOnly
+                  ? (language === 'ro' ? 'Ieșire' : language === 'it' ? 'Esci' : 'Logout')
+                  : t.admin.scanner.back}
+              </span>
             </button>
             <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight flex-1">
               {t.admin.scanner.title}

@@ -597,5 +597,11 @@ export const api = {
       backup_code: backupCode,
       new_client_id: newClientId
     })
+  },
+
+  // Create a scan-only ('staff') admin account for the caller's own tenant.
+  // Only an 'owner' admin may call this — enforced server-side by the function.
+  async createStaffAdmin(email: string, password: string) {
+    return invokeEdgeFunction('create-staff-admin', { email, password, role: 'staff' })
   }
 }

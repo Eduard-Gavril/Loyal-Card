@@ -43,8 +43,13 @@ function PageLoader() {
 }
 
 function App() {
-  const { session, setAuth, clearAuth } = useAuthStore()
+  const { session, role, setAuth, clearAuth } = useAuthStore()
   const [isConfigured, setIsConfigured] = useState(true)
+  // A 'staff' admin is restricted to QR scanning only; every other admin
+  // route bounces back to /admin/scan instead of rendering.
+  const isStaffOnly = role === 'staff'
+  const requireOwner = (element: JSX.Element) =>
+    !session ? <Navigate to="/admin/login" /> : isStaffOnly ? <Navigate to="/admin/scan" /> : element
 
   useEffect(() => {
     // Check if Supabase is configured
@@ -239,7 +244,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin/dashboard"
-            element={session ? <AdminDashboard /> : <Navigate to="/admin/login" />}
+            element={requireOwner(<AdminDashboard />)}
           />
           <Route
             path="/admin/scan"
@@ -247,19 +252,19 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           />
           <Route
             path="/admin/reports"
-            element={session ? <AdminReports /> : <Navigate to="/admin/login" />}
+            element={requireOwner(<AdminReports />)}
           />
           <Route
             path="/admin/rewards"
-            element={session ? <AdminRewards /> : <Navigate to="/admin/login" />}
+            element={requireOwner(<AdminRewards />)}
           />
           <Route
             path="/admin/products"
-            element={session ? <AdminProducts /> : <Navigate to="/admin/login" />}
+            element={requireOwner(<AdminProducts />)}
           />
           <Route
             path="/admin/settings"
-            element={session ? <AdminSettings /> : <Navigate to="/admin/login" />}
+            element={requireOwner(<AdminSettings />)}
           />
 
           {/* Super Admin routes (protected) */}

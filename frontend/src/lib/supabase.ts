@@ -603,5 +603,13 @@ export const api = {
   // Only an 'owner' admin may call this — enforced server-side by the function.
   async createStaffAdmin(email: string, password: string) {
     return invokeEdgeFunction('create-staff-admin', { email, password, role: 'staff' })
+  },
+
+  async listStaffAdmins() {
+    return invokeEdgeFunction('manage-staff-admins', { action: 'list' })
+  },
+
+  async deleteStaffAdmin(staffAdminId: string) {
+    return invokeEdgeFunction('manage-staff-admins', { action: 'delete', staff_admin_id: staffAdminId })
   }
 }

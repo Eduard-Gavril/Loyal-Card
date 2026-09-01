@@ -3,7 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
-import { Settings, Users, QrCode } from 'lucide-react'
+import { Settings, Users, QrCode, Trash2, ScanLine } from 'lucide-react'
+
+interface StaffAdmin {
+  id: string
+  email: string | null
+  active: boolean
+  created_at: string
+  scan_count: number
+}
 
 interface TenantSettings {
   name: string
@@ -34,6 +42,23 @@ export default function AdminSettings() {
   const [creatingStaff, setCreatingStaff] = useState(false)
   const [staffError, setStaffError] = useState('')
   const [staffCreated, setStaffCreated] = useState(false)
+  const [staffList, setStaffList] = useState<StaffAdmin[]>([])
+  const [staffListLoading, setStaffListLoading] = useState(false)
+  const [deletingStaffId, setDeletingStaffId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+
+  const loadStaffList = async () => {
+    if (!isOwner) return
+    setStaffListLoading(true)
+    try {
+      const result: any = await api.listStaffAdmins()
+      setStaffList(result?.staff || [])
+    } catch (err) {
+      // Non-fatal: the create-staff form still works even if the list fails to load.
+    } finally {
+      setStaffListLoading(false)
+    }
+  }
 
   const handleCreateStaff = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,6 +70,7 @@ export default function AdminSettings() {
       setStaffCreated(true)
       setStaffEmail('')
       setStaffPassword('')
+      loadStaffList()
     } catch (err: any) {
       setStaffError(err?.message || 'Failed to create staff account')
     } finally {
@@ -52,8 +78,22 @@ export default function AdminSettings() {
     }
   }
 
+  const handleDeleteStaff = async (staffId: string) => {
+    setDeletingStaffId(staffId)
+    try {
+      await api.deleteStaffAdmin(staffId)
+      setStaffList((prev) => prev.filter((s) => s.id !== staffId))
+    } catch (err) {
+      // Leave the row in place; the owner can retry the delete.
+    } finally {
+      setDeletingStaffId(null)
+      setConfirmDeleteId(null)
+    }
+  }
+
   useEffect(() => {
     loadSettings()
+    loadStaffList()
   }, [tenantId])
 
   const loadSettings = async () => {
@@ -352,6 +392,71 @@ export default function AdminSettings() {
                         : (language === 'ro' ? 'Creează Cont' : language === 'it' ? 'Crea Account' : 'Create Account')}
                     </button>
                   </form>
+
+                  {/* Staff list */}
+                  <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10">
+                    {staffListLoading ? (
+                      <div className="text-center py-6">
+                        <div className="w-8 h-8 mx-auto border-4 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
+                      </div>
+                    ) : staffList.length === 0 ? (
+                      <p className="text-sm text-gray-400 text-center py-4">
+                        {language === 'ro' ? 'Niciun cont de personal creat încă' : language === 'it' ? 'Nessun account creato finora' : 'No staff accounts created yet'}
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {staffList.map((staff) => (
+                          <div
+                            key={staff.id}
+                            className="flex items-center justify-between gap-3 bg-white/5 rounded-xl px-4 py-3 border border-white/10"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-white font-medium truncate">{staff.email || staff.id}</p>
+                              <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <ScanLine className="w-3.5 h-3.5" />
+                                  {staff.scan_count} {language === 'ro' ? 'scanări' : language === 'it' ? 'scansioni' : 'scans'}
+                                </span>
+                                {!staff.active && (
+                                  <span className="text-red-400">
+                                    {language === 'ro' ? 'Dezactivat' : language === 'it' ? 'Disattivato' : 'Deactivated'}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {confirmDeleteId === staff.id ? (
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleDeleteStaff(staff.id)}
+                                  disabled={deletingStaffId === staff.id}
+                                  className="px-3 py-2 bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                  {deletingStaffId === staff.id
+                                    ? '...'
+                                    : (language === 'ro' ? 'Confirmă' : language === 'it' ? 'Conferma' : 'Confirm')}
+                                </button>
+                                <button
+                                  onClick={() => setConfirmDeleteId(null)}
+                                  className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors"
+                                >
+                                  {language === 'ro' ? 'Anulează' : language === 'it' ? 'Annulla' : 'Cancel'}
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmDeleteId(staff.id)}
+                                className="flex-shrink-0 p-2 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-lg transition-colors"
+                                title={language === 'ro' ? 'Șterge' : language === 'it' ? 'Elimina' : 'Delete'}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

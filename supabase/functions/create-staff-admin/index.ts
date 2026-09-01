@@ -1,4 +1,3 @@
-// @deno-types="https://esm.sh/@supabase/supabase-js@2.39.3/dist/module/index.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 // Creates a new admin account with role 'staff' (scan-only, see

@@ -6,7 +6,7 @@ import { api, Product, Card, RewardRule } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
-import { Camera, Ban, Check, Package, Gift, ShoppingCart, X, PartyPopper, Star } from 'lucide-react'
+import { Camera, Ban, Check, Package, Gift, ShoppingCart, X, PartyPopper, Star, Plus, Minus } from 'lucide-react'
 
 // Cart item interface for multiple product selection
 interface CartItem {
@@ -28,6 +28,7 @@ export default function AdminScanner() {
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [mode, setMode] = useState<'scan' | 'redeem'>('scan')
   const [selectedRule, setSelectedRule] = useState<string>('')
+  const [redeemQuantity, setRedeemQuantity] = useState<number>(1)
   const [scanning, setScanning] = useState(true)
   const [cameraPermission, setCameraPermission] = useState<'pending' | 'requesting' | 'granted' | 'denied'>('pending')
   const [processing, setProcessing] = useState(false)
@@ -312,12 +313,13 @@ export default function AdminScanner() {
     setError('')
 
     try {
-      const data = await api.redeemReward(scannedQR, selectedRule)
-      
+      const data = await api.redeemReward(scannedQR, selectedRule, redeemQuantity)
+
       if (data.success) {
         setResult({
           success: true,
           message: data.message,
+          redeemed_count: data.redeemed_count,
           remaining_rewards: data.remaining_rewards,
           redeemed: true
         })
@@ -346,6 +348,7 @@ export default function AdminScanner() {
     setScannedQR('')
     setSelectedCategory('')
     setSelectedRule('')
+    setRedeemQuantity(1)
     setCard(null)
     setMode('scan')
     setResult(null)
@@ -365,7 +368,7 @@ export default function AdminScanner() {
   // Macro categories mapping
   const macroCategories = {
     espresso: { name: '☕ Espresso', emoji: '☕', types: ['espresso'] as string[] },
-    milk: { name: '🥛 Cappuccini & Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] as string[] },
+    milk: { name: '🥛 Cappuccino e Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] as string[] },
     chocolate: { name: '🍫 Cioccolata & Tè', emoji: '🍫', types: ['chocolate', 'tea'] as string[] },
     specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] as string[] },
     other: { name: '📦 General', emoji: '📦', types: [] as string[] } // Catch-all for products without type
@@ -949,27 +952,56 @@ export default function AdminScanner() {
                           .map((rule) => {
                             const state = card.loyalty_state[rule.id]
                             return (
-                              <button
-                                key={rule.id}
-                                onClick={() => setSelectedRule(rule.id)}
-                                className={`w-full text-left p-3 sm:p-5 rounded-xl border-2 transition-all duration-300 ${
-                                  selectedRule === rule.id
-                                    ? 'border-yellow-400 bg-yellow-500/20 shadow-lg shadow-yellow-500/30 scale-[1.02]'
-                                    : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
-                                }`}
-                              >
-                                <div className="flex justify-between items-start gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-white text-sm sm:text-base">{rule.name}</div>
-                                    <div className="text-xs sm:text-sm text-gray-300 mt-2 flex items-center gap-2">
-                                      <span>{t.admin.scanner.availableRewards}:</span>
-                                      <span className="font-bold text-yellow-600 text-base sm:text-lg">{state.rewards}</span>
+                              <div key={rule.id}>
+                                <button
+                                  onClick={() => {
+                                    setSelectedRule(rule.id)
+                                    setRedeemQuantity(1)
+                                  }}
+                                  className={`w-full text-left p-3 sm:p-5 rounded-xl border-2 transition-all duration-300 ${
+                                    selectedRule === rule.id
+                                      ? 'border-yellow-400 bg-yellow-500/20 shadow-lg shadow-yellow-500/30 scale-[1.02]'
+                                      : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-start gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-semibold text-white text-sm sm:text-base">{rule.name}</div>
+                                      <div className="text-xs sm:text-sm text-gray-300 mt-2 flex items-center gap-2">
+                                        <span>{t.admin.scanner.availableRewards}:</span>
+                                        <span className="font-bold text-yellow-600 text-base sm:text-lg">{state.rewards}</span>
+                                      </div>
+                                    </div>
+
+                                    <Gift className="w-6 h-6 text-yellow-400" />
+                                  </div>
+                                </button>
+
+                                {selectedRule === rule.id && state.rewards > 1 && (
+                                  <div className="mt-2 flex items-center justify-between gap-3 bg-white/5 border-2 border-yellow-400/30 rounded-xl px-3 py-2 sm:px-4 sm:py-3">
+                                    <span className="text-xs sm:text-sm text-gray-200">{t.admin.scanner.redeemQuantity}</span>
+                                    <div className="flex items-center gap-3">
+                                      <button
+                                        type="button"
+                                        onClick={() => setRedeemQuantity(q => Math.max(1, q - 1))}
+                                        disabled={redeemQuantity <= 1}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <span className="font-bold text-white text-base sm:text-lg w-6 text-center">{redeemQuantity}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setRedeemQuantity(q => Math.min(state.rewards, q + 1))}
+                                        disabled={redeemQuantity >= state.rewards}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </button>
                                     </div>
                                   </div>
-
-                                  <Gift className="w-6 h-6 text-yellow-400" />
-                                </div>
-                              </button>
+                                )}
+                              </div>
                             )
                           })}
                       </div>
@@ -1014,7 +1046,9 @@ export default function AdminScanner() {
                 {result.redeemed ? (
                   <div>
                     <p className="text-yellow-200 text-base sm:text-lg mb-3">
-                      {result.message}
+                      {result.redeemed_count > 1
+                        ? `${result.message} (x${result.redeemed_count})`
+                        : result.message}
                     </p>
                     {result.remaining_rewards !== undefined && (
                       <p className="text-xs sm:text-sm text-yellow-200 bg-yellow-500/20 rounded-xl p-3 sm:p-4 border border-yellow-400/30">

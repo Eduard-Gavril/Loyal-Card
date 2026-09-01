@@ -248,7 +248,7 @@ export const api = {
   },
 
   // Redeem reward
-  async redeemReward(qrCode: string, rewardRuleId: string) {
+  async redeemReward(qrCode: string, rewardRuleId: string, redeemCount: number = 1) {
     // Create AbortController with 10 second timeout
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 10000)
@@ -298,7 +298,7 @@ export const api = {
           'apikey': anonKey,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ qr_code: qrCode, reward_rule_id: rewardRuleId }),
+        body: JSON.stringify({ qr_code: qrCode, reward_rule_id: rewardRuleId, redeem_count: redeemCount }),
         signal: controller.signal
       })
       

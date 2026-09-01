@@ -227,23 +227,30 @@ Deno.serve(async (req: Request): Promise<Response> => {
           loyaltyState[ruleId] = { count: 0, rewards: 0 }
         }
 
-        // Increment counter (only if no pending rewards for THIS specific rule)
-        if (loyaltyState[ruleId].rewards === 0) {
-          loyaltyState[ruleId].count += 1
+        const state = loyaltyState[ruleId]
+        const prevCount = state.count
+        const resetOnRedeem = rule.reset_on_redeem !== false // default true
 
-          // FitGym milestone: When reaching 6 stamps on a 50% discount rule
-          if (isFitGym && loyaltyState[ruleId].count === 6 && rule.discount_percent === 50) {
-            milestoneReached = {
-              count: 6,
-              message: 'Next purchase 50% OFF! 🎉'
-            }
+        // Always count the scan, even while a reward is pending — a stamp scanned
+        // after the threshold must roll into the next cycle, not disappear.
+        state.count += 1
+
+        // FitGym milestone: When reaching 6 stamps on a 50% discount rule
+        if (isFitGym && state.count === 6 && rule.discount_percent === 50) {
+          milestoneReached = {
+            count: 6,
+            message: 'Next purchase 50% OFF! 🎉'
           }
+        }
 
-          // Check if reward threshold reached
-          if (loyaltyState[ruleId].count >= rule.buy_count) {
-            loyaltyState[ruleId].rewards += rule.reward_count
-            // DON'T reset counter here - will be reset in redeem-reward if reset_on_redeem=true
-            
+        if (resetOnRedeem) {
+          // Repeating reward cycle: every time the threshold is crossed, consume
+          // buy_count stamps and grant a reward, carrying any overflow (e.g. a
+          // cart of 13 coffees on a 6-stamp rule) into the next cycle.
+          while (state.count >= rule.buy_count) {
+            state.count -= rule.buy_count
+            state.rewards += rule.reward_count
+
             rewardsEarned.push({
               rule_id: ruleId,
               rule_name: rule.name,
@@ -251,6 +258,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
               discount_percent: rule.discount_percent || null
             })
           }
+        } else if (prevCount < rule.buy_count && state.count >= rule.buy_count) {
+          // Permanent milestone (e.g. "50% off after 6"): granted once when the
+          // threshold is first crossed, counter keeps climbing without re-granting.
+          state.rewards += rule.reward_count
+
+          rewardsEarned.push({
+            rule_id: ruleId,
+            rule_name: rule.name,
+            reward_count: rule.reward_count,
+            discount_percent: rule.discount_percent || null
+          })
         }
       }
     }

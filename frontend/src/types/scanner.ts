@@ -38,7 +38,7 @@ export interface MacroCategory {
 
 export const MACRO_CATEGORIES: Record<string, MacroCategory> = {
   espresso: { name: '☕ Espresso', emoji: '☕', types: ['espresso'] },
-  milk: { name: '🥛 Cappuccini & Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] },
+  milk: { name: '🥛 Cappuccino e Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] },
   chocolate: { name: '🍫 Cioccolata & Tè', emoji: '🍫', types: ['chocolate', 'tea'] },
   specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] }
 }

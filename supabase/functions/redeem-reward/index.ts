@@ -4,6 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 interface RedeemRewardRequest {
   qr_code: string
   reward_rule_id: string
+  redeem_count?: number
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -54,7 +55,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Parse request
-    const { qr_code, reward_rule_id }: RedeemRewardRequest = await req.json()
+    const { qr_code, reward_rule_id, redeem_count }: RedeemRewardRequest = await req.json()
 
     if (!qr_code || !reward_rule_id) {
       return new Response(
@@ -62,6 +63,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    const redeemCount = Number.isInteger(redeem_count) && redeem_count! > 0 ? redeem_count! : 1
 
     // Find card
     const { data: card, error: cardError } = await supabase
@@ -78,21 +81,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
-    // Check if reward is available
+    // Check if enough rewards are available
     const loyaltyState = card.loyalty_state || {}
     const ruleState = loyaltyState[reward_rule_id]
-    
-    if (!ruleState || ruleState.rewards <= 0) {
+
+    if (!ruleState || ruleState.rewards < redeemCount) {
       return new Response(
         JSON.stringify({ success: false, error: 'No rewards available to redeem' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Load reward rule to check reset_on_redeem flag
+    // Load reward rule (validates it belongs to this tenant)
     const { data: rule, error: ruleError } = await supabase
       .from('reward_rules')
-      .select('id, name, reset_on_redeem, discount_percent')
+      .select('id, name, discount_percent')
       .eq('id', reward_rule_id)
       .eq('tenant_id', admin.tenant_id)
       .single()
@@ -104,13 +107,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
-    // Redeem reward: decrement reward count
-    // Reset counter only if reset_on_redeem is true (default behavior)
-    const shouldResetCounter = rule.reset_on_redeem !== false // Default true if not specified
-    
+    // Redeem reward(s): decrement reward count only. The stamp counter (count) is
+    // never touched here — register-scan already keeps it as the correct progress
+    // toward the next reward, so resetting it here would discard legitimate stamps.
     loyaltyState[reward_rule_id] = {
-      count: shouldResetCounter ? 0 : ruleState.count,  // Reset only if flag is true
-      rewards: ruleState.rewards - 1
+      count: ruleState.count,
+      rewards: ruleState.rewards - redeemCount
     }
 
     // Update card
@@ -146,6 +148,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       JSON.stringify({
         success: true,
         message: 'Reward redeemed successfully',
+        redeemed_count: redeemCount,
         remaining_rewards: loyaltyState[reward_rule_id].rewards
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
-import { Settings, Users, QrCode, Trash2, ScanLine } from 'lucide-react'
+import { Settings, Users, QrCode, Trash2 } from 'lucide-react'
 
 interface StaffAdmin {
   id: string
   email: string | null
   active: boolean
   created_at: string
-  scan_count: number
 }
 
 interface TenantSettings {
@@ -331,7 +330,7 @@ export default function AdminSettings() {
                     <Users className="w-6 h-6 sm:w-7 sm:h-7" />
                     {language === 'ro' ? 'Personal' : language === 'it' ? 'Personale' : 'Staff'}
                   </h2>
-                  <p className="text-sm text-gray-300 mb-4 sm:mb-6 flex items-center gap-2">
+                  <p className="text-sm text-gray-300 mb-1 flex items-center gap-2">
                     <QrCode className="w-4 h-4 flex-shrink-0" />
                     {language === 'ro'
                       ? 'Creează un cont separat care poate doar scana coduri QR'
@@ -339,6 +338,17 @@ export default function AdminSettings() {
                       ? 'Crea un account separato che può solo scansionare i QR'
                       : 'Create a separate login that can only scan QR codes'}
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/admin/reports')}
+                    className="text-sm text-primary-300 hover:text-primary-200 underline mb-4 sm:mb-6"
+                  >
+                    {language === 'ro'
+                      ? 'Vezi câte scanări a făcut fiecare angajat în Rapoarte →'
+                      : language === 'it'
+                      ? 'Vedi quante scansioni ha fatto ogni dipendente nei Report →'
+                      : 'See how many scans each staff member made in Reports →'}
+                  </button>
 
                   <form onSubmit={handleCreateStaff} className="space-y-4">
                     <div>
@@ -412,17 +422,11 @@ export default function AdminSettings() {
                           >
                             <div className="min-w-0 flex-1">
                               <p className="text-white font-medium truncate">{staff.email || staff.id}</p>
-                              <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                                <span className="flex items-center gap-1">
-                                  <ScanLine className="w-3.5 h-3.5" />
-                                  {staff.scan_count} {language === 'ro' ? 'scanări' : language === 'it' ? 'scansioni' : 'scans'}
+                              {!staff.active && (
+                                <span className="text-xs text-red-400">
+                                  {language === 'ro' ? 'Dezactivat' : language === 'it' ? 'Disattivato' : 'Deactivated'}
                                 </span>
-                                {!staff.active && (
-                                  <span className="text-red-400">
-                                    {language === 'ro' ? 'Dezactivat' : language === 'it' ? 'Disattivato' : 'Deactivated'}
-                                  </span>
-                                )}
-                              </div>
+                              )}
                             </div>
 
                             {confirmDeleteId === staff.id ? (

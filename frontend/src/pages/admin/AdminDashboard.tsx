@@ -23,6 +23,7 @@ interface RecentScan {
   product_name: string
   product_emoji: string
   client_id: string
+  client_name: string | null
 }
 
 export default function AdminDashboard() {
@@ -80,8 +81,9 @@ export default function AdminDashboard() {
             id,
             scanned_at,
             reward_applied,
+            client_id,
             products (name, metadata),
-            cards (client_id)
+            clients (name)
           `)
           .eq('tenant_id', tenantId)
           .order('scanned_at', { ascending: false })
@@ -98,7 +100,8 @@ export default function AdminDashboard() {
           reward_applied: scan.reward_applied,
           product_name: scan.products?.name || 'Unknown',
           product_emoji: getProductEmoji(scan.products?.name || 'Unknown', scan.products?.metadata),
-          client_id: scan.cards?.client_id?.substring(0, 8) || '???'
+          client_id: scan.client_id?.substring(0, 8) || '???',
+          client_name: scan.clients?.name || null
         }))
         setRecentScans(scans)
       }
@@ -144,6 +147,7 @@ export default function AdminDashboard() {
           loyalty_state,
           client_id,
           clients (
+            name,
             phone,
             created_at
           )
@@ -190,6 +194,7 @@ export default function AdminDashboard() {
           }
 
           return {
+            'Name': card.clients?.name || 'N/A',
             'QR Code': card.qr_code || 'N/A',
             'Phone': card.clients?.phone || 'N/A',
             'Card Registration': card.created_at ? new Date(card.created_at).toLocaleDateString() : 'N/A',
@@ -209,6 +214,7 @@ export default function AdminDashboard() {
 
       // Auto-size columns
       const colWidths = [
+        { wch: 20 }, // Name
         { wch: 20 }, // QR Code
         { wch: 15 }, // Phone
         { wch: 18 }, // Card Registration
@@ -422,8 +428,8 @@ export default function AdminDashboard() {
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-400 text-sm">
-                        {language === 'ro' ? 'Client' : language === 'it' ? 'Cliente' : 'Client'} #{scan.client_id}
+                      <p className="text-gray-400 text-sm truncate">
+                        {scan.client_name || `${language === 'ro' ? 'Client' : language === 'it' ? 'Cliente' : 'Client'} #${scan.client_id}`}
                       </p>
                     </div>
                     

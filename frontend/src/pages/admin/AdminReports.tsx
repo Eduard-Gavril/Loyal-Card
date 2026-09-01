@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
-import { supabase } from '@/lib/supabase'
+import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import { getProductEmoji } from '@/lib/emojiUtils'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, User } from 'lucide-react'
 
 interface DailyStats {
   date: string
@@ -18,12 +18,30 @@ interface TopProduct {
   emoji: string
 }
 
+interface StaffScanCount {
+  label: string
+  count: number
+  active: boolean
+}
+
+interface RecentScanDetail {
+  id: string
+  scanned_at: string
+  product_name: string
+  product_emoji: string
+  client_label: string
+  staff_label: string
+  reward_applied: boolean
+}
+
 export default function AdminReports() {
   const navigate = useNavigate()
-  const { tenantId } = useAuthStore()
+  const { tenantId, user, role } = useAuthStore()
   const { language } = useClientStore()
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([])
   const [topProducts, setTopProducts] = useState<TopProduct[]>([])
+  const [staffScans, setStaffScans] = useState<StaffScanCount[]>([])
+  const [recentScanDetails, setRecentScanDetails] = useState<RecentScanDetail[]>([])
   const [totalStats, setTotalStats] = useState({
     totalScans: 0,
     totalRewards: 0,
@@ -53,16 +71,52 @@ export default function AdminReports() {
       // Get all scans in the time range
       const { data: scans } = await timeout(supabase
         .from('scan_events')
-        .select('scanned_at, reward_applied, product_id')
+        .select('id, scanned_at, reward_applied, product_id, admin_id, client_id, products (name, metadata), clients (name)')
         .eq('tenant_id', tenantId)
         .gte('scanned_at', startDate.toISOString())
-        .order('scanned_at', { ascending: true })) as any
+        .order('scanned_at', { ascending: false })) as any
 
       // Get products for names
       const { data: products } = await timeout(supabase
         .from('products')
         .select('id, name, metadata')
         .eq('tenant_id', tenantId)) as any
+
+      // Resolve staff labels: caller's own admin row (for "You"/owner label) + staff accounts
+      const staffLabel = language === 'ro' ? 'Angajat' : language === 'it' ? 'Dipendente' : 'Staff'
+      const youLabel = language === 'ro' ? 'Tu (Proprietar)' : language === 'it' ? 'Tu (Titolare)' : 'You (Owner)'
+      const adminLabels = new Map<string, { label: string; active: boolean }>()
+
+      try {
+        const { data: ownAdmin } = await supabase
+          .from('admins')
+          .select('id')
+          .eq('user_id', user?.id)
+          .single()
+        if (ownAdmin) {
+          adminLabels.set(ownAdmin.id, { label: role === 'owner' ? youLabel : (user?.email || staffLabel), active: true })
+        }
+      } catch {
+        // Own admin row lookup failed - staff labels will just fall back to a generic name
+      }
+
+      if (role === 'owner') {
+        try {
+          const staffResult: any = await api.listStaffAdmins()
+          ;(staffResult?.staff || []).forEach((s: any) => {
+            adminLabels.set(s.id, { label: s.email || `${staffLabel} ${s.id.substring(0, 6)}`, active: s.active })
+          })
+        } catch {
+          // Staff list failed to load - per-staff scan breakdown will show generic labels
+        }
+      }
+
+      const labelForAdmin = (adminId: string | null) => {
+        if (!adminId) return staffLabel
+        const found = adminLabels.get(adminId)
+        if (!found) return `${staffLabel} ${adminId.substring(0, 6)}`
+        return found.active ? found.label : `${found.label} (${language === 'ro' ? 'dezactivat' : language === 'it' ? 'disattivato' : 'removed'})`
+      }
 
       // Process daily stats
       const dailyMap = new Map<string, { scans: number; rewards: number }>()
@@ -114,6 +168,36 @@ export default function AdminReports() {
         .slice(0, 5)
 
       setTopProducts(topProductsArray)
+
+      // Calculate scans per staff member
+      const staffCounts = new Map<string, number>()
+      scans?.forEach((scan: any) => {
+        const key = scan.admin_id || 'unknown'
+        staffCounts.set(key, (staffCounts.get(key) || 0) + 1)
+      })
+      const staffScansArray = Array.from(staffCounts.entries())
+        .map(([adminId, count]) => ({
+          label: labelForAdmin(adminId === 'unknown' ? null : adminId),
+          count,
+          active: adminId === 'unknown' ? true : (adminLabels.get(adminId)?.active ?? true)
+        }))
+        .sort((a, b) => b.count - a.count)
+      setStaffScans(staffScansArray)
+
+      // Recent scans with client name (falls back to short client id if no name saved)
+      const clientLabel = (name: string | null | undefined, clientId: string | null | undefined) =>
+        name?.trim() || (clientId ? `${language === 'ro' ? 'Client' : language === 'it' ? 'Cliente' : 'Client'} #${clientId.substring(0, 8)}` : '—')
+
+      const recentDetails: RecentScanDetail[] = (scans || []).slice(0, 15).map((scan: any) => ({
+        id: scan.id,
+        scanned_at: scan.scanned_at,
+        product_name: scan.products?.name || 'Unknown',
+        product_emoji: getProductEmoji(scan.products?.name || 'Unknown', scan.products?.metadata),
+        client_label: clientLabel(scan.clients?.name, scan.client_id),
+        staff_label: labelForAdmin(scan.admin_id),
+        reward_applied: scan.reward_applied
+      }))
+      setRecentScanDetails(recentDetails)
 
       // Calculate totals
       const totalScans = scans?.length || 0
@@ -290,6 +374,83 @@ export default function AdminReports() {
                               style={{ width: `${(product.count / (topProducts[0]?.count || 1)) * 100}%` }}
                             ></div>
                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-center py-8">
+                    {language === 'ro' ? 'Nicio dată disponibilă' : language === 'it' ? 'Nessun dato disponibile' : 'No data available'}
+                  </p>
+                )}
+              </div>
+
+              {/* Scans by Staff */}
+              {role === 'owner' && (
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20 mt-6 sm:mt-8">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                    <User className="w-6 h-6" />
+                    {language === 'ro' ? 'Scanări pe Angajat' : language === 'it' ? 'Scansioni per Dipendente' : 'Scans by Staff'}
+                  </h2>
+                  {staffScans.length > 0 ? (
+                    <div className="space-y-4">
+                      {staffScans.map((s) => (
+                        <div key={s.label} className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-white font-medium truncate">{s.label}</span>
+                              <span className="text-gray-300 flex-shrink-0 ml-2">
+                                {s.count} {language === 'ro' ? 'scanări' : language === 'it' ? 'scansioni' : 'scans'}
+                              </span>
+                            </div>
+                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-500"
+                                style={{ width: `${(s.count / (staffScans[0]?.count || 1)) * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">
+                      {language === 'ro' ? 'Nicio dată disponibilă' : language === 'it' ? 'Nessun dato disponibile' : 'No data available'}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Recent Scans */}
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20 mt-6 sm:mt-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">
+                  {language === 'ro' ? 'Scanări Recente' : language === 'it' ? 'Scansioni Recenti' : 'Recent Scans'}
+                </h2>
+                {recentScanDetails.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentScanDetails.map((scan) => (
+                      <div
+                        key={scan.id}
+                        className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white/5 rounded-xl border border-white/10"
+                      >
+                        <div className="text-2xl sm:text-3xl flex-shrink-0">{scan.product_emoji}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-white font-medium">{scan.product_name}</span>
+                            <span className="text-gray-400 text-sm">·</span>
+                            <span className="text-gray-300 text-sm truncate">{scan.client_label}</span>
+                            {scan.reward_applied && (
+                              <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-300 text-xs font-medium rounded-full">
+                                {language === 'ro' ? 'Premiu' : language === 'it' ? 'Premio' : 'Reward'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-gray-400 text-xs mt-1">{scan.staff_label}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-gray-300 text-xs sm:text-sm">
+                            {new Date(scan.scanned_at).toLocaleString(language === 'ro' ? 'ro-RO' : language === 'it' ? 'it-IT' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
                       </div>
                     ))}

@@ -448,6 +448,14 @@ export default function AdminScanner() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
+      <style>{`
+        @keyframes pulseRingViolet { 0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.55); } 50% { box-shadow: 0 0 0 12px rgba(139,92,246,0); } }
+        @keyframes pulseRingGold { 0%, 100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.55); } 50% { box-shadow: 0 0 0 12px rgba(234,179,8,0); } }
+        @keyframes pulseRingGreen { 0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.55); } 50% { box-shadow: 0 0 0 12px rgba(34,197,94,0); } }
+        .pulse-violet { animation: pulseRingViolet 2s ease-in-out infinite; }
+        .pulse-gold { animation: pulseRingGold 2s ease-in-out infinite; }
+        .pulse-green { animation: pulseRingGreen 2s ease-in-out infinite; }
+      `}</style>
       {/* Animated background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <StaticBackground />
@@ -522,7 +530,7 @@ export default function AdminScanner() {
                         setCameraPermission('denied')
                       }
                     }}
-                    className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
+                    className="pulse-violet px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
                   >
                     <span className="flex items-center gap-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -597,7 +605,7 @@ export default function AdminScanner() {
                     className={`flex-1 py-3 sm:py-4 px-3 sm:px-6 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 ${
                       mode === 'scan'
                         ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/50'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-primary-500/20 text-primary-200 border border-primary-400/30 hover:bg-primary-500/30'
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
@@ -610,7 +618,7 @@ export default function AdminScanner() {
                     className={`flex-1 py-3 sm:py-4 px-3 sm:px-6 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 ${
                       mode === 'redeem'
                         ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/50'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-yellow-500/20 text-yellow-200 border border-yellow-400/30 hover:bg-yellow-500/30'
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
@@ -638,7 +646,7 @@ export default function AdminScanner() {
                           </div>
                           <button
                             onClick={() => setShowConfirmation(true)}
-                            className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-lg transition-all duration-300"
+                            className="pulse-violet px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-lg transition-all duration-300"
                           >
                             {t.scanner.confirm} →
                           </button>
@@ -673,7 +681,7 @@ export default function AdminScanner() {
                           <div className="mt-6">
                             <button
                               onClick={() => setShowConfirmation(true)}
-                              className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
+                              className="pulse-green w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
                             >
                               {t.scanner.proceedWith} {getTotalItems()} {t.scanner.products} →
                             </button>
@@ -694,7 +702,7 @@ export default function AdminScanner() {
                                 setSelectedCategory('')
                                 setSearchFilter('')
                               }}
-                              className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm rounded-lg transition-all duration-300 whitespace-nowrap"
+                              className="px-3 py-2 bg-primary-500/40 hover:bg-primary-500/60 border border-primary-400/50 text-white font-semibold text-xs sm:text-sm rounded-lg transition-all duration-300 whitespace-nowrap"
                             >
                               {t.scanner.otherCategories}
                             </button>
@@ -813,7 +821,7 @@ export default function AdminScanner() {
                         {cart.length > 0 ? (
                           <button
                             onClick={() => setShowConfirmation(true)}
-                            className="flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
+                            className="pulse-green flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg shadow-green-500/50 hover:shadow-xl hover:scale-105"
                           >
                             {t.scanner.confirm} {getTotalItems()} {t.scanner.products} →
                           </button>
@@ -827,7 +835,7 @@ export default function AdminScanner() {
                         )}
                         <button
                           onClick={resetScanner}
-                          className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
+                          className="px-6 py-4 bg-red-500/80 hover:bg-red-500 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
                         >
                           {t.admin.scanner.cancel}
                         </button>
@@ -922,7 +930,7 @@ export default function AdminScanner() {
                       <button
                         onClick={handleRegisterCart}
                         disabled={cart.length === 0 || processing}
-                        className="flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                        className={`flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 ${!processing ? 'pulse-violet' : ''}`}
                       >
                         {processing ? (
                           <span className="flex items-center justify-center gap-2">
@@ -939,7 +947,7 @@ export default function AdminScanner() {
                       <button
                         onClick={resetScanner}
                         disabled={processing}
-                        className="px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md disabled:opacity-50"
+                        className="px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base bg-red-500/80 hover:bg-red-500 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-md disabled:opacity-50"
                       >
                         {t.admin.scanner.cancel}
                       </button>
@@ -981,7 +989,7 @@ export default function AdminScanner() {
                                   className={`w-full text-left p-3 sm:p-5 rounded-xl border-2 transition-all duration-300 ${
                                     selectedRule === rule.id
                                       ? 'border-yellow-400 bg-yellow-500/20 shadow-lg shadow-yellow-500/30 scale-[1.02]'
-                                      : 'border-white/20 hover:border-white/40 hover:shadow-md bg-white/5'
+                                      : `border-white/20 hover:border-white/40 hover:shadow-md bg-white/5 ${!selectedRule ? 'pulse-gold' : ''}`
                                   }`}
                                 >
                                   <div className="flex justify-between items-start gap-2">
@@ -1037,13 +1045,13 @@ export default function AdminScanner() {
                       <button
                         onClick={handleRedeemReward}
                         disabled={!selectedRule || processing}
-                        className="flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 shadow-lg shadow-yellow-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                        className={`flex-1 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 shadow-lg shadow-yellow-500/50 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 ${selectedRule && !processing ? 'pulse-gold' : ''}`}
                       >
                         {processing ? t.admin.scanner.redeeming : t.admin.scanner.confirmRedeem}
                       </button>
                       <button
                         onClick={resetScanner}
-                        className="px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
+                        className="px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base bg-red-500/80 hover:bg-red-500 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-md"
                       >
                         {t.admin.scanner.cancel}
                       </button>

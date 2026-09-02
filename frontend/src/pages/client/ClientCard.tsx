@@ -52,6 +52,7 @@ export default function ClientCard() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
   const [showRewardsPanel, setShowRewardsPanel] = useState(false)
+  const [hasPhone, setHasPhone] = useState<boolean | null>(null)
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -182,6 +183,15 @@ export default function ClientCard() {
   }, [])
 
   useEffect(() => {
+    if (!card?.client_id) return
+    api.getClient(card.client_id)
+      .then((client) => setHasPhone(!!client?.phone))
+      .catch(() => {
+        // Non-fatal: the "save your data" reminder just won't show for this session
+      })
+  }, [card?.client_id])
+
+  useEffect(() => {
     const activeQr = urlQrCode || qrCode
     if (activeQr) {
       QRCode.toDataURL(activeQr, {
@@ -230,17 +240,28 @@ export default function ClientCard() {
       <div className="relative z-20">
         {/* Header */}
         <header className="pt-6 px-4">
-          <div className="max-w-2xl mx-auto flex justify-between items-center">
+          <div className="max-w-2xl mx-auto grid grid-cols-3 items-center gap-2">
             <button
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+              onClick={() => navigate('/select-tenant')}
+              className="justify-self-start flex items-center gap-2 text-white/80 hover:text-white transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               <span>{t.wallet.back}</span>
             </button>
-            <LanguageSelector />
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="justify-self-center flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-indigo-400/40 font-semibold text-xs sm:text-sm whitespace-nowrap"
+            >
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              {language === 'ro' ? 'Profilul Meu' : language === 'it' ? 'Il Mio Profilo' : 'My Profile'}
+            </button>
+            <div className="justify-self-end">
+              <LanguageSelector />
+            </div>
           </div>
         </header>
 
@@ -355,6 +376,43 @@ export default function ClientCard() {
                 {t.clientCard.selectStore}
               </button>
             </div>
+          )}
+
+          {/* Save-your-data reminder — the QR screen is what people actually open every
+              time, so this is the one place a phone-less client is guaranteed to see it */}
+          {hasPhone === false && (
+            <button
+              onClick={() => navigate('/dashboard', { state: { openPhoneModal: true } })}
+              className="save-data-reminder w-full mb-4 sm:mb-6 flex items-center gap-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 hover:from-yellow-500/30 hover:to-orange-500/30 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/40 text-left transition-colors duration-200"
+            >
+              <style>{`
+                @keyframes saveDataPulse {
+                  0%, 100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.45); }
+                  50% { box-shadow: 0 0 0 10px rgba(234,179,8,0); }
+                }
+                .save-data-reminder { animation: saveDataPulse 2.2s ease-in-out infinite; }
+              `}</style>
+              <div className="w-9 h-9 bg-yellow-500/20 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
+                <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-yellow-200 text-sm font-semibold">
+                  {language === 'ro' ? 'Salvează-ți datele' : language === 'it' ? 'Salva i tuoi dati' : 'Save your data'}
+                </p>
+                <p className="text-yellow-100/70 text-xs mt-0.5">
+                  {language === 'ro'
+                    ? 'Fără număr de telefon, timbrele se pierd în fiecare lună'
+                    : language === 'it'
+                    ? 'Senza numero di telefono i timbri si perdono ogni mese'
+                    : 'Without a phone number your stamps get lost every month'}
+                </p>
+              </div>
+              <svg className="w-4 h-4 text-yellow-300/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           )}
 
           {/* Rewards Discovery Accordion */}

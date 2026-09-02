@@ -240,6 +240,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
+      <style>{`
+        @keyframes pulseRingViolet { 0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.55); } 50% { box-shadow: 0 0 0 12px rgba(139,92,246,0); } }
+        .pulse-violet { animation: pulseRingViolet 2s ease-in-out infinite; }
+      `}</style>
       {/* Animated background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <StaticBackground />
@@ -292,7 +296,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <button
               onClick={() => navigate('/admin/scan')}
-              className="group relative overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600 text-white py-6 sm:py-8 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 hover:scale-105 active:scale-95"
+              className="pulse-violet group relative overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600 text-white py-6 sm:py-8 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 hover:scale-105 active:scale-95"
             >
               <span className="relative flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold">
                 <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">

@@ -22,6 +22,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
+  /* Keeps page content clear of the iOS status bar / notch and, on browsers
+     that float their own UI over the page top (e.g. Chrome on iOS), reduces
+     overlap with it too — the fixed background layers still extend to the
+     true edge since `fixed`/`inset-0` ignore body padding. */
+  padding-top: env(safe-area-inset-top);
 }
 
 #root {

@@ -1,22 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
-import { supabase } from '@/lib/supabase'
+import { supabase, api, ProductCategory } from '@/lib/supabase'
 import { translations } from '@/lib/i18n'
 import StaticBackground from '@/components/StaticBackground'
-import { ShoppingBag, Pencil, Trash2, Settings2, Gift, BadgePercent, Info } from 'lucide-react'
+import { ShoppingBag, Pencil, Trash2, Settings2, Gift, BadgePercent, Info, Tag, FolderCog } from 'lucide-react'
 
 interface Product {
   id: string
   name: string
   price?: number
+  category_id?: string | null
   metadata: {
     emoji?: string
     icon?: string
-    category?: string
   }
   active: boolean
   created_at: string
+  product_categories?: { id: string; name: string; icon?: string } | null
 }
 
 interface ProductRule {
@@ -46,11 +47,18 @@ export default function AdminProducts() {
   const [showAddRuleForm, setShowAddRuleForm] = useState(false)
   const [editingRule, setEditingRule] = useState<ProductRule | null>(null)
 
+  // Categories state
+  const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryEmoji, setNewCategoryEmoji] = useState('📦')
+  const [savingCategory, setSavingCategory] = useState(false)
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
     emoji: '📦',
-    category: '',
+    category_id: '',
     price: '',
     scans_required: 3
   })
@@ -72,7 +80,18 @@ export default function AdminProducts() {
       return
     }
     loadProducts()
+    loadCategories()
   }, [tenantId, navigate])
+
+  const loadCategories = async () => {
+    if (!tenantId) return
+    try {
+      const data = await api.getProductCategories(tenantId)
+      setCategories(data)
+    } catch (err) {
+      // Non-fatal: the category picker just falls back to "No category" only
+    }
+  }
 
   const loadProducts = async () => {
     if (!tenantId) return
@@ -82,7 +101,7 @@ export default function AdminProducts() {
       // Get products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*')
+        .select('*, product_categories(id, name, icon)')
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false })
 
@@ -129,9 +148,9 @@ export default function AdminProducts() {
         tenant_id: tenantId,
         name: formData.name,
         price: formData.price ? parseFloat(formData.price) : null,
+        category_id: formData.category_id || null,
         metadata: {
-          emoji: formData.emoji,
-          category: formData.category
+          emoji: formData.emoji
         },
         active: true
       }
@@ -180,7 +199,7 @@ export default function AdminProducts() {
       }
 
       // Reset form
-      setFormData({ name: '', emoji: '📦', category: '', price: '', scans_required: 3 })
+      setFormData({ name: '', emoji: '📦', category_id: '', price: '', scans_required: 3 })
       setShowAddModal(false)
       setEditingProduct(null)
       loadProducts()
@@ -247,7 +266,7 @@ export default function AdminProducts() {
     setFormData({
       name: product.name,
       emoji: product.metadata?.emoji || '📦',
-      category: product.metadata?.category || '',
+      category_id: product.category_id || '',
       price: product.price ? product.price.toString() : '',
       scans_required: 3 // Default, will be shown in rules
     })
@@ -361,6 +380,37 @@ export default function AdminProducts() {
 
   const emojiOptions = ['📦', '☕', '🍕', '🍔', '🥗', '🍰', '🎁', '💪', '🏋️', '🧘', '🚴', '🏃', '⚽', '🏀', '🎾', '🏊']
 
+  // Category Management Functions
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!tenantId || !newCategoryName.trim()) return
+    setSavingCategory(true)
+    try {
+      const created = await api.createProductCategory(tenantId, newCategoryName.trim(), newCategoryEmoji)
+      setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)))
+      setNewCategoryName('')
+      setNewCategoryEmoji('📦')
+    } catch (error) {
+      alert(t.errorSavingCategory)
+    } finally {
+      setSavingCategory(false)
+    }
+  }
+
+  const handleDeactivateCategory = async (categoryId: string) => {
+    if (!confirm(t.confirmDeleteCategory)) return
+    try {
+      await api.deactivateProductCategory(categoryId)
+      setCategories((prev) => prev.filter((c) => c.id !== categoryId))
+      if (formData.category_id === categoryId) {
+        setFormData((prev) => ({ ...prev, category_id: '' }))
+      }
+      loadProducts()
+    } catch (error) {
+      alert(t.errorDeletingCategory)
+    }
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
@@ -398,7 +448,7 @@ export default function AdminProducts() {
             <button
               onClick={() => {
                 setEditingProduct(null)
-                setFormData({ name: '', emoji: '📦', category: '', price: '', scans_required: 3 })
+                setFormData({ name: '', emoji: '📦', category_id: '', price: '', scans_required: 3 })
                 setShowAddModal(true)
               }}
               className="px-3 py-2 sm:px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg text-xs sm:text-sm font-semibold"
@@ -441,12 +491,15 @@ export default function AdminProducts() {
                         <div>
                           <h3 className="text-xl font-bold text-white">{product.name}</h3>
                           <div className="flex items-center gap-2 mt-0.5">
-                            {product.metadata?.category && (
-                              <span className="text-xs text-gray-400">{product.metadata.category}</span>
+                            {product.product_categories?.name && (
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                {product.product_categories.icon && <span>{product.product_categories.icon}</span>}
+                                {product.product_categories.name}
+                              </span>
                             )}
                             {product.price && (
                               <>
-                                {product.metadata?.category && <span className="text-xs text-gray-500">•</span>}
+                                {product.product_categories?.name && <span className="text-xs text-gray-500">•</span>}
                                 <span className="text-xs font-semibold text-green-400">{product.price.toFixed(2)} RON</span>
                               </>
                             )}
@@ -584,16 +637,30 @@ export default function AdminProducts() {
 
               {/* Category */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                  {t.category}
-                </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium text-gray-300">
+                    {t.category}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCategoriesModal(true)}
+                    className="text-xs text-purple-300 hover:text-purple-200 flex items-center gap-1"
+                  >
+                    <FolderCog className="w-3.5 h-3.5" /> {t.manageCategories}
+                  </button>
+                </div>
+                <select
+                  value={formData.category_id}
+                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                   className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder={t.categoryPlaceholder}
-                />
+                >
+                  <option value="" className="bg-gray-900">{t.noCategory}</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id} className="bg-gray-900">
+                      {cat.icon ? `${cat.icon} ` : ''}{cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Price */}
@@ -924,6 +991,84 @@ export default function AdminProducts() {
                 setEditingRule(null)
               }}
               className="w-full px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors text-sm font-semibold"
+            >
+              {t.close}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Categories Modal */}
+      {showCategoriesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 w-full max-w-md p-6">
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <Tag className="w-5 h-5" /> {t.categoriesTitle}
+            </h2>
+            <p className="text-gray-400 text-sm mb-4">{t.categoriesDesc}</p>
+
+            {/* Existing categories list */}
+            <div className="space-y-2 mb-4 max-h-56 overflow-y-auto">
+              {categories.length > 0 ? (
+                categories.map((cat) => (
+                  <div key={cat.id} className="bg-white/5 rounded-lg p-3 flex items-center justify-between gap-2">
+                    <span className="text-white text-sm flex items-center gap-2 min-w-0">
+                      <span>{cat.icon || '📦'}</span>
+                      <span className="truncate">{cat.name}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeactivateCategory(cat.id)}
+                      className="px-2 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 flex-shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-400 text-sm py-4">{t.noCategories}</p>
+              )}
+            </div>
+
+            {/* Add new category */}
+            <form onSubmit={handleAddCategory} className="bg-white/5 rounded-lg p-4 space-y-3">
+              <div className="grid grid-cols-8 gap-1.5">
+                {emojiOptions.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => setNewCategoryEmoji(emoji)}
+                    className={`text-lg p-1.5 rounded-lg transition-all ${
+                      newCategoryEmoji === emoji
+                        ? 'bg-purple-500/30 ring-2 ring-purple-500'
+                        : 'bg-white/10 hover:bg-white/20'
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder={t.newCategoryPlaceholder}
+                  className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <button
+                  type="submit"
+                  disabled={!newCategoryName.trim() || savingCategory}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all text-sm font-semibold disabled:opacity-50"
+                >
+                  {t.addCategory}
+                </button>
+              </div>
+            </form>
+
+            <button
+              onClick={() => setShowCategoriesModal(false)}
+              className="w-full mt-4 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors text-sm font-semibold"
             >
               {t.close}
             </button>

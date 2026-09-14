@@ -63,6 +63,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: true,
+    // Allows the loca.lt tunnel used for phone testing on the same wifi to reach the dev server
+    allowedHosts: ['.loca.lt']
   }
 })

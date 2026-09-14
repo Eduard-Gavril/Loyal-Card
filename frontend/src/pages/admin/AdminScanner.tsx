@@ -377,56 +377,44 @@ export default function AdminScanner() {
     }, 150)
   }
 
-  // Macro categories mapping
-  const macroCategories = {
-    espresso: { name: '☕ Espresso', emoji: '☕', types: ['espresso'] as string[] },
-    milk: { name: '🥛 Cappuccino e Latte', emoji: '🥛', types: ['milk', 'cappuccino', 'latte'] as string[] },
-    chocolate: { name: '🍫 Cioccolata & Tè', emoji: '🍫', types: ['chocolate', 'tea'] as string[] },
-    specialty: { name: '✨ Specialità', emoji: '✨', types: ['specialty', 'special'] as string[] },
-    other: { name: '📦 General', emoji: '📦', types: [] as string[] } // Catch-all for products without type
-  }
+  // Sentinel id for products with no tenant-defined category (real category ids are UUIDs)
+  const UNCATEGORIZED = '__uncategorized__'
 
-  // Group products by macro category
-  const getProductsByCategory = (categoryKey: string) => {
-    const category = macroCategories[categoryKey as keyof typeof macroCategories]
-    if (!category) return []
-    
-    // Special case for "other" - products without type or with unmatched type
-    if (categoryKey === 'other') {
-      return products.filter(product => {
-        const type = product.metadata?.type?.toLowerCase()
-        if (!type) return true // No type = show in "other"
-        
-        // Check if type matches any existing category
-        const matchesAnyCategory = Object.entries(macroCategories)
-          .filter(([key]) => key !== 'other')
-          .some(([_, cat]) => cat.types.includes(type))
-        
-        return !matchesAnyCategory // Show in "other" if doesn't match any category
-      })
+  // Group products by the tenant's own categories (managed by the owner in Admin > Prodotti)
+  const getProductsByCategory = (categoryId: string) => {
+    if (categoryId === UNCATEGORIZED) {
+      return products.filter(product => !product.product_categories)
     }
-    
-    return products.filter(product => {
-      const type = product.metadata?.type?.toLowerCase()
-      return type && category.types.includes(type)
-    })
+    return products.filter(product => product.category_id === categoryId)
   }
 
-  // Check if we should show macro categories (more than 8 products)
+  // Distinct categories actually present in this tenant's catalog, sorted like the product
+  // list itself (getProducts() orders by name), plus a catch-all bucket if needed
+  const availableCategories = (() => {
+    const seen = new Map<string, { id: string; name: string; icon: string }>()
+    products.forEach(product => {
+      const cat = product.product_categories
+      if (cat && !seen.has(cat.id)) {
+        seen.set(cat.id, { id: cat.id, name: cat.name, icon: cat.icon || '📦' })
+      }
+    })
+    const list = Array.from(seen.values())
+    if (getProductsByCategory(UNCATEGORIZED).length > 0) {
+      list.push({ id: UNCATEGORIZED, name: t.scanner.uncategorized, icon: '📦' })
+    }
+    return list
+  })()
+
+  // Check if we should show the category picker (more than 8 products)
   const shouldShowMacroCategories = products.length > 8
 
-  // Get available categories (categories that have products)
-  const availableCategories = Object.entries(macroCategories).filter(([key]) => 
-    getProductsByCategory(key).length > 0
-  )
-
-  // Fallback: if no categories have products, disable macro categories
+  // Fallback: if no categories have products, disable the category picker
   const useMacroCategories = shouldShowMacroCategories && availableCategories.length > 0
 
   // Filter and sort products by usage frequency
   const getFilteredProducts = () => {
-    let filteredProducts = useMacroCategories && selectedCategory 
-      ? getProductsByCategory(selectedCategory) 
+    let filteredProducts = useMacroCategories && selectedCategory
+      ? getProductsByCategory(selectedCategory)
       : products
     
     // Apply search filter
@@ -659,18 +647,18 @@ export default function AdminScanner() {
                       <>
                         <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">{t.scanner.selectCategory}</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                          {availableCategories.map(([key, category]) => (
+                          {availableCategories.map((category) => (
                             <button
-                              key={key}
-                              onClick={() => setSelectedCategory(key)}
+                              key={category.id}
+                              onClick={() => setSelectedCategory(category.id)}
                               className="p-4 sm:p-6 rounded-xl border-2 border-white/20 hover:border-primary-400 hover:bg-primary-500/10 bg-white/5 transition-all duration-300 hover:shadow-lg hover:scale-105"
                             >
-                              <div className="text-3xl sm:text-4xl mb-2">{category.emoji}</div>
+                              <div className="text-3xl sm:text-4xl mb-2">{category.icon}</div>
                               <div className="font-semibold text-white text-sm">
-                                {category.name.replace(/^[^\s]+\s/, '')}
+                                {category.name}
                               </div>
                               <div className="text-xs text-gray-300 mt-1">
-                                {getProductsByCategory(key).length} {t.scanner.products}
+                                {getProductsByCategory(category.id).length} {t.scanner.products}
                               </div>
                             </button>
                           ))}
@@ -692,8 +680,8 @@ export default function AdminScanner() {
                       <>
                         <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
                           <h2 className="text-xl sm:text-2xl font-bold text-white">
-                            {selectedCategory 
-                              ? macroCategories[selectedCategory as keyof typeof macroCategories]?.name 
+                            {selectedCategory
+                              ? availableCategories.find(c => c.id === selectedCategory)?.name
                               : t.admin.scanner.selectProduct}
                           </h2>
                           {useMacroCategories && selectedCategory && (

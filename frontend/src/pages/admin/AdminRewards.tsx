@@ -30,7 +30,7 @@ export default function AdminRewards() {
       const timeout = (p: any) => Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000))])
 
       const [{ data: productsData }, { data: rulesData }] = await Promise.all([
-        timeout(supabase.from('products').select('*').eq('tenant_id', tenantId).eq('active', true).order('name')),
+        timeout(supabase.from('products').select('*, product_categories(name)').eq('tenant_id', tenantId).eq('active', true).order('name')),
         timeout(supabase.from('reward_rules').select('*').eq('tenant_id', tenantId).order('created_at')),
       ]) as any[]
 
@@ -272,7 +272,7 @@ export default function AdminRewards() {
                         <span className="text-2xl sm:text-3xl">{getProductEmoji(product.name, product.metadata)}</span>
                         <p className="text-white font-medium mt-2">{product.name}</p>
                         <p className="text-gray-400 text-sm">
-                          {product.metadata?.type || 'product'}
+                          {product.product_categories?.name || (language === 'ro' ? 'Necategorizat' : language === 'it' ? 'Senza categoria' : 'Uncategorized')}
                         </p>
                       </div>
                     ))}

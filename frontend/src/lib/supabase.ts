@@ -83,15 +83,17 @@ export interface Card {
 export interface Product {
   id: string
   tenant_id: string
-  category_id?: string
+  category_id?: string | null
   name: string
   description?: string
   image_url?: string
   price?: number
-  metadata?: { type?: string; [key: string]: any }
+  metadata?: { emoji?: string; [key: string]: any }
   active: boolean
   created_at: string
   updated_at: string
+  // Embedded via `.select('*, product_categories(...)')` — not a DB column
+  product_categories?: ProductCategory | null
 }
 
 export interface ProductCategory {
@@ -410,6 +412,45 @@ export const api = {
     const { data, error } = result
     if (error) throw error
     return data
+  },
+
+  // Get product categories for tenant (owner-managed; RLS restricts writes to the tenant's owner)
+  async getProductCategories(tenantId: string) {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('active', true)
+      .order('name')
+    if (error) throw error
+    return (data || []) as ProductCategory[]
+  },
+
+  async createProductCategory(tenantId: string, name: string, icon?: string) {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .insert([{ tenant_id: tenantId, name, icon: icon || null }])
+      .select()
+      .single()
+    if (error) throw error
+    return data as ProductCategory
+  },
+
+  async updateProductCategory(categoryId: string, updates: { name?: string; icon?: string }) {
+    const { error } = await supabase
+      .from('product_categories')
+      .update(updates)
+      .eq('id', categoryId)
+    if (error) throw error
+  },
+
+  // Soft delete: keeps category history and doesn't orphan the products.category_id FK reference
+  async deactivateProductCategory(categoryId: string) {
+    const { error } = await supabase
+      .from('product_categories')
+      .update({ active: false })
+      .eq('id', categoryId)
+    if (error) throw error
   },
 
   // Get reward rules for tenant

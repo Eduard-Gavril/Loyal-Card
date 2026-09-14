@@ -7,6 +7,7 @@ import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 import { Camera, Ban, Check, Package, Gift, ShoppingCart, X, PartyPopper, Star, Plus, Minus } from 'lucide-react'
+import AppIcon from '@/components/AppIcon'
 
 // Cart item interface for multiple product selection
 interface CartItem {
@@ -395,12 +396,12 @@ export default function AdminScanner() {
     products.forEach(product => {
       const cat = product.product_categories
       if (cat && !seen.has(cat.id)) {
-        seen.set(cat.id, { id: cat.id, name: cat.name, icon: cat.icon || '📦' })
+        seen.set(cat.id, { id: cat.id, name: cat.name, icon: cat.icon || '' })
       }
     })
     const list = Array.from(seen.values())
     if (getProductsByCategory(UNCATEGORIZED).length > 0) {
-      list.push({ id: UNCATEGORIZED, name: t.scanner.uncategorized, icon: '📦' })
+      list.push({ id: UNCATEGORIZED, name: t.scanner.uncategorized, icon: 'package' })
     }
     return list
   })()
@@ -653,7 +654,9 @@ export default function AdminScanner() {
                               onClick={() => setSelectedCategory(category.id)}
                               className="p-4 sm:p-6 rounded-xl border-2 border-white/20 hover:border-primary-400 hover:bg-primary-500/10 bg-white/5 transition-all duration-300 hover:shadow-lg hover:scale-105"
                             >
-                              <div className="text-3xl sm:text-4xl mb-2">{category.icon}</div>
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 mb-2 flex items-center justify-center text-primary-300">
+                                <AppIcon name={category.icon} className="w-8 h-8 sm:w-9 sm:h-9" />
+                              </div>
                               <div className="font-semibold text-white text-sm">
                                 {category.name}
                               </div>

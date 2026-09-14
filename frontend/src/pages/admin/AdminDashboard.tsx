@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
-import { getProductEmoji } from '@/lib/emojiUtils'
+import { getProductIconName } from '@/lib/emojiUtils'
+import AppIcon from '@/components/AppIcon'
 import { Inbox } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
@@ -99,7 +100,7 @@ export default function AdminDashboard() {
           scanned_at: scan.scanned_at,
           reward_applied: scan.reward_applied,
           product_name: scan.products?.name || 'Unknown',
-          product_emoji: getProductEmoji(scan.products?.name || 'Unknown', scan.products?.metadata),
+          product_emoji: getProductIconName(scan.products?.name || 'Unknown', scan.products?.metadata),
           client_id: scan.client_id?.substring(0, 8) || '???',
           client_name: scan.clients?.name || null
         }))
@@ -417,7 +418,9 @@ export default function AdminDashboard() {
                     className="flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors border border-white/10"
                   >
                     {/* Product emoji */}
-                    <div className="text-3xl">{scan.product_emoji}</div>
+                    <div className="w-8 h-8 flex items-center justify-center text-primary-300">
+                      <AppIcon name={scan.product_emoji} className="w-7 h-7" />
+                    </div>
                     
                     {/* Info */}
                     <div className="flex-1 min-w-0">

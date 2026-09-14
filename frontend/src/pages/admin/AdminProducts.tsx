@@ -4,7 +4,10 @@ import { useAuthStore, useClientStore } from '@/store'
 import { supabase, api, ProductCategory } from '@/lib/supabase'
 import { translations } from '@/lib/i18n'
 import StaticBackground from '@/components/StaticBackground'
-import { ShoppingBag, Pencil, Trash2, Settings2, Gift, BadgePercent, Info, Tag, FolderCog } from 'lucide-react'
+import { ShoppingBag, Pencil, Trash2, Settings2, Gift, BadgePercent, Info, Tag, FolderCog, Plus, Check, X } from 'lucide-react'
+import AppIcon from '@/components/AppIcon'
+import IconPicker from '@/components/IconPicker'
+import { resolveIconName, DEFAULT_ICON_NAME } from '@/lib/icons'
 
 interface Product {
   id: string
@@ -51,13 +54,16 @@ export default function AdminProducts() {
   const [categories, setCategories] = useState<ProductCategory[]>([])
   const [showCategoriesModal, setShowCategoriesModal] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
-  const [newCategoryEmoji, setNewCategoryEmoji] = useState('📦')
+  const [newCategoryEmoji, setNewCategoryEmoji] = useState(DEFAULT_ICON_NAME as string)
   const [savingCategory, setSavingCategory] = useState(false)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
+  const [editCategoryName, setEditCategoryName] = useState('')
+  const [editCategoryEmoji, setEditCategoryEmoji] = useState(DEFAULT_ICON_NAME as string)
 
   // Form state
   const [formData, setFormData] = useState({
     name: '',
-    emoji: '📦',
+    emoji: DEFAULT_ICON_NAME as string,
     category_id: '',
     price: '',
     scans_required: 3
@@ -199,7 +205,7 @@ export default function AdminProducts() {
       }
 
       // Reset form
-      setFormData({ name: '', emoji: '📦', category_id: '', price: '', scans_required: 3 })
+      setFormData({ name: '', emoji: DEFAULT_ICON_NAME, category_id: '', price: '', scans_required: 3 })
       setShowAddModal(false)
       setEditingProduct(null)
       loadProducts()
@@ -265,7 +271,7 @@ export default function AdminProducts() {
     setEditingProduct(product)
     setFormData({
       name: product.name,
-      emoji: product.metadata?.emoji || '📦',
+      emoji: resolveIconName(product.metadata?.emoji),
       category_id: product.category_id || '',
       price: product.price ? product.price.toString() : '',
       scans_required: 3 // Default, will be shown in rules
@@ -378,8 +384,6 @@ export default function AdminProducts() {
     setShowAddRuleForm(true)
   }
 
-  const emojiOptions = ['📦', '☕', '🍕', '🍔', '🥗', '🍰', '🎁', '💪', '🏋️', '🧘', '🚴', '🏃', '⚽', '🏀', '🎾', '🏊']
-
   // Category Management Functions
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -389,7 +393,7 @@ export default function AdminProducts() {
       const created = await api.createProductCategory(tenantId, newCategoryName.trim(), newCategoryEmoji)
       setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)))
       setNewCategoryName('')
-      setNewCategoryEmoji('📦')
+      setNewCategoryEmoji(DEFAULT_ICON_NAME)
     } catch (error) {
       alert(t.errorSavingCategory)
     } finally {
@@ -397,14 +401,45 @@ export default function AdminProducts() {
     }
   }
 
-  const handleDeactivateCategory = async (categoryId: string) => {
+  const startEditCategory = (cat: ProductCategory) => {
+    setEditingCategoryId(cat.id)
+    setEditCategoryName(cat.name)
+    setEditCategoryEmoji(resolveIconName(cat.icon))
+  }
+
+  const cancelEditCategory = () => {
+    setEditingCategoryId(null)
+    setEditCategoryName('')
+    setEditCategoryEmoji(DEFAULT_ICON_NAME)
+  }
+
+  const handleUpdateCategory = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingCategoryId || !editCategoryName.trim()) return
+    setSavingCategory(true)
+    try {
+      await api.updateProductCategory(editingCategoryId, { name: editCategoryName.trim(), icon: editCategoryEmoji })
+      setCategories((prev) => prev
+        .map((c) => c.id === editingCategoryId ? { ...c, name: editCategoryName.trim(), icon: editCategoryEmoji } : c)
+        .sort((a, b) => a.name.localeCompare(b.name)))
+      cancelEditCategory()
+      loadProducts()
+    } catch (error) {
+      alert(t.errorSavingCategory)
+    } finally {
+      setSavingCategory(false)
+    }
+  }
+
+  const handleDeleteCategory = async (categoryId: string) => {
     if (!confirm(t.confirmDeleteCategory)) return
     try {
-      await api.deactivateProductCategory(categoryId)
+      await api.deleteProductCategory(categoryId)
       setCategories((prev) => prev.filter((c) => c.id !== categoryId))
       if (formData.category_id === categoryId) {
         setFormData((prev) => ({ ...prev, category_id: '' }))
       }
+      if (editingCategoryId === categoryId) cancelEditCategory()
       loadProducts()
     } catch (error) {
       alert(t.errorDeletingCategory)
@@ -425,41 +460,61 @@ export default function AdminProducts() {
       <div className="relative z-20">
         {/* Header */}
         <header className="pt-6 px-4 sm:px-6">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/admin/dashboard')}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-                  <ShoppingBag className="w-7 h-7 sm:w-8 sm:h-8" />
-                  {t.title}
-                </h1>
-                <p className="text-sm text-gray-300 mt-1">
-                  {t.subtitle}
-                </p>
-              </div>
-            </div>
+          <div className="max-w-7xl mx-auto flex items-center gap-4">
             <button
-              onClick={() => {
-                setEditingProduct(null)
-                setFormData({ name: '', emoji: '📦', category_id: '', price: '', scans_required: 3 })
-                setShowAddModal(true)
-              }}
-              className="px-3 py-2 sm:px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg text-xs sm:text-sm font-semibold"
+              onClick={() => navigate('/admin/dashboard')}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
             >
-              + {t.newProduct}
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                <ShoppingBag className="w-7 h-7 sm:w-8 sm:h-8" />
+                {t.title}
+              </h1>
+              <p className="text-sm text-gray-300 mt-1">
+                {t.subtitle}
+              </p>
+            </div>
           </div>
         </header>
 
-        {/* Products Grid */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+          {/* Quick Actions */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 mb-6 sm:mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <button
+                onClick={() => {
+                  setEditingProduct(null)
+                  setFormData({ name: '', emoji: DEFAULT_ICON_NAME, category_id: '', price: '', scans_required: 3 })
+                  setShowAddModal(true)
+                }}
+                className="group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-600/40 hover:scale-105 active:scale-95"
+              >
+                <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
+                  <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                    <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
+                  </span>
+                  {t.newProduct}
+                </span>
+              </button>
+              <button
+                onClick={() => setShowCategoriesModal(true)}
+                className="group bg-gradient-to-r from-purple-500 to-primary-600 hover:from-purple-600 hover:to-primary-700 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-600/40 hover:scale-105 active:scale-95"
+              >
+                <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
+                  <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                    <Tag className="w-6 h-6 sm:w-8 sm:h-8" />
+                  </span>
+                  {t.manageCategories}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Products Grid */}
           {loading ? (
             <div className="text-center py-12 sm:py-20">
               <div className="w-12 h-12 mx-auto border-3 border-primary-400/30 border-t-primary-400 rounded-full animate-spin"></div>
@@ -487,13 +542,15 @@ export default function AdminProducts() {
                     {/* Product Header */}
                     <div className="flex items-start justify-between mb-3 sm:mb-4">
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="text-3xl sm:text-4xl">{product.metadata?.emoji || '📦'}</div>
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-primary-300 flex-shrink-0">
+                          <AppIcon name={product.metadata?.emoji} className="w-7 h-7 sm:w-8 sm:h-8" />
+                        </div>
                         <div>
                           <h3 className="text-xl font-bold text-white">{product.name}</h3>
                           <div className="flex items-center gap-2 mt-0.5">
                             {product.product_categories?.name && (
                               <span className="text-xs text-gray-400 flex items-center gap-1">
-                                {product.product_categories.icon && <span>{product.product_categories.icon}</span>}
+                                <AppIcon name={product.product_categories.icon} className="w-3 h-3" />
                                 {product.product_categories.name}
                               </span>
                             )}
@@ -612,27 +669,17 @@ export default function AdminProducts() {
                 />
               </div>
 
-              {/* Emoji */}
+              {/* Icon */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">
                   {t.icon}
                 </label>
-                <div className="grid grid-cols-8 gap-2">
-                  {emojiOptions.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, emoji })}
-                      className={`text-2xl p-2 rounded-lg transition-all ${
-                        formData.emoji === emoji
-                          ? 'bg-purple-500/30 ring-2 ring-purple-500'
-                          : 'bg-white/10 hover:bg-white/20'
-                      }`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
+                <IconPicker
+                  value={formData.emoji}
+                  onChange={(name) => setFormData({ ...formData, emoji: name })}
+                  searchPlaceholder={t.iconSearchPlaceholder}
+                  noResultsLabel={t.noIconsFound}
+                />
               </div>
 
               {/* Category */}
@@ -657,7 +704,7 @@ export default function AdminProducts() {
                   <option value="" className="bg-gray-900">{t.noCategory}</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id} className="bg-gray-900">
-                      {cat.icon ? `${cat.icon} ` : ''}{cat.name}
+                      {cat.name}
                     </option>
                   ))}
                 </select>
@@ -1000,30 +1047,73 @@ export default function AdminProducts() {
 
       {/* Categories Modal */}
       {showCategoriesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 w-full max-w-md p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 w-full max-w-lg p-6 my-8">
             <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
               <Tag className="w-5 h-5" /> {t.categoriesTitle}
             </h2>
             <p className="text-gray-400 text-sm mb-4">{t.categoriesDesc}</p>
 
             {/* Existing categories list */}
-            <div className="space-y-2 mb-4 max-h-56 overflow-y-auto">
+            <div className="space-y-2 mb-4 max-h-72 overflow-y-auto">
               {categories.length > 0 ? (
                 categories.map((cat) => (
-                  <div key={cat.id} className="bg-white/5 rounded-lg p-3 flex items-center justify-between gap-2">
-                    <span className="text-white text-sm flex items-center gap-2 min-w-0">
-                      <span>{cat.icon || '📦'}</span>
-                      <span className="truncate">{cat.name}</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeactivateCategory(cat.id)}
-                      className="px-2 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 flex-shrink-0"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  editingCategoryId === cat.id ? (
+                    <form key={cat.id} onSubmit={handleUpdateCategory} className="bg-white/10 rounded-lg p-3 space-y-2 border border-purple-400/40">
+                      <IconPicker
+                        value={editCategoryEmoji}
+                        onChange={setEditCategoryEmoji}
+                        searchPlaceholder={t.iconSearchPlaceholder}
+                        noResultsLabel={t.noIconsFound}
+                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={editCategoryName}
+                          onChange={(e) => setEditCategoryName(e.target.value)}
+                          className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          autoFocus
+                        />
+                        <button
+                          type="submit"
+                          disabled={!editCategoryName.trim() || savingCategory}
+                          className="px-3 py-2 bg-green-500/30 text-green-400 rounded-lg hover:bg-green-500/40 disabled:opacity-50 flex-shrink-0"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEditCategory}
+                          className="px-3 py-2 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 flex-shrink-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div key={cat.id} className="bg-white/5 rounded-lg p-3 flex items-center justify-between gap-2">
+                      <span className="text-white text-sm flex items-center gap-2 min-w-0">
+                        <AppIcon name={cat.icon} className="w-4 h-4 text-primary-300 flex-shrink-0" />
+                        <span className="truncate">{cat.name}</span>
+                      </span>
+                      <div className="flex gap-1.5 flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => startEditCategory(cat)}
+                          className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCategory(cat.id)}
+                          className="px-2 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )
                 ))
               ) : (
                 <p className="text-center text-gray-400 text-sm py-4">{t.noCategories}</p>
@@ -1032,22 +1122,12 @@ export default function AdminProducts() {
 
             {/* Add new category */}
             <form onSubmit={handleAddCategory} className="bg-white/5 rounded-lg p-4 space-y-3">
-              <div className="grid grid-cols-8 gap-1.5">
-                {emojiOptions.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => setNewCategoryEmoji(emoji)}
-                    className={`text-lg p-1.5 rounded-lg transition-all ${
-                      newCategoryEmoji === emoji
-                        ? 'bg-purple-500/30 ring-2 ring-purple-500'
-                        : 'bg-white/10 hover:bg-white/20'
-                    }`}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
+              <IconPicker
+                value={newCategoryEmoji}
+                onChange={setNewCategoryEmoji}
+                searchPlaceholder={t.iconSearchPlaceholder}
+                noResultsLabel={t.noIconsFound}
+              />
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -1067,7 +1147,10 @@ export default function AdminProducts() {
             </form>
 
             <button
-              onClick={() => setShowCategoriesModal(false)}
+              onClick={() => {
+                setShowCategoriesModal(false)
+                cancelEditCategory()
+              }}
               className="w-full mt-4 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors text-sm font-semibold"
             >
               {t.close}

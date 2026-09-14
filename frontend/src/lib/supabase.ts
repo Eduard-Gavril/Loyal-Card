@@ -444,11 +444,12 @@ export const api = {
     if (error) throw error
   },
 
-  // Soft delete: keeps category history and doesn't orphan the products.category_id FK reference
-  async deactivateProductCategory(categoryId: string) {
+  // Hard delete. products.category_id has ON DELETE SET NULL, so products in this
+  // category simply become uncategorized — they are never deleted themselves.
+  async deleteProductCategory(categoryId: string) {
     const { error } = await supabase
       .from('product_categories')
-      .update({ active: false })
+      .delete()
       .eq('id', categoryId)
     if (error) throw error
   },

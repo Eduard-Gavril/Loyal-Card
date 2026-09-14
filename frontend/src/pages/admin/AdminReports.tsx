@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
-import { getProductEmoji } from '@/lib/emojiUtils'
+import { getProductIconName } from '@/lib/emojiUtils'
+import AppIcon from '@/components/AppIcon'
 import { BarChart3, User } from 'lucide-react'
 
 interface DailyStats {
@@ -161,7 +162,7 @@ export default function AdminReports() {
           return {
             name: product?.name || 'Unknown',
             count,
-            emoji: getProductEmoji(product?.name || 'Unknown', product?.metadata)
+            emoji: getProductIconName(product?.name || 'Unknown', product?.metadata)
           }
         })
         .sort((a, b) => b.count - a.count)
@@ -192,7 +193,7 @@ export default function AdminReports() {
         id: scan.id,
         scanned_at: scan.scanned_at,
         product_name: scan.products?.name || 'Unknown',
-        product_emoji: getProductEmoji(scan.products?.name || 'Unknown', scan.products?.metadata),
+        product_emoji: getProductIconName(scan.products?.name || 'Unknown', scan.products?.metadata),
         client_label: clientLabel(scan.clients?.name, scan.client_id),
         staff_label: labelForAdmin(scan.admin_id),
         reward_applied: scan.reward_applied
@@ -362,7 +363,9 @@ export default function AdminReports() {
                   <div className="space-y-4">
                     {topProducts.map((product) => (
                       <div key={product.name} className="flex items-center gap-4">
-                        <span className="text-2xl w-10 text-center">{product.emoji}</span>
+                        <span className="w-10 flex items-center justify-center text-primary-300">
+                          <AppIcon name={product.emoji} className="w-6 h-6" />
+                        </span>
                         <div className="flex-1">
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-white font-medium">{product.name}</span>
@@ -433,7 +436,9 @@ export default function AdminReports() {
                         key={scan.id}
                         className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white/5 rounded-xl border border-white/10"
                       >
-                        <div className="text-2xl sm:text-3xl flex-shrink-0">{scan.product_emoji}</div>
+                        <div className="w-8 h-8 flex items-center justify-center text-primary-300 flex-shrink-0">
+                          <AppIcon name={scan.product_emoji} className="w-6 h-6 sm:w-7 sm:h-7" />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-white font-medium">{scan.product_name}</span>

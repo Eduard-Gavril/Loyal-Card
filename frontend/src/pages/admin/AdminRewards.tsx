@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase, Product, RewardRule } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
-import { getProductEmoji } from '@/lib/emojiUtils'
+import { getProductIconName } from '@/lib/emojiUtils'
+import AppIcon from '@/components/AppIcon'
 import { Gift, Inbox } from 'lucide-react'
 
 export default function AdminRewards() {
@@ -80,10 +81,10 @@ export default function AdminRewards() {
     return product?.name || 'Unknown'
   }
 
-  const getProductEmojiById = (productId?: string) => {
+  const getProductIconNameById = (productId?: string) => {
     if (!productId) return '🏷️'
     const product = products.find(p => p.id === productId)
-    return getProductEmoji(product?.name || 'Unknown', product?.metadata)
+    return getProductIconName(product?.name || 'Unknown', product?.metadata)
   }
 
   return (
@@ -147,7 +148,9 @@ export default function AdminRewards() {
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                           <div className="flex items-start gap-3 sm:gap-4 flex-1">
-                            <span className="text-3xl sm:text-4xl flex-shrink-0">{getProductEmojiById(rule.product_id)}</span>
+                            <span className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-primary-300 flex-shrink-0">
+                              <AppIcon name={getProductIconNameById(rule.product_id)} className="w-7 h-7 sm:w-8 sm:h-8" />
+                            </span>
                             <div className="flex-1 min-w-0">
                               <h3 className="text-base sm:text-lg font-semibold text-white break-words">
                                 {rule.name || getProductName(rule.product_id)}
@@ -269,7 +272,9 @@ export default function AdminRewards() {
                         key={product.id}
                         className="bg-white/5 rounded-xl p-3 sm:p-4 border border-white/10 text-center hover:bg-white/10 transition-colors"
                       >
-                        <span className="text-2xl sm:text-3xl">{getProductEmoji(product.name, product.metadata)}</span>
+                        <span className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-primary-300 mx-auto">
+                          <AppIcon name={getProductIconName(product.name, product.metadata)} className="w-6 h-6 sm:w-7 sm:h-7" />
+                        </span>
                         <p className="text-white font-medium mt-2">{product.name}</p>
                         <p className="text-gray-400 text-sm">
                           {product.product_categories?.name || (language === 'ro' ? 'Necategorizat' : language === 'it' ? 'Senza categoria' : 'Uncategorized')}

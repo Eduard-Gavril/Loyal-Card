@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
+import { iconNames } from 'lucide-react/dynamic'
 
 export default defineConfig({
   plugins: [
@@ -40,6 +41,13 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // lucide-react/dynamic code-splits every icon into its own chunk since
+        // the icon name is only known at runtime. Precaching all ~1500 of them
+        // (most of which a given tenant will never render) turned every first
+        // visit and every app update into 1000+ background requests — let the
+        // few actually used load lazily instead (the browser still caches them
+        // normally from then on).
+        globIgnores: ['**/node_modules/**/*', ...iconNames.map((name) => `**/assets/${name}-*.js`)],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,

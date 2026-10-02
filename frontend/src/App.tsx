@@ -1,9 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store'
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { AutoUpdateToast } from './components/AutoUpdateToast'
 import CookieBanner from './components/CookieBanner'
+import ErrorBoundary from './components/ErrorBoundary'
 import { supabase } from './lib/supabase'
+import { lazyWithReload } from './lib/lazyWithReload'
+import { clearChunkReloadFlag, reloadOnceForChunkError } from './lib/chunkReload'
 
 // Critical pages - loaded immediately (small, first-screen)
 import LandingPage from './pages/LandingPage'
@@ -11,24 +14,24 @@ import TenantSelector from './pages/TenantSelector'
 import AdminLogin from './pages/admin/AdminLogin'
 
 // Lazy-loaded pages - loaded on demand (reduces initial bundle)
-const ClientCard = lazy(() => import('./pages/client/ClientCard'))
-const ClientWallet = lazy(() => import('./pages/client/ClientWallet'))
-const UserDashboard = lazy(() => import('./pages/client/UserDashboard'))
-const RecoveryPage = lazy(() => import('./pages/client/RecoveryPage'))
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
-const AdminScanner = lazy(() => import('./pages/admin/AdminScanner'))
-const AdminReports = lazy(() => import('./pages/admin/AdminReports'))
-const AdminRewards = lazy(() => import('./pages/admin/AdminRewards'))
-const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
-const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'))
-const SuperAdminDashboard = lazy(() => import('./pages/admin/SuperAdminDashboard'))
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
-const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
-const TermsOfService = lazy(() => import('./pages/TermsOfService'))
-const RefundPolicy = lazy(() => import('./pages/RefundPolicy'))
-const AcceptableUsePolicy = lazy(() => import('./pages/AcceptableUsePolicy'))
-const ContactPage = lazy(() => import('./pages/ContactPage'))
-const PricingPage = lazy(() => import('./pages/PricingPage'))
+const ClientCard = lazyWithReload(() => import('./pages/client/ClientCard'))
+const ClientWallet = lazyWithReload(() => import('./pages/client/ClientWallet'))
+const UserDashboard = lazyWithReload(() => import('./pages/client/UserDashboard'))
+const RecoveryPage = lazyWithReload(() => import('./pages/client/RecoveryPage'))
+const AdminDashboard = lazyWithReload(() => import('./pages/admin/AdminDashboard'))
+const AdminScanner = lazyWithReload(() => import('./pages/admin/AdminScanner'))
+const AdminReports = lazyWithReload(() => import('./pages/admin/AdminReports'))
+const AdminRewards = lazyWithReload(() => import('./pages/admin/AdminRewards'))
+const AdminSettings = lazyWithReload(() => import('./pages/admin/AdminSettings'))
+const AdminProducts = lazyWithReload(() => import('./pages/admin/AdminProducts'))
+const SuperAdminDashboard = lazyWithReload(() => import('./pages/admin/SuperAdminDashboard'))
+const PrivacyPolicy = lazyWithReload(() => import('./pages/PrivacyPolicy'))
+const CookiePolicy = lazyWithReload(() => import('./pages/CookiePolicy'))
+const TermsOfService = lazyWithReload(() => import('./pages/TermsOfService'))
+const RefundPolicy = lazyWithReload(() => import('./pages/RefundPolicy'))
+const AcceptableUsePolicy = lazyWithReload(() => import('./pages/AcceptableUsePolicy'))
+const ContactPage = lazyWithReload(() => import('./pages/ContactPage'))
+const PricingPage = lazyWithReload(() => import('./pages/PricingPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -58,6 +61,16 @@ function App() {
     setIsConfigured(!!(url && key && !url.includes('placeholder')))
     // Signal prerenderer that app has mounted
     document.dispatchEvent(new Event('app-prerender-ready'))
+
+    // We reached a successful mount, so any stale-chunk reload already did its
+    // job — reset the guard so a *future* deploy can still trigger one retry.
+    clearChunkReloadFlag()
+
+    // Vite's own dynamic-import() runtime fires this when a preload/import
+    // fails (belt-and-braces alongside lazyWithReload's per-route catch).
+    const handlePreloadError = () => { reloadOnceForChunkError() }
+    window.addEventListener('vite:preloadError', handlePreloadError)
+    return () => window.removeEventListener('vite:preloadError', handlePreloadError)
   }, [])
 
   // Auto-refresh session management
@@ -214,6 +227,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
     <BrowserRouter>
       <AutoUpdateToast />
       <CookieBanner />
+      <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Landing page */}
@@ -248,7 +262,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           />
           <Route
             path="/admin/scan"
-            element={session ? <AdminScanner /> : <Navigate to="/admin/login" />}
+            element={session ? <ErrorBoundary><AdminScanner /></ErrorBoundary> : <Navigate to="/admin/login" />}
           />
           <Route
             path="/admin/reports"
@@ -274,6 +288,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
     </BrowserRouter>
   )
 }

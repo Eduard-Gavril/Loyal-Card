@@ -6,6 +6,16 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Build assets are content-hashed and change on every deploy. A tab left open
+# from before a deploy can request a chunk that no longer exists; without this
+# rule the catch-all below would answer with index.html at 200, and the
+# browser's dynamic import() would fail on a JS-vs-HTML MIME mismatch instead
+# of rejecting cleanly. This must come before the catch-all so it wins first.
+[[redirects]]
+  from = "/assets/*"
+  to = "/index.html"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

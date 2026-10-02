@@ -64,22 +64,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Use existing client or create new one
     let client
     let isNewClient = false
-    
+
     if (client_id) {
-      // Use existing client
+      // Use existing client if it still exists. A client_id saved on-device can
+      // go stale if the server-side row was deleted behind its back (e.g. the
+      // monthly cleanup of clients with no phone on file) — maybeSingle() (not
+      // single()) so a missing row comes back as null instead of throwing, and
+      // we fall through to minting a fresh client instead of 500ing forever.
       const { data: existingClient, error: clientFetchError } = await supabaseClient
         .from('clients')
         .select('*')
         .eq('id', client_id)
-        .single()
-      
-      if (clientFetchError || !existingClient) {
-        throw new Error(`Client not found: ${clientFetchError?.message}`)
+        .maybeSingle()
+
+      if (clientFetchError) {
+        throw new Error(`Failed to look up client: ${clientFetchError.message}`)
       }
-      
+
       client = existingClient
-    } else {
-      // Create new client
+    }
+
+    if (!client) {
+      // Create new client (either none was provided, or the provided client_id
+      // no longer exists server-side)
       const { data: newClient, error: clientError } = await supabaseClient
         .from('clients')
         .insert({
@@ -97,7 +104,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (clientError || !newClient) {
         throw new Error(`Failed to create client: ${clientError?.message}`)
       }
-      
+
       client = newClient
       isNewClient = true
     }

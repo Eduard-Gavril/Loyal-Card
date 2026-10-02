@@ -23,6 +23,12 @@ function CategoryIcon({ type, className = 'w-5 h-5' }: { type: string; className
   )
 }
 
+const INIT_ERROR_MESSAGES: Record<string, { body: string; retry: string }> = {
+  en: { body: "We couldn't load your card. Please try again.", retry: 'Try again' },
+  it: { body: 'Non siamo riusciti a caricare la tua tessera. Riprova.', retry: 'Riprova' },
+  ro: { body: 'Nu am putut încărca cardul tău. Încearcă din nou.', retry: 'Încearcă din nou' },
+}
+
 function categoryLabel(type: string, language: string): string {
   const labels: Record<string, Record<string, string>> = {
     cafe:       { en: 'Café', ro: 'Cafenea', it: 'Caffetteria' },
@@ -38,12 +44,13 @@ export default function ClientCard() {
   const { qrCode: urlQrCode } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { clientId, qrCode, tenantId, tenantName, setClientData, language } = useClientStore()
+  const { clientId, qrCode, tenantId, tenantName, setClientData, clearClientData, language } = useClientStore()
   const t = getTranslation(language)
 
   const urlTenantId = searchParams.get('tenant')
 
   const [loading, setLoading] = useState(true)
+  const [initError, setInitError] = useState<string | null>(null)
   const [card, setCard] = useState<CardType | null>(null)
   const [tenant, setTenant] = useState<Tenant | null>(null)
   const [rules, setRules] = useState<RewardRule[]>([])
@@ -131,7 +138,18 @@ export default function ClientCard() {
               customName: tenantName || undefined,
             })
           } else {
-            const result = await api.generateClientId(activeTenantId, clientId)
+            let result
+            try {
+              result = await api.generateClientId(activeTenantId, clientId)
+            } catch (err) {
+              // The saved client_id no longer exists server-side (e.g. wiped by
+              // the monthly cleanup of phone-less clients). The backend now
+              // self-heals this case, but retry once with a clean slate in
+              // case it still fails for some other reason.
+              console.warn('[ClientCard] generateClientId failed for saved clientId, retrying fresh:', err)
+              clearClientData()
+              result = await api.generateClientId(activeTenantId)
+            }
             if (result.success) {
               setClientData({
                 clientId: result.client_id,
@@ -175,6 +193,7 @@ export default function ClientCard() {
         setRules(rulesData)
       } catch (err) {
         console.error('[ClientCard] init error:', err)
+        setInitError(err instanceof Error ? err.message : String(err))
       } finally {
         setLoading(false)
       }
@@ -227,6 +246,28 @@ export default function ClientCard() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
         <div className="relative z-20 min-h-screen flex items-center justify-center">
           <div className="text-white text-2xl font-semibold animate-pulse">{t.card.loading}</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Both generateClientId attempts failed (backend self-heal included) — show
+  // a real error with a way out instead of silently falling through to a
+  // card-shaped page with no card, qr code, or stamps in it.
+  if (initError && !card) {
+    const errorT = INIT_ERROR_MESSAGES[language] || INIT_ERROR_MESSAGES.en
+    return (
+      <div className="relative min-h-screen overflow-hidden">
+        <div className="absolute inset-0 z-0 overflow-hidden"><StaticBackground /></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
+        <div className="relative z-20 min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+          <p className="text-white text-xl font-semibold max-w-sm">{errorT.body}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors"
+          >
+            {errorT.retry}
+          </button>
         </div>
       </div>
     )

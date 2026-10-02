@@ -6,7 +6,7 @@ import CookieBanner from './components/CookieBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import { supabase } from './lib/supabase'
 import { lazyWithReload } from './lib/lazyWithReload'
-import { clearChunkReloadFlag, reloadOnceForChunkError } from './lib/chunkReload'
+import { reloadOnceForChunkError } from './lib/chunkReload'
 
 // Critical pages - loaded immediately (small, first-screen)
 import LandingPage from './pages/LandingPage'
@@ -61,10 +61,6 @@ function App() {
     setIsConfigured(!!(url && key && !url.includes('placeholder')))
     // Signal prerenderer that app has mounted
     document.dispatchEvent(new Event('app-prerender-ready'))
-
-    // We reached a successful mount, so any stale-chunk reload already did its
-    // job — reset the guard so a *future* deploy can still trigger one retry.
-    clearChunkReloadFlag()
 
     // Vite's own dynamic-import() runtime fires this when a preload/import
     // fails (belt-and-braces alongside lazyWithReload's per-route catch).

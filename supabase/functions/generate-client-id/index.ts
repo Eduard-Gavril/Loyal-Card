@@ -102,16 +102,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
       isNewClient = true
     }
 
-    // Check if card already exists for this client + tenant
-    const { data: existingCard, error: existingCardError } = await supabaseClient
+    // Check if card already exists for this client + tenant.
+    // Deliberately NOT .single(): that throws the same "cannot coerce" error for
+    // both zero AND multiple matching rows, so a duplicate card (e.g. from a past
+    // race between two near-simultaneous requests) would look identical to "no
+    // card yet" and cause this function to mint yet another duplicate. Ordering
+    // by created_at and taking the first row is safe either way: 0 rows -> null,
+    // 1 row -> that row, 2+ rows -> deterministically the oldest (the real one).
+    const { data: existingCards, error: existingCardError } = await supabaseClient
       .from('cards')
       .select('*')
       .eq('client_id', client.id)
       .eq('tenant_id', tenant_id)
-      .single()
-    
+      .order('created_at', { ascending: true })
+      .limit(1)
+
+    if (existingCardError) {
+      throw new Error(`Failed to check for existing card: ${existingCardError.message}`)
+    }
+
+    const existingCard = existingCards?.[0]
+
     // If card already exists, return it
-    if (existingCard && !existingCardError) {
+    if (existingCard) {
       const response: GenerateClientResponse = {
         success: true,
         client_id: client.id,
@@ -122,9 +135,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
       return new Response(
         JSON.stringify(response),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
@@ -147,6 +160,34 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .single()
 
     if (cardError || !card) {
+      // A concurrent request for the same client+tenant won the race and already
+      // inserted a card (relies on a unique constraint on client_id+tenant_id) —
+      // fetch and return that one instead of failing or creating a duplicate.
+      if (cardError?.code === '23505') {
+        const { data: raceWinnerCard, error: raceFetchError } = await supabaseClient
+          .from('cards')
+          .select('*')
+          .eq('client_id', client.id)
+          .eq('tenant_id', tenant_id)
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .single()
+
+        if (!raceFetchError && raceWinnerCard) {
+          const response: GenerateClientResponse = {
+            success: true,
+            client_id: client.id,
+            card_id: raceWinnerCard.id,
+            qr_code: raceWinnerCard.qr_code,
+            loyalty_state: raceWinnerCard.loyalty_state ?? {}
+          }
+          return new Response(
+            JSON.stringify(response),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+
       // Rollback: delete client ONLY if it was just created
       if (isNewClient) {
         await supabaseClient.from('clients').delete().eq('id', client.id)

@@ -2,6 +2,12 @@
   base = "frontend"
   command = "npm run build"
   publish = "dist"
+  # Skip the build entirely (0 minutes consumed) when nothing under frontend/
+  # or this config file changed since the last successful deploy — pushes
+  # touching only mobile_app/, supabase/, docs/, etc. no longer trigger a
+  # rebuild. git diff --quiet exits 0 (= "nothing changed" = skip) when the
+  # path is untouched, non-zero (= proceed) when it is.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- frontend/ netlify.toml"
 
 [build.environment]
   NODE_VERSION = "18"

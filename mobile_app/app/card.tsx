@@ -9,6 +9,7 @@ import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 import TiltCard from '@/components/TiltCard'
+import { getExpoPushToken } from '@/lib/push'
 
 type LoyaltyState = Record<string, { count?: number; rewards?: number } | undefined>
 
@@ -86,6 +87,16 @@ export default function CardScreen() {
     if (!tenantId) return
     api.getRewardRules(tenantId).then(setRules).catch(() => {})
   }, [tenantId])
+
+  // Register for push once we know who this device belongs to — covers the
+  // "reward earned" / "milestone reached" notifications register-scan sends.
+  // Silently does nothing if the user declines the permission prompt.
+  useEffect(() => {
+    if (!storedClientId) return
+    getExpoPushToken().then((token) => {
+      if (token) api.registerPushToken(storedClientId, token).catch(() => {})
+    })
+  }, [storedClientId])
 
   useEffect(() => {
     if (!qrCode) return

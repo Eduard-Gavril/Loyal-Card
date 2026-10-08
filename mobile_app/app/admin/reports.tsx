@@ -5,10 +5,11 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { supabase } from '@/lib/supabase'
+import { api, supabase } from '@/lib/supabase'
 import * as XLSX from 'xlsx'
 import { exportExcel } from '@/lib/excel'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import ProductIcon from '@/components/ProductIcon'
 
 type Range = '7d' | '30d' | '90d'
 
@@ -25,6 +26,21 @@ interface DayStat {
   rewards: number
 }
 
+interface StaffScanCount {
+  label: string
+  count: number
+}
+
+interface RecentScanDetail {
+  id: string
+  scanned_at: string
+  product_name: string
+  product_emoji?: string
+  client_label: string
+  staff_label: string
+  reward_applied: boolean
+}
+
 const RANGE_DAYS: Record<Range, number> = { '7d': 7, '30d': 30, '90d': 90 }
 const RANGE_LABELS: Record<Range, string> = { '7d': '7d', '30d': '30d', '90d': '90d' }
 
@@ -32,10 +48,11 @@ export default function AdminReportsScreen() {
   const colors = useTheme()
   const s = themedStyles(colors)
   const router = useRouter()
-  const { tenantId } = useAdminStore()
+  const { tenantId, user, role } = useAdminStore()
   const { language } = useClientStore()
   const t = getTranslation(language)
   const a = t.admin
+  const isOwner = role === 'owner'
 
   const [range, setRange] = useState<Range>('30d')
   const [loading, setLoading] = useState(true)
@@ -45,6 +62,8 @@ export default function AdminReportsScreen() {
   const [uniqueClients, setUniqueClients] = useState(0)
   const [topProducts, setTopProducts] = useState<ProductStat[]>([])
   const [dailyStats, setDailyStats] = useState<DayStat[]>([])
+  const [staffScans, setStaffScans] = useState<StaffScanCount[]>([])
+  const [recentScans, setRecentScans] = useState<RecentScanDetail[]>([])
 
   useEffect(() => { loadData() }, [range])
 
@@ -58,16 +77,16 @@ export default function AdminReportsScreen() {
 
       const { data: events } = await supabase
         .from('scan_events')
-        .select('id, scanned_at, reward_applied, card_id, products(name, metadata)')
+        .select('id, scanned_at, reward_applied, admin_id, client_id, products(name, metadata), clients(name)')
         .eq('tenant_id', tenantId!)
         .gte('scanned_at', sinceISO)
-        .order('scanned_at', { ascending: true })
+        .order('scanned_at', { ascending: false })
 
       const rows = (events as any[]) ?? []
 
       setTotalScans(rows.length)
       setTotalRewards(rows.filter((r) => r.reward_applied).length)
-      setUniqueClients(new Set(rows.map((r) => r.card_id)).size)
+      setUniqueClients(new Set(rows.map((r) => r.client_id)).size)
 
       const prodMap = new Map<string, ProductStat>()
       for (const e of rows) {
@@ -88,7 +107,59 @@ export default function AdminReportsScreen() {
         entry.scans++
         if (e.reward_applied) entry.rewards++
       }
-      setDailyStats([...dayMap.values()].reverse().slice(0, 14))
+      setDailyStats([...dayMap.values()].sort((x, y) => x.date.localeCompare(y.date)).slice(-14))
+
+      // Resolve admin_id -> display label: caller's own admin row (owner sees
+      // "Tu", staff sees their own email) plus, if owner, every staff account
+      // so the breakdown below can name each of them instead of just showing
+      // raw ids.
+      const youLabel = a.youOwnerLabel
+      const staffGeneric = a.staffGenericLabel
+      const adminLabels = new Map<string, string>()
+      try {
+        const { data: ownAdmin } = await supabase.from('admins').select('id').eq('user_id', user?.id).single()
+        if (ownAdmin) adminLabels.set(ownAdmin.id, isOwner ? youLabel : (user?.email || staffGeneric))
+      } catch {
+        // Own admin row lookup failed — staff labels fall back to a generic name.
+      }
+      if (isOwner) {
+        try {
+          const staffResult: any = await api.listStaffAdmins()
+          ;(staffResult?.staff ?? []).forEach((st: any) => {
+            adminLabels.set(st.id, st.email || `${staffGeneric} ${String(st.id).slice(0, 6)}`)
+          })
+        } catch {
+          // Staff list failed to load — per-staff scan breakdown shows generic labels.
+        }
+      }
+      const labelForAdmin = (adminId: string | null) =>
+        adminId ? (adminLabels.get(adminId) ?? `${staffGeneric} ${adminId.slice(0, 6)}`) : staffGeneric
+
+      const staffCounts = new Map<string, number>()
+      for (const e of rows) {
+        const key = e.admin_id ?? 'unknown'
+        staffCounts.set(key, (staffCounts.get(key) ?? 0) + 1)
+      }
+      setStaffScans(
+        [...staffCounts.entries()]
+          .map(([adminId, count]) => ({ label: labelForAdmin(adminId === 'unknown' ? null : adminId), count }))
+          .sort((x, y) => y.count - x.count)
+      )
+
+      const clientLabel = (name: string | null | undefined, clientId: string | null | undefined) =>
+        name?.trim() || (clientId ? `${a.clientDefault} #${clientId.slice(0, 8)}` : '—')
+
+      setRecentScans(
+        rows.slice(0, 15).map((e) => ({
+          id: e.id,
+          scanned_at: e.scanned_at,
+          product_name: e.products?.name ?? a.productDefault,
+          product_emoji: e.products?.metadata?.emoji,
+          client_label: clientLabel(e.clients?.name, e.client_id),
+          staff_label: labelForAdmin(e.admin_id),
+          reward_applied: e.reward_applied,
+        }))
+      )
     } finally {
       setLoading(false)
     }
@@ -240,7 +311,7 @@ export default function AdminReportsScreen() {
               {topProducts.map((p, i) => (
                 <View key={p.name} style={s.prodRow}>
                   <Text style={s.prodRank}>#{i + 1}</Text>
-                  <Text style={s.prodEmoji}>{p.emoji}</Text>
+                  <ProductIcon emoji={p.emoji} size={22} color={colors.ink} textStyle={s.prodEmoji} />
                   <Text style={s.prodName} numberOfLines={1}>{p.name}</Text>
                   <View style={s.prodStats}>
                     <Text style={s.prodStat}>
@@ -253,6 +324,58 @@ export default function AdminReportsScreen() {
                   </View>
                 </View>
               ))}
+            </View>
+          )}
+
+          {/* Scans by staff — owner only */}
+          {isOwner && staffScans.length > 0 && (
+            <View style={s.section}>
+              <Text style={s.sectionTitle}>{a.scansByStaffTitle}</Text>
+              <View style={s.staffCard}>
+                {staffScans.map((st) => (
+                  <View key={st.label} style={s.staffBarRow}>
+                    <View style={s.staffBarTop}>
+                      <Text style={s.staffBarLabel} numberOfLines={1}>{st.label}</Text>
+                      <Text style={s.staffBarCount}>{st.count}</Text>
+                    </View>
+                    <View style={s.staffBarTrack}>
+                      <View
+                        style={[s.staffBarFill, { width: `${Math.round((st.count / (staffScans[0]?.count || 1)) * 100)}%` }]}
+                      />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Recent scans with client + staff name */}
+          {recentScans.length > 0 && (
+            <View style={s.section}>
+              <Text style={s.sectionTitle}>{a.recentScansTitle}</Text>
+              <View style={{ gap: 8 }}>
+                {recentScans.map((scan) => (
+                  <View key={scan.id} style={s.recentScanRow}>
+                    <ProductIcon emoji={scan.product_emoji} size={22} color={colors.ink} textStyle={s.prodEmoji} />
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <View style={s.recentScanTop}>
+                        <Text style={s.recentScanProduct} numberOfLines={1}>{scan.product_name}</Text>
+                        <Text style={s.recentScanDot}>·</Text>
+                        <Text style={s.recentScanClient} numberOfLines={1}>{scan.client_label}</Text>
+                        {scan.reward_applied && (
+                          <View style={s.rewardBadge}>
+                            <Text style={s.rewardBadgeText}>{a.rewardLabel}</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={s.recentScanStaff} numberOfLines={1}>{scan.staff_label}</Text>
+                    </View>
+                    <Text style={s.recentScanTime}>
+                      {new Date(scan.scanned_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </View>
           )}
 
@@ -346,6 +469,38 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   prodStat: { color: colors.inkSoft, fontSize: 12 },
   prodStatNum: { color: colors.primary, fontWeight: '800' },
   prodReward: { color: colors.primary, fontSize: 12, fontWeight: '600' },
+
+  staffCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    padding: 14, gap: 14,
+    ...shadows.card,
+  },
+  staffBarRow: { gap: 6 },
+  staffBarTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  staffBarLabel: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 13.5 },
+  staffBarCount: { color: colors.inkSoft, fontSize: 12.5 },
+  staffBarTrack: { height: 7, borderRadius: 4, backgroundColor: colors.bgDeep, overflow: 'hidden' },
+  staffBarFill: { height: '100%', borderRadius: 4, backgroundColor: colors.primary },
+
+  recentScanRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    padding: 12,
+    ...shadows.card,
+  },
+  recentScanTop: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  recentScanProduct: { color: colors.ink, fontWeight: '600', fontSize: 13.5, flexShrink: 1 },
+  recentScanDot: { color: colors.inkFaint, fontSize: 13 },
+  recentScanClient: { color: colors.inkSoft, fontSize: 12.5, flexShrink: 1 },
+  recentScanStaff: { color: colors.inkFaint, fontSize: 11, marginTop: 2 },
+  recentScanTime: { color: colors.inkSoft, fontSize: 11, flexShrink: 0 },
+  rewardBadge: {
+    backgroundColor: colors.primarySoft, borderRadius: radius.pill,
+    paddingHorizontal: 7, paddingVertical: 2,
+  },
+  rewardBadgeText: { color: colors.primary, fontSize: 10, fontWeight: '700' },
 
   emptyBox: { alignItems: 'center', gap: 12, paddingVertical: 40 },
   emptyText: { color: colors.inkSoft, fontSize: 14, textAlign: 'center' },

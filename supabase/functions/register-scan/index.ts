@@ -310,6 +310,34 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // Don't fail the request, but log the error
     }
 
+    // Default push notifications: reward earned / milestone reached. Best
+    // effort — a failed or missing push token must never fail the scan
+    // itself, so this is fully isolated in its own try/catch.
+    try {
+      if (rewardEarned || milestoneReached) {
+        const { data: clientRow } = await supabase
+          .from('clients')
+          .select('push_token')
+          .eq('id', card.client_id)
+          .maybeSingle()
+
+        const pushToken = clientRow?.push_token
+        if (pushToken) {
+          const title = rewardEarned ? '🎉 Premio guadagnato!' : '⭐ Traguardo raggiunto!'
+          const body = rewardEarned
+            ? `Hai guadagnato: ${rewardEarned.rule_name}`
+            : milestoneReached!.message
+          await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify([{ to: pushToken, title, body, sound: 'default' }]),
+          })
+        }
+      }
+    } catch (pushError) {
+      console.error('Failed to send scan push notification:', pushError)
+    }
+
     // Success response
     const response: RegisterScanResponse = {
       success: true,

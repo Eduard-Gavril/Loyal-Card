@@ -13,11 +13,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { client_id, name }: { client_id: string; name: string } = await req.json()
+    const { client_id, name, push_token }: { client_id: string; name?: string; push_token?: string } = await req.json()
 
-    if (!client_id || !name?.trim()) {
+    if (!client_id) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Missing client_id or name' }),
+        JSON.stringify({ success: false, error: 'Missing client_id' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const updates: Record<string, string> = {}
+    if (name?.trim()) updates.name = name.trim()
+    if (push_token) updates.push_token = push_token
+
+    if (Object.keys(updates).length === 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Nothing to update' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -29,7 +40,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const { error } = await supabase
       .from('clients')
-      .update({ name: name.trim() })
+      .update(updates)
       .eq('id', client_id)
 
     if (error) throw new Error(error.message)

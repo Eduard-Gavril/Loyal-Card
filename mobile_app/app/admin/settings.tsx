@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { supabase } from '@/lib/supabase'
+import { api, supabase } from '@/lib/supabase'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
 
 interface TenantSettings {
@@ -19,16 +19,24 @@ interface TenantSettings {
   active: boolean
 }
 
+interface StaffAdmin {
+  id: string
+  email: string | null
+  active: boolean
+  created_at: string
+}
+
 const PRESET_COLORS = ['#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#db2777', '#2563eb', '#4f46e5']
 
 export default function AdminSettingsScreen() {
   const colors = useTheme()
   const s = themedStyles(colors)
   const router = useRouter()
-  const { tenantId } = useAdminStore()
+  const { tenantId, role } = useAdminStore()
   const { language } = useClientStore()
   const t = getTranslation(language)
   const a = t.admin
+  const isOwner = role === 'owner'
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -42,7 +50,88 @@ export default function AdminSettingsScreen() {
   const [originalForm, setOriginalForm] = useState<TenantSettings | null>(null)
   const [rawMetadata, setRawMetadata] = useState<Record<string, any>>({})
 
-  useEffect(() => { loadSettings() }, [])
+  // Staff (scan-only) account management — owner only
+  const [staffList, setStaffList] = useState<StaffAdmin[]>([])
+  const [staffListLoading, setStaffListLoading] = useState(false)
+  const [staffEmail, setStaffEmail] = useState('')
+  const [staffPassword, setStaffPassword] = useState('')
+  const [creatingStaff, setCreatingStaff] = useState(false)
+  const [staffError, setStaffError] = useState('')
+  const [deletingStaffId, setDeletingStaffId] = useState<string | null>(null)
+
+  // Broadcast push notification — owner only, 1/day server-enforced limit
+  const [broadcastTitle, setBroadcastTitle] = useState('')
+  const [broadcastBody, setBroadcastBody] = useState('')
+  const [sendingBroadcast, setSendingBroadcast] = useState(false)
+  const [broadcastError, setBroadcastError] = useState('')
+
+  useEffect(() => { loadSettings(); loadStaffList() }, [])
+
+  async function handleSendBroadcast() {
+    setSendingBroadcast(true)
+    setBroadcastError('')
+    try {
+      const result: any = await api.sendBroadcastNotification(broadcastTitle.trim(), broadcastBody.trim())
+      setBroadcastTitle('')
+      setBroadcastBody('')
+      Alert.alert(`✅ ${a.saved}`, a.broadcastSentMsg(result?.recipient_count ?? 0))
+    } catch (e: any) {
+      setBroadcastError(e?.message ?? a.errorSaveMsg)
+    } finally {
+      setSendingBroadcast(false)
+    }
+  }
+
+  async function loadStaffList() {
+    if (!isOwner) return
+    setStaffListLoading(true)
+    try {
+      const result: any = await api.listStaffAdmins()
+      setStaffList(result?.staff ?? [])
+    } catch {
+      // Non-fatal: the create form still works even if the list fails to load.
+    } finally {
+      setStaffListLoading(false)
+    }
+  }
+
+  async function handleCreateStaff() {
+    setCreatingStaff(true)
+    setStaffError('')
+    try {
+      await api.createStaffAdmin(staffEmail.trim(), staffPassword)
+      setStaffEmail('')
+      setStaffPassword('')
+      await loadStaffList()
+    } catch (e: any) {
+      setStaffError(e?.message ?? 'Failed to create staff account')
+    } finally {
+      setCreatingStaff(false)
+    }
+  }
+
+  function confirmDeleteStaff(staffId: string, email: string | null) {
+    Alert.alert(
+      a.staffDeleteTitle,
+      `${email ?? ''}\n${a.staffDeleteMsg}`,
+      [
+        { text: t.dashboard.cancel, style: 'cancel' },
+        { text: a.staffDeleteBtn, style: 'destructive', onPress: () => handleDeleteStaff(staffId) },
+      ]
+    )
+  }
+
+  async function handleDeleteStaff(staffId: string) {
+    setDeletingStaffId(staffId)
+    try {
+      await api.deleteStaffAdmin(staffId)
+      setStaffList((prev) => prev.filter((s) => s.id !== staffId))
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Failed to delete staff account')
+    } finally {
+      setDeletingStaffId(null)
+    }
+  }
 
   async function loadSettings() {
     if (!tenantId) return
@@ -215,6 +304,119 @@ export default function AdminSettingsScreen() {
             </View>
           </View>
 
+          {/* Staff accounts — owner only (staff can't reach this screen anyway, but
+              the role check stays here too, same defense-in-depth as the web app) */}
+          {isOwner && (
+            <View style={s.card}>
+              <View style={s.cardHeader}>
+                <Ionicons name="people-outline" size={16} color={colors.primary} />
+                <Text style={s.cardTitle}>{a.staffTitle}</Text>
+              </View>
+              <Text style={s.staffDesc}>{a.staffDesc}</Text>
+
+              {staffListLoading ? (
+                <ActivityIndicator color={colors.primary} style={{ marginVertical: 12 }} />
+              ) : staffList.length === 0 ? (
+                <Text style={s.staffEmpty}>{a.staffEmpty}</Text>
+              ) : (
+                <View style={{ gap: 8, marginTop: 8, marginBottom: 4 }}>
+                  {staffList.map((staff) => (
+                    <View key={staff.id} style={s.staffRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.staffEmail}>{staff.email}</Text>
+                        <Text style={s.staffDate}>
+                          {new Date(staff.created_at).toLocaleDateString()}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={s.staffDeleteBtn}
+                        onPress={() => confirmDeleteStaff(staff.id, staff.email)}
+                        disabled={deletingStaffId === staff.id}
+                      >
+                        {deletingStaffId === staff.id
+                          ? <ActivityIndicator size="small" color={colors.danger} />
+                          : <Ionicons name="trash-outline" size={16} color={colors.danger} />}
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              <Text style={s.fieldLabel}>{a.staffEmailLabel}</Text>
+              <TextInput
+                style={s.input}
+                value={staffEmail}
+                onChangeText={setStaffEmail}
+                placeholder="staff@example.com"
+                placeholderTextColor={colors.inkFaint}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+              <Text style={s.fieldLabel}>{a.staffPasswordLabel}</Text>
+              <TextInput
+                style={s.input}
+                value={staffPassword}
+                onChangeText={setStaffPassword}
+                placeholder="••••••••"
+                placeholderTextColor={colors.inkFaint}
+                secureTextEntry
+              />
+              {staffError ? <Text style={s.staffError}>{staffError}</Text> : null}
+              <TouchableOpacity
+                style={[s.staffCreateBtn, (creatingStaff || !staffEmail.trim() || !staffPassword) && s.saveBtnDisabled]}
+                onPress={handleCreateStaff}
+                disabled={creatingStaff || !staffEmail.trim() || !staffPassword}
+              >
+                {creatingStaff
+                  ? <><ActivityIndicator size="small" color="#fff" /><Text style={s.staffCreateBtnText}>{a.staffCreating}</Text></>
+                  : <><Ionicons name="person-add-outline" size={16} color="#fff" /><Text style={s.staffCreateBtnText}>{a.staffCreateBtn}</Text></>}
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Broadcast push notification — owner only */}
+          {isOwner && (
+            <View style={s.card}>
+              <View style={s.cardHeader}>
+                <Ionicons name="notifications-outline" size={16} color={colors.primary} />
+                <Text style={s.cardTitle}>{a.broadcastTitle}</Text>
+              </View>
+              <Text style={s.staffDesc}>{a.broadcastDesc}</Text>
+
+              <Text style={s.fieldLabel}>{a.broadcastTitleLabel}</Text>
+              <TextInput
+                style={s.input}
+                value={broadcastTitle}
+                onChangeText={setBroadcastTitle}
+                placeholder={a.broadcastTitlePlaceholder}
+                placeholderTextColor={colors.inkFaint}
+                maxLength={60}
+              />
+              <Text style={s.fieldLabel}>{a.broadcastBodyLabel}</Text>
+              <TextInput
+                style={[s.input, s.inputMultiline]}
+                value={broadcastBody}
+                onChangeText={setBroadcastBody}
+                placeholder={a.broadcastBodyPlaceholder}
+                placeholderTextColor={colors.inkFaint}
+                multiline
+                numberOfLines={3}
+                maxLength={150}
+              />
+              {broadcastError ? <Text style={s.staffError}>{broadcastError}</Text> : null}
+              <TouchableOpacity
+                style={[s.staffCreateBtn, (sendingBroadcast || !broadcastTitle.trim() || !broadcastBody.trim()) && s.saveBtnDisabled]}
+                onPress={handleSendBroadcast}
+                disabled={sendingBroadcast || !broadcastTitle.trim() || !broadcastBody.trim()}
+              >
+                {sendingBroadcast
+                  ? <><ActivityIndicator size="small" color="#fff" /><Text style={s.staffCreateBtnText}>{a.broadcastSending}</Text></>
+                  : <><Ionicons name="send-outline" size={16} color="#fff" /><Text style={s.staffCreateBtnText}>{a.broadcastSendBtn}</Text></>}
+              </TouchableOpacity>
+              <Text style={s.broadcastLimitHint}>{a.broadcastLimitHint}</Text>
+            </View>
+          )}
+
           {/* Preview */}
           <View style={s.card}>
             <View style={s.cardHeader}>
@@ -305,4 +507,29 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   previewName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
   previewMsg: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
   previewDot: { width: 8, height: 8, borderRadius: 4 },
+
+  staffDesc: { color: colors.inkSoft, fontSize: 12, lineHeight: 17, marginBottom: 4 },
+  staffEmpty: { color: colors.inkFaint, fontSize: 13, marginVertical: 8 },
+  staffRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: colors.bgDeep, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border,
+    paddingHorizontal: 12, paddingVertical: 10,
+  },
+  staffEmail: { color: colors.ink, fontWeight: '600', fontSize: 13.5 },
+  staffDate: { color: colors.inkFaint, fontSize: 11, marginTop: 1 },
+  staffDeleteBtn: {
+    width: 32, height: 32, borderRadius: radius.sm,
+    backgroundColor: colors.dangerSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  staffError: { color: colors.danger, fontSize: 12, marginTop: 6 },
+  staffCreateBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: colors.primary, borderRadius: radius.md,
+    paddingVertical: 12, marginTop: 12,
+    ...shadows.primaryBtn,
+  },
+  staffCreateBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  broadcastLimitHint: { color: colors.inkFaint, fontSize: 11, marginTop: 8, textAlign: 'center' },
 }))

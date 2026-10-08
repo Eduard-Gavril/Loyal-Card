@@ -48,6 +48,14 @@ export interface Card {
   created_at: string
 }
 
+export interface ProductCategory {
+  id: string
+  tenant_id: string
+  name: string
+  icon?: string | null
+  active: boolean
+}
+
 export interface RewardRule {
   id: string
   tenant_id: string
@@ -155,6 +163,14 @@ export const api = {
     return invokeEdgeFunction('update-client-profile', { client_id: clientId, name })
   },
 
+  async registerPushToken(clientId: string, pushToken: string) {
+    return invokeEdgeFunction('update-client-profile', { client_id: clientId, push_token: pushToken })
+  },
+
+  async sendBroadcastNotification(title: string, body: string) {
+    return invokeEdgeFunction('send-broadcast-notification', { title, body })
+  },
+
   async deleteAccount(clientId: string) {
     return invokeEdgeFunction('delete-account', { client_id: clientId })
   },
@@ -163,7 +179,50 @@ export const api = {
     return invokeEdgeFunction('register-scan', { qr_code: qrCode, product_id: productId })
   },
 
-  async redeemReward(qrCode: string, rewardRuleId: string) {
-    return invokeEdgeFunction('redeem-reward', { qr_code: qrCode, reward_rule_id: rewardRuleId })
+  async redeemReward(qrCode: string, rewardRuleId: string, redeemCount: number = 1) {
+    return invokeEdgeFunction('redeem-reward', { qr_code: qrCode, reward_rule_id: rewardRuleId, redeem_count: redeemCount })
+  },
+
+  async createStaffAdmin(email: string, password: string) {
+    return invokeEdgeFunction('create-staff-admin', { email, password, role: 'staff' })
+  },
+
+  async listStaffAdmins() {
+    return invokeEdgeFunction('manage-staff-admins', { action: 'list' })
+  },
+
+  async deleteStaffAdmin(staffAdminId: string) {
+    return invokeEdgeFunction('manage-staff-admins', { action: 'delete', staff_admin_id: staffAdminId })
+  },
+
+  async getProductCategories(tenantId: string): Promise<ProductCategory[]> {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('active', true)
+      .order('name')
+    if (error) throw error
+    return data ?? []
+  },
+
+  async createProductCategory(tenantId: string, name: string, icon?: string): Promise<ProductCategory> {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .insert([{ tenant_id: tenantId, name, icon: icon || null }])
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  },
+
+  async updateProductCategory(categoryId: string, updates: { name?: string; icon?: string }) {
+    const { error } = await supabase.from('product_categories').update(updates).eq('id', categoryId)
+    if (error) throw error
+  },
+
+  async deleteProductCategory(categoryId: string) {
+    const { error } = await supabase.from('product_categories').delete().eq('id', categoryId)
+    if (error) throw error
   },
 }

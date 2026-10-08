@@ -8,17 +8,19 @@ import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { supabase } from '@/lib/supabase'
+import { api, supabase, ProductCategory } from '@/lib/supabase'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
-
-const EMOJIS = ['☕', '🍕', '🍔', '🍰', '🥗', '🍜', '🛍️', '💄', '💪', '🎁', '🥤', '🍦', '🌮', '🥩', '🍺', '✂️']
+import { resolveCategoryIcon, CURATED_CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '@/lib/categoryIcons'
+import ProductIcon from '@/components/ProductIcon'
 
 interface Product {
   id: string
   name: string
   price: number | null
   active: boolean
-  metadata: { emoji?: string; category?: string }
+  category_id: string | null
+  metadata: { emoji?: string }
+  product_categories?: { id: string; name: string; icon: string | null } | null
 }
 
 interface Rule {
@@ -33,7 +35,7 @@ interface Rule {
   product_id: string | null
 }
 
-const emptyProduct = { name: '', emoji: '🛍️', category: '', price: '', scansRequired: '5' }
+const emptyProduct = { name: '', emoji: DEFAULT_CATEGORY_ICON, category_id: '', price: '', scansRequired: '5' }
 const emptyRule = { name: '', description: '', buy_count: '5', reward_count: '1', discount_percent: '', priority: '1', reward_type: 'free_product' as 'free_product' | 'percentage_discount' }
 
 export default function AdminProductsScreen() {
@@ -47,13 +49,24 @@ export default function AdminProductsScreen() {
 
   const [products, setProducts] = useState<Product[]>([])
   const [rules, setRules] = useState<Rule[]>([])
+  const [categories, setCategories] = useState<ProductCategory[]>([])
   const [loading, setLoading] = useState(true)
+  const [categoriesModal, setCategoriesModal] = useState(false)
 
   // Product modal
   const [productModal, setProductModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [productForm, setProductForm] = useState({ ...emptyProduct })
   const [savingProduct, setSavingProduct] = useState(false)
+
+  // Category inline form (inside the product modal) — used for both creating
+  // a new category and editing an existing one; editingCategoryId tells the
+  // save handler which.
+  const [newCategoryOpen, setNewCategoryOpen] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryIcon, setNewCategoryIcon] = useState(DEFAULT_CATEGORY_ICON)
+  const [savingCategory, setSavingCategory] = useState(false)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
 
   // Rules modal
   const [rulesModal, setRulesModal] = useState(false)
@@ -68,21 +81,99 @@ export default function AdminProductsScreen() {
   async function loadData() {
     setLoading(true)
     try {
-      const [prodRes, rulesRes] = await Promise.all([
-        supabase.from('products').select('*').eq('tenant_id', tenantId!).order('created_at', { ascending: false }),
+      const [prodRes, rulesRes, cats] = await Promise.all([
+        supabase.from('products').select('*, product_categories(id, name, icon)').eq('tenant_id', tenantId!).order('created_at', { ascending: false }),
         supabase.from('reward_rules').select('*').eq('tenant_id', tenantId!).order('priority'),
+        api.getProductCategories(tenantId!),
       ])
       setProducts(prodRes.data ?? [])
       setRules(rulesRes.data ?? [])
+      setCategories(cats)
     } finally {
       setLoading(false)
     }
+  }
+
+  function closeCategoryForm() {
+    setNewCategoryOpen(false)
+    setEditingCategoryId(null)
+    setNewCategoryName('')
+    setNewCategoryIcon(DEFAULT_CATEGORY_ICON)
+  }
+
+  function startAddCategory() {
+    if (newCategoryOpen && !editingCategoryId) { closeCategoryForm(); return }
+    setEditingCategoryId(null)
+    setNewCategoryName('')
+    setNewCategoryIcon(DEFAULT_CATEGORY_ICON)
+    setNewCategoryOpen(true)
+  }
+
+  function startEditCategory(cat: ProductCategory) {
+    setEditingCategoryId(cat.id)
+    setNewCategoryName(cat.name)
+    setNewCategoryIcon(cat.icon || DEFAULT_CATEGORY_ICON)
+    setNewCategoryOpen(true)
+  }
+
+  async function handleSaveCategory() {
+    if (!tenantId || !newCategoryName.trim()) return
+    setSavingCategory(true)
+    try {
+      if (editingCategoryId) {
+        await api.updateProductCategory(editingCategoryId, { name: newCategoryName.trim(), icon: newCategoryIcon })
+        setCategories((prev) => prev
+          .map((c) => c.id === editingCategoryId ? { ...c, name: newCategoryName.trim(), icon: newCategoryIcon } : c)
+          .sort((a, b) => a.name.localeCompare(b.name)))
+        await loadData()
+      } else {
+        const created = await api.createProductCategory(tenantId, newCategoryName.trim(), newCategoryIcon)
+        setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)))
+        setProductForm((f) => ({ ...f, category_id: created.id }))
+      }
+      closeCategoryForm()
+    } catch (e: any) {
+      Alert.alert(a.errorTitle, e?.message ?? a.errorSavingCategory)
+    } finally {
+      setSavingCategory(false)
+    }
+  }
+
+  function handleDeleteCategory(cat: ProductCategory) {
+    Alert.alert(a.confirmDeleteCategory, cat.name, [
+      { text: t.dashboard.cancel, style: 'cancel' },
+      {
+        text: t.dashboard.delete, style: 'destructive',
+        onPress: async () => {
+          try {
+            await api.deleteProductCategory(cat.id)
+            setCategories((prev) => prev.filter((c) => c.id !== cat.id))
+            if (productForm.category_id === cat.id) {
+              setProductForm((f) => ({ ...f, category_id: '' }))
+            }
+            if (editingCategoryId === cat.id) closeCategoryForm()
+            await loadData()
+          } catch (e: any) {
+            Alert.alert(a.errorTitle, e?.message ?? a.errorDeletingCategory)
+          }
+        },
+      },
+    ])
+  }
+
+  function onCategoryLongPress(cat: ProductCategory) {
+    Alert.alert(cat.name, undefined, [
+      { text: t.dashboard.cancel, style: 'cancel' },
+      { text: a.edit, onPress: () => startEditCategory(cat) },
+      { text: t.dashboard.delete, style: 'destructive', onPress: () => handleDeleteCategory(cat) },
+    ])
   }
 
   // ── PRODUCT CRUD ───────────────────────────────────────────────
   function openAddProduct() {
     setEditingProduct(null)
     setProductForm({ ...emptyProduct })
+    closeCategoryForm()
     setProductModal(true)
   }
 
@@ -90,11 +181,12 @@ export default function AdminProductsScreen() {
     setEditingProduct(p)
     setProductForm({
       name: p.name,
-      emoji: p.metadata?.emoji ?? '🛍️',
-      category: p.metadata?.category ?? '',
+      emoji: p.metadata?.emoji ?? DEFAULT_CATEGORY_ICON,
+      category_id: p.category_id ?? '',
       price: p.price != null ? String(p.price) : '',
       scansRequired: '5',
     })
+    closeCategoryForm()
     setProductModal(true)
   }
 
@@ -106,7 +198,8 @@ export default function AdminProductsScreen() {
         tenant_id: tenantId!,
         name: productForm.name.trim(),
         price: productForm.price ? parseFloat(productForm.price) : null,
-        metadata: { emoji: productForm.emoji, category: productForm.category.trim() },
+        category_id: productForm.category_id || null,
+        metadata: { emoji: productForm.emoji },
         active: true,
       }
       if (editingProduct) {
@@ -242,8 +335,17 @@ export default function AdminProductsScreen() {
           <Text style={s.backText}>{t.back}</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>{a.products}</Text>
-        <TouchableOpacity style={s.addBtn} onPress={openAddProduct}>
-          <Ionicons name="add" size={22} color="#fff" />
+        <View style={{ width: 80 }} />
+      </View>
+
+      <View style={s.actionRow}>
+        <TouchableOpacity style={s.actionBtnPrimary} onPress={openAddProduct}>
+          <Ionicons name="add" size={18} color="#fff" />
+          <Text style={s.actionBtnPrimaryText}>{a.newProductTitle}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.actionBtnSecondary} onPress={() => setCategoriesModal(true)}>
+          <Ionicons name="pricetag-outline" size={16} color="#fff" />
+          <Text style={s.actionBtnSecondaryText}>{a.manageCategoriesBtn}</Text>
         </TouchableOpacity>
       </View>
 
@@ -266,11 +368,16 @@ export default function AdminProductsScreen() {
               <View style={s.productTop}>
                 <View style={s.productLeft}>
                   <View style={s.productEmojiWrap}>
-                    <Text style={s.productEmoji}>{p.metadata?.emoji ?? '🛍️'}</Text>
+                    <ProductIcon emoji={p.metadata?.emoji} size={26} color={colors.ink} textStyle={s.productEmoji} />
                   </View>
                   <View>
                     <Text style={s.productName}>{p.name}</Text>
-                    {p.metadata?.category && <Text style={s.productCat}>{p.metadata.category}</Text>}
+                    {p.product_categories?.name && (
+                      <View style={s.productCatRow}>
+                        <Ionicons name={resolveCategoryIcon(p.product_categories.icon)} size={11} color={colors.inkSoft} />
+                        <Text style={s.productCat}>{p.product_categories.name}</Text>
+                      </View>
+                    )}
                     {p.price != null && <Text style={s.productPrice}>{p.price.toFixed(2)} lei</Text>}
                   </View>
                 </View>
@@ -342,27 +449,54 @@ export default function AdminProductsScreen() {
               onChangeText={(v) => setProductForm((f) => ({ ...f, name: v }))}
             />
 
-            <Text style={s.fieldLabel}>Emoji</Text>
+            <Text style={s.fieldLabel}>{a.iconLabel}</Text>
             <View style={s.emojiGrid}>
-              {EMOJIS.map((e) => (
+              {CURATED_CATEGORY_ICONS.map((iconName) => (
                 <TouchableOpacity
-                  key={e}
-                  style={[s.emojiBtn, productForm.emoji === e && s.emojiBtnActive]}
-                  onPress={() => setProductForm((f) => ({ ...f, emoji: e }))}
+                  key={iconName}
+                  style={[s.emojiBtn, productForm.emoji === iconName && s.emojiBtnActive]}
+                  onPress={() => setProductForm((f) => ({ ...f, emoji: iconName }))}
                 >
-                  <Text style={s.emojiChar}>{e}</Text>
+                  <Ionicons
+                    name={resolveCategoryIcon(iconName)}
+                    size={20}
+                    color={productForm.emoji === iconName ? colors.primary : colors.inkMid}
+                  />
                 </TouchableOpacity>
               ))}
             </View>
 
             <Text style={s.fieldLabel}>{a.categoryLabel}</Text>
-            <TextInput
-              style={s.input}
-              placeholder={a.categoryPlaceholder}
-              placeholderTextColor={colors.inkFaint}
-              value={productForm.category}
-              onChangeText={(v) => setProductForm((f) => ({ ...f, category: v }))}
-            />
+            <View style={s.categoryChipsWrap}>
+              <TouchableOpacity
+                style={[s.categoryChip, !productForm.category_id && s.categoryChipActive]}
+                onPress={() => setProductForm((f) => ({ ...f, category_id: '' }))}
+              >
+                <Text style={[s.categoryChipText, !productForm.category_id && s.categoryChipTextActive]}>
+                  {a.noCategoryLabel}
+                </Text>
+              </TouchableOpacity>
+              {categories.map((cat) => {
+                const active = productForm.category_id === cat.id
+                return (
+                  <TouchableOpacity
+                    key={cat.id}
+                    style={[s.categoryChip, active && s.categoryChipActive]}
+                    onPress={() => setProductForm((f) => ({ ...f, category_id: cat.id }))}
+                  >
+                    <Ionicons
+                      name={resolveCategoryIcon(cat.icon)}
+                      size={13}
+                      color={active ? '#fff' : colors.inkMid}
+                    />
+                    <Text style={[s.categoryChipText, active && s.categoryChipTextActive]}>{cat.name}</Text>
+                  </TouchableOpacity>
+                )
+              })}
+            </View>
+            {categories.length === 0 && (
+              <Text style={s.categoryHint}>{a.noCategoriesYetHint}</Text>
+            )}
 
             <Text style={s.fieldLabel}>{a.priceLabel}</Text>
             <TextInput
@@ -387,6 +521,90 @@ export default function AdminProductsScreen() {
                 />
               </>
             )}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      {/* ── CATEGORIES MODAL ──────────────────────────────────── */}
+      <Modal
+        visible={categoriesModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => { setCategoriesModal(false); closeCategoryForm() }}
+      >
+        <SafeAreaView style={s.modal}>
+          <View style={s.modalHeader}>
+            <TouchableOpacity onPress={() => { setCategoriesModal(false); closeCategoryForm() }}>
+              <Ionicons name="close" size={24} color={colors.ink} />
+            </TouchableOpacity>
+            <Text style={s.modalTitle}>{a.manageCategoriesBtn}</Text>
+            <View style={{ width: 24 }} />
+          </View>
+          <ScrollView contentContainerStyle={s.modalBody}>
+            {categories.length === 0 ? (
+              <Text style={s.categoryHint}>{a.noCategoriesYetHint}</Text>
+            ) : (
+              <View style={{ gap: 8, marginBottom: 14 }}>
+                {categories.map((cat) => (
+                  <View key={cat.id} style={s.categoryManageRow}>
+                    <View style={s.categoryManageIcon}>
+                      <Ionicons name={resolveCategoryIcon(cat.icon)} size={16} color={colors.primary} />
+                    </View>
+                    <Text style={s.categoryManageName} numberOfLines={1}>{cat.name}</Text>
+                    <TouchableOpacity style={s.categoryManageAction} onPress={() => startEditCategory(cat)}>
+                      <Ionicons name="pencil-outline" size={16} color={colors.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={s.categoryManageAction} onPress={() => handleDeleteCategory(cat)}>
+                      <Ionicons name="trash-outline" size={16} color={colors.danger} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            <View style={s.newCategoryBox}>
+              <View style={s.newCategoryEditRow}>
+                <Text style={s.newCategoryEditLabel}>
+                  {editingCategoryId ? a.editCategoryTitle : a.newCategoryNamePlaceholder}
+                </Text>
+                {editingCategoryId && (
+                  <TouchableOpacity onPress={closeCategoryForm}>
+                    <Ionicons name="close" size={18} color={colors.inkFaint} />
+                  </TouchableOpacity>
+                )}
+              </View>
+              <TextInput
+                style={s.input}
+                placeholder={a.newCategoryNamePlaceholder}
+                placeholderTextColor={colors.inkFaint}
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+              />
+              <View style={s.iconPickerGrid}>
+                {CURATED_CATEGORY_ICONS.map((iconName) => (
+                  <TouchableOpacity
+                    key={iconName}
+                    style={[s.iconPickerBtn, newCategoryIcon === iconName && s.iconPickerBtnActive]}
+                    onPress={() => setNewCategoryIcon(iconName)}
+                  >
+                    <Ionicons
+                      name={resolveCategoryIcon(iconName)}
+                      size={16}
+                      color={newCategoryIcon === iconName ? '#fff' : colors.inkMid}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity
+                style={[s.newCategorySaveBtn, (!newCategoryName.trim() || savingCategory) && s.btnDisabled]}
+                onPress={handleSaveCategory}
+                disabled={!newCategoryName.trim() || savingCategory}
+              >
+                {savingCategory
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={s.newCategorySaveBtnText}>{editingCategoryId ? a.save : a.createCategoryBtn}</Text>}
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </SafeAreaView>
       </Modal>
@@ -545,7 +763,8 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   },
   productEmoji: { fontSize: 26 },
   productName: { color: colors.ink, fontWeight: '700', fontSize: 16 },
-  productCat: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
+  productCatRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  productCat: { color: colors.inkSoft, fontSize: 12 },
   productPrice: { color: colors.primary, fontSize: 13, marginTop: 2, fontWeight: '600' },
 
   rulesList: { gap: 6 },
@@ -599,6 +818,77 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   },
   emojiBtnActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft, borderWidth: 1.5 },
   emojiChar: { fontSize: 22 },
+
+  categoryChipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
+  categoryChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 11, paddingVertical: 7,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  categoryChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  categoryChipText: { color: colors.inkMid, fontSize: 12.5, fontWeight: '600' },
+  categoryChipTextActive: { color: '#fff' },
+  categoryChipAdd: {
+    width: 30, height: 30, borderRadius: 15,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.primarySoft,
+    borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  categoryHint: { color: colors.inkFaint, fontSize: 11, marginTop: 6 },
+
+  actionRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 14 },
+  actionBtnPrimary: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: colors.success, borderRadius: radius.md, paddingVertical: 13,
+    ...shadows.primaryBtn,
+  },
+  actionBtnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 13.5 },
+  actionBtnSecondary: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: 13,
+    ...shadows.primaryBtn,
+  },
+  actionBtnSecondaryText: { color: '#fff', fontWeight: '700', fontSize: 13.5 },
+
+  categoryManageRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: colors.bgDeep, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border,
+    paddingHorizontal: 12, paddingVertical: 10,
+  },
+  categoryManageIcon: {
+    width: 28, height: 28, borderRadius: radius.sm,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  categoryManageName: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 13.5 },
+  categoryManageAction: {
+    width: 30, height: 30, borderRadius: radius.sm,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  newCategoryBox: {
+    marginTop: 10, padding: 12, gap: 10,
+    backgroundColor: colors.bgDeep, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  newCategoryEditRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  newCategoryEditLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: '700' },
+  iconPickerGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  iconPickerBtn: {
+    width: 32, height: 32, borderRadius: radius.sm,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  iconPickerBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  newCategorySaveBtn: {
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.primary, borderRadius: radius.sm,
+    paddingVertical: 10,
+  },
+  newCategorySaveBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
   ruleCard: {
     backgroundColor: colors.surface,

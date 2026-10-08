@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import * as XLSX from 'xlsx'
 import { exportExcel } from '@/lib/excel'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import ProductIcon from '@/components/ProductIcon'
 
 interface ScanEvent {
   id: string
@@ -143,7 +144,9 @@ export default function ScanHistoryScreen() {
             return (
               <View style={s.row}>
                 <View style={[s.badge, isReward ? s.badgeReward : s.badgeScan]}>
-                  <Text style={s.badgeEmoji}>{isReward ? '🎁' : emoji}</Text>
+                  {isReward
+                    ? <Text style={s.badgeEmoji}>🎁</Text>
+                    : <ProductIcon emoji={emoji} size={22} color={colors.ink} textStyle={s.badgeEmoji} />}
                 </View>
                 <View style={s.rowBody}>
                   <Text style={s.clientName} numberOfLines={1}>{clientName}</Text>

@@ -11,6 +11,7 @@ import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { api, supabase } from '@/lib/supabase'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import ProductIcon from '@/components/ProductIcon'
 
 interface Product {
   id: string
@@ -61,6 +62,7 @@ export default function AdminScannerScreen() {
   const [result, setResult] = useState<{ rewarded: string[]; message: string } | null>(null)
 
   const [redeemLoading, setRedeemLoading] = useState(false)
+  const [redeemQty, setRedeemQty] = useState<Record<string, number>>({})
 
   useEffect(() => { loadProducts() }, [])
 
@@ -163,12 +165,13 @@ export default function AdminScannerScreen() {
     }
   }
 
-  async function handleRedeem(ruleId: string, ruleName: string) {
+  async function handleRedeem(ruleId: string, ruleName: string, quantity: number) {
     setRedeemLoading(true)
     try {
-      const data = await api.redeemReward(scannedQr, ruleId)
+      const data = await api.redeemReward(scannedQr, ruleId, quantity)
+      const title = (data.redeemed_count ?? quantity) > 1 ? `✅ ${ruleName} (×${data.redeemed_count ?? quantity})` : `✅ ${ruleName}`
       Alert.alert(
-        `✅ ${ruleName}`,
+        title,
         `${a.availableLabel}: ${data.remaining_rewards ?? 0}`
       )
       const { data: refreshed } = await supabase
@@ -177,6 +180,7 @@ export default function AdminScannerScreen() {
         .eq('qr_code', scannedQr)
         .single()
       if (refreshed) setCardInfo(refreshed as any)
+      setRedeemQty((prev) => ({ ...prev, [ruleId]: 1 }))
       setMode('cart')
     } catch (e: any) {
       Alert.alert('Error', e?.message ?? 'Redeem failed')
@@ -239,15 +243,33 @@ export default function AdminScannerScreen() {
             </View>
           ) : redeemableRules.map((r) => {
             const count = cardInfo?.loyalty_state?.[r.id]?.rewards ?? 0
+            const qty = Math.min(redeemQty[r.id] ?? 1, count)
             return (
               <View key={r.id} style={s.redeemRow}>
                 <View style={s.redeemInfo}>
                   <Text style={s.redeemName}>{r.name}</Text>
                   <Text style={s.redeemCount}>×{count} {a.availableLabel}</Text>
+                  {count > 1 && (
+                    <View style={s.redeemStepper}>
+                      <TouchableOpacity
+                        style={s.cartMinus}
+                        onPress={() => setRedeemQty((prev) => ({ ...prev, [r.id]: Math.max(1, qty - 1) }))}
+                      >
+                        <Ionicons name="remove" size={14} color={colors.danger} />
+                      </TouchableOpacity>
+                      <Text style={s.cartQty}>×{qty}</Text>
+                      <TouchableOpacity
+                        style={s.cartPlus}
+                        onPress={() => setRedeemQty((prev) => ({ ...prev, [r.id]: Math.min(count, qty + 1) }))}
+                      >
+                        <Ionicons name="add" size={14} color={colors.success} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
                 <TouchableOpacity
                   style={[s.redeemBtn, redeemLoading && s.btnDisabled]}
-                  onPress={() => handleRedeem(r.id, r.name)}
+                  onPress={() => handleRedeem(r.id, r.name, qty)}
                   disabled={redeemLoading}
                 >
                   <Ionicons name="gift" size={18} color="#fff" />
@@ -349,7 +371,7 @@ export default function AdminScannerScreen() {
                       style={[s.productCard, qty > 0 && s.productCardActive]}
                       onPress={() => addToCart(p)}
                     >
-                      <Text style={s.productEmoji}>{p.metadata?.emoji ?? '🛍️'}</Text>
+                      <ProductIcon emoji={p.metadata?.emoji} size={28} color={colors.ink} textStyle={s.productEmoji} />
                       <Text style={s.productName} numberOfLines={2}>{p.name}</Text>
                       {p.price != null && <Text style={s.productPrice}>{p.price.toFixed(2)} lei</Text>}
                       {qty > 0 && (
@@ -369,7 +391,7 @@ export default function AdminScannerScreen() {
                 <Text style={s.cartTitle}>{a.cartLabel}</Text>
                 {cart.map((item) => (
                   <View key={item.product.id} style={s.cartRow}>
-                    <Text style={s.cartEmoji}>{item.product.metadata?.emoji ?? '🛍️'}</Text>
+                    <ProductIcon emoji={item.product.metadata?.emoji} size={18} color={colors.ink} textStyle={s.cartEmoji} />
                     <Text style={s.cartName}>{item.product.name}</Text>
                     <TouchableOpacity style={s.cartMinus} onPress={() => removeFromCart(item.product.id)}>
                       <Ionicons name="remove" size={14} color={colors.danger} />
@@ -554,6 +576,7 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   redeemInfo: { flex: 1 },
   redeemName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
   redeemCount: { color: colors.primary, fontSize: 12, marginTop: 2, fontWeight: '600' },
+  redeemStepper: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   redeemBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: colors.primary, borderRadius: radius.sm,

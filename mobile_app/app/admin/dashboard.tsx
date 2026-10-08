@@ -10,6 +10,7 @@ import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
 import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import ProductIcon from '@/components/ProductIcon'
 
 interface Stats {
   totalCards: number
@@ -232,7 +233,7 @@ export default function AdminDashboardScreen() {
                       {(e as any).clients?.name ?? a.anonClient}
                     </Text>
                     <Text style={s.recentProduct} numberOfLines={1}>
-                      {(e as any).products?.metadata?.emoji ?? '🛍️'} {(e as any).products?.name ?? a.productDefault}
+                      <ProductIcon emoji={(e as any).products?.metadata?.emoji} size={13} /> {(e as any).products?.name ?? a.productDefault}
                       {e.reward_applied && ' · 🎁 ' + a.rewardLabel}
                     </Text>
                   </View>

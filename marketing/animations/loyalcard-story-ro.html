@@ -1,0 +1,673 @@
+<title>LoyalCard în mișcare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Libre+Caslon+Display&display=swap">
+<style>
+/* Layout: vertical 9:16 story player (720×1280 stage scaled to fit) beside a chapter index; stacks on phones */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --ink: #120B24; --ink-2: #1D1438; --violet: #7C3AED; --violet-d: #6D28D9; --lilac: #C4B5FD;
+  --cream: #FAF9F6; --amber: #F5B544; --mint: #6EE7B7; --paper: #F1E8D8; --stamp-ink: #8A2C3E;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 980px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 56px; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 780px) { .page { grid-template-columns: minmax(0, 390px) minmax(0, 1fr); align-items: start; } .head { grid-column: 1 / -1; } }
+.head { display: grid; gap: 8px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 6vw, 52px); line-height: 1.02; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.55; max-width: 62ch; }
+.side { display: grid; gap: 14px; min-width: 0; }
+.side h2 { margin: 0; font-size: 13px; font-family: var(--f-mono); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- player ---------- */
+.player { background: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 0 var(--line), 0 24px 60px -24px rgba(40, 16, 90, .45); width: 100%; max-width: 390px; justify-self: center; }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--ink); cursor: pointer; }
+#wrap:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--ink); color: var(--cream); font-family: var(--f-body); cursor: default; }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--cream); border-top: 1px solid rgba(196, 181, 253, .14); }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(196, 181, 253, .28); background: rgba(124, 58, 237, .22); color: var(--cream); display: grid; place-items: center; cursor: pointer; }
+.cbtn:hover { background: rgba(124, 58, 237, .4); }
+.cbtn:focus-visible, .scrub:focus-visible, .chap:focus-visible { outline: 2px solid var(--lilac); outline-offset: 2px; }
+.cbtn svg { width: 17px; height: 17px; }
+.time { flex: none; font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(250, 249, 246, .78); }
+.track { position: relative; flex: 1; min-width: 0; height: 38px; display: flex; align-items: center; }
+.scrub { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; margin: 0; cursor: pointer;
+  background: linear-gradient(90deg, var(--violet) 0 var(--p, 0%), rgba(250, 249, 246, .16) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); border: 3px solid var(--violet); }
+.scrub::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--cream); border: 3px solid var(--violet); }
+.ticks { position: absolute; inset: 0; pointer-events: none; }
+.ticks i { position: absolute; top: 50%; width: 2px; height: 12px; margin-top: -6px; background: rgba(250, 249, 246, .4); border-radius: 1px; }
+
+/* ---------- chapters ---------- */
+.chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.chap { width: 100%; display: grid; grid-template-columns: 46px 1fr; gap: 2px 12px; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; cursor: pointer; }
+.chap:hover { border-color: var(--accent); }
+.chap[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.chap .ct { grid-row: span 2; font-family: var(--f-mono); font-size: 13px; color: var(--accent); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.chap .cn { font-weight: 600; font-size: 15px; }
+.chap .cd { color: var(--muted); font-size: 13.5px; line-height: 1.45; min-width: 0; }
+.note { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+/* ---------- stage pieces ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; gap: 14px; }
+.col.c { align-items: center; text-align: center; }
+.w { display: inline-block; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+#g1 { width: 900px; height: 900px; left: -420px; top: -360px; background: radial-gradient(closest-side, rgba(124, 58, 237, .4), rgba(124, 58, 237, 0)); }
+#g2 { width: 1000px; height: 1000px; left: 80px; top: 640px; background: radial-gradient(closest-side, rgba(76, 29, 149, .58), rgba(76, 29, 149, 0)); }
+#grain { position: absolute; inset: 0; background-image: radial-gradient(rgba(196, 181, 253, .07) 1px, transparent 1.2px); background-size: 24px 24px; }
+
+.d-xl { font-family: var(--f-display); font-weight: 400; font-size: 78px; line-height: 1.02; letter-spacing: -.01em; text-wrap: balance; }
+.d-l { font-family: var(--f-display); font-weight: 400; font-size: 64px; line-height: 1.04; text-wrap: balance; }
+.d-m { font-family: var(--f-display); font-weight: 400; font-size: 58px; line-height: 1.05; text-wrap: balance; }
+.body-l { font-size: 27px; line-height: 1.38; color: rgba(250, 249, 246, .76); text-wrap: balance; }
+.body-m { font-size: 24px; line-height: 1.38; color: rgba(250, 249, 246, .74); }
+.kicker { font-family: var(--f-mono); font-size: 16px; letter-spacing: .2em; text-transform: uppercase; color: var(--lilac); }
+.hl { color: var(--lilac); }
+
+/* logo tiles */
+.tiles { position: absolute; width: 268px; height: 268px; }
+.tile { position: absolute; width: 120px; height: 120px; }
+.tile svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* paper cards */
+.paper-wrap { position: absolute; width: 360px; height: 214px; }
+.paper { width: 100%; height: 100%; border-radius: 14px; background: var(--paper); color: #4A3426; padding: 20px 22px; box-sizing: border-box; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); display: grid; grid-template-rows: auto 1fr auto; gap: 10px;
+  background-image: radial-gradient(rgba(74, 52, 38, .06) 1px, transparent 1px); background-size: 5px 5px; }
+.paper-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.paper-name { font-family: var(--f-mono); font-weight: 500; font-size: 15px; letter-spacing: .16em; }
+.paper-kind { font-family: var(--f-display); font-size: 18px; }
+.paper-stamps { display: flex; gap: 10px; align-items: center; }
+.ps { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed rgba(74, 52, 38, .45); display: grid; place-items: center; box-sizing: border-box; }
+.ps.on { border: 2.5px solid var(--stamp-ink); color: var(--stamp-ink); opacity: .82; }
+.ps.on svg { width: 22px; height: 22px; }
+.paper-foot { font-family: var(--f-mono); font-size: 13px; color: rgba(74, 52, 38, .7); }
+
+/* phone */
+#phone { position: absolute; left: 210px; top: 455px; width: 300px; height: 600px; border-radius: 48px; background: #0B0716; padding: 10px; box-sizing: border-box; transform-origin: 50% 70%;
+  box-shadow: 0 0 0 1.5px rgba(196, 181, 253, .38), 0 40px 80px rgba(0, 0, 0, .55), 0 0 140px rgba(124, 58, 237, .3); }
+.screen { position: relative; width: 280px; height: 580px; border-radius: 38px; overflow: hidden; background: var(--cream); color: #1B1530; }
+.notch { position: absolute; left: 95px; top: 10px; width: 90px; height: 24px; border-radius: 12px; background: #0B0716; }
+.sbar { position: absolute; left: 26px; top: 13px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; }
+.url { position: absolute; left: 16px; top: 44px; width: 248px; height: 28px; border-radius: 14px; background: #ECE7F7; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-mono); font-size: 12px; color: #4B4166; }
+.url svg { width: 11px; height: 11px; }
+.shop { position: absolute; left: 12px; top: 82px; width: 256px; height: 76px; border-radius: 18px; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: var(--cream); }
+.shop .ico { position: absolute; left: 14px; top: 16px; width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, #FBBF24, #F97316); display: grid; place-items: center; }
+.shop .ico svg { width: 24px; height: 24px; }
+.shop .nm { position: absolute; left: 70px; top: 17px; font-weight: 600; font-size: 17px; }
+.shop .kd { position: absolute; left: 70px; top: 41px; font-size: 13px; color: #DDD6FE; }
+.p-muted { color: #6B6380; }
+.gen-btn { position: absolute; left: 24px; top: 268px; width: 232px; height: 58px; border-radius: 16px; background: linear-gradient(90deg, #8B5CF6, #6D28D9); color: var(--cream); display: grid; place-items: center; text-align: center; font-weight: 600; font-size: 14px; line-height: 1.25; padding: 0 16px; box-sizing: border-box; box-shadow: 0 10px 22px rgba(109, 40, 217, .35); }
+#tap { position: absolute; left: 110px; top: 267px; width: 60px; height: 60px; border-radius: 50%; background: rgba(250, 249, 246, .55); border: 2px solid rgba(250, 249, 246, .9); }
+.qr-box { position: absolute; left: 50px; top: 204px; width: 180px; height: 180px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #E4DEF2; display: grid; place-items: center; }
+.qr-box svg { width: 152px; height: 152px; display: block; }
+#beam { position: absolute; left: 40px; top: 204px; width: 200px; height: 4px; border-radius: 2px; background: #8B5CF6; box-shadow: 0 0 14px 4px rgba(139, 92, 246, .65); }
+.stamps { position: absolute; left: 18px; top: 448px; display: flex; gap: 8px; }
+.st { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 2px dashed #CFC6E6; box-sizing: border-box; }
+.st-fill { position: absolute; inset: -2px; border-radius: 50%; background: linear-gradient(135deg, #A78BFA, #6D28D9); display: grid; place-items: center; box-shadow: 0 4px 10px rgba(109, 40, 217, .35); }
+.st-fill svg { width: 18px; height: 18px; }
+.st-ring { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--amber); box-sizing: border-box; }
+#count { position: absolute; left: 0; width: 280px; top: 492px; text-align: center; font-family: var(--f-mono); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+#plus1 { position: absolute; left: 206px; top: 486px; padding: 3px 9px; border-radius: 10px; background: var(--amber); color: #3B2300; font-family: var(--f-mono); font-size: 12px; font-weight: 500; }
+#toast { position: absolute; left: 40px; top: 164px; width: 200px; height: 32px; border-radius: 16px; background: #DDF7EC; color: #0B6B47; display: grid; place-items: center; font-size: 13px; font-weight: 600; box-shadow: 0 6px 16px rgba(11, 107, 71, .18); }
+#reward { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 35%, #8B5CF6, #4C1D95 70%); color: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 0 24px; }
+#reward .gift { width: 84px; height: 84px; border-radius: 26px; background: linear-gradient(135deg, #FBBF24, #F97316); display: grid; place-items: center; box-shadow: 0 14px 30px rgba(249, 115, 22, .4); }
+#reward .gift svg { width: 44px; height: 44px; }
+#reward .won { font-weight: 700; font-size: 23px; letter-spacing: .04em; }
+#reward .what { font-family: var(--f-display); font-size: 34px; color: #FDE68A; }
+#reward .how { font-size: 14px; line-height: 1.45; color: rgba(250, 249, 246, .8); }
+
+/* floating chips around the phone */
+.fchip { position: absolute; max-width: 186px; padding: 12px 16px; box-sizing: border-box; border-radius: 14px; border: 1px solid rgba(196, 181, 253, .4); background: rgba(29, 20, 56, .78); font-size: 18px; line-height: 1.3; text-align: center; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+.fchip.amb { border-color: rgba(245, 181, 68, .55); color: var(--amber); }
+
+/* till */
+#till { position: absolute; left: 258px; top: 420px; width: 444px; height: 600px; border-radius: 26px; background: var(--ink-2); border: 1px solid rgba(196, 181, 253, .22); box-shadow: 0 30px 70px rgba(0, 0, 0, .45); }
+.till-h { position: absolute; left: 22px; top: 22px; font-weight: 600; font-size: 18px; }
+.till-h span { color: rgba(250, 249, 246, .55); font-weight: 400; }
+.chip { position: absolute; right: 20px; top: 20px; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(196, 181, 253, .35); font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em; color: var(--lilac); }
+.vf { position: absolute; left: 122px; top: 64px; width: 200px; height: 200px; border-radius: 18px; background: #0D0820; overflow: hidden; }
+.vf .corner { position: absolute; width: 28px; height: 28px; border: 3px solid var(--lilac); }
+.vf .c1 { left: 12px; top: 12px; border-right: 0; border-bottom: 0; border-radius: 8px 0 0 0; }
+.vf .c2 { right: 12px; top: 12px; border-left: 0; border-bottom: 0; border-radius: 0 8px 0 0; }
+.vf .c3 { left: 12px; bottom: 12px; border-right: 0; border-top: 0; border-radius: 0 0 0 8px; }
+.vf .c4 { right: 12px; bottom: 12px; border-left: 0; border-top: 0; border-radius: 0 0 8px 0; }
+#miniqr { position: absolute; left: 40px; top: 40px; width: 120px; height: 120px; background: #fff; border-radius: 8px; display: grid; place-items: center; }
+#miniqr svg { width: 104px; height: 104px; }
+#vfbeam { position: absolute; left: 24px; top: 30px; width: 152px; height: 3px; background: var(--mint); box-shadow: 0 0 12px 3px rgba(110, 231, 183, .6); }
+#detected { position: absolute; left: 0; width: 444px; text-align: center; top: 278px; font-family: var(--f-mono); font-size: 14px; color: var(--mint); }
+.plist { position: absolute; left: 22px; top: 318px; width: 400px; display: grid; gap: 8px; }
+.plab { font-family: var(--f-mono); font-size: 12px; letter-spacing: .16em; color: rgba(250, 249, 246, .55); margin-bottom: 2px; }
+.prow { position: relative; height: 46px; border-radius: 12px; background: rgba(250, 249, 246, .05); border: 1px solid rgba(250, 249, 246, .08); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 19px; font-weight: 500; }
+.prow > span { position: relative; }
+.prow .pr { font-family: var(--f-mono); font-size: 15px; color: rgba(250, 249, 246, .72); }
+#sel { position: absolute; inset: -1px; border-radius: 12px; border: 1.5px solid var(--lilac); background: rgba(124, 58, 237, .32); }
+#selck { position: absolute; right: 92px; top: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; }
+#selck svg { width: 13px; height: 13px; }
+#tbtn { position: absolute; left: 22px; top: 520px; width: 400px; height: 58px; border-radius: 14px; background: linear-gradient(90deg, #8B5CF6, #6D28D9); display: grid; place-items: center; font-weight: 600; font-size: 19px; overflow: hidden; }
+#tbtnB { color: #0B3B2A; background: var(--mint); position: absolute; inset: 0; display: grid; place-items: center; }
+
+/* step 3 */
+#rule { padding: 14px 20px; box-sizing: border-box; border-radius: 18px; background: rgba(245, 181, 68, .1); border: 1px solid rgba(245, 181, 68, .4); display: grid; gap: 4px; margin-top: 6px; }
+#rule .kicker { color: var(--amber); font-size: 13px; }
+#rule .rt { font-size: 23px; font-weight: 600; }
+.day { position: absolute; width: 104px; height: 62px; border-radius: 14px; border: 1px solid rgba(196, 181, 253, .35); background: rgba(29, 20, 56, .8); display: grid; place-items: center; align-content: center; gap: 2px; box-shadow: 0 10px 24px rgba(0, 0, 0, .3); }
+.day b { font-family: var(--f-mono); font-weight: 500; font-size: 15px; letter-spacing: .14em; color: var(--lilac); }
+.day i { font-style: normal; font-size: 13px; color: rgba(250, 249, 246, .78); }
+.pt { position: absolute; left: 354px; top: 749px; width: 12px; height: 12px; border-radius: 50%; }
+.pt.star { width: 18px; height: 18px; border-radius: 0; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+
+/* results */
+.legend { display: flex; gap: 22px; font-size: 17px; color: rgba(250, 249, 246, .72); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 22px; height: 10px; border-radius: 5px; display: inline-block; }
+.row { position: absolute; left: 48px; width: 624px; height: 130px; }
+.row .lab { position: absolute; left: 0; top: 0; font-weight: 600; font-size: 24px; }
+.row .src { position: absolute; left: 0; top: 36px; font-family: var(--f-mono); font-size: 13px; color: rgba(250, 249, 246, .52); }
+.bar0 { position: absolute; left: 0; top: 74px; height: 12px; border-radius: 6px; background: rgba(250, 249, 246, .22); transform-origin: 0 50%; }
+.v0 { position: absolute; top: 70px; font-family: var(--f-mono); font-size: 14px; color: rgba(250, 249, 246, .58); }
+.bar1 { position: absolute; left: 0; top: 94px; height: 32px; border-radius: 9px; background: linear-gradient(90deg, #6D28D9, #A78BFA); transform-origin: 0 50%; }
+.v1 { position: absolute; left: 0; top: 101px; font-family: var(--f-mono); font-size: 14px; font-weight: 500; color: var(--cream); text-align: right; }
+.delta { position: absolute; right: 0; top: 0; font-family: var(--f-display); font-size: 56px; line-height: 1; color: var(--amber); font-variant-numeric: tabular-nums; }
+
+/* for whom */
+.who { position: absolute; left: 40px; width: 640px; height: 350px; border-radius: 26px; background: rgba(250, 249, 246, .05); border: 1px solid rgba(196, 181, 253, .22); padding: 26px 30px; box-sizing: border-box; }
+.who-h { display: flex; align-items: center; gap: 14px; }
+.who-ic { width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); display: grid; place-items: center; flex: none; }
+.who-ic svg { width: 26px; height: 26px; }
+.who-t { font-weight: 700; font-size: 27px; }
+.who-s { margin-top: 12px; font-size: 18px; line-height: 1.4; color: rgba(250, 249, 246, .68); }
+.who ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+.who li { display: flex; align-items: center; gap: 12px; font-size: 18px; line-height: 1.25; }
+.ck { width: 30px; height: 30px; border-radius: 50%; background: rgba(110, 231, 183, .16); display: grid; place-items: center; flex: none; }
+.ck svg { width: 16px; height: 16px; }
+.ck path { stroke-dasharray: 24; }
+
+/* outro */
+.stats { display: flex; justify-content: center; gap: 56px; margin-top: 18px; }
+.stat { text-align: center; display: grid; gap: 6px; }
+.stat b { font-family: var(--f-display); font-weight: 400; font-size: 58px; line-height: 1; }
+.stat span { font-family: var(--f-mono); font-size: 15px; letter-spacing: .16em; text-transform: uppercase; color: var(--lilac); }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 26px; color: var(--cream); padding: 14px 26px; border-radius: 16px; background: var(--violet-d); box-shadow: 0 12px 30px rgba(109, 40, 217, .45); margin-top: 30px; }
+
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(18, 11, 36, .62); border: 2px solid rgba(196, 181, 253, .5); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8zM7 2.5v2.5M10.5 2.5v2.5M14 2.5v2.5"/></symbol>
+    <symbol id="star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+    <symbol id="check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">loyalcard.net · story 9:16</div>
+    <h1>LoyalCard în mișcare</h1>
+    <p class="lede">Prezentare animată de 46 de secunde, în format vertical pentru Instagram Stories, cu textele de pe loyalcard.net: cardul pe telefon, scanarea la casă, premiul și rezultatele.</p>
+  </header>
+
+  <section class="player" aria-label="Video LoyalCard">
+    <div id="wrap" role="img" aria-label="Animație: prezentarea LoyalCard">
+      <div id="stage">
+        <div class="glow" id="g1"></div>
+        <div class="glow" id="g2"></div>
+        <div id="grain"></div>
+
+        <!-- A · intro -->
+        <div class="scene" id="sA">
+          <div class="tiles" id="tilesA" style="left:226px;top:360px">
+            <div class="tile" style="left:0;top:0"><svg viewBox="104 104 136 136"><use href="#gL"/></svg></div>
+            <div class="tile" style="left:148px;top:0"><svg viewBox="272 104 136 136"><use href="#gP"/></svg></div>
+            <div class="tile" style="left:0;top:148px"><svg viewBox="104 272 136 136"><use href="#gQ"/></svg></div>
+            <div class="tile" style="left:148px;top:148px"><svg viewBox="272 272 136 136"><use href="#gC"/></svg></div>
+          </div>
+          <div class="abs" id="wordA" style="left:0;width:720px;text-align:center;top:352px;font-size:32px;font-weight:600;letter-spacing:.02em">LoyalCard</div>
+          <div class="col c" style="top:430px;gap:34px">
+            <div class="d-xl" id="h1a">Cardul tău de fidelitate<br><span class="hl">întotdeauna</span> <span class="hl">cu</span> <span class="hl">tine</span></div>
+            <div class="body-l" id="subA" style="max-width:580px">Acumulează timbre, câștigă recompense. Fără card fizic, fără descărcare de aplicație.</div>
+          </div>
+        </div>
+
+        <!-- B · problem -->
+        <div class="scene" id="sB">
+          <div class="paper-wrap" id="pc1" style="left:150px;top:196px"><div class="paper" style="rotate:-9deg">
+            <div class="paper-top"><span class="paper-name">BISTRO VERDE</span><span class="paper-kind">card de fidelitate</span></div>
+            <div class="paper-stamps"><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps"></span><span class="ps"></span><span class="ps"></span></div>
+            <div class="paper-foot">Nume ____________</div></div></div>
+          <div class="paper-wrap" id="pc2" style="left:214px;top:330px"><div class="paper" style="rotate:6deg">
+            <div class="paper-top"><span class="paper-name">STYLE SALON</span><span class="paper-kind">card de fidelitate</span></div>
+            <div class="paper-stamps"><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps"></span></div>
+            <div class="paper-foot">Nume ____________</div></div></div>
+          <div class="paper-wrap" id="pc3" style="left:170px;top:460px"><div class="paper" style="rotate:-3deg">
+            <div class="paper-top"><span class="paper-name">CAFÉ CENTRAL</span><span class="paper-kind">card de fidelitate</span></div>
+            <div class="paper-stamps"><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps"></span><span class="ps"></span></div>
+            <div class="paper-foot">Nume ____________</div></div></div>
+          <div class="col c" id="bT1" style="top:760px">
+            <div class="d-l" id="bH1">Carduri de hârtie?</div>
+            <div class="body-l" id="bP1">Se pierd, se rup, rămân acasă.</div>
+          </div>
+          <div class="col c" id="bT2" style="top:196px">
+            <div class="d-l" id="bH2">Acum totul e <span class="hl">pe</span> <span class="hl">telefon.</span></div>
+            <div class="body-l" id="bP2">Fără card fizic. Fără aplicație de descărcat.</div>
+          </div>
+        </div>
+
+        <!-- C · step 1 -->
+        <div class="scene" id="sC">
+          <div class="col c" style="top:180px;gap:12px">
+            <div class="kicker" id="cK">Pasul 1 din 3</div>
+            <div class="d-l" id="cH">Obține cardul tău digital</div>
+            <div class="body-l" id="cP">Generare instant, fără înregistrare.</div>
+          </div>
+          <div class="fchip" id="cc1" style="left:524px;top:560px">Fără aplicație</div>
+          <div class="fchip" id="cc2" style="left:24px;top:690px">Fără cont</div>
+          <div class="fchip amb" id="cc3" style="left:524px;top:820px">Gratuit pentru clienți</div>
+        </div>
+
+        <!-- D · step 2 -->
+        <div class="scene" id="sD">
+          <div class="col c" style="top:180px;gap:12px">
+            <div class="kicker" id="dK">Pasul 2 din 3</div>
+            <div class="d-l" id="dH">Scanează la casă</div>
+            <div class="body-l" id="dP">Arată codul QR la fiecare achiziție.</div>
+          </div>
+          <div id="till">
+            <div class="till-h">Scanner <span>· Café Central</span></div>
+            <div class="chip">STAFF</div>
+            <div class="vf"><div id="miniqr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div><div id="vfbeam"></div>
+              <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i></div>
+            <div id="detected">✓ QR detectat</div>
+            <div class="plist">
+              <div class="plab">SELECTEAZĂ PRODUSUL</div>
+              <div class="prow"><div id="sel"></div><span>Espresso</span><span class="pr">9 lei</span><div id="selck"><svg style="color:#0B3B2A"><use href="#check"/></svg></div></div>
+              <div class="prow"><span>Cappuccino</span><span class="pr">12 lei</span></div>
+              <div class="prow"><span>Croissant</span><span class="pr">8 lei</span></div>
+            </div>
+            <div id="tbtn"><span id="tbtnA">Înregistrează achiziția</span><div id="tbtnB">✓ +1 ștampilă</div></div>
+          </div>
+        </div>
+
+        <!-- E · step 3 -->
+        <div class="scene" id="sE">
+          <div class="col" style="top:172px;gap:8px">
+            <div class="kicker" id="eK" style="text-align:center">Pasul 3 din 3</div>
+            <div class="d-l" id="eH" style="text-align:center">Colectează premii</div>
+            <div id="rule"><div class="kicker">Regulă premiu</div><div class="rt">Cumpără 6 cafele → al 7-lea este GRATUIT</div></div>
+          </div>
+          <div class="day" style="left:28px;top:560px"><b>MAR</b><i>+1 ștampilă</i></div>
+          <div class="day" style="left:588px;top:560px"><b>JOI</b><i>+1 ștampilă</i></div>
+          <div class="day" style="left:28px;top:660px"><b>SÂM</b><i>+1 ștampilă</i></div>
+          <div class="day" style="left:588px;top:660px"><b>LUN</b><i>+1 ștampilă</i></div>
+          <div class="fchip amb" id="almost" style="left:520px;top:790px;width:186px">Încă 1 cafea și câștigi premiul!</div>
+        </div>
+
+        <!-- phone (persists across B → E) -->
+        <div id="phone"><div class="screen">
+          <div class="notch"></div><div class="sbar">9:41</div>
+          <div class="url"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" d="M7 11V8a5 5 0 0110 0v3M5 11h14v10H5z"/></svg>loyalcard.net</div>
+          <div class="shop"><div class="ico"><svg style="color:#fff"><use href="#cup"/></svg></div><div class="nm">Café Central</div><div class="kd">Cafenea</div></div>
+          <div id="scr0">
+            <div class="abs p-muted" style="left:0;width:280px;text-align:center;top:224px;font-size:15px">Nu ai încă un card de fidelitate</div>
+            <div class="gen-btn" id="genBtn">Generează Cardul de Fidelitate</div>
+            <div class="abs p-muted" style="left:0;width:280px;text-align:center;top:344px;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em">FĂRĂ ÎNREGISTRARE</div>
+            <div id="tap"></div>
+          </div>
+          <div id="scr1">
+            <div class="abs" id="qrT" style="left:0;width:280px;text-align:center;top:174px;font-weight:600;font-size:15px">Codul tău QR</div>
+            <div class="qr-box" id="qrBox"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div>
+            <div id="beam"></div>
+            <div class="abs p-muted" id="qrCap" style="left:30px;width:220px;text-align:center;top:396px;font-size:12.5px;line-height:1.4">Arată acest cod la casă pentru a acumula premii</div>
+            <div class="stamps" id="stamps"></div>
+            <div id="count">0 / 6 ștampile</div>
+            <div id="plus1">+1</div>
+            <div class="abs" id="qrRule" style="left:0;width:280px;text-align:center;top:518px;font-size:12px;color:#9A5B00;font-weight:600">Cumpără 6 cafele → al 7-lea este GRATUIT</div>
+          </div>
+          <div id="toast">✓ Scanare reușită</div>
+          <div id="reward">
+            <div class="gift"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg></div>
+            <div class="won">PREMIU CÂȘTIGAT!</div>
+            <div class="what">Cafea gratuită</div>
+            <div class="how">Arată cardul la casă pentru a-l valorifica</div>
+          </div>
+        </div></div>
+
+        <div class="scene" id="fx" style="pointer-events:none"></div>
+
+        <!-- F · results -->
+        <div class="scene" id="sF">
+          <div class="col" style="top:180px;left:48px;width:624px;gap:10px">
+            <div class="d-l" id="fH">Rezultate dovedite</div>
+            <div class="body-m" id="fP">Date reale din cercetări de industrie</div>
+            <div class="legend" id="fL"><span><i style="background:rgba(250,249,246,.25)"></i>Fără loialitate</span><span><i style="background:linear-gradient(90deg,#6D28D9,#A78BFA)"></i>Cu LoyalCard</span></div>
+          </div>
+          <div id="rows"></div>
+        </div>
+
+        <!-- G · for whom -->
+        <div class="scene" id="sG">
+          <div class="col c" style="top:180px">
+            <div class="d-m" id="gH">Pentru cine este LoyalCard?</div>
+          </div>
+          <div class="who" id="whoB" style="top:330px">
+            <div class="who-h"><div class="who-ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round" d="M3 9l1.5-5h15L21 9M3 9h18M3 9c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3M5 12v9h14v-9M10 21v-5h4v5"/></svg></div><div class="who-t">Pentru Afaceri</div></div>
+            <div class="who-s">Fidelizează clienții fără carduri fizice, aplicații sau costuri ridicate</div>
+            <ul><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Fără carduri fizice de printat</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Fără aplicație de descărcat</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Dashboard cu analize în timp real</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Funcționează cu orice smartphone</li></ul>
+          </div>
+          <div class="who" id="whoC" style="top:700px">
+            <div class="who-h"><div class="who-ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8.5 2.5h7A1.5 1.5 0 0117 4v16a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 017 20V4a1.5 1.5 0 011.5-1.5zM11 18.5h2"/></svg></div><div class="who-t">Pentru Clienți</div></div>
+            <div class="who-s">Acumulează puncte cu telefonul, fără să descarci nimic</div>
+            <ul><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Fără înregistrare necesară</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Toate cardurile într-un singur loc</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Nu îți mai pierzi punctele</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Funcționează și offline</li></ul>
+          </div>
+        </div>
+
+        <!-- H · outro -->
+        <div class="scene" id="sH">
+          <div class="tiles" id="tilesH" style="left:226px;top:190px;scale:.72;transform-origin:50% 0">
+            <div class="tile" style="left:0;top:0"><svg viewBox="104 104 136 136"><use href="#gL"/></svg></div>
+            <div class="tile" style="left:148px;top:0"><svg viewBox="272 104 136 136"><use href="#gP"/></svg></div>
+            <div class="tile" style="left:0;top:148px"><svg viewBox="104 272 136 136"><use href="#gQ"/></svg></div>
+            <div class="tile" style="left:148px;top:148px"><svg viewBox="272 272 136 136"><use href="#gC"/></svg></div>
+          </div>
+          <div class="col c" style="top:420px;gap:16px">
+            <div class="d-xl" id="hN" style="font-size:104px">LoyalCard</div>
+            <div class="body-l" id="hT">Fidelizare digitală simplificată.</div>
+            <div class="stats" id="hS"><div class="stat"><b>100%</b><span>Digital</span></div><div class="stat"><b>∞</b><span>Premii</span></div><div class="stat"><b>0€</b><span>Gratuit</span></div></div>
+            <div id="urlpill">loyalcard.net</div>
+            <div class="body-m" id="hC">Începe gratuit cu planul Starter</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FAF9F6" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <button class="cbtn" id="rs" type="button" aria-label="De la început"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 108-8 8.4 8.4 0 00-5.6 2.3L4 8.5M4 3.5v5h5"/></svg></button>
+      <div class="track"><input class="scrub" id="scrub" type="range" min="0" max="46000" step="10" value="0" aria-label="Poziția în video"><div class="ticks" id="ticks"></div></div>
+      <div class="time" id="time">0:00 / 0:46</div>
+      <button class="cbtn" id="fs" type="button" aria-label="Ecran complet"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+  </section>
+
+  <aside class="side">
+    <h2>Capitole</h2>
+    <ol class="chapters" id="chapters"></ol>
+    <p class="note">Texte, exemple și date luate de pe loyalcard.net (secțiunile „Cum funcționează”, „Rezultate dovedite” și „Pentru cine este LoyalCard?”). Sursele procentelor sunt cele citate pe site. Zona de sus și cea de jos sunt lăsate libere pentru interfața Instagram. Space pune pauză, săgețile mută cu 5 secunde.</p>
+  </aside>
+</main>
+
+<script>
+(() => {
+  const D = 46;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+
+  // Every effect is a paused Web Animation on one shared clock, so the timeline can be scrubbed both ways.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => {
+    const { dx = 0, dy = 28, s = 1, r = 0, d = .7, e = OUT } = o;
+    return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e);
+  };
+  const exit = (el, t, o = {}) => {
+    const { dx = 0, dy = -18, d = .45, e = IN } = o;
+    return A(el, [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: `${dx}px ${dy}px` }], t, d, e);
+  };
+  const scene = (el, start, end) => {
+    A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear');
+    A(el, [{ opacity: 1 }, { opacity: 0 }], end - .45, .45, IN);
+  };
+  const words = el => {
+    const out = [];
+    [...el.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); });
+        el.replaceChild(frag, n);
+      } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); }
+    });
+    return out;
+  };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  // ---------- fake but well-formed QR pattern ----------
+  function qrPath(n = 25, seed = 20241) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`;
+    return d;
+  }
+  const qd = qrPath(); $$('.qrp').forEach(p => p.setAttribute('d', qd));
+
+  // ---------- background ----------
+  A($('#g1'), [{ translate: '0px 0px' }, { translate: '360px 420px' }, { translate: '140px 760px' }], 0, D, 'linear');
+  A($('#g2'), [{ translate: '0px 0px' }, { translate: '-300px -520px' }, { translate: '-60px -200px' }], 0, D, 'linear');
+  const CH = [
+    [0, 'Intro', 'Cardul tău de fidelitate, întotdeauna cu tine'],
+    [5.1, 'Problema', 'Cardurile de hârtie se pierd și rămân acasă'],
+    [10.6, 'Pasul 1', 'Obține cardul digital, fără înregistrare'],
+    [16.3, 'Pasul 2', 'Scanarea codului QR și ștampila la casă'],
+    [22.7, 'Pasul 3', 'Șase cafele, a șaptea e gratuită'],
+    [29.6, 'Rezultate', '+27% retenție, +60% vizite recurente'],
+    [35.9, 'Pentru cine', 'Afaceri și clienți'],
+    [41.3, 'Final', 'loyalcard.net, începi gratuit']
+  ];
+  let lastChap = -1;
+  hooks.push(t => { let i = 0; CH.forEach((c, k) => { if (t >= c[0]) i = k; }); if (i !== lastChap) { lastChap = i; markChapter(i); } });
+
+  // ---------- A · intro (0 → 5.2) ----------
+  scene($('#sA'), 0, 5.2);
+  const scatter = [[-170, -150, -16], [170, -190, 14], [-160, 200, 11], [180, 170, -9]];
+  $$('#tilesA .tile').forEach((el, i) => { const [x, y, r] = scatter[i]; A(el, [{ translate: `${x}px ${y}px`, rotate: `${r}deg`, scale: '.86' }, { translate: '0px 0px', rotate: '0deg', scale: '1' }], .2 + i * .08, 1.05, BACK); });
+  A($('#tilesA'), [{ translate: '0px 0px', scale: '1' }, { translate: '0px -226px', scale: '.5' }], 1.55, .8, IO);
+  enter($('#wordA'), 1.9, { dy: 14, d: .6 });
+  stagger(words($('#h1a')), 2.15, .08, { dy: 46, d: .8 });
+  enter($('#subA'), 3.05, { dy: 20, d: .8 });
+
+  // ---------- B · problem (5.1 → 10.8) ----------
+  scene($('#sB'), 5.1, 10.8);
+  [['#pc1', -12, 5.3], ['#pc2', 9, 5.45], ['#pc3', -6, 5.6]].forEach(([s, r, t]) => enter($(s), t, { dy: -700, r, d: .85, e: BACK }));
+  enter($('#bH1'), 5.75, { dy: 30 }); enter($('#bP1'), 6.15, { dy: 20 });
+  [['#pc3', 7.35, 18], ['#pc2', 7.5, -14], ['#pc1', 7.62, 22]].forEach(([s, t, r]) => A($(s), [{ translate: '0px 0px', rotate: '0deg', opacity: 1 }, { translate: '0px 1300px', rotate: `${r}deg`, opacity: 0 }], t, .85, IN));
+  exit($('#bT1'), 7.35, { dy: 40 });
+  stagger(words($('#bH2')), 8.0, .07, { dy: 34 }); enter($('#bP2'), 8.5, { dy: 20 });
+
+  // ---------- phone (8.0 → 29.8) ----------
+  const phone = $('#phone');
+  enter(phone, 8.0, { dy: 700, d: 1.05 });
+  A(phone, [{ translate: '0px 0px', scale: '1' }, { translate: '-229px -124px', scale: '.74' }], 16.45, .75, IO);
+  A(phone, [{ translate: '-229px -124px', scale: '.74' }, { translate: '0px 0px', scale: '1' }], 22.45, .7, IO);
+  A(phone, [{ scale: '1' }, { scale: '1.05', offset: .35 }, { scale: '1' }], 26.75, .8, OUT);
+  A(phone, [{ translate: '0px 0px', opacity: 1 }, { translate: '0px 260px', opacity: 0 }], 29.2, .6, IN);
+
+  // ---------- C · step 1 (10.6 → 16.4) ----------
+  scene($('#sC'), 10.6, 16.4);
+  enter($('#cK'), 10.75, { dy: 12 }); stagger(words($('#cH')), 10.85, .06, { dy: 36 }); enter($('#cP'), 11.5, { dy: 18 });
+  [['#cc1', 40], ['#cc2', -40], ['#cc3', 40]].forEach(([s, dx], i) => enter($(s), 13.2 + i * .22, { dx, dy: 0, s: .9, e: BACK, d: .6 }));
+  A($('#tap'), [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '.6', offset: .2 }, { opacity: 0, scale: '2.4' }], 11.25, .7, OUT);
+  A($('#genBtn'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], 11.25, .4, IO);
+  A($('#scr0'), [{ opacity: 1 }, { opacity: 0 }], 11.6, .3, 'linear');
+  A($('#scr1'), [{ opacity: 0 }, { opacity: 1 }], 11.7, .3, 'linear');
+  enter($('#qrT'), 11.75, { dy: 8, d: .4 });
+  A($('#qrBox'), [{ clipPath: 'inset(0 0 100% 0 round 16px)' }, { clipPath: 'inset(0 0 0% 0 round 16px)' }], 11.85, 1.0, IO);
+  enter($('#qrCap'), 12.6, { dy: 10, d: .5 });
+  const stampsEl = $('#stamps'); const stampTimes = [20.0, 23.8, 24.3, 24.8, 25.3, 26.6];
+  stampTimes.forEach(() => { const st = document.createElement('div'); st.className = 'st'; st.innerHTML = '<div class="st-ring"></div><div class="st-fill"><svg style="color:#fff"><use href="#cup"/></svg></div>'; stampsEl.appendChild(st); });
+  $$('.st', stampsEl).forEach((st, i) => enter(st, 12.75 + i * .06, { dy: 10, s: .6, d: .45, e: BACK }));
+  enter($('#count'), 13.0, { dy: 8, d: .4 }); enter($('#qrRule'), 13.15, { dy: 8, d: .4 });
+  $$('.st-fill', stampsEl).forEach((f, i) => A(f, [{ scale: '0', opacity: 0 }, { scale: '1', opacity: 1 }], stampTimes[i], .55, BACK));
+  $$('.st-ring', stampsEl).forEach((r, i) => A(r, [{ scale: '1', opacity: 0 }, { scale: '1', opacity: .95, offset: .1 }, { scale: '2', opacity: 0 }], stampTimes[i] + .05, .7, OUT));
+  const countEl = $('#count'); let lastN = -1;
+  hooks.push(t => { const n = stampTimes.filter(x => t >= x).length; if (n !== lastN) { countEl.textContent = `${n} / 6 ${n === 1 ? 'ștampilă' : 'ștampile'}`; lastN = n; } });
+
+  // ---------- D · step 2 (16.3 → 22.8) ----------
+  scene($('#sD'), 16.3, 22.8);
+  enter($('#dK'), 16.45, { dy: 12 }); stagger(words($('#dH')), 16.55, .06, { dy: 30 }); enter($('#dP'), 17.0, { dy: 16 });
+  enter($('#till'), 16.7, { dx: 80, dy: 0, d: .8 });
+  A($('#beam'), [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 10px', offset: .1 }, { opacity: 1, translate: '0px 170px', offset: .9 }, { opacity: 0, translate: '0px 178px' }], 17.5, 1.0, 'linear');
+  A($('#vfbeam'), [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 6px', offset: .1 }, { opacity: 1, translate: '0px 132px', offset: .9 }, { opacity: 0, translate: '0px 138px' }], 17.5, 1.0, 'linear');
+  enter($('#miniqr'), 17.55, { dy: 0, s: .85, d: .5 });
+  enter($('#detected'), 18.45, { dy: 6, d: .35 });
+  const toast = $('#toast');
+  enter(toast, 18.5, { dy: -12, s: .9, d: .4, e: BACK }); exit(toast, 19.9, { dy: -10, d: .3 });
+  enter($('#sel'), 18.95, { dy: 0, s: .97, d: .35 });
+  enter($('#selck'), 19.1, { dy: 0, s: .4, d: .4, e: BACK });
+  A($('#tbtn'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], 19.5, .4, IO);
+  A($('#tbtnB'), [{ opacity: 0, translate: '0px 58px' }, { opacity: 1, translate: '0px 0px' }], 19.75, .4, OUT);
+  A($('#plus1'), [{ opacity: 0, translate: '0px 6px', scale: '.6' }, { opacity: 1, translate: '0px -14px', scale: '1.2', offset: .3 }, { opacity: 1, translate: '0px -20px', scale: '1.2', offset: .75 }, { opacity: 0, translate: '0px -30px', scale: '1' }], 20.05, 1.0, OUT);
+
+  // ---------- E · step 3 (22.7 → 29.7) ----------
+  scene($('#sE'), 22.7, 29.7);
+  enter($('#eK'), 22.85, { dy: 12 }); stagger(words($('#eH')), 22.95, .07, { dy: 34 });
+  enter($('#rule'), 23.35, { dy: 22 });
+  $$('.day').forEach((el, i) => enter(el, stampTimes[i + 1] - .05, { dx: i % 2 ? 30 : -30, dy: 0, s: .9, d: .45, e: BACK }));
+  enter($('#almost'), 25.7, { dx: 30, dy: 0, d: .5, e: BACK });
+  A($('#almost'), [{ opacity: 1 }, { opacity: .3 }], 26.6, .4, 'linear');
+  enter($('#reward'), 27.0, { dy: 0, s: .92, d: .55, e: BACK });
+  stagger($$('#reward > *'), 27.1, .1, { dy: 16, d: .5 });
+  const fx = $('#fx'); const cols = ['#F5B544', '#C4B5FD', '#FAF9F6', '#FDE68A', '#A78BFA'];
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('div'); p.className = 'pt' + (i % 3 === 0 ? ' star' : ''); p.style.background = cols[i % cols.length]; fx.appendChild(p);
+    const ang = (i / 24) * Math.PI * 2 + (i % 2 ? .12 : -.08), dist = 250 + (i * 37) % 120;
+    A(p, [{ opacity: 0, translate: '0px 0px', scale: '.3' }, { opacity: 1, offset: .12 }, { opacity: 0, translate: `${Math.cos(ang) * dist * .9}px ${Math.sin(ang) * dist * 1.1}px`, scale: '1.2' }], 27.0 + (i % 4) * .03, 1.3, OUT);
+  }
+
+  // ---------- F · results (29.6 → 36.0) ----------
+  scene($('#sF'), 29.6, 36.0);
+  enter($('#fH'), 29.8, { dy: 24 }); enter($('#fP'), 30.05, { dy: 14 }); enter($('#fL'), 30.2, { dy: 10 });
+  const STATS = [
+    ['Retenție clienți', 'Accenture 2020', 127, '100', '127 clienți'],
+    ['Vizite recurente', 'Bond Brand Loyalty 2023', 160, '100', '160 vizite'],
+    ['Venituri per client', 'Harvard Business Review', 125, '€100', '€125'],
+    ['Valoare pe viață client', 'Bain & Company', 130, '€100', '€130']
+  ];
+  const PX = 3.9; // px per unit, same scale for every bar
+  const rowsEl = $('#rows');
+  STATS.forEach(([lab, src, v, b0, b1], i) => {
+    const row = document.createElement('div'); row.className = 'row'; row.style.top = `${374 + i * 168}px`;
+    const w0 = 100 * PX, w1 = v * PX;
+    row.innerHTML = `<div class="lab">${lab}</div><div class="src">Sursa: ${src}</div>
+      <div class="bar0" style="width:${w0}px"></div><div class="v0" style="left:${w0 + 10}px">${b0}</div>
+      <div class="bar1" style="width:${w1}px"></div><div class="v1" style="width:${w1 - 14}px">${b1}</div>
+      <div class="delta">+0%</div>`;
+    rowsEl.appendChild(row);
+    const t0 = 30.5 + i * .32;
+    enter(row, t0 - .15, { dy: 16, d: .5 });
+    A($('.bar0', row), [{ scale: '0 1' }, { scale: '1 1' }], t0, .6, OUT);
+    A($('.bar1', row), [{ scale: '0 1' }, { scale: '1 1' }], t0 + .2, 1.0, OUT);
+    A($('.v0', row), [{ opacity: 0 }, { opacity: 1 }], t0 + .5, .3, 'linear');
+    A($('.v1', row), [{ opacity: 0 }, { opacity: 1 }], t0 + 1.0, .3, 'linear');
+    const dEl = $('.delta', row); A(dEl, [{ opacity: 0, translate: '14px 0px' }, { opacity: 1, translate: '0px 0px' }], t0 + .3, .6, OUT);
+    let last = -1;
+    hooks.push(t => { const p = Math.min(1, Math.max(0, (t - t0 - .2) / 1.0)); const e = 1 - Math.pow(1 - p, 3); const n = Math.round((v - 100) * e); if (n !== last) { dEl.textContent = `+${n}%`; last = n; } });
+  });
+
+  // ---------- G · for whom (35.9 → 41.4) ----------
+  scene($('#sG'), 35.9, 41.4);
+  stagger(words($('#gH')), 36.05, .06, { dy: 30 });
+  enter($('#whoB'), 36.4, { dy: 40, d: .8 }); enter($('#whoC'), 36.6, { dy: 40, d: .8 });
+  [['#whoB', 37.0], ['#whoC', 37.3]].forEach(([s, t0]) => $$(`${s} li`).forEach((li, i) => {
+    const t = t0 + i * .3;
+    enter(li, t, { dx: -14, dy: 0, d: .45 });
+    A($('path', li), [{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], t + .15, .4, OUT);
+  }));
+
+  // ---------- H · outro (41.3 → 46) ----------
+  scene($('#sH'), 41.3, D + 1);
+  $$('#tilesH .tile').forEach((el, i) => enter(el, 41.45 + i * .08, { dy: 0, s: .4, r: i % 2 ? 12 : -12, d: .7, e: BACK }));
+  enter($('#hN'), 41.85, { dy: 40, d: .8 });
+  enter($('#hT'), 42.3, { dy: 16 });
+  stagger($$('#hS .stat'), 42.7, .16, { dy: 22, d: .6 });
+  enter($('#urlpill'), 43.4, { dy: 18, s: .94, e: BACK });
+  enter($('#hC'), 43.7, { dy: 12 });
+
+  // ---------- clock & player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  const ICON_PLAY = '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>', ICON_PAUSE = '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>';
+  function ui() {
+    scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`);
+    timeEl.textContent = `${fmt(t)} / ${fmt(D)}`;
+    ppIcon.innerHTML = playing ? ICON_PAUSE : ICON_PLAY; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă');
+    hint.hidden = playing;
+  }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) {
+    if (!playing) return;
+    const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now;
+    let nt = t + dt; if (nt >= D) { nt = D; playing = false; }
+    seek(nt); if (playing) requestAnimationFrame(frame);
+  }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle);
+  wrap.addEventListener('click', toggle);
+  $('#rs').addEventListener('click', () => { seek(0); play(); });
+  let wasPlaying = false;
+  scrub.addEventListener('pointerdown', () => { wasPlaying = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (wasPlaying) play(); wasPlaying = false; });
+  $('#fs').addEventListener('click', () => { try { const p = document.fullscreenElement ? document.exitFullscreen() : wrap.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
+  document.addEventListener('keydown', e => {
+    if (e.target.closest('input, textarea, select') && e.target !== scrub) return;
+    if (e.key === ' ' || e.key === 'k') { if (e.target.tagName === 'BUTTON') return; e.preventDefault(); toggle(); }
+    else if (e.key === 'ArrowRight' && e.target !== scrub) { seek(t + 5); }
+    else if (e.key === 'ArrowLeft' && e.target !== scrub) { seek(t - 5); }
+  });
+
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+
+  const ticks = $('#ticks'), list = $('#chapters');
+  CH.forEach((c, i) => {
+    if (i) { const tk = document.createElement('i'); tk.style.left = `calc(${(c[0] / D) * 100}% - 1px)`; ticks.appendChild(tk); }
+    const li = document.createElement('li');
+    li.innerHTML = `<button class="chap" type="button"><span class="ct">${fmt(c[0])}</span><span class="cn">${c[1]}</span><span class="cd">${c[2]}</span></button>`;
+    $('button', li).addEventListener('click', () => { seek(c[0] + .01); play(); });
+    list.appendChild(li);
+  });
+  function markChapter(i) { $$('.chap', list).forEach((b, k) => b.setAttribute('aria-current', k === i ? 'true' : 'false')); }
+
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 3.9 : 0);
+  if (!reduce) {
+    const go = () => { if (!playing && t === 0) play(); };
+    (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(go);
+  }
+})();
+</script>

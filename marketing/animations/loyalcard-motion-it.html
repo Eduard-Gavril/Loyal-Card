@@ -1,0 +1,672 @@
+<title>LoyalCard in movimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Libre+Caslon+Display&display=swap">
+<style>
+/* Layout: one centred player column — a fixed 1280×720 stage scaled to fit, chrome below, chapter index under it */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  /* stage world: same in both themes, it plays like a video */
+  --ink: #120B24; --ink-2: #1D1438; --violet: #7C3AED; --violet-d: #6D28D9; --lilac: #C4B5FD;
+  --cream: #FAF9F6; --amber: #F5B544; --mint: #6EE7B7; --paper: #F1E8D8; --stamp-ink: #8A2C3E;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 56px; display: grid; gap: 22px; }
+.head { display: grid; gap: 8px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 6vw, 52px); line-height: 1.02; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.55; max-width: 62ch; }
+
+/* ---------- player ---------- */
+.player { background: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 0 var(--line), 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--ink); cursor: pointer; }
+#wrap:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; }
+#stage { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden; background: var(--ink); color: var(--cream); font-family: var(--f-body); cursor: default; }
+.controls { display: flex; align-items: center; gap: 14px; padding: 12px 16px; color: var(--cream); border-top: 1px solid rgba(196, 181, 253, .14); }
+.cbtn { flex: none; width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(196, 181, 253, .28); background: rgba(124, 58, 237, .22); color: var(--cream); display: grid; place-items: center; cursor: pointer; }
+.cbtn:hover { background: rgba(124, 58, 237, .4); }
+.cbtn:focus-visible, .scrub:focus-visible, .chap:focus-visible { outline: 2px solid var(--lilac); outline-offset: 2px; }
+.cbtn svg { width: 18px; height: 18px; }
+.time { flex: none; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; color: rgba(250, 249, 246, .78); }
+.track { position: relative; flex: 1; min-width: 0; height: 40px; display: flex; align-items: center; }
+.scrub { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; margin: 0; cursor: pointer;
+  background: linear-gradient(90deg, var(--violet) 0 var(--p, 0%), rgba(250, 249, 246, .16) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); border: 3px solid var(--violet); }
+.scrub::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--cream); border: 3px solid var(--violet); }
+.ticks { position: absolute; inset: 0; pointer-events: none; }
+.ticks i { position: absolute; top: 50%; width: 2px; height: 12px; margin-top: -6px; background: rgba(250, 249, 246, .4); border-radius: 1px; }
+@media (max-width: 520px) { .controls { gap: 10px; padding: 10px 12px; } .time { font-size: 12px; } #fs { display: none; } }
+
+/* ---------- chapters ---------- */
+.chapters { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 8px; }
+.chap { width: 100%; display: grid; grid-template-columns: 46px 1fr; gap: 2px 12px; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; cursor: pointer; }
+.chap:hover { border-color: var(--accent); }
+.chap[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.chap .ct { grid-row: span 2; font-family: var(--f-mono); font-size: 13px; color: var(--accent); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.chap .cn { font-weight: 600; font-size: 15px; }
+.chap .cd { color: var(--muted); font-size: 13.5px; line-height: 1.45; min-width: 0; }
+.note { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+/* ---------- stage pieces ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+#g1 { width: 820px; height: 820px; left: -260px; top: -320px; background: radial-gradient(closest-side, rgba(124, 58, 237, .38), rgba(124, 58, 237, 0)); }
+#g2 { width: 900px; height: 900px; left: 640px; top: 160px; background: radial-gradient(closest-side, rgba(76, 29, 149, .55), rgba(76, 29, 149, 0)); }
+#grain { position: absolute; inset: 0; background-image: radial-gradient(rgba(196, 181, 253, .07) 1px, transparent 1.2px); background-size: 24px 24px; }
+
+.d-xl { font-family: var(--f-display); font-weight: 400; font-size: 92px; line-height: 1; letter-spacing: -.01em; }
+.d-l { font-family: var(--f-display); font-weight: 400; font-size: 68px; line-height: 1.04; letter-spacing: -.005em; }
+.d-m { font-family: var(--f-display); font-weight: 400; font-size: 58px; line-height: 1.05; }
+.body-l { font-size: 27px; line-height: 1.4; color: rgba(250, 249, 246, .74); }
+.body-m { font-size: 22px; line-height: 1.4; color: rgba(250, 249, 246, .72); }
+.kicker { font-family: var(--f-mono); font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: var(--lilac); }
+.hl { color: var(--lilac); }
+.amber { color: var(--amber); }
+.center { text-align: center; }
+
+/* logo tiles */
+.tiles { position: absolute; width: 268px; height: 268px; }
+.tile { position: absolute; width: 120px; height: 120px; }
+.tile svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* hud */
+#hud { position: absolute; left: 44px; top: 30px; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; }
+#hud svg { width: 30px; height: 30px; }
+#chap { position: absolute; right: 44px; top: 37px; font-family: var(--f-mono); font-size: 13px; letter-spacing: .18em; color: var(--lilac); text-transform: uppercase; }
+
+/* paper cards */
+.paper-wrap { position: absolute; width: 360px; height: 214px; }
+.paper { width: 100%; height: 100%; border-radius: 14px; background: var(--paper); color: #4A3426; padding: 20px 22px; box-sizing: border-box; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); display: grid; grid-template-rows: auto 1fr auto; gap: 10px;
+  background-image: linear-gradient(transparent 0 0), radial-gradient(rgba(74, 52, 38, .06) 1px, transparent 1px); background-size: auto, 5px 5px; }
+.paper-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.paper-name { font-family: var(--f-mono); font-weight: 500; font-size: 15px; letter-spacing: .18em; }
+.paper-kind { font-family: var(--f-display); font-size: 19px; }
+.paper-stamps { display: flex; gap: 10px; align-items: center; }
+.ps { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed rgba(74, 52, 38, .45); display: grid; place-items: center; box-sizing: border-box; }
+.ps.on { border: 2.5px solid var(--stamp-ink); color: var(--stamp-ink); opacity: .82; }
+.ps.on svg { width: 22px; height: 22px; }
+.paper-foot { font-family: var(--f-mono); font-size: 13px; color: rgba(74, 52, 38, .7); }
+
+/* phone */
+#phone { position: absolute; left: 190px; top: 60px; width: 300px; height: 600px; border-radius: 48px; background: #0B0716; padding: 10px; box-sizing: border-box; transform-origin: 50% 70%;
+  box-shadow: 0 0 0 1.5px rgba(196, 181, 253, .38), 0 40px 80px rgba(0, 0, 0, .55), 0 0 140px rgba(124, 58, 237, .28); }
+.screen { position: relative; width: 280px; height: 580px; border-radius: 38px; overflow: hidden; background: var(--cream); color: #1B1530; }
+.notch { position: absolute; left: 95px; top: 10px; width: 90px; height: 24px; border-radius: 12px; background: #0B0716; }
+.sbar { position: absolute; left: 26px; top: 13px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; }
+.url { position: absolute; left: 16px; top: 44px; width: 248px; height: 28px; border-radius: 14px; background: #ECE7F7; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-mono); font-size: 12px; color: #4B4166; }
+.url svg { width: 11px; height: 11px; }
+.shop { position: absolute; left: 12px; top: 82px; width: 256px; height: 76px; border-radius: 18px; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: var(--cream); }
+.shop .ico { position: absolute; left: 14px; top: 16px; width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, #FBBF24, #F97316); display: grid; place-items: center; }
+.shop .ico svg { width: 24px; height: 24px; }
+.shop .nm { position: absolute; left: 70px; top: 17px; font-weight: 600; font-size: 17px; }
+.shop .kd { position: absolute; left: 70px; top: 41px; font-size: 13px; color: #DDD6FE; }
+.p-muted { color: #6B6380; }
+.gen-btn { position: absolute; left: 24px; top: 268px; width: 232px; height: 56px; border-radius: 16px; background: linear-gradient(90deg, #8B5CF6, #6D28D9); color: var(--cream); display: grid; place-items: center; font-weight: 600; font-size: 15px; box-shadow: 0 10px 22px rgba(109, 40, 217, .35); }
+#tap { position: absolute; left: 110px; top: 266px; width: 60px; height: 60px; border-radius: 50%; background: rgba(250, 249, 246, .55); border: 2px solid rgba(250, 249, 246, .9); }
+.qr-box { position: absolute; left: 50px; top: 204px; width: 180px; height: 180px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #E4DEF2; display: grid; place-items: center; }
+.qr-box svg { width: 152px; height: 152px; display: block; }
+#beam { position: absolute; left: 40px; top: 204px; width: 200px; height: 4px; border-radius: 2px; background: #8B5CF6; box-shadow: 0 0 14px 4px rgba(139, 92, 246, .65); }
+.stamps { position: absolute; left: 18px; top: 448px; display: flex; gap: 8px; }
+.st { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 2px dashed #CFC6E6; box-sizing: border-box; }
+.st-fill { position: absolute; inset: -2px; border-radius: 50%; background: linear-gradient(135deg, #A78BFA, #6D28D9); display: grid; place-items: center; box-shadow: 0 4px 10px rgba(109, 40, 217, .35); }
+.st-fill svg { width: 18px; height: 18px; }
+.st-ring { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--amber); box-sizing: border-box; }
+#count { position: absolute; left: 0; width: 280px; top: 492px; text-align: center; font-family: var(--f-mono); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+#plus1 { position: absolute; left: 196px; top: 486px; padding: 3px 9px; border-radius: 10px; background: var(--amber); color: #3B2300; font-family: var(--f-mono); font-size: 12px; font-weight: 500; }
+#toast { position: absolute; left: 40px; top: 164px; width: 200px; height: 32px; border-radius: 16px; background: #DDF7EC; color: #0B6B47; display: grid; place-items: center; font-size: 13px; font-weight: 600; box-shadow: 0 6px 16px rgba(11, 107, 71, .18); }
+#reward { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 35%, #8B5CF6, #4C1D95 70%); color: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 0 24px; }
+#reward .gift { width: 84px; height: 84px; border-radius: 26px; background: linear-gradient(135deg, #FBBF24, #F97316); display: grid; place-items: center; box-shadow: 0 14px 30px rgba(249, 115, 22, .4); }
+#reward .gift svg { width: 44px; height: 44px; }
+#reward .won { font-weight: 700; font-size: 24px; letter-spacing: .04em; }
+#reward .what { font-family: var(--f-display); font-size: 34px; color: #FDE68A; }
+#reward .how { font-size: 14px; line-height: 1.45; color: rgba(250, 249, 246, .8); }
+
+/* till */
+#till { position: absolute; left: 600px; top: 262px; width: 560px; height: 350px; border-radius: 24px; background: var(--ink-2); border: 1px solid rgba(196, 181, 253, .2); box-shadow: 0 30px 70px rgba(0, 0, 0, .45); }
+.till-h { position: absolute; left: 26px; top: 22px; font-weight: 600; font-size: 18px; }
+.till-h span { color: rgba(250, 249, 246, .55); font-weight: 400; }
+.chip { position: absolute; right: 24px; top: 22px; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(196, 181, 253, .35); font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em; color: var(--lilac); }
+.vf { position: absolute; left: 26px; top: 70px; width: 184px; height: 184px; border-radius: 18px; background: #0D0820; overflow: hidden; }
+.vf .corner { position: absolute; width: 26px; height: 26px; border: 3px solid var(--lilac); }
+.vf .c1 { left: 12px; top: 12px; border-right: 0; border-bottom: 0; border-radius: 8px 0 0 0; }
+.vf .c2 { right: 12px; top: 12px; border-left: 0; border-bottom: 0; border-radius: 0 8px 0 0; }
+.vf .c3 { left: 12px; bottom: 12px; border-right: 0; border-top: 0; border-radius: 0 0 0 8px; }
+.vf .c4 { right: 12px; bottom: 12px; border-left: 0; border-top: 0; border-radius: 0 0 8px 0; }
+#miniqr { position: absolute; left: 37px; top: 37px; width: 110px; height: 110px; background: #fff; border-radius: 8px; display: grid; place-items: center; }
+#miniqr svg { width: 96px; height: 96px; }
+#vfbeam { position: absolute; left: 20px; top: 30px; width: 144px; height: 3px; background: var(--mint); box-shadow: 0 0 12px 3px rgba(110, 231, 183, .6); }
+#detected { position: absolute; left: 26px; top: 270px; font-family: var(--f-mono); font-size: 13px; color: var(--mint); }
+.plist { position: absolute; left: 236px; top: 70px; width: 298px; display: grid; gap: 8px; }
+.plab { font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; color: rgba(250, 249, 246, .55); margin-bottom: 2px; }
+.prow { position: relative; height: 44px; border-radius: 12px; background: rgba(250, 249, 246, .05); border: 1px solid rgba(250, 249, 246, .08); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; font-size: 17px; font-weight: 500; }
+.prow .pr { font-family: var(--f-mono); font-size: 14px; color: rgba(250, 249, 246, .7); position: relative; }
+#sel { position: absolute; inset: -1px; border-radius: 12px; border: 1.5px solid var(--lilac); background: rgba(124, 58, 237, .32); }
+#selck { position: absolute; right: 86px; top: 12px; width: 20px; height: 20px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; }
+#selck svg { width: 12px; height: 12px; }
+.prow > span { position: relative; }
+#tbtn { position: absolute; left: 236px; top: 270px; width: 298px; height: 54px; border-radius: 14px; background: linear-gradient(90deg, #8B5CF6, #6D28D9); display: grid; place-items: center; font-weight: 600; font-size: 17px; overflow: hidden; }
+#tbtn > span { grid-area: 1 / 1; }
+#tbtnB { color: #0B3B2A; background: var(--mint); position: absolute; inset: 0; display: grid; place-items: center; }
+
+/* step 3 */
+#rule { position: absolute; left: 600px; top: 300px; width: 560px; padding: 18px 22px; box-sizing: border-box; border-radius: 18px; background: rgba(245, 181, 68, .1); border: 1px solid rgba(245, 181, 68, .4); display: grid; gap: 6px; }
+#rule .kicker { color: var(--amber); font-size: 13px; }
+#rule .rt { font-size: 25px; font-weight: 600; }
+.days { position: absolute; left: 600px; top: 424px; display: flex; gap: 12px; }
+.day { width: 104px; height: 60px; border-radius: 14px; border: 1px solid rgba(196, 181, 253, .3); background: rgba(124, 58, 237, .14); display: grid; place-items: center; align-content: center; gap: 2px; }
+.day b { font-family: var(--f-mono); font-weight: 500; font-size: 14px; letter-spacing: .14em; color: var(--lilac); }
+.day i { font-style: normal; font-size: 13px; color: rgba(250, 249, 246, .75); }
+#almost { position: absolute; left: 600px; top: 508px; font-size: 24px; font-weight: 500; color: var(--amber); }
+.pt { position: absolute; left: 334px; top: 354px; width: 12px; height: 12px; border-radius: 50%; }
+.pt.star { width: 18px; height: 18px; border-radius: 0; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+
+/* results */
+.legend { position: absolute; right: 96px; top: 154px; display: flex; gap: 22px; font-size: 15px; color: rgba(250, 249, 246, .72); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 22px; height: 10px; border-radius: 5px; display: inline-block; }
+.row { position: absolute; left: 96px; width: 1088px; height: 90px; }
+.row .lab { position: absolute; left: 0; top: 2px; width: 300px; font-weight: 600; font-size: 22px; }
+.row .src { position: absolute; left: 0; top: 36px; width: 300px; font-family: var(--f-mono); font-size: 12.5px; color: rgba(250, 249, 246, .5); }
+.bar0 { position: absolute; left: 324px; top: 6px; height: 12px; width: 360px; border-radius: 6px; background: rgba(250, 249, 246, .2); transform-origin: 0 50%; }
+.v0 { position: absolute; top: 2px; font-family: var(--f-mono); font-size: 13px; color: rgba(250, 249, 246, .55); }
+.bar1 { position: absolute; left: 324px; top: 28px; height: 28px; border-radius: 8px; background: linear-gradient(90deg, #6D28D9, #A78BFA); transform-origin: 0 50%; }
+.v1 { position: absolute; top: 33px; font-family: var(--f-mono); font-size: 13px; font-weight: 500; color: var(--cream); text-align: right; }
+.delta { position: absolute; top: 12px; font-family: var(--f-display); font-size: 46px; line-height: 1; color: var(--amber); font-variant-numeric: tabular-nums; }
+
+/* for whom */
+.who { position: absolute; top: 196px; width: 500px; height: 444px; border-radius: 26px; background: rgba(250, 249, 246, .045); border: 1px solid rgba(196, 181, 253, .2); padding: 34px 36px; box-sizing: border-box; }
+.who-h { display: flex; align-items: center; gap: 16px; }
+.who-ic { width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); display: grid; place-items: center; flex: none; }
+.who-ic svg { width: 28px; height: 28px; }
+.who-t { font-weight: 700; font-size: 28px; }
+.who-s { margin-top: 16px; font-size: 18px; line-height: 1.45; color: rgba(250, 249, 246, .66); }
+.who ul { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 16px; }
+.who li { display: flex; align-items: center; gap: 14px; font-size: 20px; }
+.ck { width: 30px; height: 30px; border-radius: 50%; background: rgba(110, 231, 183, .16); display: grid; place-items: center; flex: none; }
+.ck svg { width: 16px; height: 16px; }
+.ck path { stroke-dasharray: 24; }
+
+/* outro */
+.stats { position: absolute; left: 0; width: 1280px; top: 438px; display: flex; justify-content: center; gap: 72px; }
+.stat { text-align: center; display: grid; gap: 6px; }
+.stat b { font-family: var(--f-display); font-weight: 400; font-size: 54px; line-height: 1; }
+.stat span { font-family: var(--f-mono); font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--lilac); }
+#urlpill { position: absolute; left: 0; width: 1280px; top: 586px; display: flex; justify-content: center; align-items: center; gap: 16px; font-size: 19px; color: rgba(250, 249, 246, .72); }
+#urlpill b { font-family: var(--f-mono); font-weight: 500; font-size: 21px; color: var(--cream); padding: 10px 20px; border-radius: 14px; background: var(--violet-d); box-shadow: 0 12px 30px rgba(109, 40, 217, .45); }
+
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 88px; height: 88px; border-radius: 50%; background: rgba(18, 11, 36, .62); border: 1.5px solid rgba(196, 181, 253, .5); display: grid; place-items: center; }
+#playhint svg { width: 34px; height: 34px; margin-left: 5px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8zM7 2.5v2.5M10.5 2.5v2.5M14 2.5v2.5"/></symbol>
+    <symbol id="star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+    <symbol id="check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">loyalcard.net · video animato</div>
+    <h1>LoyalCard in movimento</h1>
+    <p class="lede">Una presentazione animata di 46 secondi, fatta con il codice a partire dai testi di loyalcard.net: la carta sul telefono, la scansione alla cassa, il premio e i risultati.</p>
+  </header>
+
+  <section class="player" aria-label="Video LoyalCard">
+    <div id="wrap" role="img" aria-label="Animazione: presentazione di LoyalCard">
+      <div id="stage">
+        <div class="glow" id="g1"></div>
+        <div class="glow" id="g2"></div>
+        <div id="grain"></div>
+
+        <!-- HUD -->
+        <div id="hud"><svg viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></svg>LoyalCard</div>
+        <div id="chap"></div>
+
+        <!-- A · intro -->
+        <div class="scene" id="sA">
+          <div class="tiles" id="tilesA" style="left:506px;top:200px">
+            <div class="tile" style="left:0;top:0"><svg viewBox="104 104 136 136"><use href="#gL"/></svg></div>
+            <div class="tile" style="left:148px;top:0"><svg viewBox="272 104 136 136"><use href="#gP"/></svg></div>
+            <div class="tile" style="left:0;top:148px"><svg viewBox="104 272 136 136"><use href="#gQ"/></svg></div>
+            <div class="tile" style="left:148px;top:148px"><svg viewBox="272 272 136 136"><use href="#gC"/></svg></div>
+          </div>
+          <div class="abs center" id="wordA" style="left:0;width:1280px;top:226px;font-size:30px;font-weight:600;letter-spacing:.02em">LoyalCard</div>
+          <div class="abs center d-xl" id="h1a" style="left:0;width:1280px;top:290px">La tua carta fedeltà</div>
+          <div class="abs center d-xl hl" id="h1b" style="left:0;width:1280px;top:388px">sempre con te</div>
+          <div class="abs center body-l" id="subA" style="left:240px;width:800px;top:514px">Accumula timbri, guadagna premi. Senza carta fisica, senza scaricare app.</div>
+        </div>
+
+        <!-- B · problem -->
+        <div class="scene" id="sB">
+          <div class="paper-wrap" id="pc1" style="left:96px;top:128px"><div class="paper" style="rotate:-9deg">
+            <div class="paper-top"><span class="paper-name">BISTRO VERDE</span><span class="paper-kind">carta fedeltà</span></div>
+            <div class="paper-stamps"><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps"></span><span class="ps"></span><span class="ps"></span></div>
+            <div class="paper-foot">Nome ____________</div></div></div>
+          <div class="paper-wrap" id="pc2" style="left:150px;top:256px"><div class="paper" style="rotate:5deg">
+            <div class="paper-top"><span class="paper-name">STYLE SALON</span><span class="paper-kind">carta fedeltà</span></div>
+            <div class="paper-stamps"><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps on"><svg><use href="#star"/></svg></span><span class="ps"></span></div>
+            <div class="paper-foot">Nome ____________</div></div></div>
+          <div class="paper-wrap" id="pc3" style="left:104px;top:376px"><div class="paper" style="rotate:-3deg">
+            <div class="paper-top"><span class="paper-name">CAFÉ CENTRAL</span><span class="paper-kind">carta fedeltà</span></div>
+            <div class="paper-stamps"><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps"></span><span class="ps"></span></div>
+            <div class="paper-foot">Nome ____________</div></div></div>
+          <div class="abs d-l" id="bH1" style="left:620px;top:232px;width:600px">Tessere di carta?</div>
+          <div class="abs body-l" id="bP1" style="left:620px;top:328px;width:560px">Si perdono, si rovinano, restano a casa.</div>
+          <div class="abs d-l" id="bH2" style="left:620px;top:232px;width:600px">Ora è tutto <span class="hl">sul telefono.</span></div>
+          <div class="abs body-l" id="bP2" style="left:620px;top:400px;width:560px">Senza carta fisica. Senza scaricare app.</div>
+        </div>
+
+        <!-- C · step 1 -->
+        <div class="scene" id="sC">
+          <div class="abs kicker" id="cK" style="left:600px;top:178px">Passo 1 di 3</div>
+          <div class="abs d-l" id="cH" style="left:600px;top:212px;width:600px">Ottieni la tua carta digitale</div>
+          <div class="abs body-l" id="cP" style="left:600px;top:372px;width:540px">Generazione istantanea, nessuna registrazione richiesta.</div>
+          <div class="abs" id="cChips" style="left:600px;top:474px;display:flex;gap:12px">
+            <span class="cchip" style="padding:10px 16px;border-radius:12px;border:1px solid rgba(196,181,253,.35);font-size:18px">Nessuna app</span>
+            <span class="cchip" style="padding:10px 16px;border-radius:12px;border:1px solid rgba(196,181,253,.35);font-size:18px">Nessun account</span>
+            <span class="cchip" style="padding:10px 16px;border-radius:12px;border:1px solid rgba(245,181,68,.5);font-size:18px;color:var(--amber)">0€ per i clienti</span>
+          </div>
+        </div>
+
+        <!-- D · step 2 -->
+        <div class="scene" id="sD">
+          <div class="abs kicker" id="dK" style="left:600px;top:92px">Passo 2 di 3</div>
+          <div class="abs d-m" id="dH" style="left:600px;top:124px;width:600px">Scansiona alla cassa</div>
+          <div class="abs body-m" id="dP" style="left:600px;top:200px;width:560px">Mostra il tuo codice QR ad ogni acquisto.</div>
+          <div id="till">
+            <div class="till-h">Scanner <span>· Café Central</span></div>
+            <div class="chip">STAFF</div>
+            <div class="vf"><div id="miniqr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div><div id="vfbeam"></div>
+              <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i></div>
+            <div id="detected">✓ QR rilevato</div>
+            <div class="plist">
+              <div class="plab">SELEZIONA PRODOTTO</div>
+              <div class="prow"><div id="sel"></div><span>Espresso</span><span class="pr">€1,20</span><div id="selck"><svg style="color:#0B3B2A"><use href="#check"/></svg></div></div>
+              <div class="prow"><span>Cappuccino</span><span class="pr">€1,50</span></div>
+              <div class="prow"><span>Cornetto</span><span class="pr">€1,30</span></div>
+            </div>
+            <div id="tbtn"><span id="tbtnA">Registra acquisto</span><div id="tbtnB">✓ +1 timbro registrato</div></div>
+          </div>
+        </div>
+
+        <!-- E · step 3 -->
+        <div class="scene" id="sE">
+          <div class="abs kicker" id="eK" style="left:600px;top:122px">Passo 3 di 3</div>
+          <div class="abs d-l" id="eH" style="left:600px;top:154px;width:600px">Raccogli premi</div>
+          <div class="abs body-l" id="eP" style="left:600px;top:238px;width:560px">Sblocca premi e benefici esclusivi.</div>
+          <div id="rule"><div class="kicker">Regola premio</div><div class="rt">Acquista 6 caffè → il 7° è GRATIS</div></div>
+          <div class="days"><div class="day"><b>MAR</b><i>+1 timbro</i></div><div class="day"><b>GIO</b><i>+1 timbro</i></div><div class="day"><b>SAB</b><i>+1 timbro</i></div><div class="day"><b>LUN</b><i>+1 timbro</i></div></div>
+          <div id="almost">Ancora 1 caffè e vinci il premio!</div>
+        </div>
+
+        <!-- phone (persists across B → E) -->
+        <div id="phone"><div class="screen">
+          <div class="notch"></div><div class="sbar">9:41</div>
+          <div class="url"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" d="M7 11V8a5 5 0 0110 0v3M5 11h14v10H5z"/></svg>loyalcard.net</div>
+          <div class="shop"><div class="ico"><svg style="color:#fff"><use href="#cup"/></svg></div><div class="nm">Café Central</div><div class="kd">Caffetteria</div></div>
+          <div id="scr0">
+            <div class="abs center p-muted" style="left:0;width:280px;top:224px;font-size:15px">Non hai ancora una carta fedeltà</div>
+            <div class="gen-btn" id="genBtn">Genera la tua Carta Fedeltà</div>
+            <div class="abs center p-muted" style="left:0;width:280px;top:342px;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em">NESSUNA REGISTRAZIONE</div>
+            <div id="tap"></div>
+          </div>
+          <div id="scr1">
+            <div class="abs center" id="qrT" style="left:0;width:280px;top:174px;font-weight:600;font-size:15px">Il tuo Codice QR</div>
+            <div class="qr-box" id="qrBox"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div>
+            <div id="beam"></div>
+            <div class="abs center p-muted" id="qrCap" style="left:30px;width:220px;top:396px;font-size:12.5px;line-height:1.4">Mostra questo codice alla cassa per accumulare premi</div>
+            <div class="stamps" id="stamps"></div>
+            <div id="count">0 / 6 timbri</div>
+            <div id="plus1">+1</div>
+            <div class="abs center" id="qrRule" style="left:0;width:280px;top:518px;font-size:12px;color:#9A5B00;font-weight:600">Acquista 6 caffè → il 7° è GRATIS</div>
+          </div>
+          <div id="toast">✓ Scansione riuscita</div>
+          <div id="reward">
+            <div class="gift"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg></div>
+            <div class="won">PREMIO VINTO!</div>
+            <div class="what">Caffè omaggio</div>
+            <div class="how">Mostra la carta alla cassa per riscattarlo</div>
+          </div>
+        </div></div>
+
+        <div class="scene" id="fx" style="pointer-events:none"></div>
+
+        <!-- F · results -->
+        <div class="scene" id="sF">
+          <div class="abs d-m" id="fH" style="left:96px;top:72px">Risultati comprovati</div>
+          <div class="abs body-m" id="fP" style="left:96px;top:146px">Dati reali da ricerche di settore</div>
+          <div class="legend" id="fL"><span><i style="background:rgba(250,249,246,.25)"></i>Senza fedeltà</span><span><i style="background:linear-gradient(90deg,#6D28D9,#A78BFA)"></i>Con LoyalCard</span></div>
+          <div id="rows"></div>
+        </div>
+
+        <!-- G · for whom -->
+        <div class="scene" id="sG">
+          <div class="abs center d-m" id="gH" style="left:0;width:1280px;top:84px">Per chi è LoyalCard?</div>
+          <div class="who" id="whoB" style="left:110px">
+            <div class="who-h"><div class="who-ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round" d="M3 9l1.5-5h15L21 9M3 9h18M3 9c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3M5 12v9h14v-9M10 21v-5h4v5"/></svg></div><div class="who-t">Per le Attività</div></div>
+            <div class="who-s">Fidelizza i clienti senza carte fisiche, app o costi elevati</div>
+            <ul><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Nessuna carta fisica da stampare</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Nessuna app da scaricare per i clienti</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Dashboard con analisi in tempo reale</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Funziona con qualsiasi smartphone</li></ul>
+          </div>
+          <div class="who" id="whoC" style="left:670px">
+            <div class="who-h"><div class="who-ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8.5 2.5h7A1.5 1.5 0 0117 4v16a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 017 20V4a1.5 1.5 0 011.5-1.5zM11 18.5h2"/></svg></div><div class="who-t">Per i Clienti</div></div>
+            <div class="who-s">Raccogli punti con il telefono, senza scaricare nulla</div>
+            <ul><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Nessuna registrazione necessaria</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Tutte le carte in un unico posto</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Non perderai mai i tuoi punti</li><li><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Funziona anche offline</li></ul>
+          </div>
+        </div>
+
+        <!-- H · outro -->
+        <div class="scene" id="sH">
+          <div class="tiles" id="tilesH" style="left:506px;top:46px;scale:.62;transform-origin:50% 0">
+            <div class="tile" style="left:0;top:0"><svg viewBox="104 104 136 136"><use href="#gL"/></svg></div>
+            <div class="tile" style="left:148px;top:0"><svg viewBox="272 104 136 136"><use href="#gP"/></svg></div>
+            <div class="tile" style="left:0;top:148px"><svg viewBox="104 272 136 136"><use href="#gQ"/></svg></div>
+            <div class="tile" style="left:148px;top:148px"><svg viewBox="272 272 136 136"><use href="#gC"/></svg></div>
+          </div>
+          <div class="abs center d-xl" id="hN" style="left:0;width:1280px;top:236px">LoyalCard</div>
+          <div class="abs center body-l" id="hT" style="left:0;width:1280px;top:344px">Fedeltà digitale semplificata.</div>
+          <div class="stats" id="hS"><div class="stat"><b>100%</b><span>Digitale</span></div><div class="stat"><b>∞</b><span>Premi</span></div><div class="stat"><b>0€</b><span>Gratuito</span></div></div>
+          <div id="urlpill"><b>loyalcard.net</b>Inizia gratis con il piano Starter</div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FAF9F6" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Riproduci"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <button class="cbtn" id="rs" type="button" aria-label="Ricomincia"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 108-8 8.4 8.4 0 00-5.6 2.3L4 8.5M4 3.5v5h5"/></svg></button>
+      <div class="track"><input class="scrub" id="scrub" type="range" min="0" max="46000" step="10" value="0" aria-label="Posizione nel video"><div class="ticks" id="ticks"></div></div>
+      <div class="time" id="time">0:00 / 0:46</div>
+      <button class="cbtn" id="fs" type="button" aria-label="Schermo intero"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+  </section>
+
+  <ol class="chapters" id="chapters"></ol>
+  <p class="note">Testi, esempi e dati presi da loyalcard.net (sezioni “Come funziona”, “Risultati comprovati” e “Per chi è LoyalCard?”). Le fonti delle percentuali sono quelle citate sul sito. Spazio mette in pausa, le frecce spostano di 5 secondi.</p>
+</main>
+
+<script>
+(() => {
+  const D = 46;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+
+  // Every effect is a paused Web Animation on one shared clock, so the timeline can be scrubbed both ways.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => {
+    const { dx = 0, dy = 28, s = 1, r = 0, d = .7, e = OUT } = o;
+    return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e);
+  };
+  const exit = (el, t, o = {}) => {
+    const { dx = 0, dy = -18, d = .45, e = IN } = o;
+    return A(el, [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: `${dx}px ${dy}px` }], t, d, e);
+  };
+  const scene = (el, start, end) => {
+    A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear');
+    A(el, [{ opacity: 1 }, { opacity: 0 }], end - .45, .45, IN);
+  };
+  const words = el => {
+    const out = [];
+    [...el.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const parts = n.textContent.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        parts.forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); });
+        el.replaceChild(frag, n);
+      } else { n.classList.add('w'); out.push(n); }
+    });
+    return out;
+  };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  // ---------- fake but well-formed QR pattern ----------
+  function qrPath(n = 25, seed = 20241) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`;
+    return d;
+  }
+  const qd = qrPath(); $$('.qrp').forEach(p => p.setAttribute('d', qd));
+
+  // ---------- background + HUD ----------
+  A($('#g1'), [{ translate: '0px 0px' }, { translate: '520px 160px' }, { translate: '120px 300px' }], 0, D, 'linear');
+  A($('#g2'), [{ translate: '0px 0px' }, { translate: '-460px -220px' }, { translate: '-120px -60px' }], 0, D, 'linear');
+  const hud = $('#hud'); A(hud, [{ opacity: 0 }, { opacity: 1 }], 5.2, .5, 'linear'); A(hud, [{ opacity: 1 }, { opacity: 0 }], 40.8, .4, 'linear');
+  const chapEl = $('#chap');
+  const CH = [
+    [0, 'Intro', 'La tua carta fedeltà, sempre con te', ''],
+    [5.1, 'Il problema', 'Le tessere di carta si perdono e restano a casa', 'Il problema'],
+    [10.6, 'Passo 1', 'Ottieni la carta digitale, senza registrazione', '01 · La carta'],
+    [16.3, 'Passo 2', 'Scansione del QR e timbro alla cassa', '02 · La cassa'],
+    [22.7, 'Passo 3', 'Sei caffè, il settimo è gratis', '03 · Il premio'],
+    [29.6, 'Risultati', '+27% fidelizzazione, +60% visite ripetute', 'I risultati'],
+    [35.9, 'Per chi', 'Attività e clienti', 'Per chi'],
+    [41.3, 'Finale', 'loyalcard.net, si parte gratis', '']
+  ];
+  let lastChap = -1;
+  hooks.push(t => { let i = 0; CH.forEach((c, k) => { if (t >= c[0]) i = k; }); if (i !== lastChap) { chapEl.textContent = CH[i][3]; lastChap = i; markChapter(i); } });
+
+  // ---------- A · intro (0 → 5.2) ----------
+  scene($('#sA'), 0, 5.2);
+  const tilesA = $$('#tilesA .tile');
+  const scatter = [[-300, -60, -16], [280, -90, 14], [-250, 130, 11], [310, 100, -9]];
+  tilesA.forEach((el, i) => { const [x, y, r] = scatter[i]; A(el, [{ translate: `${x}px ${y}px`, rotate: `${r}deg`, scale: '.86' }, { translate: '0px 0px', rotate: '0deg', scale: '1' }], .2 + i * .08, 1.05, BACK); });
+  A($('#tilesA'), [{ translate: '0px 0px', scale: '1' }, { translate: '0px -176px', scale: '.46' }], 1.55, .8, IO);
+  enter($('#wordA'), 1.9, { dy: 14, d: .6 });
+  stagger(words($('#h1a')), 2.15, .07, { dy: 46, d: .8 });
+  stagger(words($('#h1b')), 2.5, .08, { dy: 46, d: .8 });
+  enter($('#subA'), 3.05, { dy: 20, d: .8 });
+
+  // ---------- B · problem (5.1 → 10.8) ----------
+  scene($('#sB'), 5.1, 10.8);
+  [['#pc1', -12, 5.3], ['#pc2', 9, 5.45], ['#pc3', -6, 5.6]].forEach(([s, r, t]) => enter($(s), t, { dy: -560, r, d: .85, e: BACK }));
+  enter($('#bH1'), 5.75, { dy: 30 }); enter($('#bP1'), 6.15, { dy: 20 });
+  [['#pc3', 7.35, 18], ['#pc2', 7.5, -14], ['#pc1', 7.62, 22]].forEach(([s, t, r]) => A($(s), [{ translate: '0px 0px', rotate: '0deg', opacity: 1 }, { translate: '0px 640px', rotate: `${r}deg`, opacity: .2 }], t, .8, IN));
+  exit($('#bH1'), 7.35); exit($('#bP1'), 7.4);
+  enter($('#bH2'), 8.1, { dy: 30 }); enter($('#bP2'), 8.55, { dy: 20 });
+
+  // ---------- phone (8.0 → 29.8) ----------
+  const phone = $('#phone');
+  enter(phone, 8.0, { dy: 460, d: 1.05 });
+  A(phone, [{ rotate: '0deg' }, { rotate: '-5deg' }], 16.6, .6, IO);
+  A(phone, [{ rotate: '-5deg' }, { rotate: '0deg' }], 22.5, .55, IO);
+  A(phone, [{ scale: '1' }, { scale: '1.05', offset: .35 }, { scale: '1' }], 26.75, .8, OUT);
+  A(phone, [{ translate: '0px 0px', opacity: 1 }, { translate: '0px 180px', opacity: 0 }], 29.2, .6, IN);
+
+  // ---------- C · step 1 (10.6 → 16.4) ----------
+  scene($('#sC'), 10.6, 16.4);
+  enter($('#cK'), 10.75, { dy: 12 }); stagger(words($('#cH')), 10.85, .06, { dy: 36 }); enter($('#cP'), 11.5, { dy: 18 });
+  stagger($$('#cChips .cchip'), 13.3, .14, { dy: 14, s: .9, e: BACK, d: .55 });
+  const tap = $('#tap');
+  A(tap, [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '.6', offset: .2 }, { opacity: 0, scale: '2.4' }], 11.25, .7, OUT);
+  A($('#genBtn'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], 11.25, .4, IO);
+  A($('#scr0'), [{ opacity: 1 }, { opacity: 0 }], 11.6, .3, 'linear');
+  const scr1 = $('#scr1');
+  A(scr1, [{ opacity: 0 }, { opacity: 1 }], 11.7, .3, 'linear');
+  enter($('#qrT'), 11.75, { dy: 8, d: .4 });
+  A($('#qrBox'), [{ clipPath: 'inset(0 0 100% 0 round 16px)' }, { clipPath: 'inset(0 0 0% 0 round 16px)' }], 11.85, 1.0, IO);
+  enter($('#qrCap'), 12.6, { dy: 10, d: .5 });
+  // stamps
+  const stampsEl = $('#stamps'); const stampTimes = [20.0, 23.8, 24.3, 24.8, 25.3, 26.6];
+  stampTimes.forEach(() => { const st = document.createElement('div'); st.className = 'st'; st.innerHTML = '<div class="st-ring"></div><div class="st-fill"><svg style="color:#fff"><use href="#cup"/></svg></div>'; stampsEl.appendChild(st); });
+  $$('.st', stampsEl).forEach((st, i) => enter(st, 12.75 + i * .06, { dy: 10, s: .6, d: .45, e: BACK }));
+  enter($('#count'), 13.0, { dy: 8, d: .4 }); enter($('#qrRule'), 13.15, { dy: 8, d: .4 });
+  $$('.st-fill', stampsEl).forEach((f, i) => A(f, [{ scale: '0', opacity: 0 }, { scale: '1', opacity: 1 }], stampTimes[i], .55, BACK));
+  $$('.st-ring', stampsEl).forEach((r, i) => A(r, [{ scale: '1', opacity: 0 }, { scale: '1', opacity: .95, offset: .1 }, { scale: '2', opacity: 0 }], stampTimes[i] + .05, .7, OUT));
+  const countEl = $('#count'); let lastN = -1;
+  hooks.push(t => { const n = stampTimes.filter(x => t >= x).length; if (n !== lastN) { countEl.textContent = `${n} / 6 timbri`; lastN = n; } });
+
+  // ---------- D · step 2 (16.3 → 22.8) ----------
+  scene($('#sD'), 16.3, 22.8);
+  enter($('#dK'), 16.45, { dy: 12 }); stagger(words($('#dH')), 16.55, .06, { dy: 30 }); enter($('#dP'), 17.0, { dy: 16 });
+  enter($('#till'), 16.7, { dx: 70, dy: 0, d: .8 });
+  const beam = $('#beam');
+  A(beam, [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 10px', offset: .1 }, { opacity: 1, translate: '0px 170px', offset: .9 }, { opacity: 0, translate: '0px 178px' }], 17.5, 1.0, 'linear');
+  A($('#vfbeam'), [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 6px', offset: .1 }, { opacity: 1, translate: '0px 116px', offset: .9 }, { opacity: 0, translate: '0px 122px' }], 17.5, 1.0, 'linear');
+  enter($('#miniqr'), 17.55, { dy: 0, s: .85, d: .5 });
+  enter($('#detected'), 18.45, { dy: 6, d: .35 });
+  const toast = $('#toast');
+  enter(toast, 18.5, { dy: -12, s: .9, d: .4, e: BACK }); exit(toast, 19.9, { dy: -10, d: .3 });
+  enter($('#sel'), 18.95, { dy: 0, s: .97, d: .35 });
+  enter($('#selck'), 19.1, { dy: 0, s: .4, d: .4, e: BACK });
+  A($('#tbtn'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], 19.5, .4, IO);
+  A($('#tbtnB'), [{ opacity: 0, translate: '0px 54px' }, { opacity: 1, translate: '0px 0px' }], 19.75, .4, OUT);
+  const plus1 = $('#plus1');
+  A(plus1, [{ opacity: 0, translate: '0px 6px', scale: '.6' }, { opacity: 1, translate: '0px -14px', scale: '1', offset: .3 }, { opacity: 1, translate: '0px -20px', scale: '1', offset: .75 }, { opacity: 0, translate: '0px -30px', scale: '1' }], 20.05, 1.0, OUT);
+
+  // ---------- E · step 3 (22.7 → 29.7) ----------
+  scene($('#sE'), 22.7, 29.7);
+  enter($('#eK'), 22.85, { dy: 12 }); stagger(words($('#eH')), 22.95, .07, { dy: 34 }); enter($('#eP'), 23.3, { dy: 16 });
+  enter($('#rule'), 23.45, { dy: 22 });
+  $$('.day').forEach((el, i) => enter(el, stampTimes[i + 1] - .05, { dy: 16, s: .9, d: .45, e: BACK }));
+  enter($('#almost'), 25.7, { dy: 12, d: .5 });
+  A($('#almost'), [{ opacity: 1 }, { opacity: .35 }], 26.6, .4, 'linear');
+  enter($('#reward'), 27.0, { dy: 0, s: .92, d: .55, e: BACK });
+  stagger($$('#reward > *'), 27.1, .1, { dy: 16, d: .5 });
+  // burst from the phone
+  const fx = $('#fx'); const cols = ['#F5B544', '#C4B5FD', '#FAF9F6', '#FDE68A', '#A78BFA'];
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div'); p.className = 'pt' + (i % 3 === 0 ? ' star' : ''); p.style.background = cols[i % cols.length]; fx.appendChild(p);
+    const ang = (i / 22) * Math.PI * 2 + (i % 2 ? .12 : -.08), dist = 210 + (i * 37) % 140;
+    A(p, [{ opacity: 0, translate: '0px 0px', scale: '.3' }, { opacity: 1, offset: .12 }, { opacity: 0, translate: `${Math.cos(ang) * dist}px ${Math.sin(ang) * dist * .85}px`, scale: '1.1' }], 27.0 + (i % 4) * .03, 1.3, OUT);
+  }
+
+  // ---------- F · results (29.6 → 36.0) ----------
+  scene($('#sF'), 29.6, 36.0);
+  enter($('#fH'), 29.8, { dy: 24 }); enter($('#fP'), 30.05, { dy: 14 }); enter($('#fL'), 30.2, { dy: 10 });
+  const STATS = [
+    ['Fidelizzazione clienti', 'Accenture 2020', 127, '100', '127 clienti'],
+    ['Visite ripetute', 'Bond Brand Loyalty 2023', 160, '100', '160 visite'],
+    ['Fatturato per cliente', 'Harvard Business Review', 125, '€100', '€125'],
+    ['Valore vita cliente', 'Bain & Company', 130, '€100', '€130']
+  ];
+  const PX = 3.6; // px per unit, same scale for every bar
+  const rowsEl = $('#rows');
+  STATS.forEach(([lab, src, v, b0, b1], i) => {
+    const row = document.createElement('div'); row.className = 'row'; row.style.top = `${212 + i * 106}px`;
+    const w1 = v * PX;
+    row.innerHTML = `<div class="lab">${lab}</div><div class="src">Fonte: ${src}</div>
+      <div class="bar0"></div><div class="v0" style="left:${324 + 100 * PX + 10}px">${b0}</div>
+      <div class="bar1" style="width:${w1}px"></div><div class="v1" style="left:${324}px;width:${w1 - 12}px">${b1}</div>
+      <div class="delta" style="left:${324 + w1 + 22}px">+0%</div>`;
+    rowsEl.appendChild(row);
+    const t0 = 30.5 + i * .32;
+    enter(row, t0 - .15, { dy: 16, d: .5 });
+    A($('.bar0', row), [{ scale: '0 1' }, { scale: '1 1' }], t0, .6, OUT);
+    A($('.bar1', row), [{ scale: '0 1' }, { scale: '1 1' }], t0 + .2, 1.0, OUT);
+    A($('.v0', row), [{ opacity: 0 }, { opacity: 1 }], t0 + .5, .3, 'linear');
+    A($('.v1', row), [{ opacity: 0 }, { opacity: 1 }], t0 + 1.0, .3, 'linear');
+    const dEl = $('.delta', row); A(dEl, [{ opacity: 0, translate: '-14px 0px' }, { opacity: 1, translate: '0px 0px' }], t0 + .4, .6, OUT);
+    let last = -1;
+    hooks.push(t => { const p = Math.min(1, Math.max(0, (t - t0 - .2) / 1.0)); const e = 1 - Math.pow(1 - p, 3); const n = Math.round((v - 100) * e); if (n !== last) { dEl.textContent = `+${n}%`; last = n; } });
+  });
+
+  // ---------- G · for whom (35.9 → 41.4) ----------
+  scene($('#sG'), 35.9, 41.4);
+  stagger(words($('#gH')), 36.05, .06, { dy: 30 });
+  enter($('#whoB'), 36.4, { dx: -40, dy: 0, d: .8 }); enter($('#whoC'), 36.55, { dx: 40, dy: 0, d: .8 });
+  [['#whoB', 37.0], ['#whoC', 37.2]].forEach(([s, t0]) => $$(`${s} li`).forEach((li, i) => {
+    const t = t0 + i * .36;
+    enter(li, t, { dx: -14, dy: 0, d: .45 });
+    A($('path', li), [{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], t + .15, .4, OUT);
+  }));
+
+  // ---------- H · outro (41.3 → 46) ----------
+  scene($('#sH'), 41.3, D + 1);
+  $$('#tilesH .tile').forEach((el, i) => enter(el, 41.45 + i * .08, { dy: 0, s: .4, r: i % 2 ? 12 : -12, d: .7, e: BACK }));
+  stagger(words($('#hN')), 41.85, .1, { dy: 40, d: .8 });
+  enter($('#hT'), 42.3, { dy: 16 });
+  stagger($$('#hS .stat'), 42.7, .16, { dy: 22, d: .6 });
+  enter($('#urlpill'), 43.4, { dy: 18, s: .96 });
+
+  // ---------- clock & player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  const ICON_PLAY = '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>', ICON_PAUSE = '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>';
+  function ui() {
+    scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`);
+    timeEl.textContent = `${fmt(t)} / ${fmt(D)}`;
+    ppIcon.innerHTML = playing ? ICON_PAUSE : ICON_PLAY; pp.setAttribute('aria-label', playing ? 'Pausa' : 'Riproduci');
+    hint.hidden = playing;
+  }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) {
+    if (!playing) return;
+    const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now;
+    let nt = t + dt; if (nt >= D) { nt = D; playing = false; }
+    seek(nt); if (playing) requestAnimationFrame(frame);
+  }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle);
+  wrap.addEventListener('click', toggle);
+  $('#rs').addEventListener('click', () => { seek(0); play(); });
+  let wasPlaying = false;
+  scrub.addEventListener('pointerdown', () => { wasPlaying = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (wasPlaying) play(); wasPlaying = false; });
+  $('#fs').addEventListener('click', () => { try { const p = document.fullscreenElement ? document.exitFullscreen() : wrap.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
+  document.addEventListener('keydown', e => {
+    if (e.target.closest('input, textarea, select') && e.target !== scrub) return;
+    if (e.key === ' ' || e.key === 'k') { if (e.target.tagName === 'BUTTON') return; e.preventDefault(); toggle(); }
+    else if (e.key === 'ArrowRight' && e.target !== scrub) { seek(t + 5); }
+    else if (e.key === 'ArrowLeft' && e.target !== scrub) { seek(t - 5); }
+  });
+
+  // fit the 1280×720 stage into whatever box it gets (page width or fullscreen)
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 1280, h / 720); stage.style.transform = `translate(${(w - 1280 * s) / 2}px, ${(h - 720 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+
+  // chapter ticks + index
+  const ticks = $('#ticks'), list = $('#chapters');
+  CH.forEach((c, i) => {
+    if (i) { const tk = document.createElement('i'); tk.style.left = `calc(${(c[0] / D) * 100}% - 1px)`; ticks.appendChild(tk); }
+    const li = document.createElement('li');
+    li.innerHTML = `<button class="chap" type="button"><span class="ct">${fmt(c[0])}</span><span class="cn">${c[1]}</span><span class="cd">${c[2]}</span></button>`;
+    $('button', li).addEventListener('click', () => { seek(c[0] + .01); play(); });
+    list.appendChild(li);
+  });
+  function markChapter(i) { $$('.chap', list).forEach((b, k) => b.setAttribute('aria-current', k === i ? 'true' : 'false')); }
+
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 3.9 : 0);
+  if (!reduce) {
+    const go = () => { if (!playing && t === 0) play(); };
+    (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(go);
+  }
+})();
+</script>

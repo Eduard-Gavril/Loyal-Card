@@ -1,0 +1,339 @@
+<title>Carton vs telefon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Safe area for Reel + Story together: key content inside x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --ink: #120B24; --ink-2: #1D1438; --violet: #7C3AED; --violet-d: #6D28D9; --lilac: #C4B5FD;
+  --cream: #FAF9F6; --amber: #F5B544; --mint: #6EE7B7; --coral: #FF7A7A; --paper: #F1E8D8; --stamp-ink: #8A2C3E;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--ink); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--ink); color: var(--cream); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--cream); }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(196, 181, 253, .28); background: rgba(124, 58, 237, .22); color: var(--cream); display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--lilac); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--violet) 0 var(--p, 0%), rgba(250, 249, 246, .16) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); border: 3px solid var(--violet); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(250, 249, 246, .78); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(18, 11, 36, .62); border: 2px solid rgba(196, 181, 253, .5); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+.w { display: inline-block; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+#g1 { width: 900px; height: 900px; left: -420px; top: -300px; background: radial-gradient(closest-side, rgba(124, 58, 237, .45), rgba(124, 58, 237, 0)); }
+#g2 { width: 1000px; height: 1000px; left: 120px; top: 620px; background: radial-gradient(closest-side, rgba(91, 33, 182, .6), rgba(91, 33, 182, 0)); }
+#grain { position: absolute; inset: 0; background-image: radial-gradient(rgba(196, 181, 253, .07) 1px, transparent 1.2px); background-size: 24px 24px; }
+
+.hx { font-weight: 800; font-size: 60px; line-height: 1.04; letter-spacing: -.028em; text-wrap: balance; }
+.hl { position: relative; display: inline-block; isolation: isolate; margin-left: .14em; }
+.hl .mk { position: absolute; inset: 4px -7px 0; border-radius: 12px; transform-origin: 0 50%; z-index: -1; }
+.hl.amber .mk { background: var(--amber); }
+.hl.lilac .mk { background: var(--lilac); }
+.lead { font-size: 26px; line-height: 1.35; color: rgba(250, 249, 246, .78); }
+
+/* paper card */
+.paper-wrap { position: absolute; left: 180px; top: 432px; width: 360px; height: 214px; scale: 1.25; }
+.wig { width: 100%; height: 100%; }
+.paper { width: 100%; height: 100%; border-radius: 14px; background: var(--paper); color: #4A3426; padding: 20px 22px; box-sizing: border-box; box-shadow: 0 22px 50px rgba(0, 0, 0, .5); display: grid; grid-template-rows: auto 1fr auto; gap: 10px;
+  background-image: radial-gradient(rgba(74, 52, 38, .06) 1px, transparent 1px); background-size: 5px 5px; }
+.paper-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.paper-name { font-family: var(--f-mono); font-weight: 500; font-size: 15px; letter-spacing: .16em; }
+.paper-kind { font-family: var(--f-display); font-size: 18px; }
+.paper-stamps { display: flex; gap: 10px; align-items: center; }
+.ps { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed rgba(74, 52, 38, .45); display: grid; place-items: center; box-sizing: border-box; }
+.ps.on { border: 2.5px solid var(--stamp-ink); color: var(--stamp-ink); opacity: .85; }
+.ps.on svg { width: 22px; height: 22px; }
+.paper-foot { font-family: var(--f-mono); font-size: 13px; color: rgba(74, 52, 38, .7); }
+.nrow { position: absolute; left: 0; width: 720px; display: flex; justify-content: center; }
+.nchip { display: inline-flex; align-items: center; gap: 14px; padding: 12px 22px 12px 14px; border-radius: 16px; background: rgba(255, 122, 122, .12); border: 1.5px solid rgba(255, 122, 122, .55); font-size: 28px; font-weight: 700; }
+.nchip i { width: 34px; height: 34px; border-radius: 50%; background: var(--coral); color: #3A0B0B; display: grid; place-items: center; font-style: normal; font-size: 20px; font-weight: 800; }
+
+/* phone */
+#phone { position: absolute; left: 210px; top: 360px; width: 300px; height: 600px; border-radius: 48px; background: #0B0716; padding: 10px; box-sizing: border-box; transform-origin: 50% 60%;
+  box-shadow: 0 0 0 1.5px rgba(196, 181, 253, .4), 0 40px 80px rgba(0, 0, 0, .55), 0 0 140px rgba(124, 58, 237, .35); }
+.screen { position: relative; width: 280px; height: 580px; border-radius: 38px; overflow: hidden; background: var(--cream); color: #1B1530; }
+.notch { position: absolute; left: 95px; top: 10px; width: 90px; height: 24px; border-radius: 12px; background: #0B0716; }
+.sbar { position: absolute; left: 26px; top: 13px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; }
+.url { position: absolute; left: 16px; top: 44px; width: 248px; height: 28px; border-radius: 14px; background: #ECE7F7; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-mono); font-size: 12px; color: #4B4166; }
+.url svg { width: 11px; height: 11px; }
+.shop { position: absolute; left: 12px; top: 82px; width: 256px; height: 76px; border-radius: 18px; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: var(--cream); }
+.shop .ico { position: absolute; left: 14px; top: 16px; width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, #FBBF24, #F97316); display: grid; place-items: center; }
+.shop .ico svg { width: 24px; height: 24px; }
+.shop .nm { position: absolute; left: 70px; top: 17px; font-weight: 600; font-size: 17px; }
+.shop .kd { position: absolute; left: 70px; top: 41px; font-size: 13px; color: #DDD6FE; }
+.p-muted { color: #6B6380; }
+.qr-box { position: absolute; left: 50px; top: 204px; width: 180px; height: 180px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #E4DEF2; display: grid; place-items: center; }
+.qr-box svg { width: 152px; height: 152px; display: block; }
+#beam { position: absolute; left: 40px; top: 204px; width: 200px; height: 4px; border-radius: 2px; background: #8B5CF6; box-shadow: 0 0 14px 4px rgba(139, 92, 246, .65); }
+.stamps { position: absolute; left: 18px; top: 448px; display: flex; gap: 8px; }
+.st { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 2px dashed #CFC6E6; box-sizing: border-box; }
+.st-fill { position: absolute; inset: -2px; border-radius: 50%; background: linear-gradient(135deg, #A78BFA, #6D28D9); display: grid; place-items: center; box-shadow: 0 4px 10px rgba(109, 40, 217, .35); }
+.st-fill svg { width: 18px; height: 18px; }
+.st-ring { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--amber); box-sizing: border-box; opacity: 0; }
+#count { position: absolute; left: 0; width: 280px; top: 492px; text-align: center; font-family: var(--f-mono); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+#plus1 { position: absolute; left: 206px; top: 486px; padding: 3px 9px; border-radius: 10px; background: var(--amber); color: #3B2300; font-family: var(--f-mono); font-size: 13px; font-weight: 500; }
+#toast { position: absolute; left: 40px; top: 164px; width: 200px; height: 32px; border-radius: 16px; background: #DDF7EC; color: #0B6B47; display: grid; place-items: center; font-size: 13px; font-weight: 600; box-shadow: 0 6px 16px rgba(11, 107, 71, .18); }
+#reward { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 35%, #8B5CF6, #4C1D95 70%); color: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 0 24px; }
+#reward .gift { width: 84px; height: 84px; border-radius: 26px; background: linear-gradient(135deg, #FBBF24, #F97316); display: grid; place-items: center; box-shadow: 0 14px 30px rgba(249, 115, 22, .4); }
+#reward .gift svg { width: 44px; height: 44px; }
+#reward .won { font-weight: 800; font-size: 23px; letter-spacing: .04em; }
+#reward .what { font-family: var(--f-display); font-size: 34px; color: #FDE68A; }
+.fchip { position: absolute; max-width: 186px; padding: 12px 16px; box-sizing: border-box; border-radius: 14px; border: 1.5px solid rgba(110, 231, 183, .55); background: rgba(29, 20, 56, .85); font-size: 19px; font-weight: 600; line-height: 1.25; text-align: center; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+.fchip b { color: var(--mint); }
+.pt { position: absolute; left: 354px; top: 654px; width: 12px; height: 12px; border-radius: 50%; }
+.pt.star { width: 18px; height: 18px; border-radius: 0; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+
+/* offer */
+#free { font-weight: 900; font-size: 128px; line-height: .95; letter-spacing: -.035em; color: var(--amber); text-shadow: 0 10px 40px rgba(245, 181, 68, .35); }
+#free .w { display: inline-block; }
+#plan { width: 520px; padding: 22px 26px; box-sizing: border-box; border-radius: 22px; background: rgba(250, 249, 246, .06); border: 1px solid rgba(196, 181, 253, .3); display: grid; gap: 14px; text-align: left; margin-top: 10px; }
+#plan .k { font-family: var(--f-mono); font-size: 15px; letter-spacing: .18em; color: var(--lilac); }
+#plan .r { display: flex; align-items: center; gap: 14px; font-size: 25px; font-weight: 600; }
+.ck { width: 32px; height: 32px; border-radius: 50%; background: rgba(110, 231, 183, .16); display: grid; place-items: center; flex: none; }
+.ck svg { width: 17px; height: 17px; }
+.ck path { stroke-dasharray: 24; }
+#fast { display: flex; align-items: center; gap: 12px; font-size: 28px; font-weight: 700; margin-top: 6px; }
+#fast svg { width: 40px; height: 40px; }
+#hand { transform-origin: 20px 22px; transform-box: view-box; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 18px; }
+#brand svg { width: 58px; height: 58px; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 28px; color: var(--cream); padding: 12px 24px; border-radius: 16px; background: var(--violet-d); box-shadow: 0 12px 30px rgba(109, 40, 217, .5); }
+#bio { font-size: 22px; font-weight: 600; color: rgba(250, 249, 246, .78); letter-spacing: .02em; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8zM7 2.5v2.5M10.5 2.5v2.5M14 2.5v2.5"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · duminică · 15 s</div>
+    <h1>Carton vs telefon</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: carduri din carton înlocuite de LoyalCard, oferta Starter gratuită">
+      <div id="stage">
+        <div class="glow" id="g1"></div><div class="glow" id="g2"></div><div id="grain"></div>
+
+        <!-- 1 · hook (0 → 4.35) -->
+        <div class="scene" id="s1">
+          <div class="col" id="h1" style="top:178px">
+            <div class="hx" id="h1t">Încă le dai clienților carduri din <span class="hl amber" id="hl1"><i class="mk"></i><span class="tx">carton?</span></span></div>
+          </div>
+          <div class="paper-wrap" id="card"><div class="wig" id="wig"><div class="paper" style="rotate:-3deg">
+            <div class="paper-top"><span class="paper-name">CAFÉ CENTRAL</span><span class="paper-kind">card de fidelitate</span></div>
+            <div class="paper-stamps"><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on"><svg><use href="#cup"/></svg></span><span class="ps on" id="lost"><svg><use href="#cup"/></svg></span><span class="ps"></span><span class="ps"></span></div>
+            <div class="paper-foot">Nume ____________</div></div></div></div>
+          <div class="nrow" style="top:742px"><div class="nchip" id="n1"><i>✕</i>Se pierd</div></div>
+          <div class="nrow" style="top:818px"><div class="nchip" id="n2"><i>✕</i>Rămân acasă</div></div>
+          <div class="nrow" style="top:894px"><div class="nchip" id="n3"><i>✕</i>Nu știi cine revine</div></div>
+        </div>
+
+        <!-- 2 · solution (4.2 → 10.4) -->
+        <div class="scene" id="s2">
+          <div class="col" style="top:178px">
+            <div class="hx" id="h2t">Mută-le pe <span class="hl lilac" id="hl2"><i class="mk"></i><span class="tx">telefon.</span></span></div>
+          </div>
+          <div class="fchip" id="c1" style="left:24px;top:440px"><b>✓</b> Fără aplicație</div>
+          <div class="fchip" id="c2" style="left:514px;top:540px"><b>✓</b> Fără înregistrare</div>
+        </div>
+        <div id="phone"><div class="screen">
+          <div class="notch"></div><div class="sbar">9:41</div>
+          <div class="url"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" d="M7 11V8a5 5 0 0110 0v3M5 11h14v10H5z"/></svg>loyalcard.net</div>
+          <div class="shop"><div class="ico"><svg style="color:#fff"><use href="#cup"/></svg></div><div class="nm">Café Central</div><div class="kd">Cafenea</div></div>
+          <div class="abs" style="left:0;width:280px;text-align:center;top:174px;font-weight:600;font-size:15px">Codul tău QR</div>
+          <div class="qr-box"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div>
+          <div id="beam"></div>
+          <div class="abs p-muted" style="left:30px;width:220px;text-align:center;top:396px;font-size:12.5px;line-height:1.4">Arată acest cod la casă pentru a acumula premii</div>
+          <div class="stamps" id="stamps"></div>
+          <div id="count">3 / 6 ștampile</div>
+          <div id="plus1">+1</div>
+          <div class="abs" style="left:0;width:280px;text-align:center;top:518px;font-size:12px;color:#9A5B00;font-weight:600">Cumpără 6 cafele → al 7-lea este GRATUIT</div>
+          <div id="toast">✓ Scanare reușită</div>
+          <div id="reward">
+            <div class="gift"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg></div>
+            <div class="won">PREMIU CÂȘTIGAT!</div>
+            <div class="what">Cafea gratuită</div>
+          </div>
+        </div></div>
+        <div class="scene" id="fx" style="pointer-events:none"></div>
+
+        <!-- 3 · offer (10.3 → 15) -->
+        <div class="scene" id="s3">
+          <div class="col" style="top:178px;gap:6px">
+            <div class="hx" id="start" style="font-size:58px">Începe</div>
+            <div id="free">GRATUIT</div>
+            <div id="plan">
+              <div class="k">PLANUL STARTER · 0€</div>
+              <div class="r"><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>1 locație</div>
+              <div class="r"><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>50 clienți activi / lună</div>
+              <div class="r"><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Scanner QR inclus</div>
+            </div>
+            <div id="fast"><svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="14" fill="none" stroke="#F5B544" stroke-width="3"/><path d="M16 4h8M20 4v4" stroke="#F5B544" stroke-width="3" stroke-linecap="round"/><path id="hand" d="M20 22V13" stroke="#FAF9F6" stroke-width="3" stroke-linecap="round"/></svg>Gata în 2 minute</div>
+            <div id="brand"><svg viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FAF9F6" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const exit = (el, t, o = {}) => { const { dx = 0, dy = -24, d = .4, e = IN } = o; return A(el, [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: `${dx}px ${dy}px` }], t, d, e); };
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const letters = el => { const t = el.textContent; el.textContent = ''; return [...t].map(ch => { const s = document.createElement('span'); s.className = 'w'; s.textContent = ch; el.appendChild(s); return s; }); };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+  const mark = (hl, t, ink) => { A($('.mk', hl), [{ scale: '0 1' }, { scale: '1 1' }], t, .4, OUT); A($('.tx', hl), [{ color: '#FAF9F6' }, { color: ink }], t + .08, .25, 'linear'); };
+
+  function qrPath(n = 25, seed = 20241) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`; return d;
+  }
+  $$('.qrp').forEach(p => p.setAttribute('d', qrPath()));
+
+  A($('#g1'), [{ translate: '0px 0px' }, { translate: '380px 520px' }], 0, D, 'linear');
+  A($('#g2'), [{ translate: '0px 0px' }, { translate: '-340px -460px' }], 0, D, 'linear');
+
+  // ---------- 1 · hook: readable from the very first frame ----------
+  scene($('#s1'), -0.05, 4.35); // already on screen at frame 0
+  A($('#h1'), [{ scale: '1.05' }, { scale: '1' }], 0, .9, OUT);
+  mark($('#hl1'), .3, '#2A1600');
+  const card = $('#card');
+  A(card, [{ rotate: '-6deg', translate: '0px 26px' }, { rotate: '0deg', translate: '0px 0px' }], 0, 1.1, OUT);
+  ['#n1', '#n2', '#n3'].forEach((s, i) => {
+    const t = 1.25 + i * .8;
+    enter($(s), t, { dy: 18, s: .8, d: .45, e: BACK });
+    A($('#wig'), [{ rotate: '0deg' }, { rotate: '5deg', offset: .25 }, { rotate: '-4deg', offset: .6 }, { rotate: '0deg' }], t, .42, 'linear');
+  });
+  A($('#lost'), [{ translate: '0px 0px', rotate: '0deg', opacity: .85 }, { translate: '30px 260px', rotate: '80deg', opacity: 0 }], 1.3, .9, IN);
+  A(card, [{ scale: '1.25', opacity: 1 }, { scale: '.12', opacity: 0 }], 3.75, .55, IN);
+  A(card, [{ rotate: '0deg', translate: '0px 0px' }, { rotate: '-70deg', translate: '300px -460px' }], 3.75, .55, IN);
+  exit($('#h1t'), 3.85); ['#n1', '#n2', '#n3'].forEach((s, i) => exit($(s), 3.8 + i * .04, { dy: 30 }));
+
+  // ---------- 2 · solution ----------
+  scene($('#s2'), 4.2, 10.4);
+  stagger(words($('#h2t')), 4.3, .08, { dy: 34 });
+  mark($('#hl2'), 4.75, '#2E1065');
+  const phone = $('#phone');
+  enter(phone, 4.35, { dy: 680, d: .8 });
+  enter($('#c1'), 5.0, { dx: -40, dy: 0, s: .9, e: BACK, d: .5 });
+  enter($('#c2'), 5.3, { dx: 40, dy: 0, s: .9, e: BACK, d: .5 });
+  A($('#beam'), [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 10px', offset: .1 }, { opacity: 1, translate: '0px 170px', offset: .9 }, { opacity: 0, translate: '0px 178px' }], 5.4, .75, 'linear');
+  const toast = $('#toast'); enter(toast, 6.1, { dy: -12, s: .9, d: .35, e: BACK }); exit(toast, 7.6, { dy: -10, d: .3 });
+  const stampsEl = $('#stamps'); const fillAt = [-1, -1, -1, 6.35, 6.95, 7.55];
+  fillAt.forEach(() => { const st = document.createElement('div'); st.className = 'st'; st.innerHTML = '<div class="st-ring"></div><div class="st-fill"><svg style="color:#fff"><use href="#cup"/></svg></div>'; stampsEl.appendChild(st); });
+  $$('.st-fill', stampsEl).forEach((f, i) => { if (fillAt[i] > 0) A(f, [{ scale: '0', opacity: 0 }, { scale: '1', opacity: 1 }], fillAt[i], .5, BACK); });
+  $$('.st-ring', stampsEl).forEach((r, i) => { if (fillAt[i] > 0) A(r, [{ scale: '1', opacity: 0 }, { scale: '1', opacity: .95, offset: .1 }, { scale: '2', opacity: 0 }], fillAt[i] + .05, .6, OUT); });
+  const plus1 = $('#plus1');
+  fillAt.filter(x => x > 0).forEach(t => A(plus1, [{ opacity: 0, translate: '0px 6px', scale: '.6' }, { opacity: 1, translate: '0px -12px', scale: '1.2', offset: .35 }, { opacity: 0, translate: '0px -26px', scale: '1' }], t + .02, .55, OUT));
+  const countEl = $('#count'); let lastN = -1;
+  hooks.push(t => { const n = fillAt.filter(x => t >= x).length; if (n !== lastN) { countEl.textContent = `${n} / 6 ștampile`; lastN = n; } });
+  enter($('#reward'), 8.1, { dy: 0, s: .9, d: .5, e: BACK });
+  stagger($$('#reward > *'), 8.2, .1, { dy: 16, d: .45 });
+  A(phone, [{ scale: '1' }, { scale: '1.06', offset: .35 }, { scale: '1' }], 8.05, .7, OUT);
+  const fx = $('#fx'); const cols = ['#F5B544', '#C4B5FD', '#FAF9F6', '#FDE68A', '#A78BFA'];
+  for (let i = 0; i < 26; i++) {
+    const p = document.createElement('div'); p.className = 'pt' + (i % 3 === 0 ? ' star' : ''); p.style.background = cols[i % cols.length]; fx.appendChild(p);
+    const ang = (i / 26) * Math.PI * 2 + (i % 2 ? .12 : -.08), dist = 240 + (i * 37) % 130;
+    A(p, [{ opacity: 0, translate: '0px 0px', scale: '.3' }, { opacity: 1, offset: .12 }, { opacity: 0, translate: `${Math.cos(ang) * dist * .9}px ${Math.sin(ang) * dist * 1.1}px`, scale: '1.2' }], 8.1 + (i % 4) * .03, 1.2, OUT);
+  }
+  A(phone, [{ translate: '0px 0px', opacity: 1 }, { translate: '0px -80px', opacity: 0 }], 9.9, .45, IN);
+  exit($('#h2t'), 9.9); exit($('#c1'), 9.9, { dx: -30, dy: 0 }); exit($('#c2'), 9.9, { dx: 30, dy: 0 });
+
+  // ---------- 3 · offer ----------
+  scene($('#s3'), 10.3, D + 1);
+  enter($('#start'), 10.4, { dy: 30, d: .5 });
+  stagger(letters($('#free')), 10.55, .045, { dy: 70, s: .5, d: .55, e: BACK });
+  A($('#free'), [{ scale: '1' }, { scale: '1.06', offset: .4 }, { scale: '1' }], 11.05, .5, OUT);
+  enter($('#plan'), 11.2, { dy: 24, d: .5 });
+  $$('#plan .r').forEach((r, i) => { const t = 11.4 + i * .2; enter(r, t, { dx: -16, dy: 0, d: .4 }); A($('path', r), [{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], t + .12, .35, OUT); });
+  enter($('#fast'), 12.15, { dy: 16, d: .45 });
+  A($('#hand'), [{ rotate: '0deg' }, { rotate: '360deg' }], 12.2, 1.2, IO);
+  enter($('#brand'), 12.6, { dy: 18, s: .92, d: .55, e: BACK });
+  enter($('#bio'), 12.9, { dy: 10, d: .4 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.7, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 1.2 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

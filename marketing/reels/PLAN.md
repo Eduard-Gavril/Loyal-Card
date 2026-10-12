@@ -31,7 +31,7 @@ Sono punti di partenza. Dopo 2–3 settimane conviene controllare in Instagram �
 Segnare `[x]` quando un tema è stato usato.
 
 **Un settore al giorno** (regola premio realistica per ogni settore)
-- [ ] Cafenea: 6 cafele → a 7-a gratuită
+- [x] Cafenea: 6 cafele → a 7-a gratuită (2026-10-12)
 - [ ] Frizerie / barbershop: 5 tunsori → a 6-a gratuită
 - [ ] Salon de înfrumusețare / unghii: 6 vizite → 20% reducere
 - [ ] Pizzerie: 8 pizza → o pizza gratuită
@@ -101,3 +101,4 @@ Segnare `[x]` quando un tema è stato usato.
 | Data | File | Serie | Tema | Orario consigliato (RO) |
 | --- | --- | --- | --- | --- |
 | 2026-10-11 (dom) | `2026-10-11-carton-vs-telefon.html` | L'offerta | Carton vs telefon + Starter gratuit | 20:30 |
+| 2026-10-12 (lun) | `2026-10-12-cafenea.html` | Un settore al giorno | Cafenea: la tazza si riempie a ogni timbro, stile chiaro "latte" | 20:30 (eccezione: il reel di domenica esce alle 08:30) |

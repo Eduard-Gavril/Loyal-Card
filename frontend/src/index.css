@@ -122,3 +122,129 @@ body {
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+/* Client card: a brand-new reward card appearing for the first time */
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Client card: a freshly earned stamp stamping itself onto the card */
+@keyframes stampPop {
+  0% {
+    opacity: 0;
+    transform: scale(2.4) rotate(-25deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.85) rotate(6deg);
+  }
+  75% {
+    transform: scale(1.12) rotate(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes stampRing {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+.animate-card-reveal {
+  animation: cardReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-stamp-pop {
+  animation: stampPop 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-stamp-ring {
+  animation: stampRing 0.8s ease-out both;
+}
+
+/* Reward completed: gold confetti */
+@keyframes confettiFall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -16px, 0) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx, 0px), 280px, 0) rotate(var(--rot, 540deg));
+  }
+}
+
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+  }
+  50% {
+    box-shadow: 0 0 22px 2px rgba(240, 214, 130, 0.55);
+  }
+}
+
+@keyframes confettiFallScreen {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -5vh, 0) rotate(0deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx, 0px), 108vh, 0) rotate(var(--rot, 720deg));
+  }
+}
+
+.animate-confetti-screen {
+  animation: confettiFallScreen 3.6s cubic-bezier(0.25, 0.5, 0.4, 1) both;
+}
+
+.animate-confetti {
+  animation: confettiFall 2.4s cubic-bezier(0.25, 0.6, 0.35, 1) both;
+}
+
+.animate-gold-pulse {
+  animation: goldPulse 1.2s ease-in-out 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-reveal,
+  .animate-stamp-pop,
+  .animate-stamp-ring,
+  .animate-gold-pulse {
+    animation: none;
+  }
+
+  .animate-confetti,
+  .animate-confetti-screen {
+    animation: none;
+    opacity: 0;
+  }
+}

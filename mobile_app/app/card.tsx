@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Animated, Easing } from 'react-native'
+import { useEffect, useLayoutEffect, useState, useRef } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Animated, Easing, AppState, AccessibilityInfo } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -28,6 +28,94 @@ function cleanRuleName(name: string): string {
     .replace(/\b(gratuit[ăa]?|gratuito|gratis|free|gratu[iī]t)\b/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
+}
+
+interface StampAnim { delay: number }
+
+// One stamp slot. When `anim` is set the stamp "hits" the card: it starts big
+// and rotated, springs down to size and sends out an expanding ring.
+function StampDot({ index, filled, anim }: { index: number; filled: boolean; anim: StampAnim | null }) {
+  const colors = useTheme()
+  const s = themedStyles(colors)
+  const scale = useRef(new Animated.Value(1)).current
+  const tilt = useRef(new Animated.Value(0)).current
+  const opacity = useRef(new Animated.Value(1)).current
+  const ring = useRef(new Animated.Value(0)).current
+  const animating = !!anim
+
+  useLayoutEffect(() => {
+    if (!anim) return
+    scale.setValue(2.4)
+    tilt.setValue(1)
+    opacity.setValue(0)
+    ring.setValue(0)
+    Animated.sequence([
+      Animated.delay(anim.delay),
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 1, duration: 120, useNativeDriver: true }),
+        Animated.spring(scale, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }),
+        Animated.timing(tilt, { toValue: 0, duration: 450, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(ring, { toValue: 1, duration: 800, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]),
+    ]).start()
+  }, [animating])
+
+  return (
+    <View style={s.stampSlot}>
+      {animating && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            s.stampRing,
+            {
+              opacity: ring.interpolate({ inputRange: [0, 1], outputRange: [0.9, 0] }),
+              transform: [{ scale: ring.interpolate({ inputRange: [0, 1], outputRange: [0.6, 2.1] }) }],
+            },
+          ]}
+        />
+      )}
+      <Animated.View
+        style={[
+          s.stampDot,
+          filled ? s.stampDotFilled : s.stampDotEmpty,
+          {
+            opacity,
+            transform: [
+              { scale },
+              { rotate: tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-25deg'] }) },
+            ],
+          },
+        ]}
+      >
+        {filled ? (
+          <Ionicons name="checkmark" size={18} color="#fff" />
+        ) : (
+          <Text style={s.stampNumber}>{index + 1}</Text>
+        )}
+      </Animated.View>
+    </View>
+  )
+}
+
+// Brand-new reward card: slides up with a small bounce the first time it appears
+function RevealView({ reveal, children }: { reveal: boolean; children: React.ReactNode }) {
+  const v = useRef(new Animated.Value(reveal ? 0 : 1)).current
+  useEffect(() => {
+    if (reveal) Animated.spring(v, { toValue: 1, friction: 6, tension: 60, useNativeDriver: true }).start()
+  }, [])
+  return (
+    <Animated.View
+      style={{
+        opacity: v.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 1] }),
+        transform: [
+          { translateY: v.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) },
+          { scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
+  )
 }
 
 function RuleTagline({ rule, t }: { rule: RewardRule; t: ReturnType<typeof getTranslation> }) {
@@ -70,6 +158,13 @@ export default function CardScreen() {
   const [rules, setRules] = useState<RewardRule[]>([])
   const [loyaltyState, setLoyaltyState] = useState<LoyaltyState>({})
   const [showOffers, setShowOffers] = useState(false)
+  const [anim, setAnim] = useState<{ newRules: string[]; stamps: Record<string, [number, number]> }>({
+    newRules: [],
+    stamps: {},
+  })
+  const loyaltyRef = useRef<LoyaltyState | null>(null)
+  const animTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reduceMotion = useRef(false)
   const qrScale = useRef(new Animated.Value(0.6)).current
   const qrOpacity = useRef(new Animated.Value(0)).current
 
@@ -99,17 +194,84 @@ export default function CardScreen() {
   }, [storedClientId])
 
   useEffect(() => {
+    AccessibilityInfo.isReduceMotionEnabled().then((v) => { reduceMotion.current = v }).catch(() => {})
+    return () => { if (animTimer.current) clearTimeout(animTimer.current) }
+  }, [])
+
+  // Applies a fresh loyalty_state. With `animate` it diffs against the previous
+  // snapshot: a rule going from empty to stamped is a "new card", a rule whose
+  // count grew animates only the stamps just added. The first load never animates.
+  function applyLoyalty(next: LoyaltyState, animate: boolean) {
     if (!qrCode) return
-    supabase
+    const prev = loyaltyRef.current
+    loyaltyRef.current = next
+    setLoyaltyState(next)
+    recordLoyaltyProgress({ [qrCode]: next })
+    if (!animate || !prev || reduceMotion.current) return
+
+    const newRules: string[] = []
+    const stamps: Record<string, [number, number]> = {}
+    for (const ruleId of Object.keys(next)) {
+      const before = prev[ruleId]?.count ?? 0
+      const beforeRewards = prev[ruleId]?.rewards ?? 0
+      const after = next[ruleId]?.count ?? 0
+      if (after > before) {
+        stamps[ruleId] = [before, after]
+        if (before === 0 && beforeRewards === 0) newRules.push(ruleId)
+      }
+    }
+    if (Object.keys(stamps).length === 0) return
+
+    setAnim({ newRules, stamps })
+    if (animTimer.current) clearTimeout(animTimer.current)
+    animTimer.current = setTimeout(() => setAnim({ newRules: [], stamps: {} }), 4500)
+  }
+
+  async function fetchLoyalty(animate: boolean) {
+    if (!qrCode) return
+    const { data, error } = await supabase
       .from('cards')
       .select('loyalty_state')
       .eq('qr_code', qrCode)
       .maybeSingle()
-      .then(({ data }) => {
-        const state = (data?.loyalty_state as LoyaltyState) ?? {}
-        setLoyaltyState(state)
-        recordLoyaltyProgress({ [qrCode]: state })
+    // A failed read (offline, timeout) must never blank out the stamps on screen
+    // or overwrite the progress saved on the device.
+    if (error) return
+    if (!data && animate) return
+    applyLoyalty((data?.loyalty_state as LoyaltyState) ?? {}, animate)
+  }
+
+  useEffect(() => {
+    if (!qrCode) return
+    loyaltyRef.current = null
+    fetchLoyalty(false).catch(() => {})
+
+    // Live updates: the store's scan updates this card row, Realtime pushes it here.
+    // Failures are non-fatal, the screen then behaves as before.
+    const channel = supabase
+      .channel(`card-${qrCode}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'cards', filter: `qr_code=eq.${qrCode}` },
+        (payload) => {
+          const next = (payload.new as { loyalty_state?: LoyaltyState }).loyalty_state
+          if (next) applyLoyalty(next, true)
+        }
+      )
+      .subscribe((status) => {
+        // Events fired while the socket was down (or not yet open) are not replayed
+        if (status === 'SUBSCRIBED') fetchLoyalty(true).catch(() => {})
       })
+
+    // The OS suspends the socket in background: re-read the card on return.
+    const appStateSub = AppState.addEventListener('change', (st) => {
+      if (st === 'active') fetchLoyalty(true).catch(() => {})
+    })
+
+    return () => {
+      appStateSub.remove()
+      supabase.removeChannel(channel)
+    }
   }, [qrCode])
 
   // Per-rule progress, ordered by rule priority (rules arrive sorted); entries
@@ -232,8 +394,11 @@ export default function CardScreen() {
                 const capped = Math.min(item.count, item.buyCount)
                 const pct = item.buyCount > 0 ? capped / item.buyCount : 0
                 const ready = item.rewards > 0
+                const range = anim.stamps[item.id]
+                const isNewCard = anim.newRules.includes(item.id)
                 return (
-                  <View key={item.id} style={s.progressCard}>
+                  <RevealView key={item.id} reveal={isNewCard}>
+                  <View style={s.progressCard}>
                     <View style={s.progressHeader}>
                       <Text style={s.progressName} numberOfLines={1}>
                         {item.name ?? tenantName ?? 'LoyalCard'}
@@ -251,6 +416,19 @@ export default function CardScreen() {
                         ]}
                       />
                     </View>
+                    <View style={s.stampsRow}>
+                      {Array.from({ length: item.buyCount }, (_, i) => {
+                        const isNew = !!range && i >= range[0] && i < range[1] && i < capped
+                        return (
+                          <StampDot
+                            key={i}
+                            index={i}
+                            filled={i < capped}
+                            anim={isNew ? { delay: (isNewCard ? 500 : 0) + (i - range[0]) * 220 } : null}
+                          />
+                        )
+                      })}
+                    </View>
                     {ready && (
                       <View style={s.rewardBanner}>
                         <Ionicons name="gift" size={16} color={colors.success} />
@@ -263,6 +441,7 @@ export default function CardScreen() {
                       </View>
                     )}
                   </View>
+                  </RevealView>
                 )
               })}
             </View>
@@ -413,6 +592,19 @@ const themedStyles = createThemedStyles((colors) => StyleSheet.create({
   progressTrack: { height: 6, backgroundColor: colors.bgDeep, borderRadius: 3, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
   progressFillDone: { backgroundColor: colors.success },
+  stampsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  stampSlot: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+  stampRing: {
+    position: 'absolute', width: 34, height: 34, borderRadius: 17,
+    borderWidth: 2, borderColor: colors.primary,
+  },
+  stampDot: {
+    width: 34, height: 34, borderRadius: 17,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 1.5,
+  },
+  stampDotFilled: { backgroundColor: colors.primary, borderColor: colors.primary },
+  stampDotEmpty: { backgroundColor: colors.bgDeep, borderColor: colors.border },
+  stampNumber: { color: colors.inkFaint, fontSize: 11, fontWeight: '700' },
   rewardBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: colors.successSoft,

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
-import { api, Card as CardType, RewardRule, Tenant } from '@/lib/supabase'
+import { api, supabase, Card as CardType, RewardRule, Tenant } from '@/lib/supabase'
 import StaticBackground from '@/components/StaticBackground'
 import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
@@ -28,6 +29,32 @@ const INIT_ERROR_MESSAGES: Record<string, { body: string; retry: string }> = {
   it: { body: 'Non siamo riusciti a caricare la tua tessera. Riprova.', retry: 'Riprova' },
   ro: { body: 'Nu am putut încărca cardul tău. Încearcă din nou.', retry: 'Încearcă din nou' },
 }
+
+// Gold confetti for a completed reward: light gold and dark gold, deterministic
+// so the burst looks the same on every render.
+const GOLD_LIGHT = ['#FFF1B8', '#F8E08E', '#F0D682']
+const GOLD_DARK = ['#B8860B', '#C9A227', '#D4AF37']
+const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
+  left: 4 + ((i * 37) % 92),
+  delay: (i % 8) * 90,
+  size: 6 + (i % 4) * 2,
+  dx: ((i % 5) - 2) * 18,
+  rot: 360 + (i % 3) * 180,
+  color: i % 2 === 0 ? GOLD_LIGHT[i % 3] : GOLD_DARK[i % 3],
+  round: i % 3 === 0,
+}))
+
+// Full-screen variant: more pieces, wider drift, varied fall speed
+const SCREEN_CONFETTI = Array.from({ length: 70 }, (_, i) => ({
+  left: (i * 53) % 100,
+  delay: (i % 12) * 80,
+  duration: 3000 + (i % 6) * 350,
+  size: 7 + (i % 5) * 2,
+  dx: ((i % 7) - 3) * 28,
+  rot: 540 + (i % 4) * 180,
+  color: i % 2 === 0 ? GOLD_LIGHT[i % 3] : GOLD_DARK[i % 3],
+  round: i % 4 === 0,
+}))
 
 function categoryLabel(type: string, language: string): string {
   const labels: Record<string, Record<string, string>> = {
@@ -201,6 +228,95 @@ export default function ClientCard() {
     init()
   }, [])
 
+  // Detect what changed between two card snapshots so the UI can animate it:
+  // a rule that had no progress before gets a "new card" reveal, a rule that
+  // already had stamps animates only the stamps just added. The first snapshot
+  // of a card is only recorded, so loading the page never animates.
+  const prevLoyalty = useRef<{ id: string; state: CardType['loyalty_state'] } | null>(null)
+  const animTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [anim, setAnim] = useState<{
+    newRules: string[]
+    stamps: Record<string, [number, number]>
+    rewards: string[]
+  }>({ newRules: [], stamps: {}, rewards: [] })
+
+  // Layout effect: the animation state must be committed before the browser
+  // paints, otherwise the new stamp/card flashes in at full size for one frame.
+  useLayoutEffect(() => {
+    if (!card) return
+    const next = card.loyalty_state || {}
+    const prev = prevLoyalty.current
+    prevLoyalty.current = { id: card.id, state: next }
+    if (!prev || prev.id !== card.id) return
+
+    const newRules: string[] = []
+    const stamps: Record<string, [number, number]> = {}
+    const rewards: string[] = []
+    for (const ruleId of Object.keys(next)) {
+      const before = prev.state?.[ruleId]?.count ?? 0
+      const beforeRewards = prev.state?.[ruleId]?.rewards ?? 0
+      const after = next[ruleId]?.count ?? 0
+      if (after > before) {
+        stamps[ruleId] = [before, after]
+        if (before === 0 && beforeRewards === 0) newRules.push(ruleId)
+      }
+      if ((next[ruleId]?.rewards ?? 0) > beforeRewards) rewards.push(ruleId)
+    }
+    if (Object.keys(stamps).length === 0 && rewards.length === 0) return
+
+    setAnim({ newRules, stamps, rewards })
+    if (animTimer.current) clearTimeout(animTimer.current)
+    animTimer.current = setTimeout(() => setAnim({ newRules: [], stamps: {}, rewards: [] }), 6000)
+  }, [card])
+
+  useEffect(() => () => {
+    if (animTimer.current) clearTimeout(animTimer.current)
+  }, [])
+
+  // Live stamp updates: when the store scans the card, the row in `cards`
+  // changes and Supabase Realtime pushes it here. Failures are non-fatal;
+  // the page then behaves as before (manual refresh).
+  const cardId = card?.id
+  useEffect(() => {
+    if (!cardId) return
+
+    const refetch = () => {
+      supabase
+        .from('cards')
+        .select('*')
+        .eq('id', cardId)
+        .single()
+        .then(({ data }) => {
+          if (data) setCard((prev) => (prev ? { ...prev, ...(data as CardType) } : prev))
+        })
+    }
+
+    const channel = supabase
+      .channel(`card-${cardId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'cards', filter: `id=eq.${cardId}` },
+        (payload) => {
+          setCard((prev) => (prev ? { ...prev, ...(payload.new as Partial<CardType>) } : prev))
+        }
+      )
+      .subscribe((status) => {
+        // Events fired while the socket was down (or not yet open) are not replayed
+        if (status === 'SUBSCRIBED') refetch()
+      })
+
+    // Browsers suspend WebSockets in background tabs: re-read the card on return.
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') refetch()
+    }
+    document.addEventListener('visibilitychange', handleVisible)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisible)
+      supabase.removeChannel(channel)
+    }
+  }, [cardId])
+
   useEffect(() => {
     if (!card?.client_id) return
     api.getClient(card.client_id)
@@ -275,6 +391,30 @@ export default function ClientCard() {
 
   return (
     <div className="relative min-h-screen overflow-auto">
+      {/* Reward completed: gold confetti over the whole screen (portal escapes any transformed ancestor) */}
+      {anim.rewards.length > 0 && createPortal(
+        <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden" aria-hidden="true">
+          {SCREEN_CONFETTI.map((c, i) => (
+            <span
+              key={i}
+              className="absolute top-0 animate-confetti-screen"
+              style={{
+                left: `${c.left}%`,
+                width: c.size,
+                height: c.round ? c.size : c.size * 1.6,
+                borderRadius: c.round ? '9999px' : '2px',
+                background: `linear-gradient(135deg, ${c.color}, ${i % 2 === 0 ? '#C9A227' : '#F8E08E'})`,
+                animationDelay: `${c.delay}ms`,
+                animationDuration: `${c.duration}ms`,
+                ['--dx' as string]: `${c.dx}px`,
+                ['--rot' as string]: `${c.rot}deg`,
+              }}
+            />
+          ))}
+        </div>,
+        document.body
+      )}
+
       <div className="fixed inset-0 z-0 overflow-hidden"><StaticBackground /></div>
       <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
 
@@ -604,7 +744,9 @@ export default function ClientCard() {
               return (
                 <div
                   key={rule.id}
-                  className="relative overflow-hidden rounded-2xl transition-all duration-300"
+                  className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${
+                    anim.newRules.includes(rule.id) ? 'animate-card-reveal' : ''
+                  }`}
                   style={{
                     background: `
                       linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0) 60%),
@@ -626,6 +768,28 @@ export default function ClientCard() {
                     className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-2xl pointer-events-none"
                     style={{ background: `${brandColor}18` }}
                   />
+
+                  {/* Reward completed: gold confetti */}
+                  {anim.rewards.includes(rule.id) && (
+                    <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden" aria-hidden="true">
+                      {CONFETTI.map((c, i) => (
+                        <span
+                          key={i}
+                          className="absolute top-0 animate-confetti"
+                          style={{
+                            left: `${c.left}%`,
+                            width: c.size,
+                            height: c.round ? c.size : c.size * 1.6,
+                            borderRadius: c.round ? '9999px' : '2px',
+                            background: `linear-gradient(135deg, ${c.color}, ${i % 2 === 0 ? '#C9A227' : '#F8E08E'})`,
+                            animationDelay: `${c.delay}ms`,
+                            ['--dx' as string]: `${c.dx}px`,
+                            ['--rot' as string]: `${c.rot}deg`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
 
                   <div className="relative p-5 sm:p-6">
                     {/* Header */}
@@ -684,11 +848,25 @@ export default function ClientCard() {
 
                     {/* Stamps */}
                     <div className="flex flex-wrap gap-2.5">
-                      {stamps.map((isFilled, index) => (
+                      {stamps.map((isFilled, index) => {
+                        const range = anim.stamps[rule.id]
+                        const isNew = isFilled && !!range && index >= range[0] && index < range[1]
+                        // New cards wait for the reveal to finish before stamping
+                        const delay = (anim.newRules.includes(rule.id) ? 500 : 0) + (isNew ? (index - range[0]) * 220 : 0)
+                        return (
+                        <div key={index} className="relative w-11 h-11">
+                          {isNew && (
+                            <div
+                              className="absolute inset-0 rounded-full animate-stamp-ring pointer-events-none"
+                              style={{ border: `2px solid ${brandColor}`, animationDelay: `${delay + 150}ms` }}
+                            />
+                          )}
                         <div
-                          key={index}
-                          className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                          className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 overflow-hidden ${
+                            isNew ? 'animate-stamp-pop' : ''
+                          }`}
                           style={isFilled ? {
+                            ...(isNew ? { animationDelay: `${delay}ms` } : {}),
                             border: `2px solid ${brandColor}90`,
                             boxShadow: `0 4px 16px ${brandColor}50, inset 0 1px 0 rgba(255,255,255,0.2)`,
                           } : {
@@ -717,14 +895,21 @@ export default function ClientCard() {
                             <span className="text-white/20 text-xs font-bold">{index + 1}</span>
                           )}
                         </div>
-                      ))}
+                        </div>
+                        )
+                      })}
                     </div>
 
                     {/* Reward ready banner */}
                     {progress.rewards > 0 && (
                       <div
-                        className="mt-4 p-3 rounded-xl flex items-center gap-3"
-                        style={{
+                        className={`mt-4 p-3 rounded-xl flex items-center gap-3 ${
+                          anim.rewards.includes(rule.id) ? 'animate-gold-pulse' : ''
+                        }`}
+                        style={anim.rewards.includes(rule.id) ? {
+                          background: 'linear-gradient(135deg, rgba(248,224,142,0.18), rgba(184,134,11,0.18))',
+                          border: '1px solid rgba(240,214,130,0.55)',
+                        } : {
                           background: 'rgba(34,197,94,0.12)',
                           border: '1px solid rgba(34,197,94,0.25)',
                         }}

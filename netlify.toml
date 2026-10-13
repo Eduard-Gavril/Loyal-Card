@@ -7,7 +7,11 @@
   # touching only mobile_app/, supabase/, docs/, etc. no longer trigger a
   # rebuild. git diff --quiet exits 0 (= "nothing changed" = skip) when the
   # path is untouched, non-zero (= proceed) when it is.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- frontend/ netlify.toml"
+  # The command runs from the base directory (frontend/), so paths are relative
+  # to it: "." is frontend/ itself and "../netlify.toml" is this file. Writing
+  # "frontend/" here matches nothing from inside frontend/, so git sees "no
+  # changes" and every build is skipped, even commits that touch the frontend.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../netlify.toml"
 
 [build.environment]
   NODE_VERSION = "18"

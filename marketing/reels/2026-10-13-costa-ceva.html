@@ -1,0 +1,243 @@
+<title>Costă ceva?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Domanda e risposta" #1: Costă ceva? Flat brand-violet world, chat bubbles.
+   Safe area for Reel + Story together: key content inside x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --v1: #5B21B6; --v2: #3B0F7A; --v3: #7C3AED; --cream: #FAF9F6; --lilac: #EDE9FE; --lilac-2: #C4B5FD; --amber: #F5B544; --mint: #6EE7B7; --ink: #1B1530;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--v2); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--v1); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--v1); color: var(--cream); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--cream); }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(196, 181, 253, .35); background: rgba(124, 58, 237, .3); color: var(--cream); display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--lilac-2); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(250, 249, 246, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(250, 249, 246, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(27, 21, 48, .55); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bgq { position: absolute; left: 50%; top: 50%; width: 900px; height: 1100px; margin: -560px 0 0 -450px; font-family: var(--f-display); font-size: 1100px; line-height: 1; text-align: center; color: rgba(255, 255, 255, .06); pointer-events: none; }
+#shade { position: absolute; inset: 0; background: radial-gradient(70% 50% at 20% 10%, rgba(124, 58, 237, .55), transparent 70%), radial-gradient(80% 60% at 90% 100%, rgba(59, 15, 122, .8), transparent 70%); }
+#tag { position: absolute; left: 0; width: 720px; top: 178px; display: flex; justify-content: center; }
+#tag span { font-family: var(--f-mono); font-size: 16px; font-weight: 500; letter-spacing: .18em; padding: 9px 16px; border-radius: 999px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); }
+#big { position: absolute; left: 0; width: 720px; top: 300px; text-align: center; font-weight: 900; font-size: 168px; line-height: .9; letter-spacing: -.045em; transform-origin: 50% 0; }
+#big .q { color: var(--amber); }
+
+.bub { position: absolute; max-width: 500px; padding: 18px 26px; box-sizing: border-box; border-radius: 30px; font-size: 32px; font-weight: 600; line-height: 1.25; box-shadow: 0 14px 30px rgba(27, 10, 60, .3); }
+.bub.l { left: 48px; background: var(--cream); color: var(--ink); border-bottom-left-radius: 8px; transform-origin: 0 100%; }
+.bub.r { right: 80px; background: var(--lilac); color: var(--ink); border-bottom-right-radius: 8px; transform-origin: 100% 100%; text-align: left; }
+.bub.r b { color: var(--v3); }
+.who { position: absolute; font-family: var(--f-mono); font-size: 14px; letter-spacing: .14em; color: rgba(250, 249, 246, .7); }
+.typing { position: absolute; right: 80px; width: 130px; height: 64px; border-radius: 32px; border-bottom-right-radius: 8px; background: var(--lilac); display: flex; align-items: center; justify-content: center; gap: 10px; transform-origin: 100% 100%; }
+.typing i { width: 15px; height: 15px; border-radius: 50%; background: var(--v3); }
+.typing i:last-child { background: transparent; border: 3px solid var(--v3); box-sizing: border-box; }
+
+#zero { position: absolute; left: 0; width: 720px; top: 500px; text-align: center; font-family: var(--f-display); font-size: 300px; line-height: 1; color: var(--amber); text-shadow: 0 18px 50px rgba(245, 181, 68, .3); }
+#zeroL { position: absolute; left: 0; width: 720px; top: 820px; text-align: center; font-size: 36px; font-weight: 800; }
+#zeroC { position: absolute; left: 0; width: 720px; top: 886px; display: flex; justify-content: center; gap: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 14px; background: rgba(255, 255, 255, .12); border: 1.5px solid rgba(110, 231, 183, .55); font-size: 22px; font-weight: 700; }
+.chip b { color: var(--mint); }
+
+#plan { position: absolute; left: 80px; width: 560px; top: 652px; padding: 24px 28px; box-sizing: border-box; border-radius: 26px; background: rgba(255, 255, 255, .1); border: 1.5px solid rgba(255, 255, 255, .22); display: grid; gap: 14px; }
+#plan .k { font-family: var(--f-mono); font-size: 16px; font-weight: 500; letter-spacing: .18em; color: var(--amber); }
+#plan .r { display: flex; align-items: center; gap: 14px; font-size: 27px; font-weight: 700; }
+.ck { width: 34px; height: 34px; border-radius: 50%; background: rgba(110, 231, 183, .18); display: grid; place-items: center; flex: none; }
+.ck svg { width: 18px; height: 18px; }
+.ck path { stroke-dasharray: 24; }
+#grow { position: absolute; left: 0; width: 720px; top: 968px; text-align: center; font-family: var(--f-mono); font-size: 20px; color: rgba(250, 249, 246, .78); }
+
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+.hx { font-weight: 900; font-size: 84px; line-height: .98; letter-spacing: -.04em; text-wrap: balance; }
+#cm { display: flex; align-items: center; gap: 14px; font-size: 34px; font-weight: 700; color: var(--lilac); }
+#cm svg { width: 42px; height: 42px; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 34px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: var(--cream); box-shadow: 0 10px 24px rgba(27, 10, 60, .3); }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: var(--ink); padding: 12px 24px; border-radius: 16px; background: var(--amber); box-shadow: 0 12px 30px rgba(245, 181, 68, .35); }
+#bio { font-size: 25px; font-weight: 700; color: var(--cream); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · marți · 15 s · Întrebări frecvente #1</div>
+    <h1>Costă ceva?</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: Costă ceva? Pentru clienți complet gratuit, pentru afaceri planul Starter gratuit">
+      <div id="stage">
+        <div id="shade"></div>
+        <div id="bgq">?</div>
+        <div id="tag"><span>ÎNTREBĂRI FRECVENTE · 1 / 8</span></div>
+
+        <!-- hook: on screen at frame 0, then it shrinks into the chat -->
+        <div id="big">Costă<br>ceva<span class="q">?</span></div>
+
+        <div class="scene" id="chat">
+          <div class="who" id="whoQ" style="left:56px;top:240px">TU</div>
+          <div class="bub l" id="q1" style="top:268px">Costă ceva?</div>
+          <div class="typing" id="ty1" style="top:372px"><i></i><i></i><i></i><i></i></div>
+          <div class="who" id="whoA" style="right:86px;top:344px">LOYALCARD</div>
+          <div class="bub r" id="a1" style="top:372px">Pentru clienți: <b>complet gratuit.</b></div>
+          <div class="typing" id="ty2" style="top:512px"><i></i><i></i><i></i><i></i></div>
+          <div class="bub r" id="a2" style="top:512px">Pentru afaceri: începi cu <b>un plan gratuit.</b></div>
+        </div>
+
+        <div class="scene" id="free">
+          <div id="zero">0€</div>
+          <div id="zeroL">pentru clienții tăi</div>
+          <div id="zeroC"><span class="chip"><b>✓</b>Fără aplicație</span><span class="chip"><b>✓</b>Fără înregistrare</span></div>
+        </div>
+
+        <div class="scene" id="planS">
+          <div id="plan">
+            <div class="k">PLANUL STARTER · 0€</div>
+            <div class="r"><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>1 locație</div>
+            <div class="r"><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>50 clienți activi / lună</div>
+            <div class="r"><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>1 regulă de fidelitate</div>
+            <div class="r"><i class="ck"><svg viewBox="0 0 24 24"><path fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></i>Scanner QR de bază</div>
+          </div>
+          <div id="grow">Când crești: planul Business, 30€/lună</div>
+        </div>
+
+        <div class="scene" id="cta">
+          <div class="col" style="top:250px">
+            <div class="hx" id="ask">Ai altă <span style="color:var(--amber)">întrebare?</span></div>
+            <div id="cm"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 5h16v11H9l-5 4z"/></svg>Scrie-o în comentarii.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FAF9F6" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const exit = (el, t, o = {}) => { const { dx = 0, dy = -24, d = .4, e = IN } = o; return A(el, [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: `${dx}px ${dy}px` }], t, d, e); };
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+  const loop = (el, kf, ms, offset = 0) => { const a = el.animate(kf, { duration: ms, iterations: Infinity, delay: -offset }); a.pause(); anims.push(a); };
+  const pop = (el, t) => A(el, [{ opacity: 0, scale: '.4', translate: '0px 20px' }, { opacity: 1, scale: '1', translate: '0px 0px' }], t, .45, BACK);
+  const typing = (el, t0, t1) => { pop(el, t0); A(el, [{ opacity: 1, scale: '1' }, { opacity: 0, scale: '.6' }], t1, .18, IN); $$('i', el).forEach((d, i) => loop(d, [{ translate: '0px 0px' }, { translate: '0px -9px', offset: .3 }, { translate: '0px 0px', offset: .6 }, { translate: '0px 0px' }], 700, i * 120)); };
+
+  A($('#bgq'), [{ rotate: '-10deg', scale: '1' }, { rotate: '8deg', scale: '1.08' }], 0, D, 'linear');
+
+  // ---------- hook: readable at frame 0, then it collapses into the question bubble ----------
+  const big = $('#big');
+  A(big, [{ scale: '1.06' }, { scale: '1' }], 0, .9, OUT);
+  A(big, [{ opacity: 1, translate: '0px 0px', scale: '1' }, { opacity: 0, translate: '-150px -30px', scale: '.24' }], 1.45, .5, IO);
+  A($('#tag'), [{ opacity: 1 }, { opacity: 0 }], 11.6, .35, IN);
+
+  // ---------- chat ----------
+  scene($('#chat'), 1.5, 11.95);
+  enter($('#whoQ'), 1.75, { dy: 8, d: .35 });
+  pop($('#q1'), 1.7);
+  typing($('#ty1'), 2.2, 3.0);
+  enter($('#whoA'), 2.25, { dy: 8, d: .35 });
+  pop($('#a1'), 3.05);
+  typing($('#ty2'), 6.45, 7.05);
+  pop($('#a2'), 7.1);
+
+  // ---------- 0€ for customers ----------
+  scene($('#free'), 3.3, 6.4);
+  A($('#zero'), [{ opacity: 0, scale: '2.2', rotate: '-12deg' }, { opacity: 1, scale: '1', rotate: '0deg' }], 3.35, .55, BACK);
+  A($('#zero'), [{ scale: '1' }, { scale: '1.05', offset: .5 }, { scale: '1' }], 4.6, .6, IO);
+  enter($('#zeroL'), 3.8, { dy: 18, d: .45 });
+  stagger($$('#zeroC .chip'), 4.25, .2, { dy: 16, s: .85, d: .45, e: BACK });
+
+  // ---------- Starter plan for businesses ----------
+  scene($('#planS'), 7.4, 11.95);
+  enter($('#plan'), 7.5, { dy: 40, s: .94, d: .55 });
+  $$('#plan .r').forEach((r, i) => { const t = 7.85 + i * .32; enter(r, t, { dx: -18, dy: 0, d: .4 }); A($('path', r), [{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], t + .12, .35, OUT); });
+  enter($('#grow'), 9.6, { dy: 12, d: .45 });
+
+  // ---------- cta ----------
+  scene($('#cta'), 11.9, D + 1);
+  stagger(words($('#ask')), 12.0, .09, { dy: 40, d: .5, e: BACK });
+  enter($('#cm'), 12.5, { dy: 16, d: .45 });
+  enter($('#brand'), 12.9, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.2, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.9, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 4.8 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

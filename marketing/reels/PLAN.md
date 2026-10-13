@@ -44,7 +44,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [ ] Pet shop: 10 achiziții → 10% reducere
 
 **Domanda e risposta** (FAQ del sito, `faq.q1`–`q8`)
-- [ ] Costă ceva?
+- [x] Costă ceva? (2026-10-13)
 - [ ] Trebuie să descarc o aplicație?
 - [ ] Cum îmi obțin cardul de fidelitate?
 - [ ] Datele mele sunt în siguranță?
@@ -102,3 +102,4 @@ Segnare `[x]` quando un tema è stato usato.
 | --- | --- | --- | --- | --- |
 | 2026-10-11 (dom) | `2026-10-11-carton-vs-telefon.html` | L'offerta | Carton vs telefon + Starter gratuit | 20:30 |
 | 2026-10-12 (lun) | `2026-10-12-cafenea.html` | Un settore al giorno | Cafenea: la tazza si riempie a ogni timbro, stile chiaro "latte" | 20:30 (eccezione: il reel di domenica esce alle 08:30) |
+| 2026-10-13 (mar) | `2026-10-13-costa-ceva.html` | Domanda e risposta | Costă ceva? Formato chat: 0€ per i clienti, Starter gratuito per le attività | 14:30 |

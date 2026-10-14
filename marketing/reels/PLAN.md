@@ -54,7 +54,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [ ] Ce se întâmplă dacă magazinul se închide?
 
 **Il dato** (sezione "Rezultate Dovedite", con fonte a schermo)
-- [ ] +27% retenție clienți (Accenture 2020)
+- [x] +27% retenție clienți (Accenture 2020) (2026-10-14)
 - [ ] +60% vizite recurente (Bond Brand Loyalty 2023)
 - [ ] +25% venituri per client (Harvard Business Review)
 - [ ] +30% valoare pe viață client (Bain & Company)
@@ -103,3 +103,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-11 (dom) | `2026-10-11-carton-vs-telefon.html` | L'offerta | Carton vs telefon + Starter gratuit | 20:30 |
 | 2026-10-12 (lun) | `2026-10-12-cafenea.html` | Un settore al giorno | Cafenea: la tazza si riempie a ogni timbro, stile chiaro "latte" | 20:30 (eccezione: il reel di domenica esce alle 08:30) |
 | 2026-10-13 (mar) | `2026-10-13-costa-ceva.html` | Domanda e risposta | Costă ceva? Formato chat: 0€ per i clienti, Starter gratuito per le attività | 14:30 |
+| 2026-10-14 (mer) | `2026-10-14-retentie-27.html` | Il dato | +27% retenție clienți: griglia di persone 100 → 127, stile ambra | 12:30 |

@@ -60,8 +60,8 @@ Segnare `[x]` quando un tema è stato usato.
 - [ ] +30% valoare pe viață client (Bain & Company)
 
 **Una funzione in 10 secondi**
-- [ ] Apple Wallet / Google Wallet
-- [ ] Scanner multi-produs (coș cu mai multe produse)
+- [ ] ~~Apple Wallet / Google Wallet~~ (in sospeso: nel codice ci sono solo i testi, manca la generazione del pass; non pubblicizzare finché non esiste)
+- [x] Scanner multi-produs (coș cu mai multe produse) (2026-10-15, indicato come planul Business)
 - [ ] Dashboard cu analize în timp real
 - [ ] Export Excel
 - [ ] Parteneri în apropiere (geolocalizare)
@@ -104,3 +104,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-12 (lun) | `2026-10-12-cafenea.html` | Un settore al giorno | Cafenea: la tazza si riempie a ogni timbro, stile chiaro "latte" | 20:30 (eccezione: il reel di domenica esce alle 08:30) |
 | 2026-10-13 (mar) | `2026-10-13-costa-ceva.html` | Domanda e risposta | Costă ceva? Formato chat: 0€ per i clienti, Starter gratuito per le attività | 14:30 |
 | 2026-10-14 (mer) | `2026-10-14-retentie-27.html` | Il dato | +27% retenție clienți: griglia di persone 100 → 127, stile ambra | 12:30 |
+| 2026-10-15 (gio) | `2026-10-15-scanner-multi-produs.html` | Una funzione | Scanner multi-produs: 3 produse, 1 scanare (demo con dito), planul Business | 20:30 |

@@ -1,0 +1,349 @@
+<title>3 produse, 1 scanare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Una funzione" #1: scanner multi-produs (AdminScanner cart, planul Business).
+   Cool light product-demo world; the staff phone is the hero, a finger dot drives it.
+   Safe area for Reel + Story together: key content inside x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --sky: #EEF0F7; --sky-2: #E2E5F1; --ink: #1B1530; --violet: #6D28D9; --violet-2: #8B5CF6; --lilac: #EDE9FE; --mint: #10B981; --mint-l: #D1FAE5; --amber: #F5B544; --cream: #FAF9F6;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--sky); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--sky); color: var(--ink); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--cream); }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(196, 181, 253, .35); background: rgba(124, 58, 237, .3); color: var(--cream); display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--violet-2); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--violet-2) 0 var(--p, 0%), rgba(250, 249, 246, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); border: 3px solid var(--violet-2); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(250, 249, 246, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(27, 21, 48, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#soft { position: absolute; inset: -160px; background: radial-gradient(55% 40% at 15% 12%, rgba(139, 92, 246, .22), transparent 70%), radial-gradient(60% 45% at 90% 92%, rgba(16, 185, 129, .14), transparent 70%); }
+#gridbg { position: absolute; inset: 0; background-image: linear-gradient(rgba(27, 21, 48, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(27, 21, 48, .045) 1px, transparent 1px); background-size: 48px 48px; }
+.tag { position: absolute; left: 0; width: 720px; top: 180px; display: flex; justify-content: center; }
+.tag span { font-family: var(--f-mono); font-size: 16px; font-weight: 500; letter-spacing: .16em; padding: 9px 16px; border-radius: 999px; background: var(--ink); color: var(--cream); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.hx { font-weight: 900; font-size: 116px; line-height: .95; letter-spacing: -.05em; }
+.cap { position: absolute; left: 40px; width: 640px; top: 196px; text-align: center; font-weight: 800; font-size: 46px; letter-spacing: -.025em; }
+.cap b { color: var(--violet); }
+
+/* staff phone */
+#phone { position: absolute; left: 210px; top: 330px; width: 300px; height: 600px; border-radius: 48px; background: #14101F; padding: 10px; box-sizing: border-box; box-shadow: 0 40px 80px rgba(27, 21, 48, .28), 0 0 0 1px rgba(27, 21, 48, .08); }
+.screen { position: relative; width: 280px; height: 580px; border-radius: 38px; overflow: hidden; background: #F7F6FB; color: var(--ink); }
+.notch { position: absolute; left: 95px; top: 10px; width: 90px; height: 24px; border-radius: 12px; background: #14101F; z-index: 5; }
+.sbar { position: absolute; left: 26px; top: 13px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; color: #fff; z-index: 5; }
+.hdr { position: absolute; left: 0; top: 0; width: 280px; height: 104px; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: #fff; }
+.hdr .t { position: absolute; left: 18px; top: 50px; font-weight: 800; font-size: 18px; }
+.hdr .s { position: absolute; left: 18px; top: 74px; font-size: 12.5px; color: #DDD6FE; }
+.cartb { position: absolute; right: 16px; top: 54px; width: 38px; height: 38px; border-radius: 12px; background: rgba(255, 255, 255, .18); display: grid; place-items: center; }
+.cartb svg { width: 21px; height: 21px; }
+#cartN { position: absolute; right: -6px; top: -6px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: var(--amber); color: #3B2300; font-size: 12px; font-weight: 800; display: grid; place-items: center; }
+
+/* stage A: scan */
+.vf { position: absolute; left: 20px; top: 124px; width: 240px; height: 240px; border-radius: 22px; background: #0D0820; overflow: hidden; }
+.vf .c { position: absolute; width: 30px; height: 30px; border: 3px solid #C4B5FD; }
+.vf .c1 { left: 14px; top: 14px; border-right: 0; border-bottom: 0; border-radius: 8px 0 0 0; }
+.vf .c2 { right: 14px; top: 14px; border-left: 0; border-bottom: 0; border-radius: 0 8px 0 0; }
+.vf .c3 { left: 14px; bottom: 14px; border-right: 0; border-top: 0; border-radius: 0 0 0 8px; }
+.vf .c4 { right: 14px; bottom: 14px; border-left: 0; border-top: 0; border-radius: 0 0 8px 0; }
+.vf .qr { position: absolute; left: 45px; top: 45px; width: 150px; height: 150px; background: #fff; border-radius: 10px; display: grid; place-items: center; }
+.vf .qr svg { width: 130px; height: 130px; }
+#vfb { position: absolute; left: 30px; top: 40px; width: 180px; height: 3px; background: #6EE7B7; box-shadow: 0 0 12px 3px rgba(110, 231, 183, .6); }
+#det { position: absolute; left: 50px; width: 180px; top: 384px; height: 34px; border-radius: 17px; background: var(--mint-l); color: #065F46; display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+#who { position: absolute; left: 0; width: 280px; top: 432px; text-align: center; font-size: 13px; color: #6B6380; }
+
+/* stage B: products */
+.lab { position: absolute; left: 18px; top: 118px; font-weight: 800; font-size: 16px; }
+.chips { position: absolute; left: 18px; top: 146px; display: flex; gap: 8px; }
+.chips span { padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; background: #ECEAF4; color: #4B4166; }
+.chips span.on { background: var(--violet); color: #fff; }
+.tile { position: absolute; width: 118px; height: 124px; border-radius: 18px; background: #fff; box-shadow: 0 1px 0 #E6E3F0, 0 6px 16px rgba(27, 21, 48, .06); }
+.tile .ic { position: absolute; left: 14px; top: 14px; width: 40px; height: 40px; border-radius: 12px; background: var(--lilac); color: var(--violet); display: grid; place-items: center; }
+.tile .ic svg { width: 22px; height: 22px; }
+.tile .n { position: absolute; left: 14px; top: 64px; font-weight: 700; font-size: 15px; }
+.tile .p { position: absolute; left: 14px; top: 88px; font-family: var(--f-mono); font-size: 13px; color: #6B6380; }
+.tile .plus { position: absolute; right: 12px; bottom: 12px; width: 28px; height: 28px; border-radius: 9px; background: var(--violet); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 18px; line-height: 1; }
+.tile .q { position: absolute; right: 10px; top: 10px; min-width: 30px; height: 26px; padding: 0 7px; box-sizing: border-box; border-radius: 13px; background: var(--amber); color: #3B2300; font-weight: 800; font-size: 13px; display: grid; place-items: center; }
+.tile.sel { box-shadow: 0 0 0 2.5px var(--violet), 0 8px 18px rgba(109, 40, 217, .2); }
+#go { position: absolute; left: 16px; top: 476px; width: 248px; height: 54px; border-radius: 16px; background: var(--violet); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 15px; box-shadow: 0 10px 22px rgba(109, 40, 217, .3); }
+
+/* stage C: order summary sheet */
+#sheet { position: absolute; left: 0; top: 112px; width: 280px; height: 468px; border-radius: 26px 26px 0 0; background: #fff; box-shadow: 0 -12px 30px rgba(27, 21, 48, .12); }
+#sheet .h { position: absolute; left: 20px; top: 22px; font-weight: 800; font-size: 19px; }
+#sheet .r { position: absolute; left: 20px; width: 240px; display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; }
+#sheet .r span:last-child { font-family: var(--f-mono); font-weight: 500; }
+#sheet .hr { position: absolute; left: 20px; width: 240px; top: 168px; border-top: 2px dashed #E3E0EC; }
+#sheet .tt { font-weight: 800; font-size: 17px; }
+#ok { position: absolute; left: 16px; top: 364px; width: 248px; height: 54px; border-radius: 16px; background: var(--violet); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 16px; box-shadow: 0 10px 22px rgba(109, 40, 217, .3); }
+
+/* stage D: success */
+#done { position: absolute; inset: 104px 0 0; background: #F7F6FB; }
+#done .ci { position: absolute; left: 95px; top: 70px; width: 90px; height: 90px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; box-shadow: 0 14px 30px rgba(16, 185, 129, .35); }
+#done .ci svg { width: 46px; height: 46px; }
+#done .tx { position: absolute; left: 0; width: 280px; text-align: center; }
+
+#tap { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(27, 21, 48, .28); border: 3px solid rgba(255, 255, 255, .9); box-shadow: 0 4px 12px rgba(0, 0, 0, .2); z-index: 9; }
+
+/* cta */
+#cta1 { font-weight: 900; font-size: 84px; line-height: .98; letter-spacing: -.045em; text-wrap: balance; }
+#cta1 em { font-style: normal; color: var(--violet); }
+#biz { margin-top: 18px; display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 14px; background: #fff; border: 1.5px solid var(--line); font-size: 24px; font-weight: 700; box-shadow: 0 8px 20px rgba(27, 21, 48, .06); }
+#biz b { color: var(--violet); }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 30px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; box-shadow: 0 10px 24px rgba(27, 21, 48, .12); }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #fff; padding: 12px 24px; border-radius: 16px; background: var(--violet); box-shadow: 0 12px 30px rgba(109, 40, 217, .3); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8zM7 2.5v2.5M10.5 2.5v2.5M14 2.5v2.5"/></symbol>
+    <symbol id="crois" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 15c2-6 16-6 18 0M6.5 11.5l1.5 4M12 10v5M17.5 11.5L16 15.5M3 15l3 2h12l3-2"/></symbol>
+    <symbol id="drop" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z"/></symbol>
+    <symbol id="cart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l2.4 11h10.2L20 7H6.3M9 20a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · joi · 15 s · Funcția săptămânii #1</div>
+    <h1>3 produse, 1 scanare</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: scannerul multi-produs LoyalCard, o comandă cu trei produse înregistrată dintr-o singură scanare">
+      <div id="stage">
+        <div id="soft"></div><div id="gridbg"></div>
+
+        <!-- 1 · hook: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="tag"><span>FUNCȚIA SĂPTĂMÂNII</span></div>
+          <div class="col" id="h1" style="top:300px">
+            <div class="hx" id="h1a">3 produse.</div>
+            <div class="hx" id="h1b" style="color:var(--violet)">1 scanare.</div>
+            <div id="h1c" style="margin-top:26px;font-size:30px;font-weight:700;color:#4B4166">Scanner multi-produs LoyalCard</div>
+          </div>
+        </div>
+
+        <!-- 2 · demo -->
+        <div class="scene" id="s2">
+          <div class="cap" id="cap1">1 · <b>Scanezi</b> codul QR</div>
+          <div class="cap" id="cap2">2 · <b>Adaugi</b> produsele în coș</div>
+          <div class="cap" id="cap3">3 · <b>Confirmi</b> o singură dată</div>
+        </div>
+        <div id="phone"><div class="screen">
+          <div class="notch"></div><div class="sbar">9:41</div>
+          <div class="hdr"><div class="t">Scanner</div><div class="s">Café Central · staff</div><div class="cartb"><svg><use href="#cart"/></svg><div id="cartN">0</div></div></div>
+
+          <div id="stA">
+            <div class="vf"><div class="qr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div><div id="vfb"></div><i class="c c1"></i><i class="c c2"></i><i class="c c3"></i><i class="c c4"></i></div>
+            <div id="det">✓ QR detectat</div>
+          </div>
+
+          <div id="stB">
+            <div class="lab">Selectează produse</div>
+            <div class="chips"><span class="on">Toate</span><span>Cafea</span><span>Patiserie</span></div>
+            <div class="tile" id="tE" style="left:16px;top:188px"><div class="ic"><svg><use href="#cup"/></svg></div><div class="n">Espresso</div><div class="p">9 lei</div><div class="plus">+</div><div class="q" id="qE">×1</div></div>
+            <div class="tile" style="left:146px;top:188px"><div class="ic"><svg><use href="#cup"/></svg></div><div class="n">Cappuccino</div><div class="p">12 lei</div><div class="plus">+</div></div>
+            <div class="tile" id="tC" style="left:16px;top:324px"><div class="ic"><svg><use href="#crois"/></svg></div><div class="n">Croissant</div><div class="p">8 lei</div><div class="plus">+</div><div class="q" id="qC">×1</div></div>
+            <div class="tile" style="left:146px;top:324px"><div class="ic"><svg><use href="#drop"/></svg></div><div class="n">Apă plată</div><div class="p">6 lei</div><div class="plus">+</div></div>
+            <div id="go">Continuă cu 3 produse</div>
+          </div>
+
+          <div id="sheet">
+            <div class="h">Rezumat Comandă</div>
+            <div class="r" style="top:70px"><span>2× Espresso</span><span>18 lei</span></div>
+            <div class="r" style="top:106px"><span>1× Croissant</span><span>8 lei</span></div>
+            <div class="hr"></div>
+            <div class="r" style="top:190px"><span>Total produse:</span><span>3</span></div>
+            <div class="r tt" style="top:226px"><span>Preț total:</span><span>26 lei</span></div>
+            <div id="ok">Confirmă</div>
+          </div>
+
+          <div id="done">
+            <div class="ci"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <div class="tx" style="top:182px;font-weight:900;font-size:28px">Succes!</div>
+            <div class="tx" style="top:226px;font-weight:700;font-size:16px">2× Espresso · 1× Croissant</div>
+            <div class="tx" style="top:256px;font-size:13.5px;color:#6B6380;line-height:1.4;padding:0 26px;box-sizing:border-box">Ștampilele clientului se actualizează automat</div>
+          </div>
+          <div id="tap"></div>
+        </div></div>
+
+        <!-- 3 · cta -->
+        <div class="scene" id="s3">
+          <div class="col" style="top:236px;gap:6px">
+            <div id="cta1">Toată comanda, <em>dintr-o scanare.</em></div>
+            <div id="biz">Scanner multi-produs · <b>planul Business</b></div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FAF9F6" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const exit = (el, t, o = {}) => { const { dx = 0, dy = -24, d = .35, e = IN } = o; return A(el, [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: `${dx}px ${dy}px` }], t, d, e); };
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const show = (el, t, d = .25) => A(el, [{ opacity: 0 }, { opacity: 1 }], t, d, 'linear');
+  const hide = (el, t, d = .25) => A(el, [{ opacity: 1 }, { opacity: 0 }], t, d, 'linear');
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  function qrPath(n = 25, seed = 20241) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`; return d;
+  }
+  $$('.qrp').forEach(p => p.setAttribute('d', qrPath()));
+
+  A($('#soft'), [{ translate: '0px 0px' }, { translate: '60px 80px' }], 0, D, 'linear');
+
+  // ---------- 1 · hook ----------
+  scene($('#s1'), -0.05, 2.75);
+  A($('#h1'), [{ scale: '1.05' }, { scale: '1' }], 0, .9, OUT);
+  A($('#h1b'), [{ scale: '1' }, { scale: '1.06', offset: .4 }, { scale: '1' }], 1.0, .55, IO);
+  enter($('#h1c'), .7, { dy: 14, d: .45 });
+
+  // ---------- 2 · demo ----------
+  scene($('#s2'), 2.6, 10.75);
+  const caps = [['#cap1', 2.75, 4.55], ['#cap2', 4.7, 7.35], ['#cap3', 7.5, 10.4]];
+  caps.forEach(([s, a, b]) => { enter($(s), a, { dy: 24, d: .45 }); if (b < 10.4) exit($(s), b, { dy: -18, d: .3 }); });
+  const phone = $('#phone');
+  enter(phone, 2.5, { dy: 720, d: .75 });
+  A(phone, [{ translate: '0px 0px', opacity: 1 }, { translate: '0px 120px', opacity: 0 }], 10.35, .45, IN);
+
+  // A · scan
+  A($('#vfb'), [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 8px', offset: .1 }, { opacity: 1, translate: '0px 150px', offset: .9 }, { opacity: 0, translate: '0px 156px' }], 3.15, .75, 'linear');
+  A($('#det'), [{ opacity: 0, scale: '.6' }, { opacity: 1, scale: '1' }], 3.9, .35, BACK);
+  hide($('#stA'), 4.45);
+
+  // B · products: Espresso, Espresso, Croissant
+  const stB = $('#stB'); show(stB, 4.5);
+  stagger($$('.tile', stB), 4.55, .06, { dy: 18, s: .9, d: .4 });
+  enter($('#go'), 4.7, { dy: 20, d: .4 });
+  const taps = [5.15, 5.75, 6.45];
+  const qE = $('#qE'), qC = $('#qC');
+  A(qE, [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '1' }], taps[0] + .05, .35, BACK);
+  A(qE, [{ scale: '1' }, { scale: '1.3', offset: .4 }, { scale: '1' }], taps[1] + .05, .35, OUT);
+  A(qC, [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '1' }], taps[2] + .05, .35, BACK);
+  A($('#tE'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], taps[0], .3, IO);
+  A($('#tE'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], taps[1], .3, IO);
+  A($('#tC'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], taps[2], .3, IO);
+  hooks.push(t => { const e = t >= taps[1] + .05 ? 2 : 1; const s = `×${e}`; if (qE.textContent !== s) qE.textContent = s; });
+  const cartN = $('#cartN');
+  hooks.push(t => { const n = taps.filter(x => t >= x + .05).length; if (cartN.textContent !== String(n)) cartN.textContent = n; });
+  taps.forEach(x => A(cartN, [{ scale: '1' }, { scale: '1.5', offset: .35 }, { scale: '1' }], x + .05, .4, OUT));
+  A($('#go'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], 7.05, .3, IO);
+  const goEl = $('#go');
+  hooks.push(t => { const n = taps.filter(x => t >= x + .05).length; const s = n ? `Continuă cu ${n} ${n === 1 ? 'produs' : 'produse'}` : 'Selectează produse'; if (goEl.textContent !== s) goEl.textContent = s; });
+
+  // C · order summary
+  A($('#sheet'), [{ translate: '0px 480px' }, { translate: '0px 0px' }], 7.25, .5, OUT);
+  A($('#ok'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], 8.65, .3, IO);
+
+  // D · success
+  show($('#done'), 8.95, .2);
+  A($('#done .ci'), [{ scale: '0', rotate: '-30deg' }, { scale: '1', rotate: '0deg' }], 9.0, .5, BACK);
+  stagger($$('#done .tx'), 9.2, .12, { dy: 12, d: .4 });
+
+  // finger dot: rest → Espresso ×2 → Croissant → Continuă → Confirmă
+  const tap = $('#tap');
+  const P = { e: [70, 250], c: [70, 386], go: [140, 503], ok: [140, 503] };
+  A(tap, [{ translate: '200px 560px' }, { translate: `${P.e[0]}px ${P.e[1]}px` }], 4.6, .5, IO);
+  A(tap, [{ translate: `${P.e[0]}px ${P.e[1]}px` }, { translate: `${P.c[0]}px ${P.c[1]}px` }], 6.0, .4, IO);
+  A(tap, [{ translate: `${P.c[0]}px ${P.c[1]}px` }, { translate: `${P.go[0]}px ${P.go[1]}px` }], 6.65, .38, IO);
+  A(tap, [{ translate: `${P.go[0]}px ${P.go[1]}px` }, { translate: `${P.ok[0]}px ${P.ok[1] - 20}px` }, { translate: `${P.ok[0]}px ${P.ok[1] - 2}px` }], 7.6, .9, IO);
+  A(tap, [{ opacity: 0 }, { opacity: 1 }], 4.55, .2, 'linear');
+  A(tap, [{ opacity: 1 }, { opacity: 0 }], 8.85, .2, 'linear');
+  [...taps, 7.05, 8.65].forEach(x => A(tap, [{ scale: '1' }, { scale: '.7', offset: .4 }, { scale: '1' }], x, .3, IO));
+
+  // ---------- 3 · cta ----------
+  scene($('#s3'), 10.6, D + 1);
+  stagger(words($('#cta1')), 10.7, .08, { dy: 40, d: .5, e: BACK });
+  enter($('#biz'), 11.5, { dy: 16, s: .94, d: .45 });
+  enter($('#brand'), 11.95, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 12.25, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.2, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 7.9 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

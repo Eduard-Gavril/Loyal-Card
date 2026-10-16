@@ -72,7 +72,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [ ] Premii pe mai multe niveluri (planul Professional)
 
 **POV / meme**
-- [ ] POV: clientul și-a uitat iar cardul de carton acasă
+- [x] POV: clientul și-a uitat iar cardul de carton acasă (2026-10-16)
 - [ ] POV: ai printat 500 de carduri și apoi ți-ai schimbat logo-ul
 - [ ] Clientul cu 9 carduri de carton în portofel
 - [ ] Când clientul întreabă „mai am ștampile?”
@@ -105,3 +105,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-13 (mar) | `2026-10-13-costa-ceva.html` | Domanda e risposta | Costă ceva? Formato chat: 0€ per i clienti, Starter gratuito per le attività | 14:30 |
 | 2026-10-14 (mer) | `2026-10-14-retentie-27.html` | Il dato | +27% retenție clienți: griglia di persone 100 → 127, stile ambra | 12:30 |
 | 2026-10-15 (gio) | `2026-10-15-scanner-multi-produs.html` | Una funzione | Scanner multi-produs: 3 produse, 1 scanare (demo con dito), planul Business | 20:30 |
+| 2026-10-16 (ven) | `2026-10-16-pov-card-uitat.html` | POV / meme | Portafoglio vuoto, post-it con 4 tacche, faccina; CTA "trimite asta unui patron" | 18:00 |

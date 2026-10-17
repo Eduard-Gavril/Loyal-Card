@@ -1,0 +1,301 @@
+<title>Pixul vs codul QR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Prima e dopo": ștampila cu pixul vs scanarea QR.
+   Split screen: "before" panel in grey paper tones, "after" panel in brand violet.
+   Safe area for Reel + Story together: key content inside x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --stone: #EDEAE4; --paper: #E6E0D4; --paper-2: #F3EEE4; --graphite: #3A3631; --pen: #2B2B2B; --blue: #2563EB; --coral: #E5484D;
+  --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --lilac: #EDE9FE; --mint: #6EE7B7; --amber: #F5B544; --white: #FFFFFF;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--graphite); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--stone); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--stone); color: var(--graphite); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(237, 234, 228, .3); background: rgba(237, 234, 228, .12); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(58, 54, 49, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#grain { position: absolute; inset: 0; background-image: radial-gradient(rgba(58, 54, 49, .07) 1px, transparent 1.3px); background-size: 6px 6px; }
+.panel { position: absolute; left: 32px; width: 656px; height: 404px; border-radius: 34px; overflow: hidden; }
+#pA { top: 166px; background: var(--paper); box-shadow: inset 0 0 0 2px rgba(58, 54, 49, .12); }
+#pA::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(58, 54, 49, .09) 1px, transparent 1.2px); background-size: 5px 5px; pointer-events: none; }
+#pB { top: 600px; background: linear-gradient(140deg, var(--violet-2), var(--deep)); color: var(--white); box-shadow: 0 22px 50px rgba(59, 15, 122, .35); }
+.lab { position: absolute; font-family: var(--f-mono); font-size: 17px; font-weight: 500; letter-spacing: .2em; }
+.ttl { position: absolute; font-weight: 900; font-size: 38px; letter-spacing: -.025em; line-height: 1.05; }
+#vs { position: absolute; left: 318px; top: 543px; width: 84px; height: 84px; border-radius: 50%; background: var(--amber); color: #2A1600; display: grid; place-items: center; font-weight: 900; font-size: 30px; letter-spacing: -.02em; box-shadow: 0 10px 24px rgba(0, 0, 0, .2); z-index: 3; border: 5px solid var(--stone); }
+
+/* before: paper card + pens */
+#card { position: absolute; left: 32px; top: 128px; width: 320px; height: 190px; border-radius: 14px; background: var(--paper-2); box-shadow: 0 14px 30px rgba(58, 54, 49, .22); rotate: -3deg; padding: 18px; box-sizing: border-box; color: var(--graphite); }
+#card .nm { font-family: var(--f-mono); font-weight: 500; font-size: 14px; letter-spacing: .16em; }
+#card .row { position: absolute; left: 18px; top: 66px; display: flex; gap: 10px; }
+#card .c { position: relative; width: 38px; height: 38px; border-radius: 50%; border: 2px dashed rgba(58, 54, 49, .4); box-sizing: border-box; }
+#card .c svg { position: absolute; left: -6px; top: -6px; width: 46px; height: 46px; overflow: visible; }
+#card .c path { fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 120; }
+#card .ft { position: absolute; left: 18px; bottom: 16px; font-family: var(--f-mono); font-size: 12px; color: rgba(58, 54, 49, .65); }
+.pen { position: absolute; left: 0; top: 0; width: 25px; height: 110px; transform-origin: 50% 100%; z-index: 4; }
+.nchip { position: absolute; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border-radius: 14px; background: rgba(255, 255, 255, .6); border: 1.5px solid rgba(229, 72, 77, .45); font-size: 21px; font-weight: 800; color: var(--graphite); white-space: nowrap; }
+.nchip i { width: 28px; height: 28px; border-radius: 50%; background: var(--coral); color: #fff; display: grid; place-items: center; font-style: normal; font-size: 15px; font-weight: 900; }
+#joke { position: absolute; left: 32px; top: 334px; width: 600px; font-size: 25px; font-weight: 800; color: var(--graphite); }
+#joke b { color: var(--blue); }
+
+/* after: phone + log */
+#phone { position: absolute; left: 34px; top: 30px; width: 300px; height: 600px; border-radius: 48px; background: #14101F; padding: 10px; box-sizing: border-box; scale: .56; transform-origin: 0 0; box-shadow: 0 20px 40px rgba(0, 0, 0, .35); }
+.screen { position: relative; width: 280px; height: 580px; border-radius: 38px; overflow: hidden; background: #FAF9F6; color: #1B1530; }
+.notch { position: absolute; left: 95px; top: 10px; width: 90px; height: 24px; border-radius: 12px; background: #14101F; }
+.sbar { position: absolute; left: 26px; top: 13px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; }
+.shop { position: absolute; left: 12px; top: 50px; width: 256px; height: 76px; border-radius: 18px; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: #FAF9F6; }
+.shop .ico { position: absolute; left: 14px; top: 16px; width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, #FBBF24, #F97316); display: grid; place-items: center; }
+.shop .ico svg { width: 24px; height: 24px; }
+.shop .nm { position: absolute; left: 70px; top: 17px; font-weight: 600; font-size: 17px; }
+.shop .kd { position: absolute; left: 70px; top: 41px; font-size: 13px; color: #DDD6FE; }
+.qr-box { position: absolute; left: 40px; top: 156px; width: 200px; height: 200px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #E4DEF2; display: grid; place-items: center; }
+.qr-box svg { width: 170px; height: 170px; display: block; }
+#beam { position: absolute; left: 30px; top: 156px; width: 220px; height: 5px; border-radius: 3px; background: #8B5CF6; box-shadow: 0 0 16px 5px rgba(139, 92, 246, .7); }
+.stamps { position: absolute; left: 18px; top: 392px; display: flex; gap: 8px; }
+.st { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 2px dashed #CFC6E6; box-sizing: border-box; }
+.st-fill { position: absolute; inset: -2px; border-radius: 50%; background: linear-gradient(135deg, #A78BFA, #6D28D9); display: grid; place-items: center; }
+.st-fill svg { width: 18px; height: 18px; }
+#pcount { position: absolute; left: 0; width: 280px; top: 440px; text-align: center; font-family: var(--f-mono); font-size: 15px; font-weight: 500; }
+#toast { position: absolute; left: 30px; top: 116px; width: 220px; height: 34px; border-radius: 17px; background: #DDF7EC; color: #0B6B47; display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+#log { position: absolute; left: 236px; top: 128px; width: 392px; padding: 18px 20px; box-sizing: border-box; border-radius: 20px; background: var(--white); color: #1B1530; box-shadow: 0 14px 30px rgba(0, 0, 0, .25); }
+#log .k { font-family: var(--f-mono); font-size: 14px; font-weight: 500; letter-spacing: .16em; color: #0E8A5F; }
+#log .r1 { margin-top: 6px; font-weight: 900; font-size: 26px; }
+#log .r2 { margin-top: 2px; font-size: 19px; font-weight: 600; color: #4B4166; }
+#seal { position: absolute; right: 14px; top: 14px; width: 40px; height: 40px; border-radius: 50%; background: #10B981; display: grid; place-items: center; }
+#seal svg { width: 22px; height: 22px; }
+.pchip { position: absolute; left: 236px; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border-radius: 14px; background: rgba(255, 255, 255, .14); border: 1.5px solid rgba(110, 231, 183, .6); font-size: 21px; font-weight: 800; white-space: nowrap; }
+.pchip i { width: 28px; height: 28px; border-radius: 50%; background: var(--mint); color: #064E3B; display: grid; place-items: center; font-style: normal; font-size: 15px; font-weight: 900; }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 86px; line-height: .98; letter-spacing: -.045em; text-wrap: balance; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 30px; font-weight: 700; line-height: 1.3; color: var(--lilac); text-wrap: balance; max-width: 560px; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 30px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; box-shadow: 0 10px 24px rgba(0, 0, 0, .2); }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 010 4h-2M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8zM7 2.5v2.5M10.5 2.5v2.5M14 2.5v2.5"/></symbol>
+    <!-- a ballpoint pen, tip at the bottom centre (17,150) -->
+    <symbol id="penS" viewBox="0 0 34 150"><rect x="6" y="0" width="22" height="104" rx="6" fill="currentColor"/><rect x="24" y="8" width="6" height="44" rx="3" fill="currentColor" opacity=".7"/><path d="M6 104h22l-8 34h-6z" fill="#D8D2C6"/><path d="M14 138h6l-3 12z" fill="#222"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · sâmbătă · 15 s · Înainte și acum</div>
+    <h1>Pixul vs codul QR</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: ștampila cu pixul pe cardul de carton, comparată cu scanarea codului QR care înregistrează fiecare ștampilă">
+      <div id="stage">
+        <div id="grain"></div>
+
+        <!-- before: on screen at frame 0 -->
+        <div class="panel" id="pA">
+          <div class="lab" style="left:32px;top:26px;color:rgba(58,54,49,.7)">ÎNAINTE</div>
+          <div class="ttl" style="left:32px;top:52px">Ștampila cu pixul</div>
+          <div id="card">
+            <div class="nm">CAFÉ CENTRAL</div>
+            <div class="row">
+              <div class="c"><svg viewBox="0 0 46 46"><path stroke="#3A3631" d="M14 23c-1-8 8-13 15-10s9 13 2 18-17 1-17-7c0-4 4-8 9-8"/></svg></div>
+              <div class="c"><svg viewBox="0 0 46 46"><path stroke="#3A3631" d="M12 25c2-9 11-13 18-8s6 15-2 17-16-3-14-11c1-3 5-5 8-5"/></svg></div>
+              <div class="c"><svg viewBox="0 0 46 46"><path stroke="#3A3631" d="M15 22c0-8 9-12 16-8s7 14 0 18-17 0-16-8c1-4 5-7 10-6"/></svg></div>
+              <div class="c"><svg viewBox="0 0 46 46"><path id="ink4" stroke="#2B2B2B" d="M13 24c0-9 10-13 17-9s8 15 0 18-18-1-17-9c1-4 5-7 10-6"/></svg></div>
+              <div class="c"><svg viewBox="0 0 46 46"><path id="ink5" stroke="#2563EB" d="M14 22c1-8 10-12 17-8s7 14-1 17-16 0-16-8c0-3 4-7 9-7"/></svg></div>
+              <div class="c"></div>
+            </div>
+            <div class="ft">Nume ____________</div>
+          </div>
+          <svg class="pen" id="pen1" style="color:#3A3631"><use href="#penS"/></svg>
+          <svg class="pen" id="pen2" style="color:#2563EB"><use href="#penS"/></svg>
+          <div class="nchip" id="n1" style="left:380px;top:140px"><i>✕</i>Ușor de falsificat</div>
+          <div class="nchip" id="n2" style="left:380px;top:200px"><i>✕</i>Fără istoric</div>
+          <div id="joke">Oricine are un pix <b>poate „ștampila”.</b></div>
+        </div>
+
+        <div id="vs">VS</div>
+
+        <div class="panel" id="pB">
+          <div class="lab" style="left:236px;top:30px;color:rgba(255,255,255,.75)">ACUM</div>
+          <div class="ttl" style="left:236px;top:56px;width:400px">Scanezi codul QR</div>
+          <div id="phone"><div class="screen">
+            <div class="notch"></div><div class="sbar">9:41</div>
+            <div class="shop"><div class="ico"><svg style="color:#fff"><use href="#cup"/></svg></div><div class="nm">Café Central</div><div class="kd">Cafenea</div></div>
+            <div class="qr-box"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div>
+            <div id="beam"></div>
+            <div class="stamps" id="pst"></div>
+            <div id="pcount">4 / 6 ștampile</div>
+            <div id="toast">✓ Scanare reușită</div>
+          </div></div>
+          <div id="log"><div class="k">ÎNREGISTRAT</div><div class="r1">Sâm · 10:32</div><div class="r2">Espresso · +1 ștampilă</div><div id="seal"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div></div>
+          <div class="pchip" id="g1" style="top:270px"><i>✓</i>Fiecare ștampilă, înregistrată</div>
+          <div class="pchip" id="g2" style="top:328px"><i>✓</i>Istoric în dashboard</div>
+        </div>
+
+        <!-- cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:250px">
+            <div id="cta1">Treci la ștampile <em>digitale.</em></div>
+            <div id="cta2">Fiecare vizită, înregistrată. Începi gratuit.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const pop = (el, t) => A(el, [{ opacity: 0, scale: '.5' }, { opacity: 1, scale: '1' }], t, .45, BACK);
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  function qrPath(n = 25, seed = 20241) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`; return d;
+  }
+  $$('.qrp').forEach(p => p.setAttribute('d', qrPath()));
+
+  // both panels are on screen at frame 0
+  A($('#pA'), [{ translate: '0px -14px' }, { translate: '0px 0px' }], 0, .8, OUT);
+  A($('#pB'), [{ translate: '0px 14px' }, { translate: '0px 0px' }], 0, .8, OUT);
+  A($('#vs'), [{ scale: '1.25', rotate: '-12deg' }, { scale: '1', rotate: '0deg' }], 0, .7, BACK);
+
+  // ---------- before: the pen ----------
+  // stamp circles sit at card-left 32 + 18 + i*48 (+19 centre), card top 128 + 66 + 19
+  const cx = i => 32 + 18 + i * 48 + 19, cy = 128 + 66 + 19;
+  const pen1 = $('#pen1'), pen2 = $('#pen2');
+  const tip = (x, y) => `${x - 12.5}px ${y - 110}px`;
+  A(pen1, [{ opacity: 0, translate: tip(cx(3) + 120, cy - 120), rotate: '24deg' }, { opacity: 1, translate: tip(cx(3) + 6, cy - 4), rotate: '18deg' }], .3, .5, OUT);
+  A(pen1, [{ translate: tip(cx(3) + 6, cy - 4) }, { translate: tip(cx(3) - 8, cy + 6), offset: .3 }, { translate: tip(cx(3) + 8, cy + 8), offset: .6 }, { translate: tip(cx(3) - 2, cy - 8) }], .8, .7, 'linear');
+  A(pen1, [{ opacity: 1, translate: tip(cx(3) - 2, cy - 8) }, { opacity: 0, translate: tip(cx(3) + 140, cy - 140) }], 1.6, .4, IN);
+  const ink4 = $('#ink4'), ink5 = $('#ink5');
+  A(ink4, [{ strokeDashoffset: 120 }, { strokeDashoffset: 0 }], .8, .7, 'linear');
+  enter($('#n1'), 1.8, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+  // ...and anyone with a (blue) pen
+  A(pen2, [{ opacity: 0, translate: tip(cx(4) + 140, cy - 140), rotate: '-14deg' }, { opacity: 1, translate: tip(cx(4) + 6, cy - 4), rotate: '-20deg' }], 2.3, .45, OUT);
+  A(pen2, [{ translate: tip(cx(4) + 6, cy - 4) }, { translate: tip(cx(4) - 8, cy + 6), offset: .3 }, { translate: tip(cx(4) + 8, cy + 8), offset: .6 }, { translate: tip(cx(4) - 2, cy - 8) }], 2.75, .6, 'linear');
+  A(pen2, [{ opacity: 1, translate: tip(cx(4) - 2, cy - 8) }, { opacity: 0, translate: tip(cx(4) + 160, cy - 120) }], 3.45, .4, IN);
+  A(ink5, [{ strokeDashoffset: 120 }, { strokeDashoffset: 0 }], 2.75, .6, 'linear');
+  enter($('#joke'), 3.4, { dy: 14, d: .4 });
+  enter($('#n2'), 3.9, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+
+  // ---------- after: the scan ----------
+  A($('#beam'), [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 10px', offset: .1 }, { opacity: 1, translate: '0px 190px', offset: .9 }, { opacity: 0, translate: '0px 198px' }], 4.7, .75, 'linear');
+  pop($('#toast'), 5.45);
+  const pst = $('#pst'); for (let i = 0; i < 6; i++) { const st = document.createElement('div'); st.className = 'st'; if (i < 5) st.innerHTML = '<div class="st-fill"><svg style="color:#fff"><use href="#cup"/></svg></div>'; pst.appendChild(st); }
+  A($$('.st-fill', pst)[4], [{ scale: '0', opacity: 0 }, { scale: '1', opacity: 1 }], 5.6, .45, BACK);
+  const pc = $('#pcount'); hooks.push(t => { const s = t >= 5.6 ? '5 / 6 ștampile' : '4 / 6 ștampile'; if (pc.textContent !== s) pc.textContent = s; });
+  A($('#log'), [{ opacity: 0, translate: '-60px 0px', scale: '.9' }, { opacity: 1, translate: '0px 0px', scale: '1' }], 5.9, .55, BACK);
+  A($('#seal'), [{ scale: '0', rotate: '-40deg' }, { scale: '1', rotate: '0deg' }], 6.5, .45, BACK);
+  enter($('#g1'), 6.9, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+  enter($('#g2'), 7.4, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+
+  // the verdict: "before" fades to grey, "after" takes the stage
+  A($('#pA'), [{ opacity: 1, filter: 'grayscale(0)' }, { opacity: .5, filter: 'grayscale(1)' }], 8.4, .6, 'linear');
+  A($('#pB'), [{ scale: '1' }, { scale: '1.03' }], 8.4, .6, OUT);
+  A($('#vs'), [{ opacity: 1 }, { opacity: 0 }], 8.4, .3, 'linear');
+
+  // ---------- cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 10.2, .45, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'inset(48% 4% 4% 4% round 34px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)' }], 10.2, .6, IO);
+  stagger(words($('#cta1')), 10.6, .09, { dy: 40, d: .5, e: BACK });
+  enter($('#cta2'), 11.3, { dy: 16, d: .45 });
+  enter($('#brand'), 11.8, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 12.1, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.2, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 8.0 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

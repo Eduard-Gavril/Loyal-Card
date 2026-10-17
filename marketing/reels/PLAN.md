@@ -80,7 +80,7 @@ Segnare `[x]` quando un tema è stato usato.
 
 **Prima e dopo**
 - [x] Carton vs telefon (usato il 2026-10-11 dentro l'offerta)
-- [ ] Ștampila cu pixul vs scanarea QR
+- [x] Ștampila cu pixul vs scanarea QR (2026-10-17)
 - [ ] Caietul cu clienți vs dashboard
 - [ ] Costul tipăririi cardurilor vs 0€
 - [ ] „Cine sunt clienții mei fideli?” fără date vs cu date
@@ -106,3 +106,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-14 (mer) | `2026-10-14-retentie-27.html` | Il dato | +27% retenție clienți: griglia di persone 100 → 127, stile ambra | 12:30 |
 | 2026-10-15 (gio) | `2026-10-15-scanner-multi-produs.html` | Una funzione | Scanner multi-produs: 3 produse, 1 scanare (demo con dito), planul Business | 20:30 |
 | 2026-10-16 (ven) | `2026-10-16-pov-card-uitat.html` | POV / meme | Portafoglio vuoto, post-it con 4 tacche, faccina; CTA "trimite asta unui patron" | 18:00 |
+| 2026-10-17 (sab) | `2026-10-17-pix-vs-qr.html` | Prima e dopo | Schermo diviso: penna (anche una penna "altrui") vs scansione registrata in scan_events | 10:30 |

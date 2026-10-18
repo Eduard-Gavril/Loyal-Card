@@ -1,0 +1,287 @@
+<title>Fidelitate în 4 pași</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "L'offerta": programul tău de fidelitate în 4 pași (the real onboarding:
+   contact form → products → reward rule → first scan). Night-blue stepper world.
+   Safe area for Reel + Story together: key content inside x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --night: #121633; --night-2: #1B2147; --night-3: #252C5C; --ice: #E8ECFF; --soft: #A9B1DA; --violet: #7C3AED; --violet-2: #A78BFA; --amber: #F5B544; --mint: #6EE7B7; --white: #FFFFFF;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--night); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(18, 22, 51, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--night); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--night); color: var(--ice); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--ice); }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(169, 177, 218, .35); background: rgba(124, 58, 237, .25); color: var(--ice); display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(232, 236, 255, .16) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--ice); border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(232, 236, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(18, 22, 51, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#aura { position: absolute; inset: -200px; background: radial-gradient(40% 30% at 30% 20%, rgba(124, 58, 237, .35), transparent 70%), radial-gradient(45% 35% at 80% 85%, rgba(245, 181, 68, .16), transparent 70%); }
+#stars { position: absolute; inset: 0; background-image: radial-gradient(rgba(232, 236, 255, .18) 1px, transparent 1.4px); background-size: 34px 34px; }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.kick { font-family: var(--f-mono); font-size: 16px; font-weight: 500; letter-spacing: .2em; color: var(--soft); }
+#hA { font-weight: 900; font-size: 72px; line-height: 1; letter-spacing: -.04em; text-wrap: balance; }
+#hB { font-weight: 900; font-size: 150px; line-height: .9; letter-spacing: -.05em; }
+#hB b { color: var(--amber); }
+#hC { margin-top: 18px; font-size: 27px; font-weight: 700; color: var(--soft); line-height: 1.35; }
+
+/* stepper */
+#rail { position: absolute; left: 92px; top: 212px; width: 6px; height: 330px; border-radius: 3px; background: rgba(169, 177, 218, .22); }
+#railOn { position: absolute; left: 0; top: 0; width: 6px; height: 330px; border-radius: 3px; background: linear-gradient(var(--violet-2), var(--amber)); transform-origin: 50% 0; }
+.step { position: absolute; left: 66px; height: 58px; display: flex; align-items: center; gap: 22px; }
+.node { width: 58px; height: 58px; border-radius: 50%; background: var(--night-2); border: 3px solid rgba(169, 177, 218, .4); box-sizing: border-box; display: grid; place-items: center; font-weight: 900; font-size: 24px; color: var(--soft); position: relative; flex: none; }
+.node .on { position: absolute; inset: -3px; border-radius: 50%; background: var(--violet); display: grid; place-items: center; color: var(--white); }
+.node .on svg { width: 26px; height: 26px; }
+.st { font-weight: 800; font-size: 34px; letter-spacing: -.02em; color: var(--soft); white-space: nowrap; }
+.st.lit { color: var(--white); }
+
+/* visual cards (one per step, same slot) */
+.card { position: absolute; left: 66px; top: 600px; width: 588px; height: 380px; border-radius: 28px; background: var(--night-2); border: 1.5px solid rgba(169, 177, 218, .22); box-shadow: 0 24px 50px rgba(0, 0, 0, .3); overflow: hidden; }
+.card .cap { position: absolute; left: 30px; right: 30px; bottom: 24px; font-size: 21px; font-weight: 600; line-height: 1.35; color: var(--soft); }
+.field { position: absolute; left: 30px; width: 528px; height: 50px; border-radius: 12px; background: var(--night-3); display: flex; align-items: center; padding: 0 16px; box-sizing: border-box; font-size: 19px; color: var(--soft); }
+.field b { color: var(--ice); font-weight: 600; margin-left: 10px; }
+.field i { width: 2px; height: 24px; background: var(--amber); margin-left: 3px; }
+.btn { position: absolute; border-radius: 14px; background: var(--violet); color: var(--white); font-weight: 800; font-size: 20px; display: grid; place-items: center; }
+.prod { position: absolute; left: 30px; width: 528px; height: 58px; border-radius: 14px; background: var(--night-3); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; font-size: 22px; font-weight: 700; }
+.prod span:last-child { font-family: var(--f-mono); font-weight: 500; font-size: 19px; color: var(--soft); }
+.rule { position: absolute; left: 20px; top: 48px; width: 548px; display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 30px; font-weight: 800; }
+.num { width: 86px; height: 86px; border-radius: 20px; background: var(--night-3); border: 2px solid rgba(167, 139, 250, .6); display: grid; place-items: center; font-weight: 900; font-size: 48px; color: var(--white); font-variant-numeric: tabular-nums; }
+.num.g { border-color: rgba(245, 181, 68, .8); color: var(--amber); }
+.pm { position: absolute; display: flex; gap: 10px; }
+.pm span { width: 46px; height: 46px; border-radius: 12px; background: var(--night-3); display: grid; place-items: center; font-size: 28px; font-weight: 800; color: var(--soft); }
+.qrmini { position: absolute; left: 30px; top: 36px; width: 176px; height: 176px; border-radius: 18px; background: #fff; display: grid; place-items: center; }
+.qrmini svg { width: 150px; height: 150px; }
+#qbeam { position: absolute; left: 22px; top: 36px; width: 192px; height: 4px; border-radius: 2px; background: var(--mint); box-shadow: 0 0 14px 4px rgba(110, 231, 183, .55); }
+.okrow { position: absolute; left: 232px; height: 56px; border-radius: 14px; display: flex; align-items: center; gap: 12px; padding: 0 18px; font-size: 22px; font-weight: 800; }
+.okrow i { width: 30px; height: 30px; border-radius: 50%; background: var(--mint); color: #064E3B; display: grid; place-items: center; font-style: normal; font-size: 16px; font-weight: 900; }
+
+/* cta */
+#ctaA { font-weight: 900; font-size: 92px; line-height: .96; letter-spacing: -.045em; }
+#ctaA b { color: var(--amber); }
+#ctaB { font-size: 34px; font-weight: 800; color: var(--white); }
+#ctaC { font-size: 25px; font-weight: 600; color: var(--soft); line-height: 1.4; margin-top: 6px; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 30px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); box-shadow: 0 12px 30px rgba(245, 181, 68, .3); }
+#bio { font-size: 26px; font-weight: 800; color: var(--white); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="tick" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · duminică · 15 s · Oferta</div>
+    <h1>Fidelitate în 4 pași</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: cum pornești programul de fidelitate LoyalCard în 4 pași">
+      <div id="stage">
+        <div id="aura"></div><div id="stars"></div>
+
+        <!-- 1 · hook: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="col" id="h1" style="top:250px">
+            <div class="kick">PROGRAMUL TĂU DE FIDELITATE</div>
+            <div id="hA">pornește în</div>
+            <div id="hB"><b>4</b> pași.</div>
+            <div id="hC">Fără carduri de printat.<br>Fără aplicație pentru clienți.</div>
+          </div>
+        </div>
+
+        <!-- 2 · the four steps -->
+        <div class="scene" id="s2">
+          <div id="rail"><div id="railOn"></div></div>
+          <div class="step" style="top:184px"><div class="node">1<div class="on"><svg style="color:#fff"><use href="#tick"/></svg></div></div><div class="st">Ne scrii</div></div>
+          <div class="step" style="top:294px"><div class="node">2<div class="on"><svg style="color:#fff"><use href="#tick"/></svg></div></div><div class="st">Adaugi produsele</div></div>
+          <div class="step" style="top:404px"><div class="node">3<div class="on"><svg style="color:#fff"><use href="#tick"/></svg></div></div><div class="st">Alegi regula de premiu</div></div>
+          <div class="step" style="top:514px"><div class="node">4<div class="on"><svg style="color:#fff"><use href="#tick"/></svg></div></div><div class="st">Scanezi primul client</div></div>
+
+          <div class="card" id="c1">
+            <div class="field" style="top:32px">Nume:<b id="typ">Café Central</b><i id="caret"></i></div>
+            <div class="field" style="top:94px">Email:<b>contact@…</b></div>
+            <div class="field" style="top:156px;height:70px;align-items:flex-start;padding-top:12px">Mesaj:<b>Vreau planul Starter.</b></div>
+            <div class="btn" id="send1" style="left:30px;top:244px;width:200px;height:52px">Trimite</div>
+            <div class="cap">Completezi formularul de pe loyalcard.net, iar noi îți creăm contul.</div>
+          </div>
+          <div class="card" id="c2">
+            <div class="prod" style="top:32px"><span>Espresso</span><span>9 lei</span></div>
+            <div class="prod" style="top:102px"><span>Cappuccino</span><span>12 lei</span></div>
+            <div class="prod" style="top:172px"><span>Croissant</span><span>8 lei</span></div>
+            <div class="btn" style="left:30px;top:250px;width:250px;height:50px">+ Adaugă produs</div>
+            <div class="cap" style="left:310px;bottom:36px">Nume, preț, categorie.</div>
+          </div>
+          <div class="card" id="c3">
+            <div class="rule"><span>Cumpără</span><div class="num" id="buy">5</div><span>→</span><div class="num g">1</div><span>gratuit</span></div>
+            <div class="pm" style="left:0;width:588px;justify-content:center;top:164px"><span>−</span><span>+</span></div>
+            <div class="cap">Ex.: la Espresso, 6 cumpărate → 1 gratuit. Regula se leagă de produs.</div>
+          </div>
+          <div class="card" id="c4">
+            <div class="qrmini"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#121633"/></svg></div>
+            <div id="qbeam"></div>
+            <div class="okrow" id="ok1" style="top:56px;background:rgba(110,231,183,.14)"><i>✓</i>Scanare reușită</div>
+            <div class="okrow" id="ok2" style="top:126px;background:rgba(124,58,237,.3)"><i>✓</i>+1 ștampilă</div>
+            <div class="cap">Clientul nu descarcă nimic: îi arată codul QR, tu scanezi.</div>
+          </div>
+        </div>
+
+        <!-- 3 · cta -->
+        <div class="scene" id="s3">
+          <div class="col" style="top:236px">
+            <div id="ctaA">Începe <b>gratuit</b></div>
+            <div id="ctaB">cu planul Starter.</div>
+            <div id="ctaC">1 locație · 50 clienți activi/lună<br>Scrie-ne pe loyalcard.net</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const exit = (el, t, o = {}) => { const { dx = 0, dy = -24, d = .35, e = IN } = o; return A(el, [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: `${dx}px ${dy}px` }], t, d, e); };
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const pop = (el, t) => A(el, [{ opacity: 0, scale: '.5' }, { opacity: 1, scale: '1' }], t, .45, BACK);
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  function qrPath(n = 25, seed = 20241) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`; return d;
+  }
+  $$('.qrp').forEach(p => p.setAttribute('d', qrPath()));
+
+  A($('#aura'), [{ translate: '0px 0px' }, { translate: '80px 120px' }], 0, D, 'linear');
+
+  // ---------- 1 · hook ----------
+  scene($('#s1'), -0.05, 2.6);
+  A($('#h1'), [{ scale: '1.05' }, { scale: '1' }], 0, .9, OUT);
+  A($('#hB b'), [{ scale: '1' }, { scale: '1.15', offset: .4 }, { scale: '1' }], .9, .55, IO);
+
+  // ---------- 2 · stepper ----------
+  scene($('#s2'), 2.5, 11.05);
+  const steps = $$('.step'), nodes = $$('.node .on'), labels = $$('.st'), cards = ['#c1', '#c2', '#c3', '#c4'].map(s => $(s));
+  const T = [2.7, 4.8, 6.9, 9.0];  // each step becomes active
+  steps.forEach((s, i) => enter(s, 2.6 + i * .1, { dx: -24, dy: 0, d: .45 }));
+  A($('#railOn'), [{ scale: '1 0' }, { scale: '1 0' }], 0, .01, 'linear');
+  T.forEach((t, i) => {
+    A(labels[i], [{ color: '#A9B1DA', translate: '0px 0px' }, { color: '#FFFFFF', translate: '6px 0px' }], t, .3, OUT);
+    if (i) A($('#railOn'), [{ scale: `1 ${(i - 1) / 3}` }, { scale: `1 ${i / 3}` }], t - .3, .35, IO);
+    A(nodes[i], [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '1' }], (T[i + 1] || 10.6) - .25, .4, BACK);
+    A(cards[i], [{ opacity: 0, translate: '0px 60px' }, { opacity: 1, translate: '0px 0px' }], t + .05, .45, OUT);
+    if (i < 3) A(cards[i], [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: '0px -40px' }], T[i + 1] - .2, .3, IN);
+  });
+  // step 1: the form types itself, then "Trimite"
+  const typ = $('#typ'), full = 'Café Central';
+  hooks.push(t => { const n = Math.max(0, Math.min(full.length, Math.floor((t - 3.0) / .07))); const s = full.slice(0, n); if (typ.textContent !== s) typ.textContent = s; });
+  A($('#caret'), [{ opacity: 1 }, { opacity: 0 }], 4.0, .05, 'linear');
+  A($('#send1'), [{ scale: '1', filter: 'brightness(1)' }, { scale: '.94', filter: 'brightness(1.3)', offset: .4 }, { scale: '1', filter: 'brightness(1)' }], 4.15, .35, IO);
+  // step 2: products land one by one
+  stagger($$('#c2 .prod'), 4.95, .2, { dx: 40, dy: 0, d: .35, e: BACK });
+  // step 3: the rule ticks 5 → 6
+  const buy = $('#buy');
+  hooks.push(t => { const s = t >= 7.7 ? '6' : '5'; if (buy.textContent !== s) buy.textContent = s; });
+  A(buy, [{ scale: '1' }, { scale: '1.2', offset: .35 }, { scale: '1' }], 7.7, .4, OUT);
+  A($$('#c3 .pm span')[1], [{ background: '#252C5C' }, { background: '#7C3AED', offset: .3 }, { background: '#252C5C' }], 7.6, .4, 'linear');
+  // step 4: first scan
+  A($('#qbeam'), [{ opacity: 0, translate: '0px 0px' }, { opacity: 1, translate: '0px 8px', offset: .1 }, { opacity: 1, translate: '0px 168px', offset: .9 }, { opacity: 0, translate: '0px 174px' }], 9.2, .7, 'linear');
+  pop($('#ok1'), 9.95); pop($('#ok2'), 10.2);
+
+  // ---------- 3 · cta ----------
+  scene($('#s3'), 11.0, D + 1);
+  stagger(words($('#ctaA')), 11.1, .1, { dy: 40, d: .5, e: BACK });
+  enter($('#ctaB'), 11.5, { dy: 18, d: .45 });
+  enter($('#ctaC'), 11.85, { dy: 14, d: .45 });
+  enter($('#brand'), 12.2, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 12.5, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.4, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 8.2 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

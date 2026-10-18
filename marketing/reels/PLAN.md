@@ -10,6 +10,7 @@ Un video al giorno per Instagram, lo stesso file vale come **Reel** e come **Sto
 - **Zona sicura** (stage 720×1280): il contenuto importante sta in x 40–640, y 170–1000. In basso c'è la didascalia del Reel, a destra i pulsanti, in alto il nome del profilo.
 - **Gancio** leggibile già nel primo fotogramma; azione finale chiara: `loyalcard.net` + "Link în bio".
 - **Mai inventare** testimonianze, partner, clienti o numeri. Solo dati del sito con la loro fonte.
+- **Non promettere** registrazione autonoma né "Gata în 2 minute": le attività non si iscrivono da sole (il pulsante Starter porta a `/contact`, l'account lo crea l'amministratore). Non pubblicizzare Apple/Google Wallet finché non esiste.
 - Stile: stesso mondo grafico (viola LoyalCard, ambra per i premi), testi grandi in Inter 800, ritmo veloce.
 
 ## Calendario settimanale e orari consigliati
@@ -87,7 +88,7 @@ Segnare `[x]` quando un tema è stato usato.
 
 **L'offerta**
 - [x] Începe GRATUIT: planul Starter (1 locație, 50 clienți activi/lună)
-- [ ] Gata în 2 minute: crearea programului pas cu pas
+- [x] ~~Gata în 2 minute~~ → "Programul tău de fidelitate în 4 pași" (2026-10-18): ne scrii → produse → regula de premiu → prima scanare
 - [ ] Planul Business: reguli nelimitate + logo-ul tău
 - [ ] Gratuit pentru clienți, mereu
 
@@ -107,3 +108,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-15 (gio) | `2026-10-15-scanner-multi-produs.html` | Una funzione | Scanner multi-produs: 3 produse, 1 scanare (demo con dito), planul Business | 20:30 |
 | 2026-10-16 (ven) | `2026-10-16-pov-card-uitat.html` | POV / meme | Portafoglio vuoto, post-it con 4 tacche, faccina; CTA "trimite asta unui patron" | 18:00 |
 | 2026-10-17 (sab) | `2026-10-17-pix-vs-qr.html` | Prima e dopo | Schermo diviso: penna (anche una penna "altrui") vs scansione registrata in scan_events | 10:30 |
+| 2026-10-18 (dom) | `2026-10-18-4-pasi.html` | L'offerta | Programul de fidelitate în 4 pași (percorso reale), Starter gratuit | 20:30 |

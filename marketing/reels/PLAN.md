@@ -33,7 +33,7 @@ Segnare `[x]` quando un tema è stato usato.
 
 **Un settore al giorno** (regola premio realistica per ogni settore)
 - [x] Cafenea: 6 cafele → a 7-a gratuită (2026-10-12)
-- [ ] Frizerie / barbershop: 5 tunsori → a 6-a gratuită
+- [x] Frizerie / barbershop: 5 tunsori → a 6-a gratuită (2026-10-19, anche taglio corto da 10 s)
 - [ ] Salon de înfrumusețare / unghii: 6 vizite → 20% reducere
 - [ ] Pizzerie: 8 pizza → o pizza gratuită
 - [ ] Patiserie / brutărie: 10 produse → unul gratuit
@@ -109,3 +109,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-16 (ven) | `2026-10-16-pov-card-uitat.html` | POV / meme | Portafoglio vuoto, post-it con 4 tacche, faccina; CTA "trimite asta unui patron" | 18:00 |
 | 2026-10-17 (sab) | `2026-10-17-pix-vs-qr.html` | Prima e dopo | Schermo diviso: penna (anche una penna "altrui") vs scansione registrata in scan_events | 10:30 |
 | 2026-10-18 (dom) | `2026-10-18-4-pasi.html` | L'offerta | Programul de fidelitate în 4 pași (percorso reale), Starter gratuit | 20:30 |
+| 2026-10-19 (lun) | `2026-10-19-frizerie.html` | Un settore al giorno | Frizerie: palo da barbiere, 5 tunsori → a 6-a gratuită; 30 s + taglio da 10 s per test | 08:30 (30 s) / Reel di prova (10 s) |

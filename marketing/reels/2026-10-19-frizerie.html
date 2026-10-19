@@ -1,0 +1,322 @@
+<title>LoyalCard pentru frizerii</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Un settore al giorno": frizerie. Vintage barbershop: charcoal, cream, barber red,
+   a spinning barber pole; LoyalCard violet stays on the phone.
+   Safe area for Reel + Story together: key content inside x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --char: #1C1A19; --char-2: #2A2624; --char-3: #383230; --cream: #F2E8D5; --cream-2: #D9CDB6; --red: #C8102E; --navy: #1D3A8A;
+  --violet: #6D28D9; --violet-2: #8B5CF6; --amber: #F5B544; --mint: #6EE7B7;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--char); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--char); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--char); color: var(--cream); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--cream); }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(242, 232, 213, .3); background: rgba(200, 16, 46, .25); color: var(--cream); display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--red) 0 var(--p, 0%), rgba(242, 232, 213, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); border: 3px solid var(--red); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(242, 232, 213, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(28, 26, 25, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#tiles { position: absolute; inset: 0; background-image: linear-gradient(45deg, rgba(242, 232, 213, .035) 25%, transparent 25%, transparent 75%, rgba(242, 232, 213, .035) 75%), linear-gradient(45deg, rgba(242, 232, 213, .035) 25%, transparent 25%, transparent 75%, rgba(242, 232, 213, .035) 75%); background-size: 80px 80px; background-position: 0 0, 40px 40px; }
+#vig { position: absolute; inset: 0; background: radial-gradient(70% 55% at 50% 40%, transparent, rgba(0, 0, 0, .45)); }
+
+/* barber pole */
+#pole { position: absolute; left: 588px; top: 300px; width: 64px; height: 560px; }
+#pole .cap { position: absolute; left: -8px; width: 80px; height: 36px; border-radius: 18px; background: linear-gradient(90deg, #8C8279, #E8E0D4 45%, #8C8279); }
+#pole .glass { position: absolute; left: 0; top: 30px; width: 64px; height: 500px; border-radius: 10px; overflow: hidden; box-shadow: inset -10px 0 18px rgba(0, 0, 0, .35), inset 10px 0 14px rgba(255, 255, 255, .25); }
+#stripes { position: absolute; left: 0; top: -200px; width: 64px; height: 900px; background: repeating-linear-gradient(-35deg, var(--red) 0 26px, var(--cream) 26px 44px, var(--navy) 44px 70px, var(--cream) 70px 88px); }
+
+.hx { font-weight: 800; letter-spacing: -.028em; line-height: 1.04; }
+.serif { font-family: var(--f-display); font-weight: 400; letter-spacing: -.01em; line-height: 1; }
+.kick { font-family: var(--f-mono); font-size: 16px; font-weight: 500; letter-spacing: .2em; color: var(--cream-2); }
+.red { color: var(--red); }
+.left { position: absolute; left: 56px; width: 510px; }
+
+/* rule card + phone */
+#rule { position: absolute; left: 56px; top: 214px; width: 608px; padding: 16px 22px; box-sizing: border-box; border-radius: 18px; background: var(--cream); color: var(--char); border: 3px solid var(--red); display: flex; align-items: center; gap: 14px; }
+#rule .k { font-family: var(--f-mono); font-size: 13px; font-weight: 500; letter-spacing: .16em; color: var(--red); }
+#rule .t { font-weight: 900; font-size: 32px; letter-spacing: -.02em; }
+#rule svg { width: 44px; height: 44px; flex: none; color: var(--red); }
+#phone { position: absolute; left: 210px; top: 330px; width: 300px; height: 600px; border-radius: 48px; background: #0E0C0B; padding: 10px; box-sizing: border-box; scale: .8; transform-origin: 50% 0; box-shadow: 0 0 0 1.5px rgba(242, 232, 213, .25), 0 30px 70px rgba(0, 0, 0, .55); }
+.screen { position: relative; width: 280px; height: 580px; border-radius: 38px; overflow: hidden; background: #FAF9F6; color: #1B1530; }
+.notch { position: absolute; left: 95px; top: 10px; width: 90px; height: 24px; border-radius: 12px; background: #0E0C0B; }
+.sbar { position: absolute; left: 26px; top: 13px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; }
+.url { position: absolute; left: 16px; top: 44px; width: 248px; height: 28px; border-radius: 14px; background: #ECE7F7; display: flex; align-items: center; justify-content: center; font-family: var(--f-mono); font-size: 12px; color: #4B4166; }
+.shop { position: absolute; left: 12px; top: 82px; width: 256px; height: 76px; border-radius: 18px; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: #FAF9F6; }
+.shop .ico { position: absolute; left: 14px; top: 16px; width: 44px; height: 44px; border-radius: 13px; background: var(--red); display: grid; place-items: center; }
+.shop .ico svg { width: 24px; height: 24px; }
+.shop .nm { position: absolute; left: 70px; top: 17px; font-weight: 600; font-size: 17px; }
+.shop .kd { position: absolute; left: 70px; top: 41px; font-size: 13px; color: #DDD6FE; }
+.qr-box { position: absolute; left: 60px; top: 196px; width: 160px; height: 160px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #E4DEF2; display: grid; place-items: center; }
+.qr-box svg { width: 136px; height: 136px; display: block; }
+.slots { position: absolute; left: 18px; top: 392px; display: flex; gap: 8px; }
+.sl { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 2px dashed #CFC6E6; box-sizing: border-box; display: grid; place-items: center; color: #B9AED3; }
+.sl svg { width: 18px; height: 18px; }
+.sl-fill { position: absolute; inset: -2px; border-radius: 50%; background: linear-gradient(135deg, #A78BFA, #6D28D9); display: grid; place-items: center; color: #fff; }
+.sl.gift { border-color: var(--amber); color: #B9741A; }
+.sl-ring { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--amber); box-sizing: border-box; opacity: 0; }
+#pcount { position: absolute; left: 0; width: 280px; top: 438px; text-align: center; font-family: var(--f-mono); font-size: 14px; font-weight: 500; }
+#prule { position: absolute; left: 0; width: 280px; top: 466px; text-align: center; font-size: 13px; font-weight: 700; color: var(--red); }
+#won { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 35%, #8B5CF6, #4C1D95 70%); color: #FAF9F6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 0 24px; }
+#won .g { width: 84px; height: 84px; border-radius: 26px; background: var(--red); display: grid; place-items: center; box-shadow: 0 14px 30px rgba(200, 16, 46, .45); }
+#won .g svg { width: 46px; height: 46px; }
+#won .a { font-weight: 800; font-size: 22px; letter-spacing: .04em; }
+#won .b { font-family: var(--f-display); font-size: 36px; color: #FDE68A; line-height: 1.05; }
+.mon { position: absolute; left: 48px; width: 112px; height: 54px; border-radius: 14px; background: var(--char-3); border: 1.5px solid rgba(242, 232, 213, .25); display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--f-mono); font-weight: 500; font-size: 17px; letter-spacing: .12em; }
+.mon svg { width: 18px; height: 18px; color: var(--red); }
+.cf { position: absolute; left: 352px; top: 640px; width: 12px; height: 22px; border-radius: 3px; }
+
+/* benefits + cta */
+.ben { position: absolute; left: 56px; width: 608px; height: 108px; box-sizing: border-box; padding: 0 26px; border-radius: 22px; background: var(--char-2); border: 1.5px solid rgba(242, 232, 213, .16); display: flex; align-items: center; gap: 20px; }
+.ben .ic { width: 60px; height: 60px; border-radius: 16px; background: var(--red); display: grid; place-items: center; flex: none; }
+.ben .ic svg { width: 30px; height: 30px; }
+.ben span { font-size: 28px; font-weight: 700; line-height: 1.2; }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 26px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: var(--cream); }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: var(--cream); padding: 12px 24px; border-radius: 16px; background: var(--red); box-shadow: 0 12px 30px rgba(200, 16, 46, .35); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="sc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></g></symbol>
+    <symbol id="gift" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · luni · 30 s · Un sector pe zi</div>
+    <h1>LoyalCard pentru frizerii</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: cum funcționează LoyalCard într-o frizerie, 5 tunsori și a 6-a gratuită">
+      <div id="stage">
+        <div id="tiles"></div><div id="vig"></div>
+        <div id="pole"><div class="cap" style="top:0"></div><div class="glass"><div id="stripes"></div></div><div class="cap" style="top:524px"></div></div>
+
+        <!-- 1 · hook: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="left" id="h1" style="top:300px">
+            <div class="kick" style="margin-bottom:14px">PENTRU FRIZERII ȘI BARBERSHOP-URI</div>
+            <div class="hx" style="font-size:76px">Ai o</div>
+            <div class="serif" style="font-size:124px;margin-top:4px">frizerie<span class="red">?</span></div>
+            <div class="hx" id="h1c" style="font-size:31px;font-weight:700;color:var(--cream-2);margin-top:30px;line-height:1.3">Uite cum îi aduci pe clienți înapoi.</div>
+          </div>
+        </div>
+
+        <!-- 2 · insight -->
+        <div class="scene" id="s2">
+          <div class="left" style="top:300px">
+            <div class="serif" id="i1" style="font-size:70px;line-height:1.05">Frizeria de vizavi</div>
+            <div class="serif" id="i2" style="font-size:70px;line-height:1.05">are și ea <span class="red">foarfece.</span></div>
+            <div class="hx" id="i3" style="font-size:46px;margin-top:46px">Ce are în plus a ta?</div>
+            <div class="hx" id="i4" style="font-size:31px;font-weight:700;color:var(--cream-2);margin-top:16px;line-height:1.3">Un card de fidelitate în telefonul clientului.</div>
+          </div>
+        </div>
+
+        <!-- 3 · how it works -->
+        <div class="scene" id="s3">
+          <div class="abs kick" style="left:56px;top:178px" id="k3">LOYALCARD PENTRU FRIZERII</div>
+          <div id="rule"><svg><use href="#sc"/></svg><div><div class="k">REGULA TA</div><div class="t">5 tunsori → a 6-a gratuită</div></div></div>
+          <div class="mon" style="top:400px"><svg><use href="#sc"/></svg>AUG</div>
+          <div class="mon" style="top:466px"><svg><use href="#sc"/></svg>SEP</div>
+          <div class="mon" style="top:532px"><svg><use href="#sc"/></svg>OCT</div>
+          <div class="mon" style="top:598px"><svg><use href="#sc"/></svg>NOI</div>
+          <div class="mon" style="top:664px"><svg><use href="#sc"/></svg>DEC</div>
+          <div id="phone"><div class="screen">
+            <div class="notch"></div><div class="sbar">9:41</div>
+            <div class="url">loyalcard.net</div>
+            <div class="shop"><div class="ico"><svg style="color:#fff"><use href="#sc"/></svg></div><div class="nm">Frizeria ta</div><div class="kd">Frizerie</div></div>
+            <div class="abs" style="left:0;width:280px;text-align:center;top:168px;font-weight:600;font-size:15px">Codul tău QR</div>
+            <div class="qr-box"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path class="qrp" fill="#1B1530"/></svg></div>
+            <div class="slots" id="slots"></div>
+            <div id="pcount">0 / 5 tunsori</div>
+            <div id="prule">5 tunsori → a 6-a gratuită</div>
+            <div id="won"><div class="g"><svg style="color:#fff"><use href="#gift"/></svg></div><div class="a">PREMIU CÂȘTIGAT!</div><div class="b">Tunsoare gratuită</div></div>
+          </div></div>
+          <div id="cfx"></div>
+        </div>
+
+        <!-- 4 · benefits -->
+        <div class="scene" id="s4">
+          <div class="left" style="top:196px"><div class="hx" id="h4" style="font-size:56px">Pentru frizeria <span class="serif red" style="font-size:66px">ta:</span></div></div>
+          <div class="ben" id="be1" style="top:340px"><div class="ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3zM3 10.5h18M4 4l16 16"/></svg></div><span>Fără carduri de printat</span></div>
+          <div class="ben" id="be2" style="top:470px"><div class="ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 20V11M10 20V5M16 20v-6M21 20H3"/></svg></div><span>Dashboard cu analize în timp real</span></div>
+          <div class="ben" id="be3" style="top:600px"><div class="ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8.5 2.5h7A1.5 1.5 0 0117 4v16a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 017 20V4a1.5 1.5 0 011.5-1.5zM11 18.5h2"/></svg></div><span>Clienții nu descarcă nicio aplicație</span></div>
+        </div>
+
+        <!-- 5 · cta -->
+        <div class="scene" id="s5">
+          <div class="col" style="top:220px">
+            <div class="hx" id="c1" style="font-size:52px">Programul de fidelitate</div>
+            <div class="serif" id="c2" style="font-size:86px;line-height:1.05">al frizeriei <span class="red">tale</span></div>
+            <div class="hx" id="c3" style="font-size:31px;font-weight:700;color:var(--cream-2);margin-top:14px;line-height:1.35">Începi gratuit cu planul Starter.<br>Scrie-ne pe loyalcard.net</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#F2E8D5" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="30000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:30</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 30;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+  const loop = (el, kf, ms) => { const a = el.animate(kf, { duration: ms, iterations: Infinity }); a.pause(); anims.push(a); };
+
+  function qrPath(n = 25, seed = 20241) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`; return d;
+  }
+  $$('.qrp').forEach(p => p.setAttribute('d', qrPath()));
+
+  // the barber pole never stops turning; it leaves for the benefits and comes back for the end card
+  loop($('#stripes'), [{ translate: '0px 0px' }, { translate: '0px 88px' }], 1100);
+  const pole = $('#pole');
+  A(pole, [{ opacity: 0, translate: '80px 0px' }, { opacity: 1, translate: '0px 0px' }], -1, .01, 'linear');
+  A(pole, [{ opacity: 1 }, { opacity: 0 }], 20.4, .4, 'linear');
+
+  // ---------- 1 · hook ----------
+  scene($('#s1'), -0.05, 3.6);
+  A($('#h1'), [{ scale: '1.04' }, { scale: '1' }], 0, .9, OUT);
+  enter($('#h1c'), 1.0, { dy: 18, d: .5 });
+
+  // ---------- 2 · insight ----------
+  scene($('#s2'), 3.5, 8.6);
+  stagger(words($('#i1')), 3.6, .08, { dy: 30, d: .5 });
+  stagger(words($('#i2')), 4.1, .08, { dy: 30, d: .5 });
+  A($('#i2 .red'), [{ rotate: '0deg' }, { rotate: '-6deg', offset: .3 }, { rotate: '5deg', offset: .65 }, { rotate: '0deg' }], 5.0, .5, 'linear');
+  enter($('#i3'), 6.0, { dy: 22, d: .5 });
+  enter($('#i4'), 6.7, { dy: 16, d: .5 });
+
+  // ---------- 3 · five visits, the sixth is free ----------
+  scene($('#s3'), 8.5, 20.8);
+  enter($('#k3'), 8.6, { dy: 10, d: .4 });
+  A($('#rule'), [{ opacity: 0, translate: '0px -20px', rotate: '-3deg' }, { opacity: 1, translate: '0px 0px', rotate: '0deg' }], 8.7, .5, BACK);
+  const phone = $('#phone');
+  A(phone, [{ opacity: 0, translate: '0px 500px' }, { opacity: 1, translate: '0px 0px' }], 9.0, .7, OUT);
+  const slots = $('#slots');
+  for (let i = 0; i < 6; i++) { const s = document.createElement('div'); s.className = 'sl' + (i === 5 ? ' gift' : ''); s.innerHTML = i === 5 ? '<svg><use href="#gift"/></svg><div class="sl-ring"></div>' : '<svg><use href="#sc"/></svg><div class="sl-fill"><svg><use href="#sc"/></svg></div><div class="sl-ring"></div>'; slots.appendChild(s); }
+  const FILL = [10.3, 11.2, 12.1, 13.0, 13.9];
+  $$('.sl-fill', slots).forEach((f, i) => A(f, [{ scale: '0', opacity: 0 }, { scale: '1', opacity: 1 }], FILL[i], .45, BACK));
+  $$('.sl-ring', slots).forEach((r, i) => { const t = i < 5 ? FILL[i] + .05 : 14.8; A(r, [{ scale: '1', opacity: 0 }, { scale: '1', opacity: .95, offset: .1 }, { scale: '2', opacity: 0 }], t, .6, OUT); });
+  const gift = $$('.sl', slots)[5];
+  A(gift, [{ scale: '1' }, { scale: '1.3', offset: .35 }, { scale: '1' }], 14.8, .5, OUT);
+  $$('.mon').forEach((m, i) => enter(m, FILL[i] - .05, { dx: -30, dy: 0, s: .9, d: .4, e: BACK }));
+  const pc = $('#pcount');
+  hooks.push(t => { const n = FILL.filter(x => t >= x).length; const s = t >= 15.4 ? 'a 6-a tunsoare: gratuită' : `${n} / 5 tunsori`; if (pc.textContent !== s) pc.textContent = s; });
+  A($('#won'), [{ opacity: 0, scale: '.9' }, { opacity: 1, scale: '1' }], 15.6, .5, BACK);
+  $$('#won > *').forEach((el, i) => enter(el, 15.7 + i * .1, { dy: 16, d: .45 }));
+  A(phone, [{ scale: '.8' }, { scale: '.85', offset: .35 }, { scale: '.8' }], 15.55, .7, OUT);
+  // confetti in barber colours
+  const cfx = $('#cfx'), cols = ['#C8102E', '#F2E8D5', '#1D3A8A', '#F5B544', '#8B5CF6'];
+  for (let i = 0; i < 28; i++) {
+    const c = document.createElement('div'); c.className = 'cf'; c.style.background = cols[i % cols.length]; cfx.appendChild(c);
+    const ang = (i / 28) * Math.PI * 2 + (i % 2 ? .1 : -.1), dist = 230 + (i * 43) % 140;
+    A(c, [{ opacity: 0, translate: '0px 0px', rotate: '0deg', scale: '.4' }, { opacity: 1, offset: .12 }, { opacity: 0, translate: `${Math.cos(ang) * dist}px ${Math.sin(ang) * dist + 140}px`, rotate: `${(i % 2 ? 1 : -1) * 420}deg`, scale: '1' }], 15.6 + (i % 4) * .03, 1.5, OUT);
+  }
+
+  // ---------- 4 · benefits ----------
+  scene($('#s4'), 20.7, 26.3);
+  stagger(words($('#h4')), 20.8, .07, { dy: 26, d: .45 });
+  ['#be1', '#be2', '#be3'].forEach((s, i) => enter($(s), 21.2 + i * .45, { dx: 80, dy: 0, d: .55, e: BACK }));
+
+  // ---------- 5 · cta (the pole comes back) ----------
+  A(pole, [{ opacity: 0, translate: '80px 0px' }, { opacity: 1, translate: '0px 0px' }], 26.2, .5, OUT);
+  A(pole, [{ top: '300px' }, { top: '640px' }], 26.2, .01, 'linear');
+  scene($('#s5'), 26.2, D + 1);
+  enter($('#c1'), 26.3, { dy: 24, d: .45 });
+  enter($('#c2'), 26.5, { dy: 30, d: .5, e: BACK });
+  enter($('#c3'), 27.0, { dy: 16, d: .45 });
+  enter($('#brand'), 27.5, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 27.8, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 28.8, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 16.5 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

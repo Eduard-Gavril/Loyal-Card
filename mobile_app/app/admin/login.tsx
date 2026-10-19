@@ -24,7 +24,7 @@ export default function AdminLoginScreen() {
     setLoading(true)
     setError('')
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
       if (authError) throw authError
 
       // Fetch role from admins table (same as web app)

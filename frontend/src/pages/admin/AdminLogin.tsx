@@ -27,7 +27,7 @@ export default function AdminLogin() {
       
       // Sign in with Supabase Auth with timeout
       const loginPromise = supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password
       })
       

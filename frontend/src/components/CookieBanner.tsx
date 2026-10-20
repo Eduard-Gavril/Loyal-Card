@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
+import { sectorForPath } from '@/lib/sectors'
 import './CookieBanner.css'
 
 // Pages already redesigned with the amber look. The banner follows the page it sits on;
 // add a route here when its page is migrated.
-const AMBER_ROUTES = ['/', '/dashboard', '/wallet', '/select-tenant', '/recovery', '/privacy', '/terms', '/cookie-policy', '/refund', '/acceptable-use', '/contact']
+const AMBER_ROUTES = ['/', '/it', '/ro', '/dashboard', '/wallet', '/select-tenant', '/recovery', '/privacy', '/terms', '/cookie-policy', '/refund', '/acceptable-use', '/contact']
 const AMBER_PREFIXES = ['/card', '/admin', '/super-admin']
 
 export default function CookieBanner() {
@@ -15,7 +16,7 @@ export default function CookieBanner() {
   const { pathname } = useLocation()
   const { language } = useClientStore()
   const t = getTranslation(language)
-  const amber = AMBER_ROUTES.includes(pathname) || AMBER_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
+  const amber = AMBER_ROUTES.includes(pathname) || !!sectorForPath(pathname) || AMBER_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
   useEffect(() => {
     const consent = localStorage.getItem('loyalcard-cookie-consent')

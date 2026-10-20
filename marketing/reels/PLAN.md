@@ -46,7 +46,7 @@ Segnare `[x]` quando un tema è stato usato.
 
 **Domanda e risposta** (FAQ del sito, `faq.q1`–`q8`)
 - [x] Costă ceva? (2026-10-13)
-- [ ] Trebuie să descarc o aplicație?
+- [x] Trebuie să descarc o aplicație? (2026-10-20)
 - [ ] Cum îmi obțin cardul de fidelitate?
 - [ ] Datele mele sunt în siguranță?
 - [ ] Ce se întâmplă dacă îmi schimb telefonul?
@@ -110,3 +110,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-17 (sab) | `2026-10-17-pix-vs-qr.html` | Prima e dopo | Schermo diviso: penna (anche una penna "altrui") vs scansione registrata in scan_events | 10:30 |
 | 2026-10-18 (dom) | `2026-10-18-4-pasi.html` | L'offerta | Programul de fidelitate în 4 pași (percorso reale), Starter gratuit | 20:30 |
 | 2026-10-19 (lun) | `2026-10-19-frizerie.html` | Un settore al giorno | Frizerie: palo da barbiere, 5 tunsori → a 6-a gratuită; 30 s + taglio da 10 s per test | 08:30 (30 s) / Reel di prova (10 s) |
+| 2026-10-20 (mar) | `2026-10-20-descarc-aplicatie.html` | Domanda e risposta | Download bloccato al 12% → "NU" → card nel browser; bonus PWA; 15 s + taglio 8 s | 14:30 (15 s) / Reel di prova (8 s) |

@@ -1,9 +1,9 @@
+import ClientShell from '@/components/client/ClientShell'
+import { IosIcon } from '@/components/landing/ios'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore, useClientStore } from '@/store'
-import StaticBackground from '@/components/StaticBackground'
-import LanguageSelector from '@/components/LanguageSelector'
 import { getTranslation } from '@/lib/i18n'
 
 export default function AdminLogin() {
@@ -82,93 +82,64 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 bg-black">
-      {/* Animated background */}
-      <div className="fixed inset-0 z-0 overflow-hidden">
-        <StaticBackground />
-      </div>
+    <ClientShell back={{ label: t.admin.login.backHome, to: '/' }} profile={false} narrow>
+      <header className="cs-head">
+        <span className="cs-hero-ico"><IosIcon name="store" /></span>
+        <h1>{t.admin.login.title}</h1>
+        <p>{t.admin.login.subtitle}</p>
+      </header>
 
-      {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-transparent to-blue-900/40 z-10"></div>
-
-      <div className="relative z-20 max-w-md w-full px-4">
-        <div className="text-center mb-6 sm:mb-8">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 sm:mb-6 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            {t.admin.login.backHome}
-          </button>
-          <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2 sm:mb-3">{t.admin.login.title}</h1>
-          <p className="text-gray-300 text-base sm:text-lg">{t.admin.login.subtitle}</p>
-        </div>
-
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 sm:p-8">
-          <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
-                {t.admin.login.email}
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
-                placeholder="admin@example.com"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
-                {t.admin.login.password}
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
-                placeholder="••••••••"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-500/20 backdrop-blur-sm border border-red-500/50 text-red-100 px-4 py-3 rounded-xl">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
+      <div className="cs-glass cs-formcard">
+        <form onSubmit={handleLogin} className="cs-form">
+          <div className="cs-field">
+            <label htmlFor="email" className="cs-label">{t.admin.login.email}</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="cs-input"
+              placeholder="admin@example.com"
+              autoComplete="username"
+              required
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:shadow-primary-600/60 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  {t.admin.login.loggingIn}
-                </span>
-              ) : t.admin.login.loginButton}
-            </button>
-          </form>
-        </div>
+            />
+          </div>
 
-        {/* Language selector bottom right */}
-        <div className="flex justify-end mt-4">
-          <LanguageSelector />
-        </div>
+          <div className="cs-field">
+            <label htmlFor="password" className="cs-label">{t.admin.login.password}</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="cs-input"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {error && (
+            <div className="cs-alert err" style={{ margin: 0 }}>
+              <p>{error}</p>
+            </div>
+          )}
+
+          <button type="submit" disabled={loading} className="cs-btn main">
+            {loading ? (
+              <>
+                <svg className="cs-spin" fill="none" viewBox="0 0 24 24">
+                  <circle opacity="0.25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {t.admin.login.loggingIn}
+              </>
+            ) : t.admin.login.loginButton}
+          </button>
+        </form>
       </div>
-    </div>
+    </ClientShell>
   )
 }

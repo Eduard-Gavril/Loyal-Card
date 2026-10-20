@@ -36,10 +36,13 @@ const PricingPage = lazyWithReload(() => import('./pages/PricingPage'))
 // Loading fallback component
 function PageLoader() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0b0907' }}>
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-4 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-        <p className="text-white text-lg font-semibold">Loading...</p>
+        <div
+          className="w-16 h-16 mx-auto mb-4 border-4 rounded-full animate-spin"
+          style={{ borderColor: 'rgba(255,177,42,0.25)', borderTopColor: '#ffb12a' }}
+        ></div>
+        <p className="text-lg font-semibold" style={{ color: '#f7f0e6' }}>Loading...</p>
       </div>
     </div>
   )

@@ -1,0 +1,32 @@
+@import '../landing/apple.css';
+@import './adminTheme.generated.css';
+
+/* Amber theme for the admin area. Active only while an AdminBackdrop is mounted (html.adm). */
+html.adm, html.adm body { background: #0b0907; color-scheme: dark; }
+html.adm body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; }
+html.adm #root { background: transparent; }
+html.adm .bg-black { background-color: #0b0907; }
+
+/* page chrome: the old purple/black overlay gradients become a soft vignette */
+html.adm .bg-gradient-to-b.from-black\/40.via-transparent.to-black\/60,
+html.adm .bg-gradient-to-b.from-black\/50.via-transparent.to-black\/70 { background: linear-gradient(180deg, rgba(11, 9, 7, .25), transparent 35%, rgba(11, 9, 7, .55)); }
+
+/* glass panels: warmer edge light, softer corners */
+html.adm .backdrop-blur-xl, html.adm .backdrop-blur-sm, html.adm .backdrop-blur-2xl { -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%); }
+html.adm .bg-white\/10.rounded-2xl, html.adm .bg-white\/10.rounded-3xl, html.adm .bg-white\/15.rounded-2xl { box-shadow: inset 0 1px 1px rgba(255, 236, 208, .3), 0 24px 50px -26px rgba(0, 0, 0, .7); }
+
+/* inputs */
+html.adm input:focus, html.adm select:focus, html.adm textarea:focus { outline: none; }
+html.adm input::placeholder, html.adm textarea::placeholder { color: rgba(167, 154, 134, .75); }
+html.adm select option { background: #1c140b; color: #f7f0e6; }
+
+/* the shared language switch: active pill in amber instead of white */
+html.adm .bg-white\/10.rounded-lg.p-1 > button.bg-white { background: #ffb12a; color: #1a1000; }
+
+/* pulsing call-to-action ring, was violet */
+@keyframes pulseRingAmber { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 177, 42, .5); } 50% { box-shadow: 0 0 0 12px rgba(255, 177, 42, 0); } }
+html.adm .pulse-violet { animation: pulseRingAmber 2s ease-in-out infinite !important; }
+@media (prefers-reduced-motion: reduce) { html.adm .pulse-violet { animation: none !important; } }
+
+/* spinners and focus rings that rely on Tailwind's default ring colour */
+html.adm .focus\:ring-2:focus { --tw-ring-color: rgba(255, 177, 42, .35); }

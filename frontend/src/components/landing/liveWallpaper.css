@@ -1,0 +1,17 @@
+/* Live wallpaper: fixed layer behind the page content, two slow-drifting colour fields on opposite corners.
+   Fewer and smaller blobs keep the glass panels above them cheap: each frame they only re-blur a
+   small part of the screen (measured, see the performance notes in the PR/chat). */
+.lw { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; contain: strict; }
+.lw i { position: absolute; width: 56vmax; height: 56vmax; border-radius: 50%; will-change: transform; backface-visibility: hidden; }
+
+/* top left: warm amber */
+.lw .b1 { left: -14vmax; top: -18vmax; background: radial-gradient(closest-side, rgba(220, 124, 32, .68), transparent); animation: lw-1 44s ease-in-out infinite alternate; }
+/* bottom right: deeper copper */
+.lw .b2 { right: -14vmax; bottom: -18vmax; background: radial-gradient(closest-side, rgba(176, 72, 30, .62), transparent); animation: lw-2 52s ease-in-out infinite alternate; }
+
+@keyframes lw-1 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(20vmax, 14vmax, 0) scale(1.16); } }
+@keyframes lw-2 { from { transform: translate3d(0, 0, 0) scale(1.1); } to { transform: translate3d(-22vmax, -14vmax, 0) scale(.94); } }
+
+.lw.is-hidden i { animation-play-state: paused; }
+.lw.is-lite i { animation: none; will-change: auto; }
+@media (prefers-reduced-motion: reduce) { .lw i { animation: none; will-change: auto; } }

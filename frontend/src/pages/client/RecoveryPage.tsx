@@ -4,8 +4,8 @@ import { useClientStore } from '@/store'
 import { api } from '@/lib/supabase'
 import { isValidPhoneNumber, normalizePhoneNumber } from '@/lib/phoneUtils'
 import PhoneInput from '@/components/PhoneInput'
-import StaticBackground from '@/components/StaticBackground'
-import LanguageSelector from '@/components/LanguageSelector'
+import ClientShell from '@/components/client/ClientShell'
+import { IosIcon } from '@/components/landing/ios'
 import { getTranslation } from '@/lib/i18n'
 
 export default function RecoveryPage() {
@@ -137,188 +137,124 @@ export default function RecoveryPage() {
   }
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <StaticBackground />
-      </div>
+    <ClientShell back={{ label: t.wallet.back, to: '/dashboard' }} profile={false} narrow>
+      {/* Title */}
+      <header className="cs-head">
+        <span className="cs-hero-ico"><IosIcon name="key" /></span>
+        <h1>{t.recovery.title}</h1>
+        <p>{t.recovery.subtitle}</p>
+      </header>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 z-10"></div>
+      {/* Recovery Form */}
+      <div className="cs-glass cs-formcard">
+        {mode === 'request' ? (
+          <form onSubmit={handleRequestRecovery} className="cs-form">
+            <div className="cs-field">
+              <label className="cs-label">{t.recovery.phoneLabel}</label>
+              <PhoneInput value={phone} onChange={setPhone} />
+            </div>
 
-      {/* Content */}
-      <div className="relative z-20 min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="pt-6 px-4 sm:px-6">
-          <div className="max-w-lg mx-auto flex justify-between items-center">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span>{t.wallet.back}</span>
-            </button>
-            <LanguageSelector />
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="flex-1 px-4 sm:px-6 py-8 flex items-center justify-center">
-          <div className="max-w-md w-full">
-            {/* Title */}
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                </svg>
+            {error && (
+              <div className="cs-alert err" style={{ margin: 0 }}>
+                <p>{error}</p>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                {t.recovery.title}
-              </h1>
-              <p className="text-gray-300">
-                {t.recovery.subtitle}
-              </p>
-            </div>
+            )}
 
-            {/* Recovery Form */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              {mode === 'request' ? (
-                <form onSubmit={handleRequestRecovery} className="space-y-4">
-                  <div>
-                    <label className="block text-white text-sm font-medium mb-2">
-                      {t.recovery.phoneLabel}
-                    </label>
-                    <PhoneInput
-                      value={phone}
-                      onChange={setPhone}
-                    />
-                  </div>
+            {success && (
+              <div className="cs-alert ok" style={{ margin: 0 }}>
+                <p>{success}</p>
+              </div>
+            )}
 
-                  {error && (
-                    <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
-                      {error}
-                    </div>
-                  )}
-
-                  {success && (
-                    <div className="p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-200 text-sm">
-                      {success}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? t.recovery.sending : t.recovery.sendButton}
-                  </button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyRecovery} className="space-y-4">
-                  <div className="text-center mb-4">
-                    <p className="text-white text-sm">
-                      {t.recovery.pinInstructions}
-                    </p>
-                  </div>
-
-                  {!useBackupCode ? (
-                    <div>
-                      <label className="block text-white text-sm font-medium mb-2">
-                        PIN
-                      </label>
-                      <input
-                        type="password"
-                        value={pin}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '')
-                          if (value.length <= 6) setPin(value)
-                        }}
-                        placeholder="000000"
-                        maxLength={6}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-center text-2xl tracking-widest placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                        required
-                      />
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="block text-white text-sm font-medium mb-2">
-                        {t.recovery.backupCodeLabel}
-                      </label>
-                      <input
-                        type="text"
-                        value={backupCode}
-                        onChange={(e) => {
-                          const value = e.target.value.toUpperCase()
-                          setBackupCode(value)
-                        }}
-                        placeholder="XXXX-XXXX"
-                        maxLength={9}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-center text-xl tracking-widest placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 font-mono"
-                        required
-                      />
-                    </div>
-                  )}
-
-                  {error && (
-                    <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
-                      {error}
-                    </div>
-                  )}
-
-                  {success && (
-                    <div className="p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-200 text-sm">
-                      {success}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? t.recovery.verifying : t.recovery.verifyButton}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setUseBackupCode(!useBackupCode)}
-                    className="w-full text-primary-400 hover:text-primary-300 text-sm"
-                  >
-                    {useBackupCode ? t.recovery.usePinInstead : t.recovery.forgotPin}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('request')
-                      setPin('')
-                      setBackupCode('')
-                      setUseBackupCode(false)
-                    }}
-                    className="w-full text-gray-400 hover:text-gray-300 text-sm"
-                  >
-                    {t.recovery.tryDifferentPhone}
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* Info */}
-            <p className="text-center text-gray-400 text-sm mt-6">
-              {t.recovery.noPhone}{' '}
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="text-primary-400 hover:text-primary-300"
-              >
-                {t.recovery.createNew}
-              </button>
+            <button type="submit" disabled={loading} className="cs-btn main">
+              {loading ? t.recovery.sending : t.recovery.sendButton}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyRecovery} className="cs-form">
+            <p className="cs-text" style={{ textAlign: 'center', color: 'var(--text)' }}>
+              {t.recovery.pinInstructions}
             </p>
-          </div>
-        </main>
+
+            {!useBackupCode ? (
+              <div className="cs-field">
+                <label className="cs-label">PIN</label>
+                <input
+                  type="password"
+                  value={pin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '')
+                    if (value.length <= 6) setPin(value)
+                  }}
+                  placeholder="000000"
+                  maxLength={6}
+                  inputMode="numeric"
+                  className="cs-input pin"
+                  required
+                />
+              </div>
+            ) : (
+              <div className="cs-field">
+                <label className="cs-label">{t.recovery.backupCodeLabel}</label>
+                <input
+                  type="text"
+                  value={backupCode}
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase()
+                    setBackupCode(value)
+                  }}
+                  placeholder="XXXX-XXXX"
+                  maxLength={9}
+                  className="cs-input confirm"
+                  style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}
+                  required
+                />
+              </div>
+            )}
+
+            {error && (
+              <div className="cs-alert err" style={{ margin: 0 }}>
+                <p>{error}</p>
+              </div>
+            )}
+
+            {success && (
+              <div className="cs-alert ok" style={{ margin: 0 }}>
+                <p>{success}</p>
+              </div>
+            )}
+
+            <button type="submit" disabled={loading} className="cs-btn main">
+              {loading ? t.recovery.verifying : t.recovery.verifyButton}
+            </button>
+
+            <button type="button" onClick={() => setUseBackupCode(!useBackupCode)} className="cs-link-btn">
+              {useBackupCode ? t.recovery.usePinInstead : t.recovery.forgotPin}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode('request')
+                setPin('')
+                setBackupCode('')
+                setUseBackupCode(false)
+              }}
+              className="cs-link-btn muted"
+            >
+              {t.recovery.tryDifferentPhone}
+            </button>
+          </form>
+        )}
       </div>
-    </div>
+
+      {/* Info */}
+      <p className="cs-foot">
+        {t.recovery.noPhone}{' '}
+        <button onClick={() => navigate('/dashboard')} className="cs-link-btn inline">
+          {t.recovery.createNew}
+        </button>
+      </p>
+    </ClientShell>
   )
 }

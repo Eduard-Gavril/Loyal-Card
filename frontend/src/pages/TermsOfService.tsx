@@ -1,3 +1,4 @@
+import LegalBackdrop from '@/components/legal/LegalBackdrop'
 import { useNavigate } from 'react-router-dom'
 
 export default function TermsOfService() {
@@ -5,6 +6,7 @@ export default function TermsOfService() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <LegalBackdrop />
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">

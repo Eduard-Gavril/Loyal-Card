@@ -1,3 +1,4 @@
+import LegalBackdrop from '@/components/legal/LegalBackdrop'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '../store'
@@ -53,6 +54,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <LegalBackdrop />
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">

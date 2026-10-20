@@ -64,27 +64,27 @@ export default function PhoneInput({ value, onChange, placeholder }: PhoneInputP
   const localPlaceholder = placeholder ?? (selectValue === '+40' ? '0712 345 678' : '712 345 678')
 
   return (
-    <div className="flex rounded-xl overflow-hidden border border-white/20 bg-white/10 focus-within:ring-2 focus-within:ring-primary-500/50 focus-within:border-primary-500 transition-all">
-      <div className="flex-shrink-0 border-r border-white/20 flex">
+    <div className="cs-phone">
+      <div className="cs-phone-pre">
         <select
           value={selectValue}
           onChange={handleSelectChange}
-          className="px-3 py-3 bg-white/5 text-white text-sm cursor-pointer focus:outline-none h-full"
+          className="cs-phone-sel"
           aria-label="Country code"
         >
           {NAMED_CODES.map(c => (
-            <option key={c.code} value={c.code} className="bg-gray-900 text-white">
+            <option key={c.code} value={c.code}>
               {c.label}
             </option>
           ))}
-          <option value="other" className="bg-gray-900 text-white">Other</option>
+          <option value="other">Other</option>
         </select>
         {selectValue === 'other' && (
           <input
             type="text"
             value={customPrefix}
             onChange={handleCustomPrefixChange}
-            className="w-16 px-2 py-3 bg-white/5 text-white text-sm focus:outline-none text-center border-l border-white/20"
+            className="cs-phone-custom"
             placeholder="+1"
             maxLength={5}
           />
@@ -96,7 +96,7 @@ export default function PhoneInput({ value, onChange, placeholder }: PhoneInputP
         value={localNumber}
         onChange={handleLocalChange}
         placeholder={localPlaceholder}
-        className="flex-1 px-4 py-3 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base"
+        className="cs-phone-num"
         inputMode="numeric"
         maxLength={10}
       />

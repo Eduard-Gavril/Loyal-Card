@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { api, supabase } from '@/lib/supabase'
-import StaticBackground from '@/components/StaticBackground'
+import StaticBackground from '@/components/admin/AdminBackdrop'
 import { Settings, Users, QrCode, Trash2 } from 'lucide-react'
 
 interface StaffAdmin {

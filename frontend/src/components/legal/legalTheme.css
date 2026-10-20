@@ -1,0 +1,49 @@
+@import '../landing/apple.css';
+
+/* Dark amber skin for the light document pages. Scoped to html.doc. */
+html.doc, html.doc body { background: #0b0907; color-scheme: dark; }
+html.doc body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+html.doc #root { isolation: isolate; }
+
+/* page + header + cards */
+html.doc .bg-gray-50, html.doc .from-gray-50, html.doc .to-white { background: transparent; --tw-gradient-from: transparent; --tw-gradient-to: transparent; --tw-gradient-stops: transparent; }
+html.doc header.bg-white, html.doc .bg-white.border-b { background: rgba(20, 14, 8, .6); -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%); box-shadow: none; border-color: rgba(255, 226, 186, .14); position: sticky; top: 0; z-index: 20; }
+html.doc .bg-white { background: linear-gradient(135deg, rgba(255, 226, 186, .12), rgba(255, 226, 186, .04)); -webkit-backdrop-filter: blur(24px) saturate(165%); backdrop-filter: blur(24px) saturate(165%); border: 1px solid rgba(255, 226, 186, .18); box-shadow: inset 0 1px 1px rgba(255, 236, 208, .3), 0 24px 50px -26px rgba(0, 0, 0, .7); }
+html.doc header.bg-white.shadow-sm { border: 0; border-bottom: 1px solid rgba(255, 226, 186, .14); }
+html.doc .bg-gray-50.p-4, html.doc .bg-gray-100 { background: rgba(255, 226, 186, .07); }
+html.doc .rounded-xl.shadow-sm, html.doc .rounded-2xl { border-radius: 26px; }
+
+/* text */
+html.doc .text-gray-900, html.doc .text-gray-800 { color: #f7f0e6; }
+html.doc .text-gray-700 { color: #e2d6c3; }
+html.doc .text-gray-600 { color: #b9ab96; }
+html.doc .text-gray-500, html.doc .text-gray-400 { color: #a79a86; }
+html.doc .hover\:text-gray-900:hover { color: #fff; }
+html.doc .text-primary-600, html.doc .text-purple-600 { color: #ffb12a; }
+html.doc .hover\:text-primary-700:hover { color: #ffd166; }
+html.doc a { text-underline-offset: 3px; }
+html.doc strong { color: #f7f0e6; }
+
+/* borders, tables, hovers */
+html.doc .border-gray-200, html.doc .border-gray-300, html.doc .border-gray-100 { border-color: rgba(255, 226, 186, .2); }
+html.doc .hover\:bg-gray-100:hover { background: rgba(255, 226, 186, .14); }
+html.doc th, html.doc td { border-color: rgba(255, 226, 186, .2); }
+html.doc button svg { color: inherit; }
+
+/* form (contact) */
+html.doc input, html.doc textarea { background: rgba(255, 226, 186, .07); color: #f7f0e6; border-color: rgba(255, 226, 186, .22); border-radius: 16px; }
+html.doc input::placeholder, html.doc textarea::placeholder { color: rgba(167, 154, 134, .75); }
+html.doc input:focus, html.doc textarea:focus { outline: none; border-color: #ffb12a; --tw-ring-color: rgba(255, 177, 42, .3); }
+html.doc .bg-purple-600 { background: linear-gradient(180deg, #ffc447, #f59e0b); color: #1a1000; border-radius: 99px; box-shadow: inset 0 1px 1px rgba(255, 255, 255, .5), 0 10px 24px -10px rgba(255, 177, 42, .7); }
+html.doc .hover\:bg-purple-700:hover { background: linear-gradient(180deg, #ffd166, #f5a623); }
+html.doc .disabled\:bg-gray-400:disabled { background: #5a5143; color: #a79a86; box-shadow: none; }
+html.doc .bg-purple-600.text-white, html.doc .bg-purple-600 .text-white { color: #1a1000; }
+
+/* success / error boxes keep their meaning, tuned for the dark ground */
+html.doc .bg-green-50 { background: rgba(52, 199, 89, .1); border-color: rgba(52, 199, 89, .32); }
+html.doc .text-green-900 { color: #d4f7dd; }
+html.doc .text-green-700 { color: #a8e6bb; }
+html.doc .bg-green-600 { background: #d97706; }
+html.doc .hover\:bg-green-700:hover { background: #b45309; }
+html.doc .bg-red-50 { background: rgba(255, 90, 80, .1); border-color: rgba(255, 120, 110, .35); }
+html.doc .text-red-700 { color: #ffc2bb; }

@@ -4,8 +4,8 @@ import { createPortal } from 'react-dom'
 import QRCode from 'qrcode'
 import { useClientStore } from '@/store'
 import { api, supabase, Card as CardType, RewardRule, Tenant } from '@/lib/supabase'
-import StaticBackground from '@/components/StaticBackground'
-import LanguageSelector from '@/components/LanguageSelector'
+import ClientShell from '@/components/client/ClientShell'
+import { IosIcon } from '@/components/landing/ios'
 import { getTranslation } from '@/lib/i18n'
 
 function CategoryIcon({ type, className = 'w-5 h-5' }: { type: string; className?: string }) {
@@ -357,13 +357,9 @@ export default function ClientCard() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0 z-0 overflow-hidden"><StaticBackground /></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
-        <div className="relative z-20 min-h-screen flex items-center justify-center">
-          <div className="text-white text-2xl font-semibold animate-pulse">{t.card.loading}</div>
-        </div>
-      </div>
+      <ClientShell back={{ label: t.wallet.back, to: '/select-tenant' }} narrow>
+        <p className="cs-pulse cs-center">{t.card.loading}</p>
+      </ClientShell>
     )
   }
 
@@ -373,24 +369,20 @@ export default function ClientCard() {
   if (initError && !card) {
     const errorT = INIT_ERROR_MESSAGES[language] || INIT_ERROR_MESSAGES.en
     return (
-      <div className="relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0 z-0 overflow-hidden"><StaticBackground /></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
-        <div className="relative z-20 min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
-          <p className="text-white text-xl font-semibold max-w-sm">{errorT.body}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors"
-          >
+      <ClientShell back={{ label: t.wallet.back, to: '/select-tenant' }} narrow>
+        <div className="cs-glass cs-empty">
+          <span className="cs-empty-ico"><IosIcon name="alert" /></span>
+          <p>{errorT.body}</p>
+          <button className="cs-btn main" style={{ marginTop: 20 }} onClick={() => window.location.reload()}>
             {errorT.retry}
           </button>
         </div>
-      </div>
+      </ClientShell>
     )
   }
 
   return (
-    <div className="relative min-h-screen overflow-auto">
+    <ClientShell back={{ label: t.wallet.back, to: '/select-tenant' }}>
       {/* Reward completed: gold confetti over the whole screen (portal escapes any transformed ancestor) */}
       {anim.rewards.length > 0 && createPortal(
         <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden" aria-hidden="true">
@@ -415,38 +407,8 @@ export default function ClientCard() {
         document.body
       )}
 
-      <div className="fixed inset-0 z-0 overflow-hidden"><StaticBackground /></div>
-      <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10"></div>
-
-      <div className="relative z-20">
-        {/* Header */}
-        <header className="pt-6 px-4">
-          <div className="max-w-2xl mx-auto grid grid-cols-3 items-center gap-2">
-            <button
-              onClick={() => navigate('/select-tenant')}
-              className="justify-self-start flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span>{t.wallet.back}</span>
-            </button>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="justify-self-center flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm border border-indigo-400/40 font-semibold text-xs sm:text-sm whitespace-nowrap"
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              {language === 'ro' ? 'Profilul Meu' : language === 'it' ? 'Il Mio Profilo' : 'My Profile'}
-            </button>
-            <div className="justify-self-end">
-              <LanguageSelector />
-            </div>
-          </div>
-        </header>
-
-        <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
+      <div className="cs-col">
+        <div>
 
           {/* ── WALLET CARD ── */}
           {qrDataUrl ? (
@@ -538,22 +500,16 @@ export default function ClientCard() {
               </div>
             </div>
           ) : qrError ? (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6 text-center">
-              <p className="text-red-300 mb-4">QR code failed to generate. Please refresh the page.</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-white/20 text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/30 transition-colors"
-              >
+            <div className="cs-glass cs-empty mb-6">
+              <p style={{ color: '#ffb4ab' }}>QR code failed to generate. Please refresh the page.</p>
+              <button className="cs-btn ghost" style={{ marginTop: 16 }} onClick={() => window.location.reload()}>
                 Refresh
               </button>
             </div>
           ) : (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 mb-6 text-center">
-              <p className="text-gray-200 mb-4">{t.clientCard.noCardYet}</p>
-              <button
-                onClick={() => navigate('/select-tenant')}
-                className="bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
-              >
+            <div className="cs-glass cs-empty mb-6">
+              <p>{t.clientCard.noCardYet}</p>
+              <button className="cs-btn main" style={{ marginTop: 20 }} onClick={() => navigate('/select-tenant')}>
                 {t.clientCard.selectStore}
               </button>
             </div>
@@ -564,35 +520,22 @@ export default function ClientCard() {
           {hasPhone === false && (
             <button
               onClick={() => navigate('/dashboard', { state: { openPhoneModal: true } })}
-              className="save-data-reminder w-full mb-4 sm:mb-6 flex items-center gap-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 hover:from-yellow-500/30 hover:to-orange-500/30 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/40 text-left transition-colors duration-200"
+              className="cs-alert warn cs-alert-btn"
             >
-              <style>{`
-                @keyframes saveDataPulse {
-                  0%, 100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.45); }
-                  50% { box-shadow: 0 0 0 10px rgba(234,179,8,0); }
-                }
-                .save-data-reminder { animation: saveDataPulse 2.2s ease-in-out infinite; }
-              `}</style>
-              <div className="w-9 h-9 bg-yellow-500/20 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
-                <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-yellow-200 text-sm font-semibold">
+              <IosIcon name="alert" />
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <b className="cs-alert-title">
                   {language === 'ro' ? 'Salvează-ți datele' : language === 'it' ? 'Salva i tuoi dati' : 'Save your data'}
-                </p>
-                <p className="text-yellow-100/70 text-xs mt-0.5">
+                </b>
+                <span className="cs-alert-sub">
                   {language === 'ro'
                     ? 'Fără număr de telefon, timbrele se pierd în fiecare lună'
                     : language === 'it'
                     ? 'Senza numero di telefono i timbri si perdono ogni mese'
                     : 'Without a phone number your stamps get lost every month'}
-                </p>
-              </div>
-              <svg className="w-4 h-4 text-yellow-300/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+                </span>
+              </span>
+              <IosIcon name="chev" />
             </button>
           )}
 
@@ -713,11 +656,10 @@ export default function ClientCard() {
             <div className="mb-6">
               <button
                 onClick={handleInstallClick}
-                className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg shadow-primary-500/50 hover:shadow-xl hover:scale-105"
+                className="cs-btn main"
+                style={{ width: '100%', padding: '16px 20px' }}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                <IosIcon name="plus" />
                 {t.clientCard.addToHomeScreen}
               </button>
             </div>
@@ -726,10 +668,10 @@ export default function ClientCard() {
 
         {/* Loyalty Progress — only if stamps exist */}
         {activeRules.length > 0 && (
-          <div className="space-y-4 px-4 max-w-2xl mx-auto">
+          <div className="space-y-4">
             <h2 className="text-white text-2xl font-bold flex items-center gap-3">
-              <div className="w-9 h-9 bg-primary-500/20 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-9 h-9 bg-amber-400/15 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                 </svg>
               </div>
@@ -937,10 +879,10 @@ export default function ClientCard() {
         )}
 
         {/* How it works */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 mt-6 mx-4 max-w-2xl lg:mx-auto mb-8">
+        <div className="cs-glass cs-how mt-6">
           <h3 className="font-bold mb-4 text-lg flex items-center gap-2 text-white">
-            <div className="w-7 h-7 bg-primary-500/20 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-7 h-7 bg-amber-400/15 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -965,6 +907,6 @@ export default function ClientCard() {
           </ul>
         </div>
       </div>
-    </div>
+    </ClientShell>
   )
 }

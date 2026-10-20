@@ -2,7 +2,7 @@
 
 /* Dark amber skin for the light document pages. Scoped to html.doc. */
 html.doc, html.doc body { background: #0b0907; color-scheme: dark; }
-html.doc body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+html.doc body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Inter Fallback', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 html.doc #root { isolation: isolate; }
 
 /* page + header + cards */

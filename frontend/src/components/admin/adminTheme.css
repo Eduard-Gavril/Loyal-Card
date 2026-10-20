@@ -3,7 +3,7 @@
 
 /* Amber theme for the admin area. Active only while an AdminBackdrop is mounted (html.adm). */
 html.adm, html.adm body { background: #0b0907; color-scheme: dark; }
-html.adm body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; }
+html.adm body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Inter Fallback', system-ui, sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; }
 html.adm #root { background: transparent; }
 html.adm .bg-black { background-color: #0b0907; }
 

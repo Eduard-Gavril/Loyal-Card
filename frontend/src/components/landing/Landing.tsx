@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCopy, useL, useT, useUi } from './shared'
+import { useCopy, useL, useLang, useT, useUi } from './shared'
 import { ApShell } from './apple'
 import { Phone, Qr } from './phone'
 import { IosIcon, Squircle } from './ios'
 import GlassNav from './GlassNav'
+import { SECTOR_IDS, sectors } from '@/lib/sectors'
 import LiveWallpaper from './LiveWallpaper'
 import './layoutA.css'
 import './landing.css'
@@ -16,6 +17,7 @@ export default function Landing() {
   const u = useUi()
   const T = useT()
   const L = useL()
+  const lang = useLang()
   const go = useNavigate()
   const [yearly, setYearly] = useState(true)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
@@ -382,6 +384,11 @@ export default function Landing() {
             <a href="/contact">{T.footerNav.contactUs}</a>
           </nav>
         </div>
+        <nav className="gl-sectors" aria-label="Sectors">
+          {SECTOR_IDS.map((id) => (
+            <a key={id} href={sectors[id][lang].path}>{sectors[id][lang].label}</a>
+          ))}
+        </nav>
         <p className="gl-copy">{T.footerNav.copyright}</p>
       </footer>
     </ApShell>

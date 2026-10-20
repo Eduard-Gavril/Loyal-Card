@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { LANDING_PATH } from '@/lib/seo'
+import { sectorForPath, sectors } from '@/lib/sectors'
 import { useClientStore } from '@/store'
 import { useCopy, useL } from './shared'
 import { IosIcon, Squircle, type IconName } from './ios'
@@ -17,6 +18,8 @@ export function LangSwitch() {
   const navigate = useNavigate()
   // on the landing each language has its own address ('/', '/it', '/ro')
   const onLanding = (Object.values(LANDING_PATH) as string[]).includes(pathname.replace(/(.)\/$/, '$1'))
+  // a sector page has the same page in each language, at its own address
+  const sector = sectorForPath(pathname)
   return (
     <div className="gn-lang" role="group" aria-label="Language">
       {LANGS.map(([code, label]) => (
@@ -27,6 +30,7 @@ export function LangSwitch() {
           onClick={() => {
             setLanguage(code)
             if (onLanding) navigate(LANDING_PATH[code])
+            else if (sector) navigate(sectors[sector.id][code].path)
           }}
         >
           {label}
@@ -36,7 +40,10 @@ export function LangSwitch() {
   )
 }
 
-export default function GlassNav() {
+export type NavLink = { href: string; label: string; icon: IconName; color: string }
+
+/** `links` replaces the landing's section anchors (used by pages that are not the landing). */
+export default function GlassNav({ links: custom, home = '#top' }: { links?: NavLink[]; home?: string }) {
   const t = useCopy()
   const L = useL()
   const go = useNavigate()
@@ -49,7 +56,7 @@ export default function GlassNav() {
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
-  const links: { href: string; label: string; icon: IconName; color: string }[] = [
+  const links: NavLink[] = custom ?? [
     { href: '#how', label: t.nav.how, icon: 'phone', color: 'linear-gradient(160deg,#ffd166,#f5a623)' },
     { href: '#results', label: L('Risultati', 'Results', 'Rezultate'), icon: 'chart', color: 'linear-gradient(160deg,#ffb12a,#e5811a)' },
     { href: '#pricing', label: t.nav.pricing, icon: 'tag', color: 'linear-gradient(160deg,#ff9a3d,#e5671c)' },
@@ -66,7 +73,7 @@ export default function GlassNav() {
   return (
     <header className="ap-nav gn">
       <div className="ap-nav-in gn-in">
-        <a href="#top" className="ap-logo" onClick={close}>
+        <a href={home} className="ap-logo" onClick={close}>
           <img src="/brand/logo-amber-tight.png" alt="" />
           LoyalCard
         </a>

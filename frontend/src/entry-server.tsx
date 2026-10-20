@@ -13,9 +13,11 @@ import CookiePolicy from './pages/CookiePolicy'
 import RefundPolicy from './pages/RefundPolicy'
 import AcceptableUsePolicy from './pages/AcceptableUsePolicy'
 import * as seo from './lib/seo'
+import * as sectorData from './lib/sectors'
+import SectorPage from './pages/SectorPage'
 
 // Build-time entry: draws the public pages to HTML. The browser then takes over (hydration) with the same components.
-export { seo }
+export { seo, sectorData }
 
 function page(path: string) {
   switch (path) {
@@ -29,10 +31,13 @@ function page(path: string) {
     case '/cookie-policy': return <CookiePolicy />
     case '/refund': return <RefundPolicy />
     case '/acceptable-use': return <AcceptableUsePolicy />
-    default: throw new Error(`No page registered for ${path}`)
+    default: {
+      const s = sectorData.sectorForPath(path)
+      if (s) return <SectorPage sector={s.id} routeLang={s.lang} />
+      throw new Error(`No page registered for ${path}`)
+    }
   }
 }
-
 export function render(path: string, language: Language): string {
   // On the server zustand reads its *initial* state (React's server snapshot), not the current one, so set both.
   useClientStore.setState({ language, languageDetected: true })

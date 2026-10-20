@@ -6,6 +6,7 @@ import CookieBanner from './components/CookieBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import { supabase } from './lib/supabase'
 import { lazyWithReload } from './lib/lazyWithReload'
+import { SECTOR_ROUTES } from './lib/sectors'
 import { reloadOnceForChunkError } from './lib/chunkReload'
 
 // Critical pages - loaded immediately (small, first-screen)
@@ -32,6 +33,7 @@ const RefundPolicy = lazyWithReload(() => import('./pages/RefundPolicy'))
 const AcceptableUsePolicy = lazyWithReload(() => import('./pages/AcceptableUsePolicy'))
 const ContactPage = lazyWithReload(() => import('./pages/ContactPage'))
 const PricingPage = lazyWithReload(() => import('./pages/PricingPage'))
+const SectorPage = lazyWithReload(() => import('./pages/SectorPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -254,6 +256,9 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           <Route path="/acceptable-use" element={<AcceptableUsePolicy />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          {SECTOR_ROUTES.map((r) => (
+            <Route key={r.path} path={r.path} element={<SectorPage sector={r.id} routeLang={r.lang} />} />
+          ))}
 
           {/* Admin routes (protected) */}
           <Route path="/admin" element={<Navigate to="/admin/login" replace />} />

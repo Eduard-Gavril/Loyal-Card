@@ -231,6 +231,9 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
         <Routes>
           {/* Landing page */}
           <Route path="/" element={<LandingPage />} />
+          {/* One real address per language, so each can be indexed on its own */}
+          <Route path="/it" element={<LandingPage routeLang="it" />} />
+          <Route path="/ro" element={<LandingPage routeLang="ro" />} />
           
           {/* Tenant selection */}
           <Route path="/select-tenant" element={<TenantSelector />} />

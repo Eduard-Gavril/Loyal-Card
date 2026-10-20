@@ -1,39 +1,32 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useClientStore } from '@/store'
+import { LANDING_META, LANDING_PATH, SITE_URL, type SeoLang } from '@/lib/seo'
 import Landing from '@/components/landing/Landing'
 
-// Page-level concerns only: SEO tags per language and the browser chrome colour.
-// The page itself lives in components/landing.
-const META_TAGS = {
-  en: {
-    title: 'LoyalCard - Digital Loyalty Card | Free Customer Rewards Program',
-    description: 'Free digital loyalty card platform for businesses. Create mobile loyalty programs, reward customers, and boost retention. No setup fees. Start in 2 minutes!',
-    keywords: 'digital loyalty card, customer rewards app, free loyalty program, digital punch card, mobile loyalty card',
-    canonical: 'https://loyalcard.net/'
-  },
-  it: {
-    title: 'LoyalCard - Carta Fedeltà Digitale | Programma Fedeltà Gratuito',
-    description: 'Piattaforma gratuita di carte fedeltà digitali per aziende. Crea programmi fedeltà mobile, premia i clienti e aumenta la fidelizzazione. Inizia in 2 minuti!',
-    keywords: 'carta fedeltà digitale, app premi clienti, programma fedeltà gratuito, tessera fedeltà digitale, carta fedeltà mobile',
-    canonical: 'https://loyalcard.net/?lang=it'
-  },
-  ro: {
-    title: 'LoyalCard - Card de Fidelitate Digital | Program Loialitate Gratuit',
-    description: 'Platformă gratuită de carduri de fidelitate digitale pentru afaceri. Creează programe de loialitate mobile, recompensează clienții și crește retenția. Fără costuri!',
-    keywords: 'card de fidelitate digital, aplicație recompense clienți, program loialitate gratuit, card digital puncte, card loialitate mobil',
-    canonical: 'https://loyalcard.net/?lang=ro'
-  }
-}
+// Page-level concerns only: SEO tags and the browser chrome colour.
+// The page itself lives in components/landing; the tags per language live in lib/seo.ts.
 
 // Same as <meta name="theme-color"> in index.html (#8b5cf6) for every other page.
 const LANDING_THEME_COLOR = '#0b0907'
 
-export default function LandingPage() {
+/**
+ * `routeLang` is the language of the URL the page is served from: '/' (en), '/it' or '/ro'.
+ * Visiting /it or /ro selects that language; '/' keeps the visitor's own language.
+ */
+export default function LandingPage({ routeLang = 'en' }: { routeLang?: SeoLang }) {
+  // Set before the first render, so the page (and the HTML generated at build time) is in the URL's language.
+  useState(() => {
+    // Only when it actually differs: main.tsx already does this before the first render, and a no-op update here
+    // would notify subscribers in the middle of hydration.
+    if (routeLang !== 'en' && useClientStore.getState().language !== routeLang) {
+      useClientStore.setState({ language: routeLang, languageDetected: true })
+    }
+  })
   const { language } = useClientStore()
 
   // Update meta tags based on language
   useEffect(() => {
-    const meta = META_TAGS[language as keyof typeof META_TAGS] || META_TAGS.en
+    const meta = LANDING_META[language as SeoLang] || LANDING_META.en
 
     document.title = meta.title
 
@@ -50,18 +43,18 @@ export default function LandingPage() {
     updateMetaTag('description', meta.description)
     updateMetaTag('keywords', meta.keywords)
 
-    // Update canonical link
+    // The canonical address belongs to the URL, not to the visitor: '/' stays '/' even when shown in Italian.
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
     if (!canonical) {
       canonical = document.createElement('link')
       canonical.rel = 'canonical'
       document.head.appendChild(canonical)
     }
-    canonical.href = meta.canonical
+    canonical.href = SITE_URL + LANDING_PATH[routeLang]
 
     // Update html lang attribute
     document.documentElement.lang = language
-  }, [language])
+  }, [language, routeLang])
 
   // The landing is dark: tint the browser's address bar to match, and put it back on leave.
   useEffect(() => {

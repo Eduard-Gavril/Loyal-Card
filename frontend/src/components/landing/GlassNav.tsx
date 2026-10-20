@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { LANDING_PATH } from '@/lib/seo'
 import { useClientStore } from '@/store'
 import { useCopy, useL } from './shared'
 import { IosIcon, Squircle, type IconName } from './ios'
@@ -12,10 +13,22 @@ const LANGS = [
 
 export function LangSwitch() {
   const { language, setLanguage } = useClientStore()
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  // on the landing each language has its own address ('/', '/it', '/ro')
+  const onLanding = (Object.values(LANDING_PATH) as string[]).includes(pathname.replace(/(.)\/$/, '$1'))
   return (
     <div className="gn-lang" role="group" aria-label="Language">
       {LANGS.map(([code, label]) => (
-        <button key={code} type="button" className={language === code ? 'is-on' : ''} onClick={() => setLanguage(code)}>
+        <button
+          key={code}
+          type="button"
+          className={language === code ? 'is-on' : ''}
+          onClick={() => {
+            setLanguage(code)
+            if (onLanding) navigate(LANDING_PATH[code])
+          }}
+        >
           {label}
         </button>
       ))}

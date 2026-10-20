@@ -26,7 +26,66 @@
   to = "/index.html"
   status = 404
 
+# The old language addresses (/?lang=it) now live at /it and /ro. "/" exists as a
+# real file, so force is needed for the rule to win over it.
+[[redirects]]
+  from = "/"
+  query = {lang = "it"}
+  to = "/it"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/"
+  query = {lang = "ro"}
+  to = "/ro"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Private areas: kept out of search results. This is done with a header rather
+# than robots.txt, because a page blocked in robots.txt can't be crawled and so
+# Google never gets to see that it should be dropped.
+[[headers]]
+  for = "/card/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/card"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/dashboard"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/wallet"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/recovery"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/select-tenant"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/super-admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

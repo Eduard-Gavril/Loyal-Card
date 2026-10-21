@@ -32,7 +32,6 @@ const TermsOfService = lazyWithReload(() => import('./pages/TermsOfService'))
 const RefundPolicy = lazyWithReload(() => import('./pages/RefundPolicy'))
 const AcceptableUsePolicy = lazyWithReload(() => import('./pages/AcceptableUsePolicy'))
 const ContactPage = lazyWithReload(() => import('./pages/ContactPage'))
-const PricingPage = lazyWithReload(() => import('./pages/PricingPage'))
 const SectorPage = lazyWithReload(() => import('./pages/SectorPage'))
 
 // Loading fallback component
@@ -255,7 +254,7 @@ VITE_SUPABASE_ANON_KEY=[tua-anon-key]`}
           <Route path="/refund" element={<RefundPolicy />} />
           <Route path="/acceptable-use" element={<AcceptableUsePolicy />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/pricing" element={<Navigate to="/" replace />} />
           {SECTOR_ROUTES.map((r) => (
             <Route key={r.path} path={r.path} element={<SectorPage sector={r.id} routeLang={r.lang} />} />
           ))}

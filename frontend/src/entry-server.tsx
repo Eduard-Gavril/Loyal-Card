@@ -5,7 +5,6 @@ import { StaticRouter } from 'react-router-dom/server'
 import { useClientStore } from './store'
 import { translations, type Language } from './lib/i18n'
 import LandingPage from './pages/LandingPage'
-import PricingPage from './pages/PricingPage'
 import ContactPage from './pages/ContactPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
@@ -24,7 +23,6 @@ function page(path: string) {
     case '/': return <LandingPage routeLang="en" />
     case '/it': return <LandingPage routeLang="it" />
     case '/ro': return <LandingPage routeLang="ro" />
-    case '/pricing': return <PricingPage />
     case '/contact': return <ContactPage />
     case '/privacy': return <PrivacyPolicy />
     case '/terms': return <TermsOfService />

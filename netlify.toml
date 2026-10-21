@@ -42,6 +42,13 @@
   status = 301
   force = true
 
+# The pricing page was merged into the landing
+[[redirects]]
+  from = "/pricing"
+  to = "/"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

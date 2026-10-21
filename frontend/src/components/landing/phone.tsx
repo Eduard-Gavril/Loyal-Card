@@ -90,8 +90,9 @@ function FeaturedCard({ e, big }: { e: Example; big?: boolean }) {
   )
 }
 
-function WalletScreen() {
+function WalletScreen({ ex }: { ex?: Example[] }) {
   const t = useCopy()
+  const examples = ex ?? t.examples
   const u = useUi()
   return (
     <>
@@ -102,10 +103,10 @@ function WalletScreen() {
         </div>
         <span className="ph-plus">+</span>
       </div>
-      <FeaturedCard e={t.examples[0]} />
+      <FeaturedCard e={examples[0]} />
       <p className="ph-label">{u.allCards}</p>
       <ul className="ph-list">
-        {t.examples.map((x, i) => (
+        {examples.map((x, i) => (
           <li key={x.name}>
             <span className={`ph-ico c${i}`}>{x.name[0]}</span>
             <div>
@@ -121,10 +122,11 @@ function WalletScreen() {
   )
 }
 
-function CardScreen() {
+function CardScreen({ ex }: { ex?: Example[] }) {
   const t = useCopy()
+  const examples = ex ?? t.examples
   const u = useUi()
-  const e = t.examples[0]
+  const e = examples[0]
   return (
     <>
       <div className="ph-nav">
@@ -154,7 +156,7 @@ function CardScreen() {
           <span className="ph-ico c1"><Icon name="check" /></span>
           <div>
             <b>{u.stampAdded}</b>
-            <small>{t.examples[1].name} · 13:05</small>
+            <small>{examples[1].name} · 13:05</small>
           </div>
           <em>+1</em>
         </li>
@@ -163,10 +165,10 @@ function CardScreen() {
   )
 }
 
-function QrScreen() {
+function QrScreen({ ex }: { ex?: Example[] }) {
   const t = useCopy()
   const u = useUi()
-  const e = t.examples[0]
+  const e = (ex ?? t.examples)[0]
   return (
     <>
       <div className="ph-nav">
@@ -192,14 +194,15 @@ function QrScreen() {
 
 export type ScreenKind = 'wallet' | 'card' | 'qr'
 
-export function Phone({ kind, className = '', style }: { kind: ScreenKind; className?: string; style?: CSSProperties }) {
+/** `examples` replaces the demo cards shown on the screens (e.g. with ones fitting a business sector). */
+export function Phone({ kind, className = '', style, examples }: { kind: ScreenKind; className?: string; style?: CSSProperties; examples?: Example[] }) {
   return (
     <div className={`ph ${className}`} style={style} aria-hidden="true">
       <div className="ph-body">
         <span className="ph-island" />
         <div className="ph-screen">
           <Status />
-          {kind === 'wallet' ? <WalletScreen /> : kind === 'card' ? <CardScreen /> : <QrScreen />}
+          {kind === 'wallet' ? <WalletScreen ex={examples} /> : kind === 'card' ? <CardScreen ex={examples} /> : <QrScreen ex={examples} />}
           <span className="ph-home" />
         </div>
       </div>

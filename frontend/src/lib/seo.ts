@@ -28,10 +28,6 @@ export const LANDING_META: Record<SeoLang, { title: string; description: string;
 
 /** Public pages other than the landing that are rendered to static HTML and listed in the sitemap. */
 export const STATIC_PAGES: Record<string, { title: string; description: string }> = {
-  '/pricing': {
-    title: 'Pricing - Digital Loyalty Card Plans | LoyalCard',
-    description: 'LoyalCard plans from free to enterprise: loyalty rules, analytics, white-label and staff accounts. Start free, upgrade when your business grows.',
-  },
   '/contact': {
     title: 'Contact Us | LoyalCard',
     description: 'Questions about LoyalCard? Send us a message or reach us on Instagram. We reply to businesses and customers alike.',

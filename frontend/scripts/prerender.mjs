@@ -17,7 +17,7 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g
 
 const LANDING = [['/', 'en'], ['/it', 'it'], ['/ro', 'ro']]
 // 'en' = text depends on the visitor's language, so the browser redraws it when theirs differs; 'any' = same for everyone
-const OTHER = Object.entries(STATIC_PAGES).map(([path, m]) => [path, m, /^\/(pricing|contact)$/.test(path) ? 'en' : 'any'])
+const OTHER = Object.entries(STATIC_PAGES).map(([path, m]) => [path, m, /^\/contact$/.test(path) ? 'en' : 'any'])
 
 function replaceOnce(html, re, to, what) {
   if (!re.test(html)) throw new Error(`prerender: cannot find ${what} in dist/index.html`)
@@ -123,7 +123,7 @@ const urls = [
     const a = [['en', sectors[id].en.path], ['it', sectors[id].it.path], ['ro', sectors[id].ro.path], ['x-default', sectors[id].en.path]]
     return ['en', 'it', 'ro'].map((l) => entry(sectors[id][l].path, 'monthly', '0.8', a))
   }),
-  ...OTHER.map(([p]) => entry(p, /^\/(pricing|contact)$/.test(p) ? 'monthly' : 'yearly', p === '/pricing' ? '0.8' : p === '/contact' ? '0.6' : '0.3')),
+  ...OTHER.map(([p]) => entry(p, /^\/contact$/.test(p) ? 'monthly' : 'yearly', p === '/contact' ? '0.6' : '0.3')),
 ]
 writeFileSync(join(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`)
 rmSync(join(root, 'dist-ssr'), { recursive: true, force: true })

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '@/store'
+import { getTranslation } from '@/lib/i18n'
 import { LANDING_PATH, SITE_URL, type SeoLang } from '@/lib/seo'
 import { SECTOR_IDS, sectors, sectorUi, type SectorId } from '@/lib/sectors'
 import { ApShell } from '@/components/landing/apple'
 import GlassNav, { type NavLink } from '@/components/landing/GlassNav'
+import Pricing from '@/components/landing/Pricing'
 import LiveWallpaper from '@/components/landing/LiveWallpaper'
 import { Phone } from '@/components/landing/phone'
 import { IosIcon, Squircle, type IconName } from '@/components/landing/ios'
@@ -36,6 +38,7 @@ export default function SectorPage({ sector, routeLang }: { sector: SectorId; ro
   const c = sectors[sector][lang]
   const u = sectorUi[lang]
   const go = useNavigate()
+  const T = getTranslation(lang)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
 
   // The tags belong to the address (routeLang), the visible text follows the language switch.
@@ -74,8 +77,8 @@ export default function SectorPage({ sector, routeLang }: { sector: SectorId; ro
 
   const nav: NavLink[] = [
     { href: '#how', label: u.navHow, icon: 'phone', color: 'linear-gradient(160deg,#ffd166,#f5a623)' },
+    { href: '#pricing', label: u.navPricing, icon: 'tag', color: 'linear-gradient(160deg,#ff9a3d,#e5671c)' },
     { href: '#faq', label: u.navFaq, icon: 'help', color: 'linear-gradient(160deg,#f0a35e,#c4601f)' },
-    { href: '/pricing', label: u.navPricing, icon: 'tag', color: 'linear-gradient(160deg,#ff9a3d,#e5671c)' },
     { href: '/contact', label: u.navContact, icon: 'mail', color: 'linear-gradient(160deg,#f6c25a,#d99320)' },
   ]
 
@@ -95,12 +98,13 @@ export default function SectorPage({ sector, routeLang }: { sector: SectorId; ro
         <p className="ap-sub la-sub">{c.sub}</p>
         <div className="ap-cta la-cta">
           <button className="ap-btn" onClick={() => go('/contact')}>{u.ctaBtn}</button>
+          <button className="ap-btn gl-btn-ghost" onClick={() => go('/select-tenant')}>{u.discover}</button>
           <a className="ap-link" href="#how">{u.navHow}</a>
         </div>
         <div className="la-fan">
-          <Phone kind="card" className="la-side" />
-          <Phone kind="wallet" className="la-mid" />
-          <Phone kind="qr" className="la-side" />
+          <Phone kind="card" examples={c.examples} className="la-side" />
+          <Phone kind="wallet" examples={c.examples} className="la-mid" />
+          <Phone kind="qr" examples={c.examples} className="la-side" />
         </div>
       </header>
 
@@ -153,6 +157,8 @@ export default function SectorPage({ sector, routeLang }: { sector: SectorId; ro
         </div>
       </section>
 
+      <Pricing />
+
       <section id="faq" className="ap-sec gl-sec gl-faq">
         <div className="gl-faq-head">
           <h2 className="ap-h2">FAQ</h2>
@@ -179,33 +185,30 @@ export default function SectorPage({ sector, routeLang }: { sector: SectorId; ro
           </div>
           <div className="gl-contact-btns">
             <button className="ap-btn" onClick={() => go('/contact')}>{u.ctaBtn}</button>
-            <a className="ap-btn gl-btn-ghost" href="/pricing" onClick={(e) => { e.preventDefault(); go('/pricing') }}>{u.seePricing}</a>
+            <button className="ap-btn gl-btn-ghost" onClick={() => go('/select-tenant')}>{u.discover}</button>
           </div>
         </div>
-      </section>
-
-      <section className="ap-sec sc-others">
-        <h2>{u.othersTitle}</h2>
-        <ul>
-          {SECTOR_IDS.filter((id) => id !== sector).map((id) => (
-            <li key={id}><a href={sectors[id][lang].path}>{sectors[id][lang].label}</a></li>
-          ))}
-          <li><a href={LANDING_PATH[lang]}>LoyalCard</a></li>
-        </ul>
       </section>
 
       <footer className="ap-sec gl-footer">
         <div className="gl-footer-top">
           <a className="ap-logo" href={LANDING_PATH[lang]}><img src="/brand/logo-amber-tight.png" alt="" />LoyalCard</a>
           <nav aria-label="Legal">
-            <a href="/privacy">Privacy</a>
-            <a href="/terms">Terms</a>
-            <a href="/cookie-policy">Cookies</a>
-            <a href="/refund">Refund</a>
-            <a href="/acceptable-use">Acceptable use</a>
-            <a href="/contact">{u.navContact}</a>
+            <a href="/privacy">{T.footerNav.privacy}</a>
+            <a href="/terms">{T.footerNav.terms}</a>
+            <a href="/cookie-policy">{T.footerNav.cookies}</a>
+            <a href="/refund">{T.footerNav.refund}</a>
+            <a href="/acceptable-use">{T.footerNav.acceptableUse}</a>
+            <a href="/contact">{T.footerNav.contactUs}</a>
           </nav>
         </div>
+        <nav className="gl-sectors" aria-label={u.othersTitle}>
+          <span>{u.othersTitle}</span>
+          {SECTOR_IDS.filter((id) => id !== sector).map((id) => (
+            <a key={id} href={sectors[id][lang].path}>{sectors[id][lang].label}</a>
+          ))}
+        </nav>
+        <p className="gl-copy">{T.footerNav.copyright}</p>
       </footer>
     </ApShell>
   )

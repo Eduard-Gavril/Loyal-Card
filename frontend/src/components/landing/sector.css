@@ -10,14 +10,7 @@
 .sc-card { width: auto; }
 .sc-card small { opacity: .75; }
 
-.sc-others { padding-top: 56px; }
-.sc-others h2 { font-size: 15px; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-bottom: 14px; }
-.sc-others ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
-.sc-others a {
-  display: inline-block; padding: 9px 16px; border-radius: 999px; font-size: 14px; text-decoration: none;
-  color: var(--text); background: rgba(255, 226, 186, .08); border: 1px solid rgba(255, 226, 186, .14);
-}
-.sc-others a:hover { background: rgba(255, 226, 186, .16); }
+.gl-sectors span { color: var(--text); opacity: .6; font-weight: 600; }
 
 @media (max-width: 860px) {
   .sc-grid { grid-template-columns: 1fr; }

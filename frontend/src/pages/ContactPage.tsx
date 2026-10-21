@@ -217,6 +217,19 @@ export default function ContactPage() {
                       </a>
                     </div>
 
+                    {/* Phone (Romania) */}
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                        {language === 'it' ? 'Telefono' : language === 'ro' ? 'Telefon' : 'Phone'}
+                      </div>
+                      <a
+                        href="tel:+40750438655"
+                        className="text-purple-600 dark:text-purple-400 hover:underline"
+                      >
+                        +40 750 438 655
+                      </a>
+                    </div>
+
                     {/* Instagram */}
                     <div>
                       <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">

@@ -191,3 +191,4 @@ html:has(.la) { scroll-behavior: smooth; }
 .gl-sectors { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; font-size: 13px; }
 .gl-sectors a { color: var(--muted); text-decoration: none; }
 .gl-sectors a:hover { color: var(--text); text-decoration: underline; }
+.gl-sectors + .gl-copy { margin-top: 18px; }

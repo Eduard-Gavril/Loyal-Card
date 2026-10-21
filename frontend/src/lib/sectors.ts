@@ -374,7 +374,7 @@ export const sectorUi: Record<SeoLang, {
   ctaTitle: string
   ctaSub: string
   ctaBtn: string
-  seePricing: string
+  discover: string
   othersTitle: string
   navHow: string
   navFaq: string
@@ -397,8 +397,8 @@ export const sectorUi: Record<SeoLang, {
     faqSub: 'Common questions',
     ctaTitle: 'Ready to start?',
     ctaSub: 'Create your loyalty program in two minutes. The free plan has no setup fees.',
-    ctaBtn: 'Get started free',
-    seePricing: 'See all plans',
+    ctaBtn: 'Become a partner for free',
+    discover: 'Discover partners',
     othersTitle: 'LoyalCard for other businesses',
     navHow: 'How it works',
     navFaq: 'FAQ',
@@ -421,8 +421,8 @@ export const sectorUi: Record<SeoLang, {
     faqSub: 'Le domande più frequenti',
     ctaTitle: 'Pronto a iniziare?',
     ctaSub: 'Crea il tuo programma fedeltà in due minuti. Il piano gratuito non ha costi di attivazione.',
-    ctaBtn: 'Inizia gratis',
-    seePricing: 'Vedi tutti i piani',
+    ctaBtn: 'Diventa partner gratis',
+    discover: 'Scopri i partner',
     othersTitle: 'LoyalCard per altre attività',
     navHow: 'Come funziona',
     navFaq: 'FAQ',
@@ -445,8 +445,8 @@ export const sectorUi: Record<SeoLang, {
     faqSub: 'Întrebări frecvente',
     ctaTitle: 'Ești gata să începi?',
     ctaSub: 'Creează-ți programul de fidelitate în două minute. Planul gratuit nu are costuri de activare.',
-    ctaBtn: 'Începe gratuit',
-    seePricing: 'Vezi toate planurile',
+    ctaBtn: 'Devino partener gratuit',
+    discover: 'Descoperă parteneri',
     othersTitle: 'LoyalCard pentru alte afaceri',
     navHow: 'Cum funcționează',
     navFaq: 'FAQ',

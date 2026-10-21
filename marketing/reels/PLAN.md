@@ -56,7 +56,7 @@ Segnare `[x]` quando un tema è stato usato.
 
 **Il dato** (sezione "Rezultate Dovedite", con fonte a schermo)
 - [x] +27% retenție clienți (Accenture 2020) (2026-10-14)
-- [ ] +60% vizite recurente (Bond Brand Loyalty 2023)
+- [x] +60% vizite recurente (Bond Brand Loyalty 2023) (2026-10-21)
 - [ ] +25% venituri per client (Harvard Business Review)
 - [ ] +30% valoare pe viață client (Bain & Company)
 
@@ -111,3 +111,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-18 (dom) | `2026-10-18-4-pasi.html` | L'offerta | Programul de fidelitate în 4 pași (percorso reale), Starter gratuit | 20:30 |
 | 2026-10-19 (lun) | `2026-10-19-frizerie.html` | Un settore al giorno | Frizerie: palo da barbiere, 5 tunsori → a 6-a gratuită; 30 s + taglio da 10 s per test | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-10-20 (mar) | `2026-10-20-descarc-aplicatie.html` | Domanda e risposta | Download bloccato al 12% → "NU" → card nel browser; bonus PWA; 15 s + taglio 8 s | 14:30 (15 s) / Reel di prova (8 s) |
+| 2026-10-21 (mer) | `2026-10-21-vizite-60.html` | Il dato | +60% vizite recurente: contapersone 100 → 160, 1 icona = 10 visite; 15 s + taglio 9 s | 12:30 (15 s) / Reel di prova (9 s) |

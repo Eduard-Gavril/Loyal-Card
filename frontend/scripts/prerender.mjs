@@ -126,5 +126,10 @@ const urls = [
   ...OTHER.map(([p]) => entry(p, /^\/contact$/.test(p) ? 'monthly' : 'yearly', p === '/contact' ? '0.6' : '0.3')),
 ]
 writeFileSync(join(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`)
+
+// Netlify answers /it with a redirect to /it/ when it finds a folder with an index.html. The canonical, hreflang and
+// sitemap addresses have no trailing slash, so serve the page at the address without a redirect (forced rewrite).
+const rewrites = written.map(([p]) => p).filter((p) => p !== '/').map((p) => `${p} ${p}/index.html 200!`)
+writeFileSync(join(dist, '_redirects'), rewrites.join('\n') + '\n')
 rmSync(join(root, 'dist-ssr'), { recursive: true, force: true })
 for (const [p, n] of written) console.log(`prerendered ${p.padEnd(42)} ${String(n).padStart(7)} chars`)

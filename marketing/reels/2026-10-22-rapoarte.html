@@ -1,0 +1,294 @@
+<title>Rapoartele LoyalCard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Una funzione" #2: the Rapoarte page (AdminReports): Total Scanări, Premii Date, Medie/Zi,
+   Rata Conversie, Scanări pe Zi, Produse Populare, Scanări pe Angajat, 7/30/90 Zile.
+   Example numbers only, labelled on screen, internally consistent (sums, averages, rates).
+   Cool light product-demo world (same as the scanner reel). Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --sky: #EEF0F7; --ink: #1B1530; --violet: #6D28D9; --violet-2: #8B5CF6; --lilac: #C4B5FD; --amber: #F5B544; --mint: #6EE7B7; --cream: #FAF9F6;
+  --panel: #161226; --panel-2: #211B38; --panel-3: #2D2550; --soft: #A9A3C4;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--sky); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--sky); color: var(--ink); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--cream); }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(196, 181, 253, .35); background: rgba(124, 58, 237, .3); color: var(--cream); display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--violet-2); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--violet-2) 0 var(--p, 0%), rgba(250, 249, 246, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); border: 3px solid var(--violet-2); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(250, 249, 246, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(27, 21, 48, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#soft { position: absolute; inset: -160px; background: radial-gradient(55% 40% at 15% 12%, rgba(139, 92, 246, .22), transparent 70%), radial-gradient(60% 45% at 90% 92%, rgba(245, 181, 68, .16), transparent 70%); }
+#gridbg { position: absolute; inset: 0; background-image: linear-gradient(rgba(27, 21, 48, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(27, 21, 48, .045) 1px, transparent 1px); background-size: 48px 48px; }
+.tag { position: absolute; left: 0; width: 720px; top: 180px; display: flex; justify-content: center; }
+.tag span { font-family: var(--f-mono); font-size: 16px; font-weight: 500; letter-spacing: .16em; padding: 9px 16px; border-radius: 999px; background: var(--ink); color: var(--cream); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.hx { font-weight: 900; font-size: 96px; line-height: .96; letter-spacing: -.05em; text-wrap: balance; }
+.hx em { font-style: normal; color: var(--violet); }
+
+/* dashboard panel (dark, like the admin app) */
+#panel { position: absolute; left: 40px; top: 200px; width: 640px; height: 790px; border-radius: 30px; background: var(--panel); color: var(--cream); box-shadow: 0 40px 80px rgba(27, 21, 48, .3); overflow: hidden; }
+#panel .top { position: absolute; left: 26px; top: 22px; font-weight: 800; font-size: 26px; }
+#ex { position: absolute; right: 22px; top: 24px; font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(245, 181, 68, .6); color: var(--amber); }
+.ranges { position: absolute; left: 26px; top: 70px; display: flex; gap: 8px; }
+.rg { position: relative; padding: 8px 14px; border-radius: 10px; background: var(--panel-2); font-size: 15px; font-weight: 700; color: var(--soft); overflow: hidden; }
+.rg .on { position: absolute; inset: 0; background: var(--violet); }
+.rg span { position: relative; }
+.kpis { position: absolute; left: 26px; top: 122px; width: 588px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.kpi { height: 92px; border-radius: 16px; background: var(--panel-2); padding: 12px 14px; box-sizing: border-box; }
+.kpi .l { font-size: 13px; font-weight: 600; color: var(--soft); white-space: nowrap; }
+.kpi .v { margin-top: 8px; font-size: 32px; font-weight: 900; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.sec { position: absolute; left: 26px; width: 588px; border-radius: 18px; background: var(--panel-2); }
+.sec .h { position: absolute; left: 18px; top: 14px; font-size: 16px; font-weight: 800; }
+#chart { top: 232px; height: 236px; }
+.bars { position: absolute; left: 18px; right: 18px; bottom: 34px; top: 50px; display: flex; align-items: flex-end; gap: 6px; }
+.bars i { flex: 1; border-radius: 6px 6px 3px 3px; background: linear-gradient(var(--violet-2), var(--violet)); transform-origin: 50% 100%; }
+.bars i.hi { background: linear-gradient(#FCD34D, var(--amber)); }
+.days { position: absolute; left: 18px; right: 18px; bottom: 10px; display: flex; gap: 6px; font-family: var(--f-mono); font-size: 13px; color: var(--soft); }
+.days span { flex: 1; text-align: center; }
+#peak { position: absolute; top: 0; font-family: var(--f-mono); font-size: 14px; font-weight: 500; padding: 4px 8px; border-radius: 8px; background: var(--amber); color: #2A1600; }
+#prods { top: 482px; height: 176px; }
+.pr { position: absolute; left: 18px; right: 18px; height: 30px; display: flex; align-items: center; }
+.pr .n { width: 132px; font-size: 16px; font-weight: 700; }
+.pr .b { flex: 1; height: 22px; border-radius: 6px; background: var(--panel-3); position: relative; overflow: hidden; }
+.pr .b i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, var(--violet), var(--violet-2)); transform-origin: 0 50%; }
+.pr .c { width: 64px; text-align: right; font-family: var(--f-mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+#staff { top: 672px; height: 96px; }
+.sf { position: absolute; top: 48px; height: 34px; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; }
+.sf i { width: 30px; height: 30px; border-radius: 50%; background: var(--panel-3); display: grid; place-items: center; font-style: normal; font-size: 13px; font-weight: 800; color: var(--lilac); }
+.sf b { font-family: var(--f-mono); font-weight: 500; color: var(--mint); }
+#tap { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(250, 249, 246, .35); border: 3px solid rgba(255, 255, 255, .9); z-index: 9; }
+
+/* cta */
+#ctaA { font-weight: 900; font-size: 74px; line-height: 1; letter-spacing: -.045em; text-wrap: balance; }
+#ctaA em { font-style: normal; color: var(--violet); }
+#ctaB { font-size: 28px; font-weight: 700; color: #4B4166; margin-top: 6px; }
+#biz { margin-top: 18px; display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 14px; background: #fff; border: 1.5px solid var(--line); font-size: 23px; font-weight: 700; }
+#biz b { color: var(--violet); }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; box-shadow: 0 10px 24px rgba(27, 21, 48, .12); }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #fff; padding: 12px 24px; border-radius: 16px; background: var(--violet); box-shadow: 0 12px 30px rgba(109, 40, 217, .3); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · joi · 15 s · Funcția săptămânii #2</div>
+    <h1>Rapoartele LoyalCard</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: pagina de rapoarte LoyalCard cu scanări pe zi, produse populare și scanări pe angajat (date de exemplu)">
+      <div id="stage">
+        <div id="soft"></div><div id="gridbg"></div>
+
+        <!-- 1 · hook: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="tag"><span>FUNCȚIA SĂPTĂMÂNII</span></div>
+          <div class="col" id="h1" style="top:290px">
+            <div class="hx">Știi ce se vinde <em>cel mai bine</em> la tine?</div>
+            <div id="h1c" style="margin-top:26px;font-size:30px;font-weight:700;color:#4B4166">Rapoartele LoyalCard îți arată.</div>
+          </div>
+        </div>
+
+        <!-- 2 · the reports page -->
+        <div class="scene" id="s2">
+          <div id="panel">
+            <div class="top">Rapoarte</div>
+            <div id="ex">DATE DE EXEMPLU</div>
+            <div class="ranges"><div class="rg" id="r7"><div class="on" id="on7"></div><span>7 Zile</span></div><div class="rg" id="r30"><div class="on" id="on30"></div><span>30 Zile</span></div><div class="rg"><span>90 Zile</span></div></div>
+            <div class="kpis">
+              <div class="kpi"><div class="l">Total Scanări</div><div class="v" id="kT">0</div></div>
+              <div class="kpi"><div class="l">Premii Date</div><div class="v" id="kR">0</div></div>
+              <div class="kpi"><div class="l">Medie/Zi</div><div class="v" id="kA">0</div></div>
+              <div class="kpi"><div class="l">Rata Conversie</div><div class="v" id="kC">0%</div></div>
+            </div>
+            <div class="sec" id="chart"><div class="h">Scanări pe Zi</div>
+              <div class="bars" id="b7"></div><div class="bars" id="b30"></div>
+              <div class="days" id="dl7"><span>L</span><span>Ma</span><span>Mi</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+              <div id="peak">61</div>
+            </div>
+            <div class="sec" id="prods"><div class="h">Produse Populare</div></div>
+            <div class="sec" id="staff"><div class="h">Scanări pe Angajat</div>
+              <div class="sf" style="left:18px"><i>TU</i>Tu (Proprietar) <b id="sA">0</b></div>
+              <div class="sf" style="left:316px"><i>A</i>Angajat <b id="sB">0</b></div>
+            </div>
+          </div>
+          <div id="tap"></div>
+        </div>
+
+        <!-- 3 · cta -->
+        <div class="scene" id="s3">
+          <div class="col" style="top:236px;gap:8px">
+            <div id="ctaA">Știi exact ce se întâmplă <em>în localul tău.</em></div>
+            <div id="ctaB">Rapoarte pe 7, 30 sau 90 de zile.</div>
+            <div id="biz">Analytics + export Excel · <b>planul Business</b></div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FAF9F6" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+  const ease = p => 1 - Math.pow(1 - Math.max(0, Math.min(1, p)), 3);
+  const ro = (x, dec = 0) => x.toLocaleString('ro-RO', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+  // ---- example data, internally consistent ----
+  // 7 days: 312 scans (38+41+35+47+52+61+38), 41 rewards → 44,6/zi, 13,1 %
+  // 30 days: 1.324 scans (sum of W30), 167 rewards → 44,1/zi, 12,6 %
+  const W7 = [38, 41, 35, 47, 52, 61, 38];
+  const W30 = [36, 40, 38, 44, 49, 58, 34, 39, 42, 37, 45, 50, 60, 36, 38, 43, 39, 46, 51, 57, 35, 41, 44, 40, 47, 52, 59, 37, 40, 47];
+  const K7 = { T: 312, R: 41, A: 312 / 7, C: 41 / 312 * 100, P: [142, 88, 51], S: [176, 136] };
+  const K30 = { T: W30.reduce((a, b) => a + b, 0), R: 167, P: [571, 352, 214], S: [0, 0] };
+  K30.A = K30.T / 30; K30.C = K30.R / K30.T * 100; K30.S = [Math.round(K30.T * .55), K30.T - Math.round(K30.T * .55)];
+  const PN = ['Espresso', 'Cappuccino', 'Croissant'];
+
+  A($('#soft'), [{ translate: '0px 0px' }, { translate: '60px 80px' }], 0, D, 'linear');
+
+  // ---------- 1 · hook ----------
+  scene($('#s1'), -0.05, 2.75);
+  A($('#h1'), [{ scale: '1.05' }, { scale: '1' }], 0, .9, OUT);
+  enter($('#h1c'), .8, { dy: 14, d: .45 });
+
+  // ---------- 2 · reports ----------
+  scene($('#s2'), 2.6, 10.45);
+  A($('#panel'), [{ opacity: 0, translate: '0px 80px', scale: '.96' }, { opacity: 1, translate: '0px 0px', scale: '1' }], 2.6, .6, OUT);
+  enter($('#ex'), 3.1, { dy: 0, s: .7, d: .35, e: BACK });
+  const SW = 8.55; // range switch 7 → 30 days
+  A($('#on30'), [{ opacity: 0 }, { opacity: 1 }], SW, .2, 'linear');
+  A($('#on7'), [{ opacity: 1 }, { opacity: 0 }], SW, .2, 'linear');
+  // KPIs
+  const kT = $('#kT'), kR = $('#kR'), kA = $('#kA'), kC = $('#kC'), sA = $('#sA'), sB = $('#sB');
+  hooks.push(t => {
+    const p = ease((t - 3.0) / 1.2), q = ease((t - SW) / .9), mix = (a, b) => a + (b - a) * q;
+    kT.textContent = ro(Math.round(mix(K7.T, K30.T) * p));
+    kR.textContent = ro(Math.round(mix(K7.R, K30.R) * p));
+    kA.textContent = ro(mix(K7.A, K30.A) * p, 1);
+    kC.textContent = ro(mix(K7.C, K30.C) * p, 1) + '%';
+    const ps = ease((t - 7.0) / .8);
+    sA.textContent = ro(Math.round(mix(K7.S[0], K30.S[0]) * ps)); sB.textContent = ro(Math.round(mix(K7.S[1], K30.S[1]) * ps));
+  });
+  // bars: 7 days, then 30 days
+  const max7 = Math.max(...W7), max30 = Math.max(...W30), MAX = Math.max(max7, max30);
+  const b7 = $('#b7'), b30 = $('#b30');
+  W7.forEach((v, i) => { const b = document.createElement('i'); b.style.height = `${v / MAX * 100}%`; if (v === max7) b.className = 'hi'; b7.appendChild(b); A(b, [{ scale: '1 0' }, { scale: '1 1' }], 4.0 + i * .1, .55, OUT); });
+  W30.forEach((v, i) => { const b = document.createElement('i'); b.style.height = `${v / MAX * 100}%`; b30.appendChild(b); A(b, [{ scale: '1 0' }, { scale: '1 1' }], SW + .1 + i * .02, .45, OUT); });
+  A(b7, [{ opacity: 1 }, { opacity: 0 }], SW, .2, 'linear'); A($('#dl7'), [{ opacity: 1 }, { opacity: 0 }], SW, .2, 'linear');
+  // peak label sits above Saturday's bar
+  const peak = $('#peak'); const colW = (588 - 36 - 6 * 6) / 7;
+  peak.style.left = `${18 + 5 * (colW + 6) + colW / 2 - 18}px`; peak.style.top = `${50 + (1 - max7 / MAX) * (236 - 84) - 30}px`;
+  A(peak, [{ opacity: 0, translate: '0px 10px' }, { opacity: 1, translate: '0px 0px' }], 5.0, .35, BACK);
+  A(peak, [{ opacity: 1 }, { opacity: 0 }], SW, .2, 'linear');
+  // popular products
+  const prods = $('#prods');
+  PN.forEach((n, i) => {
+    const r = document.createElement('div'); r.className = 'pr'; r.style.top = `${50 + i * 40}px`;
+    r.innerHTML = `<div class="n">${n}</div><div class="b"><i></i></div><div class="c">0</div>`; prods.appendChild(r);
+    const bar = $('.b i', r), c = $('.c', r);
+    bar.style.width = `${K7.P[i] / K7.P[0] * 100}%`;
+    A(bar, [{ scale: '0 1' }, { scale: '1 1' }], 5.8 + i * .2, .6, OUT);
+    hooks.push(t => { const q = ease((t - SW) / .9); c.textContent = ro(Math.round((K7.P[i] + (K30.P[i] - K7.P[i]) * q) * ease((t - 5.8 - i * .2) / .6))); });
+  });
+  // a finger switches the range to 30 days
+  const tap = $('#tap'), R30 = { x: 40 + 26 + 78 + 8 + 40, y: 200 + 70 + 18 };
+  A(tap, [{ opacity: 0, translate: `${R30.x + 120}px ${R30.y + 200}px` }, { opacity: 1, translate: `${R30.x}px ${R30.y}px` }], 7.8, .55, IO);
+  A(tap, [{ scale: '1' }, { scale: '.7', offset: .4 }, { scale: '1' }], SW - .05, .3, IO);
+  A(tap, [{ opacity: 1 }, { opacity: 0 }], 9.1, .25, 'linear');
+
+  // ---------- 3 · cta ----------
+  scene($('#s3'), 10.4, D + 1);
+  stagger(words($('#ctaA')), 10.5, .07, { dy: 36, d: .45, e: BACK });
+  enter($('#ctaB'), 11.3, { dy: 14, d: .4 });
+  enter($('#biz'), 11.65, { dy: 16, s: .94, d: .45 });
+  enter($('#brand'), 12.0, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 12.3, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.3, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 7.8 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

@@ -63,7 +63,7 @@ Segnare `[x]` quando un tema è stato usato.
 **Una funzione in 10 secondi**
 - [ ] ~~Apple Wallet / Google Wallet~~ (in sospeso: nel codice ci sono solo i testi, manca la generazione del pass; non pubblicizzare finché non esiste)
 - [x] Scanner multi-produs (coș cu mai multe produse) (2026-10-15, indicato come planul Business)
-- [ ] Dashboard cu analize în timp real
+- [x] Dashboard / Rapoarte (2026-10-22: pagina Rapoarte con dati di esempio; non dire "în timp real": i dati si caricano all'apertura, non in diretta)
 - [ ] Export Excel
 - [ ] Parteneri în apropiere (geolocalizare)
 - [ ] Toate cardurile într-un singur loc
@@ -112,3 +112,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-19 (lun) | `2026-10-19-frizerie.html` | Un settore al giorno | Frizerie: palo da barbiere, 5 tunsori → a 6-a gratuită; 30 s + taglio da 10 s per test | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-10-20 (mar) | `2026-10-20-descarc-aplicatie.html` | Domanda e risposta | Download bloccato al 12% → "NU" → card nel browser; bonus PWA; 15 s + taglio 8 s | 14:30 (15 s) / Reel di prova (8 s) |
 | 2026-10-21 (mer) | `2026-10-21-vizite-60.html` | Il dato | +60% vizite recurente: contapersone 100 → 160, 1 icona = 10 visite; 15 s + taglio 9 s | 12:30 (15 s) / Reel di prova (9 s) |
+| 2026-10-22 (gio) | `2026-10-22-rapoarte.html` | Una funzione | Pagina Rapoarte (KPI, Scanări pe Zi, Produse Populare, Scanări pe Angajat, 7→30 Zile), "Date de exemplu", Business; 15 s + taglio 8 s | 20:30 (15 s) / Reel di prova (8 s) |

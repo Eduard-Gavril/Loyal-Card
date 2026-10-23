@@ -74,7 +74,7 @@ Segnare `[x]` quando un tema è stato usato.
 
 **POV / meme**
 - [x] POV: clientul și-a uitat iar cardul de carton acasă (2026-10-16)
-- [ ] POV: ai printat 500 de carduri și apoi ți-ai schimbat logo-ul
+- [x] POV: ai printat 500 de carduri și apoi ți-ai schimbat logo-ul (2026-10-23, Setări → URL Logo, planul Business)
 - [ ] Clientul cu 9 carduri de carton în portofel
 - [ ] Când clientul întreabă „mai am ștampile?”
 - [ ] Când ștampila cu pixul e „ușor” falsificată
@@ -113,3 +113,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-20 (mar) | `2026-10-20-descarc-aplicatie.html` | Domanda e risposta | Download bloccato al 12% → "NU" → card nel browser; bonus PWA; 15 s + taglio 8 s | 14:30 (15 s) / Reel di prova (8 s) |
 | 2026-10-21 (mer) | `2026-10-21-vizite-60.html` | Il dato | +60% vizite recurente: contapersone 100 → 160, 1 icona = 10 visite; 15 s + taglio 9 s | 12:30 (15 s) / Reel di prova (9 s) |
 | 2026-10-22 (gio) | `2026-10-22-rapoarte.html` | Una funzione | Pagina Rapoarte (KPI, Scanări pe Zi, Produse Populare, Scanări pe Angajat, 7→30 Zile), "Date de exemplu", Business; 15 s + taglio 8 s | 20:30 (15 s) / Reel di prova (8 s) |
+| 2026-10-23 (ven) | `2026-10-23-pov-500-carduri.html` | POV / meme | 500 carduri la coș vs logo cambiato in Setări (URL Logo), Business; 15 s + taglio 9 s | 18:00 (15 s) / Reel di prova (9 s) |

@@ -13,7 +13,7 @@ await p.evaluate(() => document.fonts.ready);
 await p.evaluate(() => window.__lc.pause());
 await p.addStyleTag({ content: `body{margin:0!important} .page{display:block!important;padding:0!important;max-width:none!important} .head,.side,.controls,#playhint{display:none!important}
   .player{border-radius:0!important;box-shadow:none!important;max-width:none!important;width:720px!important} #wrap{width:720px!important;height:1280px!important;aspect-ratio:auto!important}` });
-await p.evaluate(() => Promise.all(['400 16px "IBM Plex Mono"','500 16px "IBM Plex Mono"','400 16px "Inter"','500 16px "Inter"','600 16px "Inter"','700 16px "Inter"','400 16px "Libre Caslon Display"'].map(f => document.fonts.load(f, 'aăîșțâĂÎȘȚÂ€→'))));
+await p.evaluate(() => Promise.all(['400 16px "IBM Plex Mono"','500 16px "IBM Plex Mono"','400 16px "Inter"','500 16px "Inter"','600 16px "Inter"','700 16px "Inter"','400 16px "Libre Caslon Display"','800 16px "Inter"','900 16px "Inter"','600 16px "Caveat"','700 16px "Caveat"'].map(f => document.fonts.load(f, 'aăîșțâĂÎȘȚÂ€→'))));
 await p.waitForTimeout(300);
 const fontsOk = await p.evaluate(() => ['Libre Caslon Display','Inter','IBM Plex Mono'].map(f => f + ':' + document.fonts.check(`16px "${f}"`, 'ăîșțâ')));
 const clip = { x: 0, y: 0, width: 720, height: 1280 };

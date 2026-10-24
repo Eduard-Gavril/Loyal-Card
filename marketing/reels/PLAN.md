@@ -82,7 +82,7 @@ Segnare `[x]` quando un tema è stato usato.
 **Prima e dopo**
 - [x] Carton vs telefon (usato il 2026-10-11 dentro l'offerta)
 - [x] Ștampila cu pixul vs scanarea QR (2026-10-17)
-- [ ] Caietul cu clienți vs dashboard
+- [x] Caietul cu clienți vs dashboard (2026-10-24, export Excel indicato come planul Business)
 - [ ] Costul tipăririi cardurilor vs 0€
 - [ ] „Cine sunt clienții mei fideli?” fără date vs cu date
 
@@ -114,3 +114,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-21 (mer) | `2026-10-21-vizite-60.html` | Il dato | +60% vizite recurente: contapersone 100 → 160, 1 icona = 10 visite; 15 s + taglio 9 s | 12:30 (15 s) / Reel di prova (9 s) |
 | 2026-10-22 (gio) | `2026-10-22-rapoarte.html` | Una funzione | Pagina Rapoarte (KPI, Scanări pe Zi, Produse Populare, Scanări pe Angajat, 7→30 Zile), "Date de exemplu", Business; 15 s + taglio 8 s | 20:30 (15 s) / Reel di prova (8 s) |
 | 2026-10-23 (ven) | `2026-10-23-pov-500-carduri.html` | POV / meme | 500 carduri la coș vs logo cambiato in Setări (URL Logo), Business; 15 s + taglio 9 s | 18:00 (15 s) / Reel di prova (9 s) |
+| 2026-10-24 (sab) | `2026-10-24-caiet-vs-dashboard.html` | Prima e dopo | Schermo diviso: quaderno a mano (lente, "Cine a venit de 5 ori luna asta?") vs dashboard (Scanări Totale, Clienți, Premii Date, Scanări Azi) + "Download Report Excel" → LoyalCard_Clients_*.xlsx, "Date de exemplu", Business; 15 s + taglio 9 s | 10:30 (15 s) / Reel di prova (9 s) |

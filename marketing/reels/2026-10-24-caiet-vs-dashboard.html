@@ -1,0 +1,270 @@
+<title>Caietul vs dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Prima e dopo": caietul cu clienți vs dashboard. Same split screen as "pixul vs QR".
+   Real labels from AdminDashboard: Scanări Totale, Clienți, Premii Date, Scanări Azi,
+   "Download Report Excel" → LoyalCard_Clients_<date>.xlsx (Name, Last Scan, Total Scans, Rewards Received).
+   Example numbers only, labelled. Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --stone: #EDEAE4; --paper: #E6E0D4; --graphite: #3A3631; --pencil: #4B4A55; --coral: #E5484D; --rule: #B9C7E6; --margin: #E8A0A0;
+  --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --lilac: #EDE9FE; --mint: #6EE7B7; --amber: #F5B544; --white: #FFFFFF; --xl: #1D6F42;
+  --f-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--graphite); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--stone); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--stone); color: var(--graphite); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(237, 234, 228, .3); background: rgba(237, 234, 228, .12); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(58, 54, 49, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#grain { position: absolute; inset: 0; background-image: radial-gradient(rgba(58, 54, 49, .07) 1px, transparent 1.3px); background-size: 6px 6px; }
+.panel { position: absolute; left: 32px; width: 656px; height: 404px; border-radius: 34px; overflow: hidden; }
+#pA { top: 166px; background: var(--paper); box-shadow: inset 0 0 0 2px rgba(58, 54, 49, .12); }
+#pB { top: 600px; background: linear-gradient(140deg, var(--violet-2), var(--deep)); color: var(--white); box-shadow: 0 22px 50px rgba(59, 15, 122, .35); }
+.lab { position: absolute; font-family: var(--f-mono); font-size: 17px; font-weight: 500; letter-spacing: .2em; }
+.ttl { position: absolute; font-weight: 900; font-size: 38px; letter-spacing: -.025em; line-height: 1.05; }
+#vs { position: absolute; left: 318px; top: 543px; width: 84px; height: 84px; border-radius: 50%; background: var(--amber); color: #2A1600; display: grid; place-items: center; font-weight: 900; font-size: 30px; z-index: 3; border: 5px solid var(--stone); box-shadow: 0 10px 24px rgba(0, 0, 0, .2); }
+
+/* the notebook */
+#nb { position: absolute; left: 32px; top: 108px; width: 330px; height: 270px; border-radius: 10px 16px 16px 10px; background: #FBFAF6; box-shadow: 0 14px 30px rgba(58, 54, 49, .22); rotate: -2deg; overflow: hidden;
+  background-image: linear-gradient(transparent 0 37px, var(--rule) 37px 39px); background-size: 100% 39px; background-position: 0 14px; }
+#nb::before { content: ""; position: absolute; left: 46px; top: 0; bottom: 0; width: 2px; background: var(--margin); }
+#nb .ln { position: absolute; left: 58px; font-family: var(--f-hand); font-weight: 600; font-size: 31px; color: #2F3A75; white-space: nowrap; }
+#nb .ln s { text-decoration-thickness: 3px; }
+#stain { position: absolute; left: 200px; top: 150px; width: 120px; height: 120px; border-radius: 50%; border: 10px solid rgba(139, 94, 60, .22); box-sizing: border-box; }
+#mag { position: absolute; left: 0; top: 0; width: 86px; height: 86px; z-index: 4; }
+#ask { position: absolute; left: 378px; top: 116px; width: 226px; padding: 14px 16px; border-radius: 18px; background: var(--white); font-family: var(--f-hand); font-weight: 700; font-size: 30px; line-height: 1.05; color: var(--graphite); box-shadow: 0 10px 24px rgba(58, 54, 49, .15); }
+.nchip { position: absolute; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border-radius: 14px; background: rgba(255, 255, 255, .6); border: 1.5px solid rgba(229, 72, 77, .45); font-size: 21px; font-weight: 800; color: var(--graphite); white-space: nowrap; }
+.nchip i { width: 28px; height: 28px; border-radius: 50%; background: var(--coral); color: #fff; display: grid; place-items: center; font-style: normal; font-size: 15px; font-weight: 900; }
+
+/* the dashboard */
+.tiles { position: absolute; left: 28px; top: 104px; width: 600px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.tl { height: 92px; border-radius: 16px; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .18); padding: 12px 14px; box-sizing: border-box; }
+.tl .l { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, .72); white-space: nowrap; }
+.tl .v { margin-top: 8px; font-size: 32px; font-weight: 900; font-variant-numeric: tabular-nums; }
+#ex { position: absolute; right: 28px; top: 20px; font-family: var(--f-mono); font-size: 14px; letter-spacing: .14em; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(245, 181, 68, .7); color: var(--amber); }
+#dl { position: absolute; left: 28px; top: 214px; height: 50px; padding: 0 16px; border-radius: 14px; background: var(--white); color: var(--violet); display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 16px; white-space: nowrap; }
+#dl svg { width: 22px; height: 22px; }
+#sheet { position: absolute; left: 298px; top: 212px; width: 330px; border-radius: 14px; background: var(--white); color: #1B1B1B; overflow: hidden; box-shadow: 0 16px 34px rgba(0, 0, 0, .3); }
+#sheet .fn { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--xl); color: #fff; font-family: var(--f-mono); font-size: 12px; }
+#sheet .fn b { width: 18px; height: 18px; border-radius: 4px; background: #fff; color: var(--xl); display: grid; place-items: center; font-size: 12px; font-family: var(--f-body); }
+#sheet table { width: 100%; border-collapse: collapse; font-size: 15px; }
+#sheet th, #sheet td { border: 1px solid #E2E2E2; padding: 5px 7px; text-align: left; white-space: nowrap; }
+#sheet th { background: #F2F2F2; font-weight: 700; font-size: 13px; }
+#sheet td.n { text-align: right; font-variant-numeric: tabular-nums; }
+.pchip { position: absolute; left: 28px; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border-radius: 14px; background: rgba(255, 255, 255, .14); border: 1.5px solid rgba(110, 231, 183, .6); font-size: 19px; font-weight: 800; white-space: nowrap; }
+.pchip i { width: 28px; height: 28px; border-radius: 50%; background: var(--mint); color: #064E3B; display: grid; place-items: center; font-style: normal; font-size: 15px; font-weight: 900; }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 84px; line-height: .98; letter-spacing: -.045em; text-wrap: balance; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 28px; font-weight: 700; line-height: 1.35; color: var(--lilac); text-wrap: balance; max-width: 580px; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 30px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · sâmbătă · 15 s · Înainte și acum</div>
+    <h1>Caietul vs dashboard</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: caietul cu clienți comparat cu dashboard-ul LoyalCard și exportul Excel (date de exemplu)">
+      <div id="stage">
+        <div id="grain"></div>
+
+        <!-- before: on screen at frame 0 -->
+        <div class="panel" id="pA">
+          <div class="lab" style="left:32px;top:26px;color:rgba(58,54,49,.7)">ÎNAINTE</div>
+          <div class="ttl" style="left:32px;top:52px">Caietul cu clienți</div>
+          <div id="nb">
+            <div class="ln" style="top:14px">Ana — ||||</div>
+            <div class="ln" style="top:53px">Mihai — ||</div>
+            <div class="ln" style="top:92px"><s>Ioana</s> Ioana P. — |||</div>
+            <div class="ln" style="top:131px">??? — |</div>
+            <div class="ln" style="top:170px">Radu — ||||| <span style="color:#B42318">?</span></div>
+            <div id="stain"></div>
+          </div>
+          <svg id="mag" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5" fill="rgba(255,255,255,.45)" stroke="#3A3631" stroke-width="2.4"/><path d="M15 15l6 6" stroke="#3A3631" stroke-width="3" stroke-linecap="round"/></svg>
+          <div id="ask">Cine a venit de 5 ori luna asta?</div>
+          <div class="nchip" id="n1" style="left:378px;top:262px"><i>✕</i>Cauți de mână</div>
+          <div class="nchip" id="n2" style="left:378px;top:318px"><i>✕</i>Se pierde, se udă</div>
+        </div>
+
+        <div id="vs">VS</div>
+
+        <div class="panel" id="pB">
+          <div class="lab" style="left:28px;top:28px;color:rgba(255,255,255,.75)">ACUM</div>
+          <div class="ttl" style="left:28px;top:54px">Dashboard-ul LoyalCard</div>
+          <div id="ex">DATE DE EXEMPLU</div>
+          <div class="tiles">
+            <div class="tl"><div class="l">Scanări Totale</div><div class="v" id="v1">0</div></div>
+            <div class="tl"><div class="l">Clienți</div><div class="v" id="v2">0</div></div>
+            <div class="tl"><div class="l">Premii Date</div><div class="v" id="v3">0</div></div>
+            <div class="tl"><div class="l">Scanări Azi</div><div class="v" id="v4">0</div></div>
+          </div>
+          <div id="dl"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Download Report Excel</div>
+          <div id="sheet">
+            <div class="fn"><b>X</b>LoyalCard_Clients_2026-10-24.xlsx</div>
+            <table>
+              <tr><th>Name</th><th>Total Scans</th><th>Rewards Received</th></tr>
+              <tr><td>Ana</td><td class="n">14</td><td class="n">2</td></tr>
+              <tr><td>Mihai</td><td class="n">6</td><td class="n">1</td></tr>
+              <tr><td>Ioana P.</td><td class="n">9</td><td class="n">1</td></tr>
+            </table>
+          </div>
+          <div class="pchip" id="g1" style="top:282px"><i>✓</i>Se numără singur</div>
+          <div class="pchip" id="g2" style="top:338px"><i>✓</i>Lista în Excel</div>
+        </div>
+
+        <!-- cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:250px">
+            <div id="cta1">Lasă caietul. <em>Treci la dashboard.</em></div>
+            <div id="cta2">Începi gratuit. Analytics + export Excel în planul Business.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+  const ease = p => 1 - Math.pow(1 - Math.max(0, Math.min(1, p)), 3);
+
+  // both panels on screen at frame 0
+  A($('#pA'), [{ translate: '0px -14px' }, { translate: '0px 0px' }], 0, .8, OUT);
+  A($('#pB'), [{ translate: '0px 14px' }, { translate: '0px 0px' }], 0, .8, OUT);
+  A($('#vs'), [{ scale: '1.25', rotate: '-12deg' }, { scale: '1', rotate: '0deg' }], 0, .7, BACK);
+
+  // ---------- before: hunting through the notebook ----------
+  const mag = $('#mag');
+  const at = (x, y) => `${x - 30}px ${y - 30}px`;
+  A(mag, [{ opacity: 0, translate: at(250, 380) }, { opacity: 1, translate: at(140, 150) }], .4, .5, OUT);
+  A(mag, [{ translate: at(140, 150) }, { translate: at(250, 190), offset: .25 }, { translate: at(130, 230), offset: .5 }, { translate: at(240, 270), offset: .75 }, { translate: at(150, 310) }], .9, 2.2, IO);
+  A(mag, [{ opacity: 1 }, { opacity: 0 }], 3.3, .3, 'linear');
+  A($('#ask'), [{ opacity: 0, scale: '.5', rotate: '-6deg' }, { opacity: 1, scale: '1', rotate: '0deg' }], .9, .45, BACK);
+  A($('#ask'), [{ rotate: '0deg' }, { rotate: '-3deg', offset: .3 }, { rotate: '3deg', offset: .7 }, { rotate: '0deg' }], 2.2, .5, 'linear');
+  enter($('#n1'), 2.6, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+  enter($('#n2'), 3.1, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+
+  // ---------- after: the dashboard counts by itself ----------
+  const V = [['#v1', 312], ['#v2', 87], ['#v3', 41], ['#v4', 18]].map(([s, v]) => [$(s), v]);
+  hooks.push(t => { const p = ease((t - 4.1) / 1.2); V.forEach(([el, v]) => { const s = String(Math.round(v * p)); if (el.textContent !== s) el.textContent = s; }); });
+  $$('.tl').forEach((tl, i) => A(tl, [{ scale: '1' }, { scale: '1.06', offset: .4 }, { scale: '1' }], 4.0 + i * .12, .45, OUT));
+  enter($('#ex'), 4.2, { dy: 0, s: .7, d: .35, e: BACK });
+  A($('#dl'), [{ opacity: 0, translate: '0px 16px' }, { opacity: 1, translate: '0px 0px' }], 5.3, .4, OUT);
+  A($('#dl'), [{ scale: '1' }, { scale: '.94', offset: .4 }, { scale: '1' }], 5.9, .3, IO);
+  A($('#sheet'), [{ opacity: 0, translate: '-40px 30px', scale: '.8' }, { opacity: 1, translate: '0px 0px', scale: '1' }], 6.2, .5, BACK);
+  $$('#sheet tr').forEach((tr, i) => A(tr, [{ opacity: 0 }, { opacity: 1 }], 6.5 + i * .15, .2, 'linear'));
+  enter($('#g1'), 7.2, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+  enter($('#g2'), 7.6, { dx: 20, dy: 0, s: .9, d: .4, e: BACK });
+
+  // verdict: the notebook fades to grey
+  A($('#pA'), [{ opacity: 1, filter: 'grayscale(0)' }, { opacity: .5, filter: 'grayscale(1)' }], 8.5, .6, 'linear');
+  A($('#pB'), [{ scale: '1' }, { scale: '1.03' }], 8.5, .6, OUT);
+  A($('#vs'), [{ opacity: 1 }, { opacity: 0 }], 8.5, .3, 'linear');
+
+  // ---------- cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 10.2, .45, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'inset(48% 4% 4% 4% round 34px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)' }], 10.2, .6, IO);
+  stagger(words($('#cta1')), 10.6, .09, { dy: 40, d: .5, e: BACK });
+  enter($('#cta2'), 11.4, { dy: 16, d: .45 });
+  enter($('#brand'), 11.9, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 12.2, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.2, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 8.0 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

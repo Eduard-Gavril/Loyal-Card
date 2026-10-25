@@ -1,0 +1,296 @@
+<title>Planul Business</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "L'offerta": planul Business. Everything from PricingPage.tsx: €30/lună (€288 facturat anual = €24/lună),
+   Reguli loyalty nelimitate, White-label (logo propriu), Scanner multi-produs, Analytics + Export Excel,
+   300 clienți activi/lună, Support email. Logo: Setări → URL Logo, shown on the client card (ClientCard.tsx).
+   "Cafeneaua Mea" is the placeholder of the business-name field. Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --night: #140A2E; --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --lilac: #DDD3FB; --amber: #F5B544; --gold: #FFD27A; --mint: #6EE7B7; --coral: #E5484D; --white: #FFFFFF; --ink: #1B1530;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--night); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--night); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--night); color: var(--white); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(20, 10, 46, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background:
+  radial-gradient(520px 420px at 78% 22%, rgba(245, 181, 68, .20), transparent 70%),
+  radial-gradient(620px 560px at 12% 70%, rgba(124, 58, 237, .55), transparent 70%),
+  linear-gradient(170deg, #1E0E4A, var(--night) 60%); }
+#dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, .06) 1px, transparent 1.4px); background-size: 8px 8px; }
+.kick { position: absolute; left: 40px; top: 192px; font-family: var(--f-mono); font-size: 19px; font-weight: 500; letter-spacing: .18em; color: var(--amber); white-space: nowrap; }
+.big { position: absolute; left: 40px; width: 640px; font-weight: 900; letter-spacing: -.045em; line-height: .98; }
+.big em { font-style: normal; color: var(--amber); }
+
+/* s1: the client card gets your logo */
+#card { position: absolute; left: 80px; top: 444px; width: 560px; height: 336px; border-radius: 36px; background: linear-gradient(145deg, var(--violet-2), var(--deep)); box-shadow: 0 30px 70px rgba(0, 0, 0, .45), inset 0 0 0 1.5px rgba(255, 255, 255, .16); overflow: hidden; }
+#card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(255, 255, 255, .07), transparent); }
+#lt { position: absolute; left: 32px; top: 32px; width: 96px; height: 96px; }
+#lt > div { position: absolute; inset: 0; border-radius: 26px; display: grid; place-items: center; box-shadow: 0 10px 22px rgba(0, 0, 0, .25), 0 0 0 3px rgba(255, 255, 255, .3); }
+#lOld { background: var(--white); }
+#lOld svg { width: 72px; height: 72px; }
+#lNew { background: var(--coral); }
+#lNew svg { width: 60px; height: 60px; }
+#cname { position: absolute; left: 150px; top: 40px; font-size: 36px; font-weight: 800; letter-spacing: -.02em; }
+#csub { position: absolute; left: 150px; top: 88px; font-size: 21px; font-weight: 600; color: var(--lilac); }
+.stamps { position: absolute; left: 32px; top: 168px; display: flex; gap: 14px; }
+.st { width: 56px; height: 56px; border-radius: 50%; border: 2.5px dashed rgba(255, 255, 255, .35); box-sizing: border-box; display: grid; place-items: center; }
+.st b { width: 56px; height: 56px; border-radius: 50%; background: var(--amber); display: grid; place-items: center; box-shadow: 0 6px 14px rgba(245, 181, 68, .4); }
+.st b svg { width: 26px; height: 26px; }
+#prog { position: absolute; left: 32px; top: 250px; font-size: 21px; font-weight: 700; color: var(--lilac); }
+#prog strong { color: var(--white); }
+#fld { position: absolute; left: 80px; top: 812px; width: 560px; height: 76px; border-radius: 18px; background: rgba(255, 255, 255, .08); border: 1.5px solid rgba(255, 255, 255, .22); box-sizing: border-box; padding: 10px 18px; }
+#fld .l { font-family: var(--f-mono); font-size: 15px; letter-spacing: .08em; color: var(--amber); }
+#fld .v { margin-top: 4px; font-family: var(--f-mono); font-size: 23px; color: var(--white); white-space: nowrap; }
+#caret { display: inline-block; width: 2px; height: 24px; background: var(--white); vertical-align: -4px; margin-left: 2px; }
+.chip { position: absolute; display: inline-flex; align-items: center; gap: 12px; padding: 11px 18px 11px 11px; border-radius: 16px; background: rgba(255, 255, 255, .1); border: 1.5px solid rgba(110, 231, 183, .55); font-size: 22px; font-weight: 800; white-space: nowrap; }
+.chip i { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--mint); color: #064E3B; display: grid; place-items: center; font-style: normal; font-size: 16px; font-weight: 900; }
+
+/* s2: unlimited rules */
+#was { position: absolute; left: 40px; top: 236px; font-size: 46px; font-weight: 800; letter-spacing: -.03em; color: var(--lilac); white-space: nowrap; }
+#strike { position: absolute; left: -6px; right: -6px; top: 27px; height: 6px; border-radius: 3px; background: var(--coral); transform-origin: 0 50%; }
+#exTag { position: absolute; right: 60px; top: 462px; font-family: var(--f-mono); font-size: 14px; letter-spacing: .14em; padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(245, 181, 68, .7); color: var(--amber); }
+.rule { position: absolute; left: 60px; width: 600px; height: 104px; border-radius: 24px; background: var(--white); color: var(--ink); box-shadow: 0 18px 36px rgba(0, 0, 0, .3); }
+.rule .ic { position: absolute; left: 18px; top: 16px; width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; }
+.rule .ic svg { width: 40px; height: 40px; }
+.rule .nl { position: absolute; left: 108px; top: 20px; font-size: 14px; font-weight: 600; color: #6B6580; }
+.rule .nv { position: absolute; left: 108px; top: 42px; font-size: 29px; font-weight: 800; letter-spacing: -.02em; white-space: nowrap; }
+.rule .pill { position: absolute; right: 18px; top: 30px; height: 44px; padding: 0 16px; border-radius: 14px; background: #F3EEFF; color: var(--violet); display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; white-space: nowrap; }
+.rule .pill b { color: #B45309; }
+#more { position: absolute; left: 60px; top: 846px; width: 600px; height: 76px; border-radius: 24px; border: 2.5px dashed rgba(255, 255, 255, .45); box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 26px; font-weight: 800; color: var(--white); }
+#inf { font-size: 46px; line-height: 1; color: var(--amber); font-weight: 900; }
+
+/* s3: price + what's included */
+#price { position: absolute; left: 40px; top: 214px; display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+#price .n { font-size: 200px; font-weight: 900; letter-spacing: -.06em; line-height: .9; }
+#price .u { font-size: 46px; font-weight: 800; color: var(--lilac); }
+#yr { position: absolute; left: 40px; top: 430px; font-size: 28px; font-weight: 700; color: var(--lilac); white-space: nowrap; }
+#yr b { color: var(--gold); }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 100px; line-height: .96; letter-spacing: -.05em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 30px; font-weight: 700; line-height: 1.3; color: var(--lilac); }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 30px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+    <symbol id="tick" viewBox="0 0 24 24"><path fill="none" stroke="#2A1600" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · duminică · 15 s · Oferta</div>
+    <h1>Planul Business</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: planul Business LoyalCard, logo-ul tău pe cardul clientului, reguli nelimitate, 30 euro pe lună">
+      <div id="stage">
+        <div id="bg"></div>
+        <div id="dots"></div>
+
+        <!-- s1: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="kick" id="k1">PLANUL BUSINESS · €30/LUNĂ</div>
+          <div class="big" id="h1" style="top:234px;font-size:88px">Logo-ul tău.<br><em>Regulile tale.</em></div>
+          <div id="card">
+            <div id="lt">
+              <div id="lOld"><svg><use href="#logo"/></svg></div>
+              <div id="lNew"><svg><use href="#cup"/></svg></div>
+            </div>
+            <div id="cname">Cafeneaua Mea</div>
+            <div id="csub">Card de fidelitate</div>
+            <div class="stamps">
+              <div class="st"><b><svg><use href="#tick"/></svg></b></div>
+              <div class="st"><b><svg><use href="#tick"/></svg></b></div>
+              <div class="st"><b><svg><use href="#tick"/></svg></b></div>
+              <div class="st"><b><svg><use href="#tick"/></svg></b></div>
+              <div class="st"><b class="late"><svg><use href="#tick"/></svg></b></div><div class="st"></div><div class="st"></div>
+            </div>
+            <div id="prog"><strong id="cnt">4 / 7</strong> · Cafea gratuită</div>
+          </div>
+          <div id="fld"><div class="l">SETĂRI → URL LOGO</div><div class="v"><span id="url"></span><span id="caret"></span></div></div>
+          <div class="chip" id="c1" style="left:80px;top:910px"><i>✓</i>Logo-ul tău pe cardul clientului</div>
+        </div>
+
+        <!-- s2: rules -->
+        <div class="scene" id="s2">
+          <div class="kick">REGULI LOYALTY</div>
+          <div id="was">Starter: 1 regulă<div id="strike"></div></div>
+          <div class="big" id="h2" style="top:306px;font-size:84px">Business: <em>nelimitate.</em></div>
+          <div id="exTag">EXEMPLE</div>
+          <div class="rule" id="r1" style="top:496px"><div class="ic" style="background:#8B5E3C"><svg><use href="#cup"/></svg></div><div class="nl">Nume Regulă</div><div class="nv">Cafea gratuită</div><div class="pill"><b>7</b> scanări → 1</div></div>
+          <div class="rule" id="r2" style="top:612px"><div class="ic" style="background:#D97706"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" d="M7.5 8.5a4 4 0 1 1 4.5 3.5a4 4 0 1 1 4.5-3.5M12 12v.01M6 15.5a3.5 3.5 0 0 0 12 0"/></svg></div><div class="nl">Nume Regulă</div><div class="nv">Covrig gratuit</div><div class="pill"><b>10</b> scanări → 1</div></div>
+          <div class="rule" id="r3" style="top:728px"><div class="ic" style="background:#DB2777"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" d="M3.5 19h17L18 10.5 4.5 14.5zM4.5 14.5V19M18 10.5c.5-2 2.5-2.5 3-1.5"/></svg></div><div class="nl">Nume Regulă</div><div class="nv">Desert gratuit</div><div class="pill"><b>5</b> scanări → 1</div></div>
+          <div id="more"><span id="inf">∞</span>și încă una, și încă una…</div>
+        </div>
+
+        <!-- s3: price -->
+        <div class="scene" id="s3">
+          <div class="kick">CE PRIMEȘTI ÎN BUSINESS</div>
+          <div id="price"><span class="n" id="pn">€30</span><span class="u">/lună</span></div>
+          <div id="yr">sau <b>€24/lună</b> cu plata anuală (–20%)</div>
+          <div class="chip f" style="left:40px;top:500px"><i>✓</i>Reguli loyalty nelimitate</div>
+          <div class="chip f" style="left:40px;top:568px"><i>✓</i>White-label (logo propriu)</div>
+          <div class="chip f" style="left:40px;top:636px"><i>✓</i>Scanner multi-produs</div>
+          <div class="chip f" style="left:40px;top:704px"><i>✓</i>Analytics + Export Excel</div>
+          <div class="chip f" style="left:40px;top:772px"><i>✓</i>300 clienți activi/lună</div>
+          <div class="chip f" style="left:40px;top:840px"><i>✓</i>Support email</div>
+        </div>
+
+        <!-- cta -->
+        <div class="scene" id="s4">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:270px">
+            <div id="cta1">Alege <em>Business.</em></div>
+            <div id="cta2">Sau începi gratuit cu Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  A($('#bg'), [{ translate: '0px 0px' }, { translate: '-60px 40px' }], 0, D, 'linear');
+
+  // ---------- s1 · 0 → 4.4: your logo on the client card (readable at frame 0) ----------
+  scene($('#s1'), -.05, 4.4);
+  A($('#h1'), [{ translate: '0px 10px' }, { translate: '0px 0px' }], 0, .8, OUT);
+  A($('#card'), [{ translate: '0px 24px', rotate: '-2deg' }, { translate: '0px 0px', rotate: '0deg' }], 0, .9, OUT);
+  $$('#card .st b:not(.late)').forEach((b, i) => A(b, [{ scale: '0' }, { scale: '1' }], .15 + i * .12, .35, BACK));
+  enter($('#fld'), .3, { dy: 16, d: .4 });
+  const url = $('#url'), U = 'https://cafeneauamea.ro/logo.png';
+  hooks.push(t => { const n = Math.round(U.length * Math.max(0, Math.min(1, (t - .55) / .8))); const s = U.slice(0, n); if (url.textContent !== s) url.textContent = s; });
+  A($('#caret'), [{ opacity: 1 }, { opacity: 0, offset: .5 }, { opacity: 1 }], 0, .6, 'steps(1)').effect.updateTiming({ iterations: 8 });
+  A($('#fld'), [{ borderColor: 'rgba(255,255,255,.22)' }, { borderColor: 'rgba(110,231,183,.9)' }], 1.35, .2, 'linear');
+  A($('#lOld'), [{ scale: '1 1' }, { scale: '0 1' }], 1.4, .18, IN);
+  A($('#lNew'), [{ scale: '0 1' }, { scale: '1.12 1.12', offset: .7 }, { scale: '1 1' }], 1.58, .35, OUT);
+  A($('#lt'), [{ rotate: '0deg' }, { rotate: '-6deg', offset: .5 }, { rotate: '0deg' }], 1.5, .5, IO);
+  enter($('#c1'), 1.75, { dx: -20, dy: 0, s: .9, d: .45, e: BACK });
+  A($('#card'), [{ scale: '1' }, { scale: '1.03', offset: .4 }, { scale: '1' }], 1.6, .6, OUT);
+  A($('#card .late'), [{ scale: '0' }, { scale: '1' }], 3.0, .4, BACK);
+  const cnt = $('#cnt');
+  hooks.push(t => { const s = t >= 3.1 ? '5 / 7' : '4 / 7'; if (cnt.textContent !== s) cnt.textContent = s; });
+
+  // ---------- s2 · 4.4 → 9.0: one rule vs unlimited ----------
+  scene($('#s2'), 4.4, 9.0);
+  enter($('#was'), 4.45, { dy: 18, d: .45 });
+  A($('#strike'), [{ scale: '0 1' }, { scale: '1 1' }], 4.9, .3, IO);
+  stagger(words($('#h2')), 5.15, .12, { dy: 36, d: .5, e: BACK });
+  enter($('#exTag'), 5.6, { dy: 0, s: .7, d: .3, e: BACK });
+  ['#r1', '#r2', '#r3'].forEach((s, i) => enter($(s), 5.7 + i * .32, { dy: 60, s: .94, d: .5, e: BACK }));
+  enter($('#more'), 6.8, { dy: 30, d: .45 });
+  A($('#inf'), [{ scale: '1', rotate: '0deg' }, { scale: '1.35', rotate: '-8deg', offset: .5 }, { scale: '1', rotate: '0deg' }], 7.3, .6, IO);
+  A($('#inf'), [{ scale: '1' }, { scale: '1.35', offset: .5 }, { scale: '1' }], 8.0, .5, IO);
+
+  // ---------- s3 · 9.0 → 12.0: the price and what's in it ----------
+  scene($('#s3'), 9.0, 12.0);
+  A($('#price'), [{ opacity: 0, translate: '0px 40px', scale: '.85' }, { opacity: 1, translate: '0px 0px', scale: '1' }], 9.05, .55, BACK);
+  enter($('#yr'), 9.45, { dy: 14, d: .4 });
+  stagger($$('#s3 .chip'), 9.7, .11, { dx: -24, dy: 0, d: .4, e: OUT });
+
+  // ---------- s4 · 11.9 → 15: cta ----------
+  A($('#s4'), [{ opacity: 0 }, { opacity: 1 }], 11.9, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'circle(0% at 50% 40%)' }, { clipPath: 'circle(95% at 50% 40%)' }], 11.9, .7, IO);
+  stagger(words($('#cta1')), 12.2, .12, { dy: 40, d: .5, e: BACK });
+  enter($('#cta2'), 12.7, { dy: 16, d: .45 });
+  enter($('#brand'), 13.1, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.4, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 14.1, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 2.5 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

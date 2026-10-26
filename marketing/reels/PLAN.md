@@ -34,7 +34,7 @@ Segnare `[x]` quando un tema è stato usato.
 **Un settore al giorno** (regola premio realistica per ogni settore)
 - [x] Cafenea: 6 cafele → a 7-a gratuită (2026-10-12)
 - [x] Frizerie / barbershop: 5 tunsori → a 6-a gratuită (2026-10-19, anche taglio corto da 10 s)
-- [ ] Salon de înfrumusețare / unghii: 6 vizite → 20% reducere
+- [x] Salon de înfrumusețare / unghii: 6 vizite → 20% reducere (2026-10-26, sconto percentuale = reward_type `percentage_discount`; anche taglio da 10 s)
 - [ ] Pizzerie: 8 pizza → o pizza gratuită
 - [ ] Patiserie / brutărie: 10 produse → unul gratuit
 - [ ] Restaurant: 5 meniuri → desert gratuit (esempio del sito: "5 mese principale → desert GRATUIT sau 20% reducere")
@@ -116,3 +116,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-23 (ven) | `2026-10-23-pov-500-carduri.html` | POV / meme | 500 carduri la coș vs logo cambiato in Setări (URL Logo), Business; 15 s + taglio 9 s | 18:00 (15 s) / Reel di prova (9 s) |
 | 2026-10-24 (sab) | `2026-10-24-caiet-vs-dashboard.html` | Prima e dopo | Schermo diviso: quaderno a mano (lente, "Cine a venit de 5 ori luna asta?") vs dashboard (Scanări Totale, Clienți, Premii Date, Scanări Azi) + "Download Report Excel" → LoyalCard_Clients_*.xlsx, "Date de exemplu", Business; 15 s + taglio 9 s | 10:30 (15 s) / Reel di prova (9 s) |
 | 2026-10-25 (dom) | `2026-10-25-planul-business.html` | L'offerta | Planul Business: logo nel card cliente (Setări → URL Logo, "Cafeneaua Mea"), Starter 1 regulă vs reguli nelimitate (esempi), €30/lună o €24/lună annuale + 6 funzioni; 15 s + taglio 9 s | 20:30 (15 s) / Reel di prova (9 s) |
+| 2026-10-26 (lun) | `2026-10-26-salon.html` | Un settore al giorno | Salon: boccette di smalto, "Salonul de alături are și el oje", telefono con 6 visite → 20% reducere, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |

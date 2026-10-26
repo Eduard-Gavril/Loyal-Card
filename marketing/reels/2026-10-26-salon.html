@@ -1,0 +1,342 @@
+<title>Salon de înfrumusețare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920), 30 s
+   Series "Un settore": salon de înfrumusețare / unghii. Rule 6 vizite → 20% reducere
+   (reward_type 'percentage_discount' exists in AdminProducts; the UI shows "Cumpără 6 → Primești 20%").
+   Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --blush: #F7E7E2; --blush-2: #F1D6CE; --nude: #E4BFAE; --rose: #D9467A; --rose-2: #B8325F; --plum: #3A1A2E; --plum-2: #6B4A5E; --gold: #C99A3B; --white: #FFFFFF; --mint: #3BB98A;
+  --violet: #6D28D9; --amber: #F5B544;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--plum); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(58, 26, 46, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--blush); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--blush); color: var(--plum); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--nude); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--rose) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--rose); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(58, 26, 46, .55); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.abs { position: absolute; }
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background:
+  radial-gradient(560px 460px at 85% 20%, rgba(217, 70, 122, .16), transparent 70%),
+  radial-gradient(600px 520px at 10% 85%, rgba(228, 191, 174, .7), transparent 70%),
+  var(--blush); }
+#grain { position: absolute; inset: 0; background-image: radial-gradient(rgba(58, 26, 46, .05) 1px, transparent 1.4px); background-size: 7px 7px; }
+.kick { font-family: var(--f-mono); font-size: 17px; font-weight: 500; letter-spacing: .16em; color: var(--rose-2); white-space: nowrap; }
+.left { position: absolute; left: 56px; width: 608px; }
+.hx { font-weight: 900; letter-spacing: -.04em; line-height: 1; }
+.serif { font-family: var(--f-display); font-weight: 400; letter-spacing: -.02em; line-height: .95; }
+.rose { color: var(--rose); }
+.sub { font-size: 31px; font-weight: 700; color: var(--plum-2); line-height: 1.3; }
+
+/* polish bottles (hook + insight) */
+#bottles { position: absolute; left: 330px; top: 720px; width: 314px; height: 280px; }
+.bot { position: absolute; bottom: 0; width: 90px; }
+.bot svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 18px rgba(58, 26, 46, .22)); }
+#swoosh { position: absolute; left: 48px; top: 512px; width: 430px; height: 60px; overflow: visible; }
+
+/* s3: how it works */
+#rule { position: absolute; left: 56px; top: 212px; width: 608px; height: 96px; border-radius: 26px; background: var(--white); box-shadow: 0 14px 30px rgba(58, 26, 46, .12); display: flex; align-items: center; gap: 18px; padding: 0 22px; box-sizing: border-box; }
+#rule .gi { flex: none; width: 58px; height: 58px; border-radius: 18px; background: var(--rose); display: grid; place-items: center; }
+#rule .gi svg { width: 32px; height: 32px; }
+#rule .k { font-family: var(--f-mono); font-size: 14px; letter-spacing: .14em; color: var(--rose-2); }
+#rule .t { font-size: 32px; font-weight: 900; letter-spacing: -.03em; margin-top: 2px; }
+.vis { position: absolute; left: 56px; width: 214px; height: 58px; border-radius: 18px; background: var(--white); display: flex; align-items: center; gap: 12px; padding: 0 14px; box-sizing: border-box; font-size: 22px; font-weight: 800; box-shadow: 0 8px 18px rgba(58, 26, 46, .08); }
+.vis i { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--rose); color: #fff; display: grid; place-items: center; font-style: normal; font-size: 15px; font-weight: 900; }
+.vis.last { background: var(--plum); color: var(--white); }
+.vis.last i { background: var(--gold); }
+#phone { position: absolute; left: 300px; top: 336px; width: 340px; height: 640px; border-radius: 50px; background: var(--plum); box-shadow: 0 30px 60px rgba(58, 26, 46, .32); }
+.screen { position: absolute; inset: 12px; border-radius: 40px; background: #FFF9F7; overflow: hidden; color: var(--plum); }
+.sbar { position: absolute; left: 30px; top: 14px; font-size: 14px; font-weight: 700; }
+.notch { position: absolute; left: 50%; top: 10px; width: 90px; height: 24px; margin-left: -45px; border-radius: 14px; background: var(--plum); }
+.url { position: absolute; left: 50%; top: 46px; transform: translateX(-50%); font-family: var(--f-mono); font-size: 13px; padding: 4px 12px; border-radius: 10px; background: #F3E4DF; color: var(--plum-2); }
+.shop { position: absolute; left: 20px; top: 86px; right: 20px; height: 56px; }
+.shop .ico { position: absolute; left: 0; top: 0; width: 52px; height: 52px; border-radius: 16px; background: var(--rose); display: grid; place-items: center; }
+.shop .ico svg { width: 30px; height: 30px; }
+.shop .nm { position: absolute; left: 66px; top: 2px; font-size: 22px; font-weight: 800; white-space: nowrap; }
+.shop .kd { position: absolute; left: 66px; top: 31px; font-size: 13px; font-weight: 600; color: var(--plum-2); white-space: nowrap; }
+.qlab { position: absolute; left: 0; width: 316px; text-align: center; top: 158px; font-weight: 600; font-size: 15px; }
+.qr-box { position: absolute; left: 70px; top: 184px; width: 176px; height: 176px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1.5px #EAD9D3; overflow: hidden; }
+.qr-box svg { position: absolute; left: 14px; top: 14px; width: 148px; height: 148px; shape-rendering: crispEdges; }
+#beam { position: absolute; left: 6px; right: 6px; top: 0; height: 4px; border-radius: 2px; background: var(--rose); box-shadow: 0 0 16px 4px rgba(217, 70, 122, .55); }
+#slots { position: absolute; left: 18px; top: 386px; display: flex; gap: 8px; }
+.sl { width: 40px; height: 40px; border-radius: 50%; border: 2.5px dashed rgba(217, 70, 122, .45); box-sizing: border-box; position: relative; }
+.sl b { position: absolute; inset: -2.5px; border-radius: 50%; background: var(--rose); display: grid; place-items: center; }
+.sl b svg { width: 20px; height: 20px; }
+#pcount { position: absolute; left: 0; width: 316px; text-align: center; top: 442px; font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; }
+#prule { position: absolute; left: 0; width: 316px; text-align: center; top: 478px; font-size: 15px; font-weight: 700; color: var(--rose-2); }
+#won { position: absolute; left: 14px; right: 14px; top: 372px; height: 216px; border-radius: 28px; background: linear-gradient(150deg, var(--rose), var(--rose-2)); color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 16px 30px rgba(184, 50, 95, .4); }
+#won .g { width: 54px; height: 54px; border-radius: 16px; background: rgba(255, 255, 255, .2); display: grid; place-items: center; }
+#won .g svg { width: 32px; height: 32px; }
+#won .a { font-family: var(--f-mono); font-size: 14px; letter-spacing: .16em; }
+#won .b { font-size: 38px; font-weight: 900; letter-spacing: -.03em; line-height: 1; white-space: nowrap; }
+#won .c { font-size: 15px; font-weight: 700; opacity: .9; }
+.spark { position: absolute; width: 34px; height: 34px; }
+#flash { position: absolute; inset: 0; background: #fff; }
+
+/* s4: benefits */
+.ben { position: absolute; left: 56px; width: 608px; height: 108px; border-radius: 28px; background: var(--white); display: flex; align-items: center; gap: 20px; padding: 0 24px; box-sizing: border-box; box-shadow: 0 14px 30px rgba(58, 26, 46, .1); font-size: 29px; font-weight: 800; letter-spacing: -.02em; }
+.ben .ic { flex: none; width: 62px; height: 62px; border-radius: 20px; background: #FBE3EA; display: grid; place-items: center; }
+.ben .ic svg { width: 34px; height: 34px; }
+
+/* s5: cta */
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 36px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; box-shadow: 0 8px 18px rgba(58, 26, 46, .12); }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: var(--white); padding: 12px 24px; border-radius: 16px; background: var(--plum); }
+#bio { font-size: 26px; font-weight: 800; margin-top: 6px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="tick" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="gift" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.5 9h17v3.5h-17zM5 12.5V20h14v-7.5M12 9v11M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9zM12 9c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9z"/></symbol>
+    <symbol id="nail" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 2.5h6v6H9zM8 8.5h8M7 11a5 5 0 0 1 10 0v7.5a3 3 0 0 1-3 3h-4a3 3 0 0 1-3-3z"/></symbol>
+    <symbol id="spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5l2.4 7.1 7.1 2.4-7.1 2.4L12 20.5l-2.4-7.1L2.5 11l7.1-2.4z"/></symbol>
+    <symbol id="bottle" viewBox="0 0 100 220"><rect x="33" y="0" width="34" height="84" rx="9" fill="#3A1A2E"/><rect x="38" y="6" width="6" height="70" rx="3" fill="#fff" opacity=".18"/><rect x="28" y="80" width="44" height="14" rx="4" fill="#E9D8D2"/><rect x="6" y="90" width="88" height="128" rx="28" fill="currentColor"/><rect x="18" y="106" width="12" height="88" rx="6" fill="#fff" opacity=".38"/><rect x="38" y="140" width="44" height="28" rx="8" fill="#fff" opacity=".22"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · luni · 30 s · Un sector</div>
+    <h1>Salon de înfrumusețare</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: LoyalCard pentru saloane de înfrumusețare și unghii, 6 vizite înseamnă 20% reducere">
+      <div id="stage">
+        <div id="bg"></div><div id="grain"></div>
+
+        <div id="bottles">
+          <div class="bot" id="b1" style="left:0;width:96px;color:#D9467A"><svg viewBox="0 0 100 220"><use href="#bottle"/></svg></div>
+          <div class="bot" id="b2" style="left:108px;width:110px;color:#E4BFAE"><svg viewBox="0 0 100 220"><use href="#bottle"/></svg></div>
+          <div class="bot" id="b3" style="left:230px;width:84px;color:#8E2C55"><svg viewBox="0 0 100 220"><use href="#bottle"/></svg></div>
+        </div>
+
+        <!-- 1 · hook: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="left" style="top:250px">
+            <div class="kick" id="k1">PENTRU SALOANE DE ÎNFRUMUSEȚARE ȘI UNGHII</div>
+            <div class="hx" id="h1a" style="font-size:80px;margin-top:22px">Ai un</div>
+            <div class="serif" id="h1b" style="font-size:156px;margin-top:2px">salon<span class="rose" style="margin-left:8px">?</span></div>
+            <div class="sub" id="h1c" style="margin-top:58px;width:330px">Uite cum îți aduci clienții înapoi.</div>
+          </div>
+          <svg id="swoosh" viewBox="0 0 430 60"><path id="sw" pathLength="1" d="M6 40 C 110 14, 230 54, 424 18" fill="none" stroke="#D9467A" stroke-width="12" stroke-linecap="round" stroke-dasharray="1 1"/></svg>
+        </div>
+
+        <!-- 2 · insight -->
+        <div class="scene" id="s2">
+          <div class="left" style="top:250px">
+            <div class="serif" id="i1" style="font-size:72px;line-height:1.05">Salonul de alături</div>
+            <div class="serif" id="i2" style="font-size:72px;line-height:1.05">are și el <span class="rose">oje.</span></div>
+            <div class="hx" id="i3" style="font-size:46px;margin-top:44px">Ce are în plus al tău?</div>
+            <div class="sub" id="i4" style="margin-top:16px;width:440px">Un card de fidelitate în telefonul clientului.</div>
+          </div>
+        </div>
+
+        <!-- 3 · how it works -->
+        <div class="scene" id="s3">
+          <div class="abs kick" style="left:56px;top:176px" id="k3">LOYALCARD PENTRU SALOANE</div>
+          <div id="rule"><div class="gi"><svg><use href="#gift"/></svg></div><div><div class="k">REGULA TA</div><div class="t">6 vizite → 20% reducere</div></div></div>
+          <div class="vis" style="top:336px"><i>✓</i>Vizita 1</div>
+          <div class="vis" style="top:410px"><i>✓</i>Vizita 2</div>
+          <div class="vis" style="top:484px"><i>✓</i>Vizita 3</div>
+          <div class="vis" style="top:558px"><i>✓</i>Vizita 4</div>
+          <div class="vis" style="top:632px"><i>✓</i>Vizita 5</div>
+          <div class="vis last" style="top:706px"><i>✓</i>Vizita 6</div>
+          <div class="vis" id="next" style="top:796px;width:214px;height:auto;padding:12px 14px;flex-direction:column;align-items:flex-start;gap:2px;background:#FBE3EA"><span style="font-size:14px;font-family:var(--f-mono);letter-spacing:.12em;color:var(--rose-2)">LA VIZITA 7</span><span style="font-size:30px;font-weight:900;color:var(--rose-2)">−20%</span></div>
+          <div id="phone"><div class="screen">
+            <div class="notch"></div><div class="sbar">9:41</div>
+            <div class="url">loyalcard.net</div>
+            <div class="shop"><div class="ico"><svg><use href="#nail"/></svg></div><div class="nm">Salonul tău</div><div class="kd">Salon de înfrumusețare</div></div>
+            <div class="qlab">Codul tău QR</div>
+            <div class="qr-box"><svg viewBox="0 0 25 25"><path class="qrp" fill="#3A1A2E"/></svg><div id="beam"></div></div>
+            <div id="slots"></div>
+            <div id="pcount">0 / 6 vizite</div>
+            <div id="prule">6 vizite → 20% reducere</div>
+            <div id="won"><div class="g"><svg><use href="#gift"/></svg></div><div class="a">PREMIU CÂȘTIGAT!</div><div class="b">20% reducere</div><div class="c">la următoarea programare</div></div>
+            <div id="flash"></div>
+          </div></div>
+          <svg class="spark" id="sp1" style="left:286px;top:330px;color:#C99A3B"><use href="#spark"/></svg>
+          <svg class="spark" id="sp2" style="left:612px;top:420px;color:#D9467A"><use href="#spark"/></svg>
+          <svg class="spark" id="sp3" style="left:620px;top:900px;color:#C99A3B"><use href="#spark"/></svg>
+          <svg class="spark" id="sp4" style="left:276px;top:860px;color:#D9467A"><use href="#spark"/></svg>
+        </div>
+
+        <!-- 4 · benefits -->
+        <div class="scene" id="s4">
+          <div class="left" style="top:196px"><div class="hx" id="h4" style="font-size:58px">Pentru salonul <span class="serif rose" style="font-size:72px">tău:</span></div></div>
+          <div class="ben" id="be1" style="top:340px"><div class="ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#D9467A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6.5h18v11H3zM3 10h18M4 4l16 16"/></svg></div><span>Fără carduri de carton</span></div>
+          <div class="ben" id="be2" style="top:470px"><div class="ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#D9467A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5zM10.5 18.5h3"/></svg></div><span>Clienții nu descarcă nicio aplicație</span></div>
+          <div class="ben" id="be3" style="top:600px"><div class="ic"><svg viewBox="0 0 24 24"><path fill="none" stroke="#D9467A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><span>Fiecare vizită apare în dashboard</span></div>
+        </div>
+
+        <!-- 5 · cta -->
+        <div class="scene" id="s5">
+          <div class="col" style="top:230px">
+            <div class="hx" id="c1" style="font-size:52px">Programul de fidelitate</div>
+            <div class="serif" id="c2" style="font-size:92px;line-height:1.02">al salonului <span class="rose">tău</span></div>
+            <div class="sub" id="c3" style="margin-top:18px;line-height:1.35">Începi gratuit cu planul Starter.<br>Scrie-ne pe loyalcard.net</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="30000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:30</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 30;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  function qrPath(n = 25, seed = 20261026) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`; return d;
+  }
+  $$('.qrp').forEach(p => p.setAttribute('d', qrPath()));
+  const slots = $('#slots');
+  for (let i = 0; i < 6; i++) { const s = document.createElement('div'); s.className = 'sl'; s.innerHTML = '<b><svg><use href="#tick"/></svg></b>'; slots.appendChild(s); }
+
+  A($('#bg'), [{ translate: '0px 0px' }, { translate: '-50px 40px' }], 0, D, 'linear');
+
+  // the bottles stand by the hook and the insight, then leave for the demo
+  [['#b1', 0], ['#b2', .08], ['#b3', .16]].forEach(([s, d]) => A($(s), [{ translate: '0px 60px', rotate: '6deg' }, { translate: '0px 0px', rotate: '0deg' }], d, .8, BACK));
+  A($('#b2'), [{ rotate: '0deg' }, { rotate: '-5deg', offset: .3 }, { rotate: '4deg', offset: .65 }, { rotate: '0deg' }], 4.0, .9, IO);
+  A($('#bottles'), [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: '0px 80px' }], 8.2, .5, IN);
+
+  // ---------- 1 · hook (on screen at frame 0) ----------
+  scene($('#s1'), -.05, 3.8);
+  A($('#h1b'), [{ translate: '0px 12px' }, { translate: '0px 0px' }], 0, .7, OUT);
+  A($('#sw'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], .25, .7, IO);
+  enter($('#h1c'), .9, { dy: 18, d: .5 });
+
+  // ---------- 2 · insight ----------
+  scene($('#s2'), 3.7, 8.8);
+  enter($('#i1'), 3.75, { dy: 30, d: .55 });
+  enter($('#i2'), 4.15, { dy: 30, d: .55 });
+  stagger(words($('#i3')), 5.3, .1, { dy: 30, d: .45, e: BACK });
+  enter($('#i4'), 6.3, { dy: 16, d: .5 });
+
+  // ---------- 3 · six visits, the reward ----------
+  scene($('#s3'), 8.7, 21.0);
+  enter($('#k3'), 8.75, { dy: 0, dx: -20, d: .4 });
+  enter($('#rule'), 8.85, { dy: -24, s: .95, d: .5, e: BACK });
+  A($('#phone'), [{ opacity: 0, translate: '80px 0px', rotate: '6deg' }, { opacity: 1, translate: '0px 0px', rotate: '0deg' }], 9.0, .7, OUT);
+  const visits = [10.2, 11.45, 12.7, 13.95, 15.2, 16.45];
+  const beam = $('#beam'), flash = $('#flash');
+  A(beam, [{ opacity: 0 }, { opacity: 0 }], 0, .01, 'linear');
+  visits.forEach((v, i) => {
+    A(beam, [{ opacity: 1, translate: '0px 6px' }, { opacity: 1, translate: '0px 166px', offset: .9 }, { opacity: 0, translate: '0px 170px' }], v - .45, .45, 'linear');
+    A(flash, [{ opacity: 0 }, { opacity: .35 }, { opacity: 0 }], v, .3, 'linear');
+    A($$('#slots .sl b')[i], [{ scale: '0' }, { scale: '1' }], v, .35, BACK);
+    enter($$('#s3 .vis:not(#next)')[i], v, { dx: -30, dy: 0, d: .4, e: BACK });
+    A($('#phone'), [{ scale: '1' }, { scale: '1.025', offset: .35 }, { scale: '1' }], v, .35, OUT);
+  });
+  const pc = $('#pcount');
+  hooks.push(t => { let n = 0; visits.forEach(v => { if (t >= v) n++; }); const s = `${n} / 6 vizite`; if (pc.textContent !== s) pc.textContent = s; });
+  A($('#won'), [{ opacity: 0, scale: '.6', translate: '0px 30px' }, { opacity: 1, scale: '1', translate: '0px 0px' }], 17.2, .6, BACK);
+  A($('#won .b'), [{ scale: '1' }, { scale: '1.1', offset: .4 }, { scale: '1' }], 18.3, .6, OUT);
+  enter($('#next'), 18.0, { dy: 20, s: .9, d: .5, e: BACK });
+  ['#sp1', '#sp2', '#sp3', '#sp4'].forEach((s, i) => A($(s), [{ opacity: 0, scale: '0', rotate: '0deg' }, { opacity: 1, scale: '1.2', rotate: '90deg', offset: .5 }, { opacity: 0, scale: '.6', rotate: '180deg' }], 17.3 + i * .14, 1.2, 'ease-out'));
+  A($('#rule'), [{ scale: '1' }, { scale: '1.04', offset: .4 }, { scale: '1' }], 17.4, .6, OUT);
+
+  // ---------- 4 · benefits ----------
+  scene($('#s4'), 20.9, 26.4);
+  stagger(words($('#h4')), 21.0, .1, { dy: 30, d: .45, e: BACK });
+  ['#be1', '#be2', '#be3'].forEach((s, i) => enter($(s), 21.7 + i * .55, { dx: -50, dy: 0, d: .55, e: BACK }));
+
+  // ---------- 5 · cta ----------
+  scene($('#s5'), 26.3, D + 1);
+  enter($('#c1'), 26.35, { dy: 24, d: .5 });
+  enter($('#c2'), 26.65, { dy: 30, d: .6, e: BACK });
+  enter($('#c3'), 27.2, { dy: 16, d: .45 });
+  enter($('#brand'), 27.6, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 27.95, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 28.8, .7, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 18.5 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

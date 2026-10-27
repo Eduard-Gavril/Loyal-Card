@@ -47,7 +47,7 @@ Segnare `[x]` quando un tema è stato usato.
 **Domanda e risposta** (FAQ del sito, `faq.q1`–`q8`)
 - [x] Costă ceva? (2026-10-13)
 - [x] Trebuie să descarc o aplicație? (2026-10-20)
-- [ ] Cum îmi obțin cardul de fidelitate?
+- [x] Cum îmi obțin cardul de fidelitate? (2026-10-27: flusso reale loyalcard.net → "Alege magazinul tău" → card creato in automatico → scansione; la risposta del sito `faq.a3` dice che il card si crea alla scansione, nel codice si crea quando il cliente apre la pagina del negozio)
 - [ ] Datele mele sunt în siguranță?
 - [ ] Ce se întâmplă dacă îmi schimb telefonul?
 - [ ] Pot să-l folosesc la orice magazin?
@@ -117,3 +117,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-24 (sab) | `2026-10-24-caiet-vs-dashboard.html` | Prima e dopo | Schermo diviso: quaderno a mano (lente, "Cine a venit de 5 ori luna asta?") vs dashboard (Scanări Totale, Clienți, Premii Date, Scanări Azi) + "Download Report Excel" → LoyalCard_Clients_*.xlsx, "Date de exemplu", Business; 15 s + taglio 9 s | 10:30 (15 s) / Reel di prova (9 s) |
 | 2026-10-25 (dom) | `2026-10-25-planul-business.html` | L'offerta | Planul Business: logo nel card cliente (Setări → URL Logo, "Cafeneaua Mea"), Starter 1 regulă vs reguli nelimitate (esempi), €30/lună o €24/lună annuale + 6 funzioni; 15 s + taglio 9 s | 20:30 (15 s) / Reel di prova (9 s) |
 | 2026-10-26 (lun) | `2026-10-26-salon.html` | Un settore al giorno | Salon: boccette di smalto, "Salonul de alături are și el oje", telefono con 6 visite → 20% reducere, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
+| 2026-10-27 (mar) | `2026-10-27-cum-obtin-cardul.html` | Domanda e risposta | Fumetto con la domanda, telefono in 4 passi (loyalcard.net, Alege magazinul tău, card creato in automatico, scansione +1 ștampilă), "Tu doar scanezi"; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |

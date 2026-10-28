@@ -113,7 +113,23 @@ export default function Pricing() {
           })}
         </div>
 
-        <div className="gl-glass gl-addon">
+        <div className="gl-glass gl-addon is-wip">
+          <Squircle color="linear-gradient(160deg,#ffd166,#f5a623)" size={46}><IosIcon name="calendar" /></Squircle>
+          <div>
+            <b>{L('Prenotazioni appuntamenti', 'Appointment booking', 'Programări online')} <em>+€15{L('/mese', '/mo', '/lună')}</em></b>
+            <p>
+              {L(
+                'Per parrucchieri, barbieri e centri estetici: i clienti prenotano online servizio, operatore e orario, tu gestisci tutto da un calendario. In arrivo.',
+                'For hair salons, barbers and beauty studios: clients book service, staff member and time online, and you manage everything from one calendar. Coming soon.',
+                'Pentru frizerii, coafori și saloane de înfrumusețare: clienții își programează online serviciul, specialistul și ora, iar tu gestionezi totul dintr-un calendar. În curând.',
+              )}
+            </p>
+          </div>
+          <span className="gl-tape" aria-hidden="true"><b>{L('Lavori in corso', 'Work in progress', 'În lucru')}</b></span>
+          <button className="ap-btn gl-btn-ghost" onClick={() => go('/contact')}>{L('Richiedi Info', 'Request Info', 'Solicită Info')}</button>
+        </div>
+
+        <div className="gl-glass gl-addon is-wip">
           <Squircle color="linear-gradient(160deg,#ffc447,#e5811a)" size={46}><IosIcon name="bell" /></Squircle>
           <div>
             <b>{L('Notifiche WhatsApp', 'WhatsApp Notifications', 'Notificări WhatsApp')} <em>+€9{L('/mese', '/mo', '/lună')}</em></b>
@@ -125,6 +141,7 @@ export default function Pricing() {
               )}
             </p>
           </div>
+          <span className="gl-tape" aria-hidden="true"><b>{L('Lavori in corso', 'Work in progress', 'În lucru')}</b></span>
           <button className="ap-btn gl-btn-ghost" onClick={() => go('/contact')}>{L('Richiedi Info', 'Request Info', 'Solicită Info')}</button>
         </div>
       </section>

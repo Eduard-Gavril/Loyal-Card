@@ -192,3 +192,22 @@ html:has(.la) { scroll-behavior: smooth; }
 .gl-sectors a { color: var(--muted); text-decoration: none; }
 .gl-sectors a:hover { color: var(--text); text-decoration: underline; }
 .gl-sectors + .gl-copy { margin-top: 18px; }
+
+/* "Work in progress" tape: a ribbon laid diagonally across add-ons that are not available yet */
+.gl-addon.is-wip { position: relative; overflow: hidden; } /* the ribbon is cut by the card's edge instead of sticking out */
+.gl-addon.is-wip > div { padding-right: 150px; }
+.gl-tape {
+  position: absolute; right: 190px; top: 50%; z-index: 2; width: 176px; height: 26px; pointer-events: none;
+  transform: translateY(-50%) rotate(-55deg);
+  display: grid; place-items: center;
+  background:
+    repeating-linear-gradient(-45deg, #17120c 0 6px, #ffc21a 6px 12px) top / 100% 5px no-repeat,
+    repeating-linear-gradient(-45deg, #17120c 0 6px, #ffc21a 6px 12px) bottom / 100% 5px no-repeat,
+    #ffc21a;
+  border-radius: 2px; box-shadow: 0 4px 14px rgba(0, 0, 0, .55);
+}
+.gl-tape b { font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #17120c; white-space: nowrap; }
+@media (max-width: 860px) {
+  .gl-addon.is-wip > div { padding-right: 78px; }
+  .gl-tape { right: -34px; top: 46px; transform: translateY(-50%) rotate(-55deg); width: 132px; }
+}

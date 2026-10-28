@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
-import { usePlanUsage } from '@/lib/plan'
+import { usePlanUsage, PLAN_NAMES } from '@/lib/plan'
 import { supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/admin/AdminBackdrop'
 import LanguageSelector from '@/components/LanguageSelector'
@@ -266,6 +266,15 @@ export default function AdminDashboard() {
               <p className="text-xs sm:text-sm text-gray-200 mt-1 flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                 <span className="truncate max-w-[200px] sm:max-w-none">{user?.email}</span>
+                {plan && (
+                  <button
+                    onClick={() => navigate('/admin/settings')}
+                    title={language === 'ro' ? 'Vezi planul și limitele' : language === 'it' ? 'Vedi piano e limiti' : 'View plan and limits'}
+                    className="px-2.5 py-0.5 rounded-full bg-primary-500/20 border border-primary-400/40 text-primary-200 text-xs font-semibold hover:bg-primary-500/30 transition-colors"
+                  >
+                    {PLAN_NAMES[plan.effective_plan]}
+                  </button>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">

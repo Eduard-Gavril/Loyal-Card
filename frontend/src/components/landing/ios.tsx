@@ -4,7 +4,7 @@ import './ios.css'
 export type IconName =
   | 'phone' | 'qr' | 'wallet' | 'gift' | 'check' | 'bell' | 'chev' | 'store' | 'star'
   | 'user' | 'menu' | 'close' | 'mail' | 'ext' | 'insta' | 'plus' | 'home' | 'help' | 'tag' | 'chart'
-  | 'key' | 'download' | 'trash' | 'shield' | 'pencil' | 'alert' | 'back' | 'search' | 'pin' | 'copy' | 'info' | 'sparkle'
+  | 'key' | 'download' | 'trash' | 'shield' | 'pencil' | 'alert' | 'back' | 'search' | 'pin' | 'copy' | 'info' | 'sparkle' | 'calendar'
 
 export function IosIcon({ name }: { name: IconName }) {
   const p = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round' } as const
@@ -40,6 +40,7 @@ export function IosIcon({ name }: { name: IconName }) {
       {name === 'pin' && (<><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" {...p} /><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" {...p} /></>)}
       {name === 'copy' && <path d="M8 7h8a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V9a2 2 0 012-2zM16 7V5a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2h2" {...p} />}
       {name === 'info' && (<><circle cx="12" cy="12" r="8.5" {...p} /><path d="M12 11v5M12 8v.01" {...p} /></>)}
+      {name === 'calendar' && (<><rect x="3.5" y="5" width="17" height="15" rx="3" {...p} /><path d="M3.5 10h17M8 3v4M16 3v4" {...p} /><path d="M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01" {...p} strokeWidth={2.4} /></>)}
       {name === 'sparkle' && <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" {...p} />}
       {name === 'chart' && <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" {...p} />}
     </svg>

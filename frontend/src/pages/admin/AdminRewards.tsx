@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
+import { isPlanError, planErrorText } from '@/lib/plan'
 import { supabase, Product, RewardRule } from '@/lib/supabase'
 import StaticBackground from '@/components/admin/AdminBackdrop'
 import { getProductIconName } from '@/lib/emojiUtils'
@@ -50,13 +51,14 @@ export default function AdminRewards() {
     setRewardRules(rules => rules.map(r => r.id === ruleId ? { ...r, buy_count: buyCount } : r))
     setEditingRule(null)
     try {
-      await Promise.race([
+      const res = await Promise.race([
         supabase.from('reward_rules').update({ buy_count: buyCount }).eq('id', ruleId),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000))
-      ])
+      ]) as { error?: { message: string } | null }
+      if (res?.error) throw res.error
     } catch (err: any) {
       setRewardRules(previousRules)
-      setError(err?.message || 'Failed to update rule. Please try again.')
+      setError(isPlanError(err) ? planErrorText(err) : err?.message || 'Failed to update rule. Please try again.')
     }
   }
 
@@ -65,13 +67,14 @@ export default function AdminRewards() {
     setError('')
     setRewardRules(rules => rules.map(r => r.id === ruleId ? { ...r, active } : r))
     try {
-      await Promise.race([
+      const res = await Promise.race([
         supabase.from('reward_rules').update({ active }).eq('id', ruleId),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000))
-      ])
+      ]) as { error?: { message: string } | null }
+      if (res?.error) throw res.error
     } catch (err: any) {
       setRewardRules(previousRules)
-      setError(err?.message || 'Failed to update rule. Please try again.')
+      setError(isPlanError(err) ? planErrorText(err) : err?.message || 'Failed to update rule. Please try again.')
     }
   }
 

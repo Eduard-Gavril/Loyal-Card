@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useClientStore } from '../store'
 import { getTranslation } from '../lib/i18n'
+import { IosIcon, Squircle } from '@/components/landing/ios'
 
 export default function ContactPage() {
   const navigate = useNavigate()
@@ -74,15 +75,17 @@ export default function ContactPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         {status === 'success' ? (
           // Success Message
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-8 text-center">
-            <div className="text-6xl mb-4">✅</div>
-            <h2 className="text-2xl font-bold text-green-900 dark:text-green-100 mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg text-center flex flex-col items-center">
+            <Squircle color="linear-gradient(160deg,#ffd166,#f5a623)" size={64}>
+              <IosIcon name="check" />
+            </Squircle>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-5 mb-2">
               {t.success.title}
             </h2>
-            <p className="text-green-700 dark:text-green-300 mb-6">{t.success.description}</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">{t.success.description}</p>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
             >
               {t.success.backHome}
             </button>
@@ -165,7 +168,10 @@ export default function ContactPage() {
 
                   {/* Error Message */}
                   {status === 'error' && (
-                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3">
+                      <Squircle color="linear-gradient(160deg,#ff8a7a,#e5483a)" size={32}>
+                        <IosIcon name="alert" />
+                      </Squircle>
                       <p className="text-sm text-red-700 dark:text-red-300">{t.error.description}</p>
                     </div>
                   )}

@@ -708,7 +708,7 @@ export const translations = {
         sending: 'Sending...',
       },
       success: {
-        title: 'Message Sent! ✅',
+        title: 'Message Sent!',
         description: 'Thank you for contacting us. We\'ll get back to you as soon as possible.',
         backHome: 'Back to Home'
       },
@@ -1433,7 +1433,7 @@ export const translations = {
         sending: 'Se trimite...',
       },
       success: {
-        title: 'Mesaj Trimis! ✅',
+        title: 'Mesaj Trimis!',
         description: 'Îți mulțumim că ne-ai contactat. Îți vom răspunde cât mai curând posibil.',
         backHome: 'Înapoi Acasă'
       },
@@ -2160,7 +2160,7 @@ export const translations = {
         sending: 'Invio in corso...',
       },
       success: {
-        title: 'Messaggio Inviato! ✅',
+        title: 'Messaggio Inviato!',
         description: 'Grazie per averci contattato. Ti risponderemo il prima possibile.',
         backHome: 'Torna alla Home'
       },

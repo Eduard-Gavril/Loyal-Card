@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { supabase, api, ProductCategory } from '@/lib/supabase'
 import { translations } from '@/lib/i18n'
+import { isPlanError, planErrorText } from '@/lib/plan'
 import StaticBackground from '@/components/admin/AdminBackdrop'
 import { ShoppingBag, Pencil, Trash2, Settings2, Gift, BadgePercent, Info, Tag, FolderCog, Plus, Check, X } from 'lucide-react'
 import AppIcon from '@/components/AppIcon'
@@ -332,6 +333,7 @@ export default function AdminProducts() {
       alert(editingRule ? t.ruleUpdated : t.ruleAdded)
 
     } catch (error) {
+      if (isPlanError(error)) { alert(planErrorText(error)); return }
       alert(language === 'ro' ? 'Eroare la salvarea regulii' : language === 'it' ? 'Errore nel salvataggio della regola' : 'Error saving rule')
     }
   }

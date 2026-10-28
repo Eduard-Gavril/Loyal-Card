@@ -26,6 +26,7 @@ interface TenantInfo {
   contact_email: string | null
   logo_url: string | null
   active: boolean
+  plan?: string
   created_at: string
   total_clients: number
   total_scans: number
@@ -208,6 +209,32 @@ export default function SuperAdminDashboard() {
       setError(err?.message || 'Failed to update tenant status')
     }
   }
+
+  const changeTenantPlan = async (tenantId: string, plan: string) => {
+    const previous = tenants
+    setTenants((list) => list.map((t) => (t.id === tenantId ? { ...t, plan } : t)))
+    try {
+      const { error } = await supabase.from('tenants').update({ plan, plan_status: 'active', plan_expires_at: null }).eq('id', tenantId)
+      if (error) throw error
+    } catch (err: any) {
+      setTenants(previous)
+      setError(err?.message || 'Failed to change plan')
+    }
+  }
+
+  const planSelect = (tenant: TenantInfo) => (
+    <select
+      value={tenant.plan || 'starter'}
+      onChange={(e) => changeTenantPlan(tenant.id, e.target.value)}
+      aria-label="Plan"
+      className="px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 text-white border border-white/20 focus:outline-none"
+    >
+      <option value="starter" className="text-black">Starter</option>
+      <option value="business" className="text-black">Business</option>
+      <option value="pro" className="text-black">Professional</option>
+      <option value="enterprise" className="text-black">Enterprise</option>
+    </select>
+  )
 
   const refreshData = async () => {
     setLoading(true)
@@ -641,6 +668,7 @@ export default function SuperAdminDashboard() {
                         <Calendar className="w-3 h-3" />
                         {new Date(tenant.created_at).toLocaleDateString()}
                       </div>
+                      {planSelect(tenant)}
                       <button
                         onClick={() => toggleTenantStatus(tenant.id, tenant.active)}
                         className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-lg hover:scale-105 flex items-center gap-2 ${
@@ -741,6 +769,8 @@ export default function SuperAdminDashboard() {
                           {new Date(tenant.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                          {planSelect(tenant)}
                           <button
                             onClick={() => toggleTenantStatus(tenant.id, tenant.active)}
                             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-lg hover:scale-105 flex items-center gap-2 ${
@@ -761,6 +791,7 @@ export default function SuperAdminDashboard() {
                               </>
                             )}
                           </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

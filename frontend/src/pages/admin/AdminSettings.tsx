@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/admin/AdminBackdrop'
+import PlanCard from '@/components/admin/PlanCard'
+import { usePlanUsage, isPlanError, planErrorText } from '@/lib/plan'
 import { Settings, Users, QrCode, Trash2 } from 'lucide-react'
 
 interface StaffAdmin {
@@ -24,6 +26,8 @@ export default function AdminSettings() {
   const { tenantId, role } = useAuthStore()
   const { language } = useClientStore()
   const isOwner = role === 'owner'
+  const { usage: plan } = usePlanUsage(tenantId)
+  const canLogo = !plan || plan.limits.can_white_label
   const [settings, setSettings] = useState<TenantSettings>({
     name: '',
     logo_url: '',
@@ -71,7 +75,7 @@ export default function AdminSettings() {
       setStaffPassword('')
       loadStaffList()
     } catch (err: any) {
-      setStaffError(err?.message || 'Failed to create staff account')
+      setStaffError(isPlanError(err) ? planErrorText(err) : err?.message || 'Failed to create staff account')
     } finally {
       setCreatingStaff(false)
     }
@@ -201,6 +205,8 @@ export default function AdminSettings() {
             </div>
           ) : (
             <div className="space-y-6 sm:space-y-8">
+              {plan && <PlanCard usage={plan} />}
+
               {/* Business Info */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
@@ -230,10 +236,16 @@ export default function AdminSettings() {
                     <input
                       type="url"
                       value={settings.logo_url}
+                      disabled={!canLogo}
                       onChange={(e) => setSettings({ ...settings, logo_url: e.target.value })}
                       className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none transition-colors"
                       placeholder="https://example.com/logo.png"
                     />
+                    {!canLogo && (
+                      <p className="mt-2 text-sm text-amber-200">
+                        {language === 'ro' ? 'Logo-ul propriu (white-label) este inclus începând cu planul Business.' : language === 'it' ? 'Il logo personalizzato (white-label) è incluso dal piano Business.' : 'Your own logo (white-label) is included from the Business plan.'}
+                      </p>
+                    )}
                     {settings.logo_url && (
                       <div className="mt-3 p-4 bg-white/5 rounded-xl">
                         <img

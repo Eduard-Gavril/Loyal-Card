@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
+import { usePlanUsage } from '@/lib/plan'
 import { supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/admin/AdminBackdrop'
 import LanguageSelector from '@/components/LanguageSelector'
@@ -30,6 +31,8 @@ interface RecentScan {
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const { user, tenantId, clearAuth } = useAuthStore()
+  const { usage: plan } = usePlanUsage(tenantId)
+  const canExport = !plan || plan.limits.can_export
   const { language } = useClientStore()
   const t = getTranslation(language)
   const [stats, setStats] = useState<Stats>({
@@ -336,8 +339,9 @@ export default function AdminDashboard() {
               </span>
             </button>
             <button
-              onClick={downloadClientsExcel}
-              className="group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-600/40 hover:scale-105 active:scale-95"
+              onClick={canExport ? downloadClientsExcel : () => navigate('/contact')}
+              title={canExport ? undefined : (language === 'ro' ? 'Export Excel este inclus începând cu planul Business' : language === 'it' ? "L'export Excel è incluso dal piano Business" : 'Excel export is included from the Business plan')}
+              className={`group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400/40 py-6 sm:py-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-600/40 hover:scale-105 active:scale-95${canExport ? '' : ' opacity-60'}`}
             >
               <span className="flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold text-white">
                 <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">

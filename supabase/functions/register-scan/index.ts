@@ -157,6 +157,24 @@ Deno.serve(async (req: Request): Promise<Response> => {
       )
     }
 
+    // Plan limit: clients active per month. A client who already scanned in the last 30 days always goes through;
+    // a client who would become a NEW active client is refused once the plan's number is reached.
+    // If the check itself fails we let the scan through: a stamp must never be lost because of the limit machinery.
+    const { data: gate, error: gateError } = await supabase.rpc('can_scan_client', {
+      p_tenant: admin.tenant_id,
+      p_client: card.client_id,
+    })
+    if (!gateError && gate && gate.allowed === false) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          code: 'PLAN_LIMIT_CLIENTS',
+          error: `PLAN_LIMIT: your ${gate.plan} plan allows ${gate.limit} active clients per month. Upgrade the plan to stamp new clients.`,
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // FitGym only: Check if more than 31 days passed since last scan
     // If yes, reset all stamps on the card
     let cardNeedsReset = false

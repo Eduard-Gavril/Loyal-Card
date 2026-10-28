@@ -57,8 +57,8 @@ Segnare `[x]` quando un tema è stato usato.
 **Il dato** (sezione "Rezultate Dovedite", con fonte a schermo)
 - [x] +27% retenție clienți (Accenture 2020) (2026-10-14)
 - [x] +60% vizite recurente (Bond Brand Loyalty 2023) (2026-10-21)
-- [ ] +25% venituri per client (Harvard Business Review)
-- [ ] +30% valoare pe viață client (Bain & Company)
+- [x] ~~+25% venituri per client (Harvard Business Review)~~ → +5% clienți care revin = +25% până la +95% profit (2026-10-28). L'articolo HBR linkato dal sito (2014, "The Value of Keeping the Right Customers") riporta questo dato di Frederick Reichheld / Bain, non "+25% venituri per client": la frase del sito va corretta
+- [ ] +30% valoare pe viață client (Bain & Company): prima di usarlo trovare lo studio preciso, il link del sito porta solo alla pagina generica di Bain sulla fedeltà
 
 **Una funzione in 10 secondi**
 - [ ] ~~Apple Wallet / Google Wallet~~ (in sospeso: nel codice ci sono solo i testi, manca la generazione del pass; non pubblicizzare finché non esiste)
@@ -118,3 +118,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-25 (dom) | `2026-10-25-planul-business.html` | L'offerta | Planul Business: logo nel card cliente (Setări → URL Logo, "Cafeneaua Mea"), Starter 1 regulă vs reguli nelimitate (esempi), €30/lună o €24/lună annuale + 6 funzioni; 15 s + taglio 9 s | 20:30 (15 s) / Reel di prova (9 s) |
 | 2026-10-26 (lun) | `2026-10-26-salon.html` | Un settore al giorno | Salon: boccette di smalto, "Salonul de alături are și el oje", telefono con 6 visite → 20% reducere, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-10-27 (mar) | `2026-10-27-cum-obtin-cardul.html` | Domanda e risposta | Fumetto con la domanda, telefono in 4 passi (loyalcard.net, Alege magazinul tău, card creato in automatico, scansione +1 ștampilă), "Tu doar scanezi"; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |
+| 2026-10-28 (mer) | `2026-10-28-profit-25-95.html` | Il dato | Slider "Clienți care revin" 0 → +5%, "Cât crește profitul?", grafico a barre +25% → +95% con fonte Reichheld/Bain in HBR 2014; 15 s + taglio 9,5 s | 12:30 (15 s) / Reel di prova (9,5 s) |

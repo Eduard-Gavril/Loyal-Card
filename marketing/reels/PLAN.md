@@ -64,8 +64,8 @@ Segnare `[x]` quando un tema è stato usato.
 - [ ] ~~Apple Wallet / Google Wallet~~ (in sospeso: nel codice ci sono solo i testi, manca la generazione del pass; non pubblicizzare finché non esiste)
 - [x] Scanner multi-produs (coș cu mai multe produse) (2026-10-15, indicato come planul Business)
 - [x] Dashboard / Rapoarte (2026-10-22: pagina Rapoarte con dati di esempio; non dire "în timp real": i dati si caricano all'apertura, non in diretta)
-- [ ] Export Excel
-- [ ] Parteneri în apropiere (geolocalizare)
+- [x] Export Excel (già mostrato nel reel "Prima e dopo" del 2026-10-24: pulsante "Download Report Excel" + file LoyalCard_Clients_*.xlsx; non ripetuto)
+- [x] Parteneri în apropiere (geolocalizare) (2026-10-29: "Alege magazinul tău" chiede la posizione e mostra i 5 negozi più vicini con la distanza "x.x km"; la posizione del negozio la inserisce il team LoyalCard, il titolare non la imposta dalle Setări)
 - [ ] Toate cardurile într-un singur loc
 - [ ] Funcționează și offline
 - [ ] Reguli pe produs sau categorie
@@ -119,3 +119,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-26 (lun) | `2026-10-26-salon.html` | Un settore al giorno | Salon: boccette di smalto, "Salonul de alături are și el oje", telefono con 6 visite → 20% reducere, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-10-27 (mar) | `2026-10-27-cum-obtin-cardul.html` | Domanda e risposta | Fumetto con la domanda, telefono in 4 passi (loyalcard.net, Alege magazinul tău, card creato in automatico, scansione +1 ștampilă), "Tu doar scanezi"; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-10-28 (mer) | `2026-10-28-profit-25-95.html` | Il dato | Slider "Clienți care revin" 0 → +5%, "Cât crește profitul?", grafico a barre +25% → +95% con fonte Reichheld/Bain in HBR 2014; 15 s + taglio 9,5 s | 12:30 (15 s) / Reel di prova (9,5 s) |
+| 2026-10-29 (gio) | `2026-10-29-magazine-apropiere.html` | Una funzione | Mappa con il cliente e i pin, "Te găsesc clienții din cartier?", telefono con "Alege magazinul tău" → Se caută locația ta... → elenco con 0.3 km (EXEMPLU) → tap → Card nou creat; 15 s + taglio 9,5 s | 20:30 (15 s) / Reel di prova (9,5 s) |

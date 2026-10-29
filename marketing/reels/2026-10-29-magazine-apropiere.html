@@ -1,0 +1,311 @@
+<title>Magazine în apropiere</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Una funzione": nearby stores. TenantSelector asks for the location ("Se caută locația ta..."),
+   calls get_nearest_tenants (5 results) and shows each store with its category and "x.x km" (toFixed(1)).
+   Selecting one opens /card?tenant=… and creates the card. Store names other than "Cafeneaua Mea" are skeletons.
+   Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --map: #E8EDF1; --block: #D9E0E7; --park: #CDE6D3; --water: #CFE0F2; --street: #FFFFFF; --ink: #1B1530; --ink-2: #5E5873;
+  --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --lilac: #EDE9FE; --blue: #2F7BF6; --mint: #10B981; --mint-2: #D1FAE5; --amber: #F5B544; --white: #FFFFFF;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--map); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--map); color: var(--ink); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--blue) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--blue); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(27, 21, 48, .55); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#mapWrap { position: absolute; inset: -80px; }
+#mapWrap svg { width: 100%; height: 100%; display: block; }
+#dim { position: absolute; inset: 0; background: rgba(27, 21, 48, .55); }
+.pin { position: absolute; width: 56px; height: 72px; margin-left: -28px; margin-top: -72px; transform-origin: 50% 100%; }
+.pin svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 8px 10px rgba(27, 21, 48, .25)); }
+#pinMe { width: 84px; height: 108px; margin-left: -42px; margin-top: -108px; }
+#you { position: absolute; left: 330px; top: 760px; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 6px #fff, 0 6px 16px rgba(47, 123, 246, .5); }
+.ring { position: absolute; left: 330px; top: 760px; width: 400px; height: 400px; margin: -200px 0 0 -200px; border-radius: 50%; border: 3px solid rgba(47, 123, 246, .55); background: rgba(47, 123, 246, .08); }
+#tag { position: absolute; left: 300px; top: 526px; padding: 8px 14px; border-radius: 14px; background: var(--white); font-size: 20px; font-weight: 800; box-shadow: 0 10px 22px rgba(27, 21, 48, .18); white-space: nowrap; }
+#tag b { color: var(--violet); }
+#hook { position: absolute; left: 40px; top: 176px; width: 640px; padding: 26px 30px 30px; box-sizing: border-box; border-radius: 34px; background: rgba(255, 255, 255, .94); box-shadow: 0 20px 44px rgba(27, 21, 48, .16); }
+.kick { font-family: var(--f-mono); font-size: 17px; font-weight: 500; letter-spacing: .16em; color: var(--violet); white-space: nowrap; }
+#hookT { margin-top: 12px; font-size: 64px; font-weight: 900; letter-spacing: -.045em; line-height: .98; }
+#hookT em { font-style: normal; color: var(--violet); }
+
+/* s2 */
+.cap { position: absolute; left: 40px; top: 186px; width: 640px; font-size: 44px; font-weight: 900; letter-spacing: -.035em; line-height: 1.04; color: var(--white); text-align: center; text-shadow: 0 4px 20px rgba(27, 21, 48, .4); }
+.cap em { font-style: normal; color: var(--amber); }
+#phone { position: absolute; left: 200px; top: 352px; width: 320px; height: 624px; border-radius: 48px; background: var(--ink); box-shadow: 0 30px 60px rgba(0, 0, 0, .4), 0 0 0 2px rgba(255, 255, 255, .15); }
+.screen { position: absolute; inset: 11px; border-radius: 38px; background: #FFFFFF; overflow: hidden; color: var(--ink); }
+.notch { position: absolute; left: 50%; top: 10px; width: 86px; height: 22px; margin-left: -43px; border-radius: 12px; background: var(--ink); z-index: 3; }
+.sbar { position: absolute; left: 28px; top: 12px; font-size: 13px; font-weight: 700; z-index: 3; }
+.scr { position: absolute; inset: 0; }
+.urlbar { position: absolute; left: 14px; right: 14px; top: 42px; height: 38px; border-radius: 14px; background: #F1EEF8; display: flex; align-items: center; gap: 8px; padding: 0 12px; font-family: var(--f-mono); font-size: 14px; box-sizing: border-box; }
+.urlbar svg { width: 14px; height: 14px; flex: none; }
+.st-title { position: absolute; left: 18px; top: 96px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+#loc { position: absolute; left: 18px; right: 18px; top: 136px; height: 40px; border-radius: 12px; background: #EEF4FF; color: #1D4ED8; display: flex; align-items: center; gap: 10px; padding: 0 12px; font-size: 14px; font-weight: 700; box-sizing: border-box; }
+#spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(29, 78, 216, .25); border-top-color: #1D4ED8; box-sizing: border-box; flex: none; }
+.row { position: absolute; left: 14px; right: 14px; height: 76px; border-radius: 18px; background: #F7F5FC; display: flex; align-items: center; gap: 10px; padding: 0 12px; box-sizing: border-box; }
+.row .ic { width: 46px; height: 46px; border-radius: 14px; flex: none; display: grid; place-items: center; }
+.row .ic svg { width: 26px; height: 26px; }
+.row .mid { flex: 1; min-width: 0; }
+.row .nm { font-size: 16px; font-weight: 800; white-space: nowrap; }
+.row .tg { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; color: #92400E; background: #FEF3C7; }
+.row .km { flex: none; padding: 4px 8px; border-radius: 8px; background: var(--lilac); color: var(--violet); font-size: 12.5px; font-weight: 800; white-space: nowrap; }
+.sk { height: 12px; border-radius: 6px; background: #E6E1F1; }
+#hit { background: #fff; box-shadow: 0 0 0 2px var(--violet), 0 10px 22px rgba(109, 40, 217, .18); }
+#tap { position: absolute; left: 140px; top: 210px; width: 60px; height: 60px; border-radius: 50%; background: rgba(109, 40, 217, .25); border: 3px solid var(--violet); box-sizing: border-box; }
+#ex { position: absolute; right: 18px; top: 150px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .12em; padding: 3px 7px; border-radius: 6px; border: 1px solid #C4B5FD; color: var(--violet); }
+.shop { position: absolute; left: 18px; top: 52px; right: 18px; height: 56px; }
+.shop .ico { position: absolute; left: 0; top: 0; width: 52px; height: 52px; border-radius: 16px; background: #8B5E3C; display: grid; place-items: center; }
+.shop .ico svg { width: 30px; height: 30px; }
+.shop .nm { position: absolute; left: 64px; top: 3px; font-size: 20px; font-weight: 800; white-space: nowrap; }
+.shop .kd { position: absolute; left: 64px; top: 30px; font-size: 13px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+#newTag { position: absolute; left: 50%; top: 124px; translate: -50% 0; padding: 6px 12px; border-radius: 10px; background: var(--mint-2); color: #065F46; font-size: 13px; font-weight: 800; white-space: nowrap; }
+.qlab { position: absolute; left: 0; width: 298px; text-align: center; top: 164px; font-weight: 700; font-size: 15px; }
+.qr-box { position: absolute; left: 61px; top: 190px; width: 176px; height: 176px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1.5px #E4DEF2; }
+.qr-box svg { position: absolute; left: 14px; top: 14px; width: 148px; height: 148px; shape-rendering: crispEdges; }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 74px; line-height: 1; letter-spacing: -.045em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+    <symbol id="lock" viewBox="0 0 24 24"><path fill="none" stroke="#5E5873" stroke-width="2.4" stroke-linecap="round" d="M7 11V8a5 5 0 0 1 10 0v3M5.5 11h13v9.5h-13z"/></symbol>
+    <symbol id="pinG" viewBox="0 0 56 72"><path d="M28 70C28 70 4 44 4 27a24 24 0 0 1 48 0c0 17-24 43-24 43z" fill="currentColor" stroke="#fff" stroke-width="3"/><circle cx="28" cy="27" r="9" fill="#fff"/></symbol>
+    <symbol id="pinS" viewBox="0 0 56 72"><path d="M28 70C28 70 4 44 4 27a24 24 0 0 1 48 0c0 17-24 43-24 43z" fill="#6D28D9" stroke="#fff" stroke-width="3"/><circle cx="28" cy="27" r="15" fill="#8B5E3C"/><use href="#cup" x="17" y="16" width="22" height="22"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · joi · 15 s · O funcție</div>
+    <h1>Magazine în apropiere</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: în LoyalCard clientul vede magazinele cele mai apropiate, cu distanța, și își face cardul dintr-un tap">
+      <div id="stage">
+        <div id="mapWrap"><svg viewBox="0 0 880 1440" preserveAspectRatio="none">
+          <rect width="880" height="1440" fill="#E8EDF1"/>
+          <path d="M-20 1100 C 200 1040, 420 1180, 900 1080 L 900 1200 C 420 1300, 200 1160, -20 1220 Z" fill="#CFE0F2"/>
+          <rect x="520" y="300" width="260" height="190" rx="28" fill="#CDE6D3"/>
+          <rect x="90" y="930" width="220" height="140" rx="24" fill="#CDE6D3"/>
+          <g fill="#D9E0E7">
+            <rect x="80" y="120" width="170" height="150" rx="14"/><rect x="290" y="120" width="190" height="150" rx="14"/><rect x="520" y="120" width="260" height="140" rx="14"/>
+            <rect x="80" y="310" width="170" height="180" rx="14"/><rect x="290" y="310" width="190" height="180" rx="14"/>
+            <rect x="80" y="530" width="170" height="170" rx="14"/><rect x="290" y="530" width="190" height="170" rx="14"/><rect x="520" y="530" width="260" height="170" rx="14"/>
+            <rect x="80" y="740" width="170" height="150" rx="14"/><rect x="290" y="740" width="190" height="150" rx="14"/><rect x="520" y="740" width="260" height="150" rx="14"/>
+            <rect x="350" y="930" width="130" height="140" rx="14"/><rect x="520" y="930" width="260" height="120" rx="14"/>
+            <rect x="80" y="1280" width="300" height="120" rx="14"/><rect x="420" y="1280" width="360" height="120" rx="14"/>
+          </g>
+          <g stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" fill="none">
+            <path d="M0 290 H880M0 510 H880M0 720 H880M0 910 H880M270 0 V1100M500 0 V1100M60 0 V1100M800 0 V1100"/>
+          </g>
+          <path d="M0 1260 H880" stroke="#FFFFFF" stroke-width="30"/>
+          <path d="M120 1400 L 760 40" stroke="#F6E7B8" stroke-width="16" stroke-linecap="round" opacity=".9"/>
+        </svg></div>
+        <div class="ring" id="ring1"></div><div class="ring" id="ring2"></div>
+        <div class="pin" id="p1" style="left:150px;top:640px;color:#A9A3BD"><svg><use href="#pinG"/></svg></div>
+        <div class="pin" id="p2" style="left:590px;top:600px;color:#A9A3BD"><svg><use href="#pinG"/></svg></div>
+        <div class="pin" id="p3" style="left:230px;top:960px;color:#A9A3BD"><svg><use href="#pinG"/></svg></div>
+        <div class="pin" id="p4" style="left:560px;top:930px;color:#A9A3BD"><svg><use href="#pinG"/></svg></div>
+        <div class="pin" id="pinMe" style="left:410px;top:690px"><svg><use href="#pinS"/></svg></div>
+        <div id="you"></div>
+        <div id="tag">Cafeneaua Mea · <b>0.3 km</b></div>
+        <div id="dim"></div>
+
+        <!-- s1: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div id="hook"><div class="kick">O FUNCȚIE ÎN 10 SECUNDE</div><div id="hookT">Te găsesc clienții <em>din cartier?</em></div></div>
+        </div>
+
+        <!-- s2: the store list -->
+        <div class="scene" id="s2">
+          <div class="cap" id="cA">Clientul deschide LoyalCard…</div>
+          <div class="cap" id="cB">…și vede magazinele <em>cele mai apropiate.</em></div>
+          <div class="cap" id="cC">Un tap și are <em>cardul tău.</em></div>
+          <div id="phone"><div class="screen">
+            <div class="notch"></div><div class="sbar">9:41</div>
+            <div class="scr" id="pB">
+              <div class="urlbar"><svg><use href="#lock"/></svg>loyalcard.net</div>
+              <div class="st-title">Alege magazinul tău</div>
+              <div id="ex">EXEMPLU</div>
+              <div id="loc"><div id="spin"></div>Se caută locația ta...</div>
+              <div class="row" id="hit" style="top:190px"><div class="ic" style="background:#8B5E3C"><svg><use href="#cup"/></svg></div><div class="mid"><div class="nm">Cafeneaua Mea</div><span class="tg">Cafenea</span></div><div class="km">0.3 km</div></div>
+              <div class="row" style="top:276px"><div class="ic" style="background:#E6E1F1"></div><div class="mid"><div class="sk" style="width:110px"></div><div class="sk" style="width:60px;height:10px;margin-top:8px"></div></div><div class="km">0.8 km</div></div>
+              <div class="row" style="top:362px"><div class="ic" style="background:#E6E1F1"></div><div class="mid"><div class="sk" style="width:90px"></div><div class="sk" style="width:70px;height:10px;margin-top:8px"></div></div><div class="km">1.2 km</div></div>
+              <div class="row" style="top:448px"><div class="ic" style="background:#E6E1F1"></div><div class="mid"><div class="sk" style="width:120px"></div><div class="sk" style="width:50px;height:10px;margin-top:8px"></div></div><div class="km">2.5 km</div></div>
+              <div id="tap"></div>
+            </div>
+            <div class="scr" id="pC">
+              <div class="shop"><div class="ico"><svg><use href="#cup"/></svg></div><div class="nm">Cafeneaua Mea</div><div class="kd">Program de Fidelitate</div></div>
+              <div id="newTag">✓ Card nou creat</div>
+              <div class="qlab">Codul tău QR</div>
+              <div class="qr-box"><svg viewBox="0 0 25 25"><path class="qrp" fill="#1B1530"/></svg></div>
+            </div>
+          </div></div>
+        </div>
+
+        <!-- s3: cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:270px">
+            <div id="cta1">Clienții din zonă <em>te pot găsi.</em></div>
+            <div id="cta2">Afacerea ta apare în LoyalCard, cu distanța până la client. Începi gratuit cu planul Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+  const loop = (el, kf, ms, delay = 0) => { const a = el.animate(kf, { duration: ms, delay, iterations: Infinity, easing: 'linear' }); a.pause(); anims.push(a); return a; };
+
+  function qrPath(n = 25, seed = 20261029) {
+    let a = seed; const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const m = [...Array(n)].map(() => Array(n).fill(0)), res = [...Array(n)].map(() => Array(n).fill(false));
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue; res[rr][cc] = true; const inside = i >= 0 && i <= 6 && j >= 0 && j <= 6; m[rr][cc] = inside && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) ? 1 : 0; } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    for (let i = 8; i < n - 8; i++) { m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0; res[6][i] = res[i][6] = true; }
+    const al = n - 7; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { res[al + i][al + j] = true; m[al + i][al + j] = Math.max(Math.abs(i), Math.abs(j)) !== 1 ? 1 : 0; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!res[r][c]) m[r][c] = rnd() < .5 ? 1 : 0;
+    let d = ''; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) d += `M${c} ${r}h1v1h-1z`; return d;
+  }
+  $$('.qrp').forEach(p => p.setAttribute('d', qrPath()));
+
+  // the map drifts slowly the whole time; the client's location pulses
+  A($('#mapWrap'), [{ translate: '0px 0px', scale: '1' }, { translate: '-30px -20px', scale: '1.06' }], 0, D, 'linear');
+  loop($('#ring1'), [{ scale: '.1', opacity: 1 }, { scale: '1', opacity: 0 }], 1800);
+  loop($('#ring2'), [{ scale: '.1', opacity: 1 }, { scale: '1', opacity: 0 }], 1800, 900);
+  loop($('#spin'), [{ rotate: '0deg' }, { rotate: '360deg' }], 700);
+  // pins drop in; the shop's pin is the one closest to the client
+  ['#p1', '#p2', '#p3', '#p4'].forEach((s, i) => A($(s), [{ translate: '0px -40px', scale: '.6', opacity: 0 }, { translate: '0px 0px', scale: '1', opacity: 1 }], .15 + i * .12, .45, BACK));
+  A($('#pinMe'), [{ translate: '0px -60px', scale: '.5', opacity: 0 }, { translate: '0px 0px', scale: '1', opacity: 1 }], .75, .55, BACK);
+  A($('#pinMe'), [{ scale: '1' }, { scale: '1.15', offset: .4 }, { scale: '1' }], 1.6, .5, OUT);
+  enter($('#tag'), 1.75, { dx: 0, dy: 12, s: .8, d: .4, e: BACK });
+  A($('#dim'), [{ opacity: 0 }, { opacity: 1 }], 3.2, .5, 'linear');
+  A($('#tag'), [{ opacity: 1 }, { opacity: 0 }], 3.2, .3, 'linear');
+  A($('#dim'), [{ opacity: 1 }, { opacity: 0 }], 11.3, .3, 'linear');
+
+  // ---------- s1 · hook (on screen at frame 0) ----------
+  scene($('#s1'), -.05, 3.4);
+  A($('#hook'), [{ translate: '0px -10px' }, { translate: '0px 0px' }], 0, .6, OUT);
+
+  // ---------- s2 · the list of nearby stores ----------
+  scene($('#s2'), 3.25, 11.6);
+  A($('#phone'), [{ opacity: 0, translate: '0px 160px' }, { opacity: 1, translate: '0px 0px' }], 3.3, .7, OUT);
+  const caps = [['#cA', 3.4, 5.6], ['#cB', 5.6, 8.2], ['#cC', 8.2, 0]];
+  caps.forEach(([s, a, b]) => { const c = $(s); A(c, [{ opacity: 0, translate: '0px 20px' }, { opacity: 1, translate: '0px 0px' }], a, .4, OUT); if (b) A(c, [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: '0px -16px' }], b - .25, .25, IN); });
+  A($('#loc'), [{ opacity: 1 }, { opacity: 0 }], 5.0, .2, 'linear');
+  $$('#pB .row').forEach((r, i) => enter(r, 5.15 + i * .12, { dy: 18, d: .4 }));
+  enter($('#ex'), 5.3, { dy: 0, s: .7, d: .3, e: BACK });
+  A($('#hit .km'), [{ scale: '1' }, { scale: '1.25', offset: .4 }, { scale: '1' }], 6.6, .5, OUT);
+  A($('#hit'), [{ scale: '1' }, { scale: '1.04', offset: .4 }, { scale: '1' }], 7.2, .5, OUT);
+  A($('#tap'), [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '1', offset: .4 }, { opacity: 0, scale: '1.6' }], 8.6, .5, 'ease-out');
+  A($('#pB'), [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: '-60px 0px' }], 9.05, .3, IN);
+  A($('#pC'), [{ opacity: 0, translate: '60px 0px' }, { opacity: 1, translate: '0px 0px' }], 9.2, .4, OUT);
+  A($('#newTag'), [{ opacity: 0, scale: '.6' }, { opacity: 1, scale: '1' }], 9.6, .4, BACK);
+
+  // ---------- s3 · cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 11.5, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'circle(0% at 57% 54%)' }, { clipPath: 'circle(120% at 57% 54%)' }], 11.5, .7, IO);
+  stagger(words($('#cta1')), 11.8, .09, { dy: 36, d: .45, e: BACK });
+  enter($('#cta2'), 12.5, { dy: 16, d: .45 });
+  enter($('#brand'), 12.9, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.2, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 14.1, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 7.0 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

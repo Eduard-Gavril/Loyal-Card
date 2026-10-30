@@ -1,0 +1,281 @@
+<title>POV: 9 carduri de carton</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "POV / meme": the client with 9 paper loyalty cards. Shop names are generic categories, not real shops.
+   Phone screen mirrors ClientWallet: "Cardurile Tale", "Alege cardul de arătat", "Magazin • #XXXXXX", "x/y ștampile".
+   Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --wood: #B9875A; --wood-2: #A57447; --ink: #17130F; --ink-2: #5E5873; --pen: #2446A8; --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --amber: #F5B544; --white: #FFFFFF; --leather: #4A2C1A; --leather-2: #6B3F24;
+  --f-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .45); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--wood); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--wood); color: var(--ink); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(23, 19, 15, .55); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#table { position: absolute; inset: -120px; background:
+  radial-gradient(700px 600px at 50% 45%, rgba(255, 236, 205, .35), transparent 70%),
+  repeating-linear-gradient(92deg, rgba(90, 52, 20, .10) 0 3px, transparent 3px 22px, rgba(90, 52, 20, .06) 22px 24px, transparent 24px 61px),
+  linear-gradient(180deg, var(--wood), var(--wood-2)); }
+#vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(40, 20, 5, .35)); }
+.cap { position: absolute; z-index: 30; left: 40px; top: 176px; width: 640px; padding: 22px 28px; box-sizing: border-box; border-radius: 26px; background: var(--white); font-size: 44px; font-weight: 900; letter-spacing: -.035em; line-height: 1.05; box-shadow: 0 16px 36px rgba(40, 20, 5, .3); }
+.cap em { font-style: normal; color: var(--violet); }
+.cap .pov { display: inline-block; margin-right: 8px; padding: 2px 12px; border-radius: 10px; background: var(--ink); color: var(--white); font-size: 36px; vertical-align: 4px; }
+#count { position: absolute; right: 40px; top: 384px; padding: 8px 16px; border-radius: 14px; background: var(--ink); color: var(--white); font-family: var(--f-mono); font-size: 26px; font-weight: 500; font-variant-numeric: tabular-nums; z-index: 30; }
+
+.pc { position: absolute; width: 240px; height: 150px; border-radius: 14px; box-shadow: 0 10px 20px rgba(40, 20, 5, .32); overflow: hidden; }
+.pc::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .025) 0 2px, transparent 2px 5px); }
+.pc .nm { position: absolute; left: 16px; top: 12px; font-size: 19px; font-weight: 900; letter-spacing: .04em; white-space: nowrap; }
+.pc .sub { position: absolute; left: 16px; top: 36px; font-size: 11px; font-weight: 700; letter-spacing: .14em; opacity: .7; }
+.pc .grid { position: absolute; left: 16px; top: 62px; display: grid; grid-template-columns: repeat(5, 30px); gap: 8px 12px; }
+.pc .grid i { width: 30px; height: 30px; border-radius: 50%; border: 2px solid currentColor; opacity: .55; box-sizing: border-box; position: relative; }
+.pc .grid i.on::after { content: "✓"; position: absolute; left: 3px; top: -10px; font-family: var(--f-hand); font-size: 34px; font-weight: 700; color: var(--pen); opacity: 1; }
+#wallet { position: absolute; left: 210px; top: 880px; width: 300px; height: 130px; z-index: 20; }
+#wallet .back { position: absolute; inset: 0; border-radius: 22px; background: linear-gradient(180deg, var(--leather-2), var(--leather)); box-shadow: 0 18px 30px rgba(40, 20, 5, .45); }
+#wallet .stitch { position: absolute; inset: 9px; border-radius: 16px; border: 2px dashed rgba(255, 220, 180, .35); }
+#wallet .flap { position: absolute; left: 0; right: 0; top: 0; height: 46px; border-radius: 22px 22px 8px 8px; background: linear-gradient(180deg, #7A4A2B, #5C3520); }
+#wallet .peek { position: absolute; left: 24px; top: -18px; width: 252px; height: 40px; border-radius: 8px 8px 0 0; background: repeating-linear-gradient(90deg, #F1E3C8 0 30px, #E7B9A8 30px 62px, #CFE2C6 62px 96px, #F3D58C 96px 128px); z-index: -1; }
+
+#yours { position: absolute; left: 150px; top: 452px; width: 420px; height: 262px; border-radius: 22px; background: #E9DDC4; color: #6B5B45; box-shadow: 0 24px 40px rgba(40, 20, 5, .45); z-index: 25; overflow: hidden; filter: sepia(.35) contrast(.85); }
+#yours .nm { position: absolute; left: 26px; top: 20px; font-size: 32px; font-weight: 900; letter-spacing: .04em; opacity: .55; filter: blur(.8px); }
+#yours .grid { position: absolute; left: 26px; top: 92px; display: grid; grid-template-columns: repeat(7, 42px); gap: 12px; }
+#yours .grid i { width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid rgba(107, 91, 69, .35); box-sizing: border-box; }
+#yours .grid i.on { background: radial-gradient(circle, rgba(36, 70, 168, .28), rgba(36, 70, 168, .08) 70%); filter: blur(1.6px); border-color: rgba(36, 70, 168, .25); }
+#yours .wr { position: absolute; inset: 0; }
+#yours .stain { position: absolute; left: 230px; top: 120px; width: 210px; height: 170px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120, 90, 50, .0) 40%, rgba(120, 90, 50, .22) 62%, rgba(120, 90, 50, 0) 72%); }
+#yours .hand { position: absolute; left: 26px; bottom: 18px; font-family: var(--f-hand); font-size: 30px; font-weight: 700; color: rgba(36, 70, 168, .45); filter: blur(.7px); }
+#shade { position: absolute; inset: 0; background: rgba(23, 19, 15, .5); z-index: 24; }
+
+/* s2: the phone */
+#phone { position: absolute; left: 200px; top: 360px; width: 320px; height: 624px; border-radius: 48px; background: var(--ink); box-shadow: 0 30px 60px rgba(40, 20, 5, .5); }
+.screen { position: absolute; inset: 11px; border-radius: 38px; overflow: hidden; color: var(--white); background: linear-gradient(170deg, #2B1660, #140B33); }
+.notch { position: absolute; left: 50%; top: 10px; width: 86px; height: 22px; margin-left: -43px; border-radius: 12px; background: var(--ink); z-index: 3; }
+.sbar { position: absolute; left: 28px; top: 12px; font-size: 13px; font-weight: 700; z-index: 3; }
+.wt { position: absolute; left: 0; width: 298px; text-align: center; top: 58px; font-size: 26px; font-weight: 900; letter-spacing: -.02em; }
+.ws { position: absolute; left: 0; width: 298px; text-align: center; top: 94px; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, .75); }
+.wc { position: absolute; left: 16px; right: 16px; height: 112px; border-radius: 22px; padding: 16px; box-sizing: border-box; }
+#mine { top: 136px; background: linear-gradient(135deg, var(--violet-2), #4C1D95); box-shadow: 0 14px 28px rgba(0, 0, 0, .35), 0 0 0 2px rgba(245, 181, 68, .8); }
+#mine .n { font-size: 20px; font-weight: 800; }
+#mine .m { font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, .7); margin-top: 2px; font-family: var(--f-mono); }
+#mine .p { position: absolute; left: 16px; bottom: 16px; display: flex; gap: 5px; }
+#mine .p i { width: 16px; height: 16px; border-radius: 50%; background: rgba(255, 255, 255, .2); }
+#mine .p i.on { background: var(--amber); }
+#mine .c { position: absolute; right: 16px; bottom: 12px; font-size: 14px; font-weight: 800; }
+.ghost { background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .12); }
+.ghost .sk { height: 12px; border-radius: 6px; background: rgba(255, 255, 255, .16); }
+#crisp { position: absolute; left: 130px; top: 880px; width: 460px; text-align: center; padding: 14px 18px; box-sizing: border-box; border-radius: 18px; background: var(--white); color: var(--ink); font-size: 24px; font-weight: 800; line-height: 1.2; box-shadow: 0 12px 24px rgba(40, 20, 5, .3); }
+#crisp b { color: #059669; }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 74px; line-height: 1; letter-spacing: -.045em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · vineri · 15 s · POV</div>
+    <h1>POV: 9 carduri de carton</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel POV: clientul scoate 9 carduri de carton din portofel, al tău e șifonat și spălat; în telefon cardul nu se șifonează">
+      <div id="stage">
+        <div id="table"></div><div id="vig"></div>
+
+        <!-- s1: the wallet and the pile (on screen at frame 0) -->
+        <div class="scene" id="s1">
+          <div id="pile"></div>
+          <div id="wallet"><div class="peek"></div><div class="back"></div><div class="stitch"></div><div class="flap"></div></div>
+          <div id="shade"></div>
+          <div id="yours">
+            <div class="nm">CAFENEAUA TA</div>
+            <div class="grid"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+            <div class="stain"></div>
+            <svg class="wr" viewBox="0 0 420 262" preserveAspectRatio="none"><g fill="none" stroke-linecap="round"><path d="M0 70 L120 95 L260 60 L420 110" stroke="rgba(255,255,255,.55)" stroke-width="3"/><path d="M0 72 L120 97 L260 62 L420 112" stroke="rgba(80,60,30,.22)" stroke-width="2"/><path d="M140 0 L170 120 L130 262" stroke="rgba(255,255,255,.5)" stroke-width="3"/><path d="M142 0 L172 120 L132 262" stroke="rgba(80,60,30,.2)" stroke-width="2"/><path d="M300 0 L280 140 L330 262" stroke="rgba(255,255,255,.45)" stroke-width="2.5"/><path d="M0 190 L210 170 L420 205" stroke="rgba(80,60,30,.18)" stroke-width="2"/></g></svg>
+            <div class="hand">4 ștampile… sau 5?</div>
+          </div>
+          <div id="count">0 / 9</div>
+          <div class="cap" id="c1"><span class="pov">POV:</span>clientul caută cardul tău de fidelitate…</div>
+          <div class="cap" id="c2"><em>9 carduri de carton</em> mai târziu…</div>
+          <div class="cap" id="c3">Uite-l! A trecut doar prin <em>mașina de spălat.</em></div>
+        </div>
+
+        <!-- s2: the same card in the phone -->
+        <div class="scene" id="s2">
+          <div class="cap" id="c4">În telefon, cardul tău <em>nu se șifonează.</em></div>
+          <div id="phone"><div class="screen">
+            <div class="notch"></div><div class="sbar">9:41</div>
+            <div class="wt">Cardurile Tale</div>
+            <div class="ws">Alege cardul de arătat</div>
+            <div class="wc" id="mine"><div class="n">Cafeneaua ta</div><div class="m">Magazin • #A3F9C2</div><div class="p"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div><div class="c">4/7 ștampile</div></div>
+            <div class="wc ghost" style="top:262px"><div class="sk" style="width:120px"></div><div class="sk" style="width:80px;height:9px;margin-top:10px"></div></div>
+            <div class="wc ghost" style="top:388px"><div class="sk" style="width:100px"></div><div class="sk" style="width:90px;height:9px;margin-top:10px"></div></div>
+          </div></div>
+          <div id="crisp"><b>4/7</b> ștampile, clar ca bună ziua.</div>
+        </div>
+
+        <!-- s3: cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:270px">
+            <div id="cta1">Cardul tău, <em>în telefonul clientului.</em></div>
+            <div id="cta2">Fără carton, fără aplicație de instalat. Începi gratuit cu planul Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  // nine generic paper cards fly out of the wallet onto the table
+  const P = [
+    ['CAFENEA', '#F1E3C8', '#6B4A2B', 70, 438, -8, 3], ['BRUTĂRIE', '#F3D58C', '#6B4A10', 400, 430, 7, 6],
+    ['PIZZERIE', '#E7B9A8', '#7A2E1E', 210, 520, -3, 2], ['FRIZERIE', '#CFE2C6', '#2F5A2A', 430, 560, 10, 4],
+    ['FLORĂRIE', '#F6C9D8', '#7A2348', 56, 618, 5, 7], ['SPĂLĂTORIE', '#C9DCEF', '#1F4A75', 290, 650, -7, 1],
+    ['PATISERIE', '#EADCF5', '#56307A', 440, 712, 4, 5], ['SHAORMA', '#F4D2B0', '#7A3E10', 86, 740, -10, 3], ['CEAINĂRIE', '#D8E6D0', '#3D5A2E', 270, 760, 3, 8]
+  ];
+  const pile = $('#pile'), W = [360, 900];
+  const cards = P.map(([nm, bg, fg, x, y, r, on]) => {
+    const c = document.createElement('div'); c.className = 'pc';
+    c.style.cssText = `left:${x}px;top:${y}px;background:${bg};color:${fg};rotate:${r}deg`;
+    c.innerHTML = `<div class="nm">${nm}</div><div class="sub">CARD DE FIDELITATE</div><div class="grid">${Array.from({ length: 10 }, (_, i) => `<i class="${i < on ? 'on' : ''}"></i>`).join('')}</div>`;
+    pile.appendChild(c); return [c, x + 120, y + 75, r];
+  });
+  const T0 = 1.9, STEP = .44;
+  cards.forEach(([c, cx, cy, r], i) => {
+    const t = T0 + i * STEP;
+    A(c, [{ opacity: 0, translate: `${W[0] - cx}px ${W[1] - cy}px`, scale: '.55', rotate: `${-r}deg` }, { opacity: 1, translate: `${W[0] - cx}px ${W[1] - cy - 60}px`, scale: '.75', rotate: `${-r * .3}deg`, offset: .25 }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: `${r}deg` }], t, .5, OUT);
+  });
+  const cnt = $('#count');
+  hooks.push(t => { let n = 0; cards.forEach((_, i) => { if (t >= T0 + i * STEP + .2) n++; }); const s = `${n} / 9`; if (cnt.textContent !== s) cnt.textContent = s; });
+  A($('#wallet'), [{ translate: '0px 0px', rotate: '0deg' }, { translate: '0px -6px', rotate: '-2deg', offset: .25 }, { translate: '0px 0px', rotate: '1.5deg', offset: .5 }, { translate: '0px -4px', rotate: '-1deg', offset: .75 }, { translate: '0px 0px', rotate: '0deg' }], T0, STEP * 9 + .4, 'linear');
+  enter($('#count'), T0 + .1, { dx: 20, dy: 0, s: .8, d: .35, e: BACK });
+
+  // ---------- s1 · hook, pile, the washed card ----------
+  scene($('#s1'), -.05, 8.7);
+  A($('#wallet'), [{ scale: '1' }, { scale: '1.04', offset: .5 }, { scale: '1' }], .3, .5, OUT);
+  const caps = [['#c1', -.05, 4.4], ['#c2', 4.4, 6.5], ['#c3', 6.5, 0]];
+  caps.forEach(([s, a, b]) => { const c = $(s); if (a > 0) A(c, [{ opacity: 0, translate: '0px 16px', scale: '.97' }, { opacity: 1, translate: '0px 0px', scale: '1' }], a, .35, BACK); else A(c, [{ translate: '0px 8px' }, { translate: '0px 0px' }], 0, .5, OUT); if (b) A(c, [{ opacity: 1 }, { opacity: 0 }], b - .2, .2, 'linear'); });
+  A($('#count'), [{ scale: '1' }, { scale: '1.2', offset: .4 }, { scale: '1' }], T0 + 8 * STEP + .2, .4, OUT);
+  A($('#shade'), [{ opacity: 0 }, { opacity: 1 }], 6.5, .35, 'linear');
+  A($('#count'), [{ opacity: 1 }, { opacity: 0 }], 6.5, .25, 'linear');
+  A($('#yours'), [{ opacity: 0, translate: '0px 380px', scale: '.5', rotate: '-14deg' }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '-4deg' }], 6.55, .6, BACK);
+  A($('#yours'), [{ rotate: '-4deg' }, { rotate: '-2deg', offset: .5 }, { rotate: '-4deg' }], 7.3, 1.2, IO);
+
+  // ---------- s2 · the phone ----------
+  scene($('#s2'), 8.6, 11.6);
+  A($('#c4'), [{ opacity: 0, translate: '0px 16px' }, { opacity: 1, translate: '0px 0px' }], 8.65, .35, BACK);
+  A($('#phone'), [{ opacity: 0, translate: '0px 160px', rotate: '5deg' }, { opacity: 1, translate: '0px 0px', rotate: '0deg' }], 8.7, .6, OUT);
+  A($('#mine'), [{ opacity: 0, scale: '.85' }, { opacity: 1, scale: '1' }], 9.1, .45, BACK);
+  $$('#s2 .ghost').forEach((g, i) => enter(g, 9.3 + i * .1, { dy: 12, d: .35 }));
+  $$('#mine .p i.on').forEach((d, i) => A(d, [{ scale: '1' }, { scale: '1.3', offset: .4 }, { scale: '1' }], 9.7 + i * .08, .3, OUT));
+  enter($('#crisp'), 10.0, { dy: 20, s: .9, d: .4, e: BACK });
+
+  // ---------- s3 · cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 11.5, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)' }], 11.5, .6, IO);
+  stagger(words($('#cta1')), 11.8, .08, { dy: 36, d: .45, e: BACK });
+  enter($('#cta2'), 12.5, { dy: 16, d: .45 });
+  enter($('#brand'), 12.9, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.2, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 14.1, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 7.6 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

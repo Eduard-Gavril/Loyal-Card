@@ -75,7 +75,7 @@ Segnare `[x]` quando un tema è stato usato.
 **POV / meme**
 - [x] POV: clientul și-a uitat iar cardul de carton acasă (2026-10-16)
 - [x] POV: ai printat 500 de carduri și apoi ți-ai schimbat logo-ul (2026-10-23, Setări → URL Logo, planul Business)
-- [ ] Clientul cu 9 carduri de carton în portofel
+- [x] Clientul cu 9 carduri de carton în portofel (2026-10-30: 9 tessere generiche escono dal portafoglio, la tua è passata in lavatrice; poi "Cardurile Tale" nel telefono)
 - [ ] Când clientul întreabă „mai am ștampile?”
 - [ ] Când ștampila cu pixul e „ușor” falsificată
 
@@ -120,3 +120,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-27 (mar) | `2026-10-27-cum-obtin-cardul.html` | Domanda e risposta | Fumetto con la domanda, telefono in 4 passi (loyalcard.net, Alege magazinul tău, card creato in automatico, scansione +1 ștampilă), "Tu doar scanezi"; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-10-28 (mer) | `2026-10-28-profit-25-95.html` | Il dato | Slider "Clienți care revin" 0 → +5%, "Cât crește profitul?", grafico a barre +25% → +95% con fonte Reichheld/Bain in HBR 2014; 15 s + taglio 9,5 s | 12:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-10-29 (gio) | `2026-10-29-magazine-apropiere.html` | Una funzione | Mappa con il cliente e i pin, "Te găsesc clienții din cartier?", telefono con "Alege magazinul tău" → Se caută locația ta... → elenco con 0.3 km (EXEMPLU) → tap → Card nou creat; 15 s + taglio 9,5 s | 20:30 (15 s) / Reel di prova (9,5 s) |
+| 2026-10-30 (ven) | `2026-10-30-pov-9-carduri.html` | POV / meme | Tavolo di legno, portafoglio, 9 tessere di cartone (contatore 0/9 → 9/9), la tua "trecută prin mașina de spălat", poi "Cardurile Tale" sul telefono con 4/7 ștampile; 15 s + taglio 10 s | 18:00 (15 s) / Reel di prova (10 s) |

@@ -83,7 +83,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Carton vs telefon (usato il 2026-10-11 dentro l'offerta)
 - [x] Ștampila cu pixul vs scanarea QR (2026-10-17)
 - [x] Caietul cu clienți vs dashboard (2026-10-24, export Excel indicato come planul Business)
-- [ ] Costul tipăririi cardurilor vs 0€
+- [x] Costul tipăririi cardurilor vs 0€ (2026-10-31: due scontrini; voci di costo della carta con "?" perché non abbiamo prezzi reali di stampa, Starter 0€ con i suoi limiti)
 - [ ] „Cine sunt clienții mei fideli?” fără date vs cu date
 
 **L'offerta**
@@ -121,3 +121,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-28 (mer) | `2026-10-28-profit-25-95.html` | Il dato | Slider "Clienți care revin" 0 → +5%, "Cât crește profitul?", grafico a barre +25% → +95% con fonte Reichheld/Bain in HBR 2014; 15 s + taglio 9,5 s | 12:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-10-29 (gio) | `2026-10-29-magazine-apropiere.html` | Una funzione | Mappa con il cliente e i pin, "Te găsesc clienții din cartier?", telefono con "Alege magazinul tău" → Se caută locația ta... → elenco con 0.3 km (EXEMPLU) → tap → Card nou creat; 15 s + taglio 9,5 s | 20:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-10-30 (ven) | `2026-10-30-pov-9-carduri.html` | POV / meme | Tavolo di legno, portafoglio, 9 tessere di cartone (contatore 0/9 → 9/9), la tua "trecută prin mașina de spălat", poi "Cardurile Tale" sul telefono con 4/7 ștampile; 15 s + taglio 10 s | 18:00 (15 s) / Reel di prova (10 s) |
+| 2026-10-31 (sab) | `2026-10-31-carton-vs-0.html` | Prima e dopo | Due scontrini stampati riga per riga: "Carduri de carton" (Design, Tipărire, Ștampilă, Retipărire, Carduri pierdute = ?, TOTAL ???) vs "LoyalCard" (0, 0, 0, Starter 0€, timbro GRATUIT); 15 s + taglio 11 s | 10:30 (15 s) / Reel di prova (11 s) |

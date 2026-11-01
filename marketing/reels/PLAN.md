@@ -90,7 +90,10 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Începe GRATUIT: planul Starter (1 locație, 50 clienți activi/lună)
 - [x] ~~Gata în 2 minute~~ → "Programul tău de fidelitate în 4 pași" (2026-10-18): ne scrii → produse → regula de premiu → prima scanare
 - [x] Planul Business: reguli nelimitate + logo-ul tău (2026-10-25: €30/lună, €24/lună con pagamento annuale, elenco funzioni da PricingPage)
-- [ ] Gratuit pentru clienți, mereu
+- [x] Gratuit pentru clienți (2026-11-01: senza "mereu", il sito non promette "per sempre"; fonti faq.a1, faq.a2, features.step1 "fără înregistrare")
+- [ ] Ce primești gratis în Starter: 1 locație, 50 clienți activi/lună, 1 regulă, scanner QR de bază
+- [ ] Business la plata anuală: €24/lună (€288/an, –20%)
+- [ ] Planul Professional (€60/lună): 3 locații, premii pe mai multe niveluri; prima verificare che i premi multi-livello funzionino nell'app
 
 ## Come si produce un reel
 1. Copiare l'ultimo file `AAAA-MM-GG-*.html` di questa cartella (stesso motore di animazione) e cambiare le scene.
@@ -122,3 +125,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-29 (gio) | `2026-10-29-magazine-apropiere.html` | Una funzione | Mappa con il cliente e i pin, "Te găsesc clienții din cartier?", telefono con "Alege magazinul tău" → Se caută locația ta... → elenco con 0.3 km (EXEMPLU) → tap → Card nou creat; 15 s + taglio 9,5 s | 20:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-10-30 (ven) | `2026-10-30-pov-9-carduri.html` | POV / meme | Tavolo di legno, portafoglio, 9 tessere di cartone (contatore 0/9 → 9/9), la tua "trecută prin mașina de spălat", poi "Cardurile Tale" sul telefono con 4/7 ștampile; 15 s + taglio 10 s | 18:00 (15 s) / Reel di prova (10 s) |
 | 2026-10-31 (sab) | `2026-10-31-carton-vs-0.html` | Prima e dopo | Due scontrini stampati riga per riga: "Carduri de carton" (Design, Tipărire, Ștampilă, Retipărire, Carduri pierdute = ?, TOTAL ???) vs "LoyalCard" (0, 0, 0, Starter 0€, timbro GRATUIT); 15 s + taglio 11 s | 10:30 (15 s) / Reel di prova (11 s) |
+| 2026-11-01 (dom) | `2026-11-01-gratuit-clienti.html` | L'offerta | Cartellino del prezzo che oscilla "? lei" → "0 lei", tre righe a rullo 0 lei / 0 aplicații / 0 formulare, "Zero bariere pentru clienți", Starter 0€; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |

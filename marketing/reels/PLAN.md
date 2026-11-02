@@ -35,7 +35,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Cafenea: 6 cafele → a 7-a gratuită (2026-10-12)
 - [x] Frizerie / barbershop: 5 tunsori → a 6-a gratuită (2026-10-19, anche taglio corto da 10 s)
 - [x] Salon de înfrumusețare / unghii: 6 vizite → 20% reducere (2026-10-26, sconto percentuale = reward_type `percentage_discount`; anche taglio da 10 s)
-- [ ] Pizzerie: 8 pizza → o pizza gratuită
+- [x] Pizzerie: 8 pizza → o pizza gratuită (2026-11-02: la pizza sul telefono si riempie fetta per fetta, "Cumpără 8 → Primești 1"; anche taglio da 10 s)
 - [ ] Patiserie / brutărie: 10 produse → unul gratuit
 - [ ] Restaurant: 5 meniuri → desert gratuit (esempio del sito: "5 mese principale → desert GRATUIT sau 20% reducere")
 - [ ] Spălătorie auto: 5 spălări → a 6-a gratuită
@@ -126,3 +126,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-30 (ven) | `2026-10-30-pov-9-carduri.html` | POV / meme | Tavolo di legno, portafoglio, 9 tessere di cartone (contatore 0/9 → 9/9), la tua "trecută prin mașina de spălat", poi "Cardurile Tale" sul telefono con 4/7 ștampile; 15 s + taglio 10 s | 18:00 (15 s) / Reel di prova (10 s) |
 | 2026-10-31 (sab) | `2026-10-31-carton-vs-0.html` | Prima e dopo | Due scontrini stampati riga per riga: "Carduri de carton" (Design, Tipărire, Ștampilă, Retipărire, Carduri pierdute = ?, TOTAL ???) vs "LoyalCard" (0, 0, 0, Starter 0€, timbro GRATUIT); 15 s + taglio 11 s | 10:30 (15 s) / Reel di prova (11 s) |
 | 2026-11-01 (dom) | `2026-11-01-gratuit-clienti.html` | L'offerta | Cartellino del prezzo che oscilla "? lei" → "0 lei", tre righe a rullo 0 lei / 0 aplicații / 0 formulare, "Zero bariere pentru clienți", Starter 0€; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
+| 2026-11-02 (lun) | `2026-11-02-pizzerie.html` | Un settore al giorno | Pizzerie: tovaglia a quadri, "Pizza bună face și vecinul", 8 ordini riempiono le 8 fette sul telefono → Pizza gratuită, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |

@@ -7,7 +7,7 @@ import {
   Building2, Users, Activity, Gift, TrendingUp, Calendar,
   Search, Download, RefreshCw, Power, PowerOff,
   Award, Zap, BarChart3, Clock, CheckCircle, XCircle,
-  Settings, Bell, Plus, Eye
+  Settings, Bell, Plus, Eye, AlertTriangle
 } from 'lucide-react'
 
 interface GlobalStats {
@@ -27,11 +27,21 @@ interface TenantInfo {
   logo_url: string | null
   active: boolean
   plan?: string
+  approval_status?: string
+  deletion_scheduled_at?: string | null
   created_at: string
   total_clients: number
   total_scans: number
   total_rewards: number
   scans_today: number
+}
+
+interface PendingSignup {
+  tenant_id: string
+  name: string
+  slug: string
+  owner_email: string | null
+  requested_at: string
 }
 
 interface ActivityLog {
@@ -63,6 +73,9 @@ export default function SuperAdminDashboard() {
   const [showActivityLog, setShowActivityLog] = useState(false)
   const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([])
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards')
+  const [pending, setPending] = useState<PendingSignup[]>([])
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [busyTenantId, setBusyTenantId] = useState<string | null>(null)
 
   // Redirect if not super admin
   useEffect(() => {
@@ -76,8 +89,65 @@ export default function SuperAdminDashboard() {
       loadGlobalStats()
       loadTenants()
       loadRecentActivity()
+      loadPending(true)
     }
   }, [role])
+
+  // Notifications: businesses that signed up and wait for approval
+  const loadPending = async (openIfAny = false) => {
+    const { data, error: rpcError } = await supabase.rpc('list_pending_signups')
+    if (rpcError) return // function not installed yet, or not allowed: no notifications
+    const rows = (data || []) as PendingSignup[]
+    setPending(rows)
+    if (openIfAny && rows.length > 0) setShowNotifications(true)
+  }
+
+  const approveSignup = async (tenantId: string) => {
+    setBusyTenantId(tenantId)
+    try {
+      const { error: rpcError } = await supabase.rpc('approve_tenant', { p_tenant: tenantId })
+      if (rpcError) throw rpcError
+      await Promise.all([loadPending(), loadTenants(), loadGlobalStats()])
+    } catch (err: any) {
+      setError(err?.message || 'Failed to approve')
+    } finally {
+      setBusyTenantId(null)
+    }
+  }
+
+  const rejectSignup = async (tenantId: string, name: string) => {
+    if (!window.confirm(`Deny "${name}"? Everything it created (business and login) will be deleted.`)) return
+    setBusyTenantId(tenantId)
+    try {
+      const { error: rpcError } = await supabase.rpc('reject_tenant', { p_tenant: tenantId })
+      if (rpcError) throw rpcError
+      await Promise.all([loadPending(), loadTenants(), loadGlobalStats()])
+    } catch (err: any) {
+      setError(err?.message || 'Failed to deny')
+    } finally {
+      setBusyTenantId(null)
+    }
+  }
+
+  const extraBadges = (tenant: TenantInfo) => (
+    <>
+      {tenant.approval_status === 'pending' && (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 ml-2 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <Clock className="w-3 h-3" />
+          Pending approval
+        </span>
+      )}
+      {tenant.deletion_scheduled_at && (
+        <span
+          className="inline-flex items-center gap-1.5 px-3 py-1 ml-2 text-xs font-semibold rounded-full bg-red-500/20 text-red-300 border border-red-500/30"
+          title="The owner asked to delete this business"
+        >
+          <AlertTriangle className="w-3 h-3" />
+          Deleting on {new Date(tenant.deletion_scheduled_at).toLocaleDateString()}
+        </span>
+      )}
+    </>
+  )
 
   const loadRecentActivity = async () => {
     try {
@@ -342,6 +412,18 @@ export default function SuperAdminDashboard() {
                   <span className="text-sm font-medium">Activity</span>
                 </button>
                 <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative flex items-center gap-2 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 rounded-xl transition-all border border-amber-400/30"
+                >
+                  <Bell className="w-4 h-4" />
+                  <span className="text-sm font-medium hidden sm:inline">Notifications</span>
+                  {pending.length > 0 && (
+                    <span className="min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold">
+                      {pending.length}
+                    </span>
+                  )}
+                </button>
+                <button
                   onClick={refreshData}
                   disabled={loading}
                   className="p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-xl transition-all border border-purple-400/30 disabled:opacity-50"
@@ -368,6 +450,55 @@ export default function SuperAdminDashboard() {
                 <XCircle className="w-5 h-5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {showNotifications && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+            <div className="bg-amber-500/10 border border-amber-400/30 backdrop-blur-xl rounded-2xl p-5 shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-amber-300" />
+                  Notifications
+                </h2>
+                <span className="text-sm text-amber-200">{pending.length} waiting for approval</span>
+              </div>
+
+              {pending.length === 0 ? (
+                <p className="text-sm text-gray-300">No new business requests.</p>
+              ) : (
+                <div className="space-y-3">
+                  {pending.map((req) => (
+                    <div key={req.tenant_id} className="flex flex-col sm:flex-row sm:items-center gap-3 bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-white truncate">{req.name}</p>
+                        <p className="text-sm text-gray-400 truncate">
+                          /{req.slug}{req.owner_email ? ` · ${req.owner_email}` : ''} · {new Date(req.requested_at).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => approveSignup(req.tenant_id)}
+                          disabled={busyTenantId === req.tenant_id}
+                          className="px-4 py-2 bg-green-500/80 hover:bg-green-500 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => rejectSignup(req.tenant_id, req.name)}
+                          disabled={busyTenantId === req.tenant_id}
+                          className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-200 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Deny
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -622,6 +753,7 @@ export default function SuperAdminDashboard() {
                                 Inactive
                               </span>
                             )}
+                            {extraBadges(tenant)}
                           </div>
                         </div>
                       </div>
@@ -736,6 +868,7 @@ export default function SuperAdminDashboard() {
                               Inactive
                             </span>
                           )}
+                          {extraBadges(tenant)}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">

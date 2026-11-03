@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Linking } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '@/lib/supabase'
-import { useAdminStore } from '@/store'
+import { useAdminStore, useClientStore } from '@/store'
 import { colors, continuous } from '@/theme'
 import AmbientBackground from '@/components/AmbientBackground'
 import Button from '@/ui/Button'
@@ -11,9 +11,13 @@ import Field from '@/ui/Field'
 import PressableScale from '@/ui/PressableScale'
 import Txt from '@/ui/Txt'
 
+// Flip to true when business signup is open on the website (see frontend VITE_SIGNUP_OPEN)
+const SIGNUP_OPEN = false
+
 export default function AdminLoginScreen() {
   const router = useRouter()
   const { setAuth } = useAdminStore()
+  const { language } = useClientStore()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -107,6 +111,13 @@ export default function AdminLoginScreen() {
             </View>
           ) : null}
           <Button title="Accedi" loading={loading} onPress={handleLogin} style={{ marginTop: 6 }} />
+          {SIGNUP_OPEN && (
+            <Button
+              variant="plain"
+              title={language === 'it' ? 'Registra la tua attività sul sito' : language === 'ro' ? 'Înregistrează-ți afacerea pe site' : 'Register your business on the website'}
+              onPress={() => Linking.openURL('https://loyalcard.net/register')}
+            />
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

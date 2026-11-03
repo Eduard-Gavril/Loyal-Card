@@ -50,12 +50,24 @@ export default function AdminLogin() {
         .eq('active', true)
         .single()
       
-      const adminResult = await Promise.race([
+      let adminResult = await Promise.race([
         adminPromise,
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 10000)
         )
       ]) as any
+
+      // A new business that has just confirmed its email has no admin row yet: create the (hidden, pending) business now.
+      if ((adminResult.error || !adminResult.data) && authData.user.user_metadata?.business_slug) {
+        const { error: signupError } = await supabase.rpc('complete_business_signup')
+        if (signupError) throw signupError
+        adminResult = await supabase
+          .from('admins')
+          .select('tenant_id, role')
+          .eq('user_id', authData.user.id)
+          .eq('active', true)
+          .single()
+      }
       
       const { data: admin, error: adminError } = adminResult
 

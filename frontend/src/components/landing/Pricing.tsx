@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useL } from './shared'
 import { IosIcon, Squircle } from './ios'
+import { SIGNUP_OPEN } from '@/lib/features'
 
 /** Plans, billing toggle and WhatsApp add-on. Shared by the landing and the sector pages. */
 export default function Pricing() {
@@ -107,7 +108,7 @@ export default function Pricing() {
                     <li key={f}><i><IosIcon name="check" /></i>{f}</li>
                   ))}
                 </ul>
-                <button className={p.popular ? 'ap-btn' : 'ap-btn gl-btn-ghost'} onClick={() => go('/contact')}>{p.cta}</button>
+                <button className={p.popular ? 'ap-btn' : 'ap-btn gl-btn-ghost'} onClick={() => go(p.id === 'starter' && SIGNUP_OPEN ? '/register' : '/contact')}>{p.cta}</button>
               </article>
             )
           })}

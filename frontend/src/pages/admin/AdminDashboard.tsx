@@ -9,6 +9,7 @@ import { getTranslation } from '@/lib/i18n'
 import { getProductIconName } from '@/lib/emojiUtils'
 import AppIcon from '@/components/AppIcon'
 import { Inbox } from 'lucide-react'
+import TenantStatusBanner from '@/components/admin/TenantStatusBanner'
 import * as XLSX from 'xlsx'
 
 interface Stats {
@@ -301,6 +302,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </header>
+        <TenantStatusBanner />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {/* Quick Actions - Moved to top for better mobile UX */}

@@ -195,6 +195,18 @@ export const api = {
     return invokeEdgeFunction('manage-staff-admins', { action: 'delete', staff_admin_id: staffAdminId })
   },
 
+  // Owner only: schedules the deletion of the business in 14 days (cancellable)
+  async requestTenantDeletion(confirmName: string): Promise<{ scheduled_at: string }> {
+    const { data, error } = await supabase.rpc('request_tenant_deletion', { p_confirm_name: confirmName })
+    if (error) throw error
+    return data as { scheduled_at: string }
+  },
+
+  async cancelTenantDeletion(): Promise<void> {
+    const { error } = await supabase.rpc('cancel_tenant_deletion')
+    if (error) throw error
+  },
+
   async getProductCategories(tenantId: string): Promise<ProductCategory[]> {
     const { data, error } = await supabase
       .from('product_categories')

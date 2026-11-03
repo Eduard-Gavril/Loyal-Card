@@ -577,7 +577,7 @@ export const translations = {
       },
       retention: {
         title: '7. Data Retention',
-        text: 'Data is retained for the duration of service use and for 3 additional years after last access, then automatically deleted.'
+        text: 'Data is retained while you use the service. A customer account that has not been used for 10 months (no card opened or scanned) is deleted automatically together with its cards, and a card that has not been scanned for 3 months is removed. You can delete your account at any time. When a business deletes its profile, its data and the login accounts of its owner and staff are deleted after a 14-day grace period; customer accounts are not affected.'
       },
       rights: {
         title: '8. Your Rights (GDPR)',
@@ -1302,7 +1302,7 @@ export const translations = {
       },
       retention: {
         title: '7. Păstrarea Datelor',
-        text: 'Datele sunt păstrate pe durata utilizării serviciului și pentru 3 ani suplimentari după ultimul acces, apoi sunt șterse automat.'
+        text: 'Datele sunt păstrate cât timp folosești serviciul. Un cont de client nefolosit timp de 10 luni (niciun card deschis sau scanat) este șters automat împreună cu cardurile sale, iar un card nescanat timp de 3 luni este eliminat. Îți poți șterge contul oricând. Când o afacere își șterge profilul, datele ei și conturile de acces ale proprietarului și ale personalului sunt șterse după o perioadă de grație de 14 zile; conturile clienților nu sunt afectate.'
       },
       rights: {
         title: '8. Drepturile Tale (GDPR)',
@@ -2029,7 +2029,7 @@ export const translations = {
       },
       retention: {
         title: '7. Conservazione Dati',
-        text: 'I dati sono conservati per la durata dell\'utilizzo del servizio e per 3 anni aggiuntivi dopo l\'ultimo accesso, poi vengono eliminati automaticamente.'
+        text: 'I dati sono conservati finché usi il servizio. Un account cliente non utilizzato per 10 mesi (nessuna carta aperta o scansionata) viene eliminato automaticamente insieme alle sue carte, e una carta non scansionata da 3 mesi viene rimossa. Puoi eliminare il tuo account in qualsiasi momento. Quando un\'attività elimina il proprio profilo, i suoi dati e gli account di accesso del titolare e dello staff vengono eliminati dopo un periodo di grazia di 14 giorni; gli account dei clienti non sono interessati.'
       },
       rights: {
         title: '8. I Tuoi Diritti (GDPR)',

@@ -87,6 +87,42 @@ export default function AdminSettingsScreen() {
   const [sendingBroadcast, setSendingBroadcast] = useState(false)
   const [broadcastError, setBroadcastError] = useState('')
 
+  // Business deletion — owner only, 14 day grace period enforced by the database
+  const [deletionScheduledAt, setDeletionScheduledAt] = useState<string | null>(null)
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleteName, setDeleteName] = useState('')
+  const [deleteBusy, setDeleteBusy] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+
+  async function handleRequestDeletion() {
+    setDeleteBusy(true)
+    setDeleteError('')
+    try {
+      const res = await api.requestTenantDeletion(deleteName)
+      setDeletionScheduledAt(res?.scheduled_at ?? null)
+      setShowDelete(false)
+      setDeleteName('')
+    } catch (e: any) {
+      const msg = String(e?.message ?? '')
+      setDeleteError(msg.includes('NAME_MISMATCH') ? a.deleteBizMismatch : msg || a.errorSaveMsg)
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
+
+  async function handleCancelDeletion() {
+    setDeleteBusy(true)
+    setDeleteError('')
+    try {
+      await api.cancelTenantDeletion()
+      setDeletionScheduledAt(null)
+    } catch (e: any) {
+      setDeleteError(e?.message ?? a.errorSaveMsg)
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
+
   useEffect(() => { loadSettings(); loadStaffList() }, [])
 
   async function handleSendBroadcast() {
@@ -161,13 +197,14 @@ export default function AdminSettingsScreen() {
     try {
       const { data, error } = await supabase
         .from('tenants')
-        .select('name, logo_url, brand_color, metadata, active')
+        .select('name, logo_url, brand_color, metadata, active, deletion_scheduled_at')
         .eq('id', tenantId)
         .single()
       if (error) throw error
       if (data) {
         const meta = (data.metadata as Record<string, any>) ?? {}
         setRawMetadata(meta)
+        setDeletionScheduledAt((data as any).deletion_scheduled_at ?? null)
         const loaded: TenantSettings = {
           name: data.name ?? '',
           logo_url: data.logo_url ?? '',
@@ -369,6 +406,42 @@ export default function AdminSettingsScreen() {
                   disabled={!broadcastTitle.trim() || !broadcastBody.trim()}
                   onPress={handleSendBroadcast}
                 />
+              </FormGroup>
+
+              {/* Delete business */}
+              <FormGroup header={a.deleteBizTitle} footer={deletionScheduledAt ? undefined : a.deleteBizDesc}>
+                {deletionScheduledAt ? (
+                  <>
+                    <Txt v="body">{a.deleteBizScheduled(new Date(deletionScheduledAt).toLocaleDateString())}</Txt>
+                    <Button variant="tinted" icon="arrow-undo-outline" title={a.deleteBizCancelBtn} loading={deleteBusy} onPress={handleCancelDeletion} />
+                  </>
+                ) : !showDelete ? (
+                  <Button variant="destructive" icon="trash-outline" title={a.deleteBizBtn} onPress={() => setShowDelete(true)} />
+                ) : (
+                  <>
+                    <Field
+                      label={a.deleteBizConfirmLabel(form.name)}
+                      value={deleteName}
+                      onChangeText={setDeleteName}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                    <Button
+                      variant="destructive"
+                      icon="trash-outline"
+                      title={a.deleteBizConfirmBtn}
+                      loading={deleteBusy}
+                      disabled={!deleteName.trim()}
+                      onPress={handleRequestDeletion}
+                    />
+                    <Button variant="plain" title={t.dashboard.cancel} onPress={() => { setShowDelete(false); setDeleteName(''); setDeleteError('') }} />
+                  </>
+                )}
+                {deleteError ? (
+                  <Txt v="footnote" tone="danger">
+                    {deleteError}
+                  </Txt>
+                ) : null}
               </FormGroup>
             </>
           )}

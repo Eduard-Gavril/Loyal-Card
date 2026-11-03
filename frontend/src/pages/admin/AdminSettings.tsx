@@ -5,7 +5,7 @@ import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/admin/AdminBackdrop'
 import PlanCard from '@/components/admin/PlanCard'
 import { usePlanUsage, isPlanError, planErrorText } from '@/lib/plan'
-import { Settings, Users, QrCode, Trash2 } from 'lucide-react'
+import { Settings, Users, QrCode, Trash2, AlertTriangle } from 'lucide-react'
 
 interface StaffAdmin {
   id: string
@@ -49,6 +49,46 @@ export default function AdminSettings() {
   const [staffListLoading, setStaffListLoading] = useState(false)
   const [deletingStaffId, setDeletingStaffId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+
+  // Business deletion (owner only, 14 day grace period handled by the database)
+  const [deletionScheduledAt, setDeletionScheduledAt] = useState<string | null>(null)
+  const [deleteName, setDeleteName] = useState('')
+  const [deleteBusy, setDeleteBusy] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [showDelete, setShowDelete] = useState(false)
+
+  const handleRequestDeletion = async () => {
+    setDeleteBusy(true)
+    setDeleteError('')
+    try {
+      const res: any = await api.requestTenantDeletion(deleteName)
+      setDeletionScheduledAt(res?.scheduled_at ?? null)
+      setShowDelete(false)
+      setDeleteName('')
+    } catch (err: any) {
+      const msg = String(err?.message || '')
+      setDeleteError(
+        msg.includes('NAME_MISMATCH')
+          ? (language === 'ro' ? 'Numele nu corespunde.' : language === 'it' ? 'Il nome non corrisponde.' : 'The name does not match.')
+          : msg || 'Error'
+      )
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
+
+  const handleCancelDeletion = async () => {
+    setDeleteBusy(true)
+    setDeleteError('')
+    try {
+      await api.cancelTenantDeletion()
+      setDeletionScheduledAt(null)
+    } catch (err: any) {
+      setDeleteError(err?.message || 'Error')
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
 
   const loadStaffList = async () => {
     if (!isOwner) return
@@ -113,6 +153,7 @@ export default function AdminSettings() {
 
       const data = result?.data
       if (data) {
+        setDeletionScheduledAt(data.deletion_scheduled_at || null)
         setSettings({
           name: data.name || '',
           logo_url: data.logo_url || '',
@@ -473,6 +514,94 @@ export default function AdminSettings() {
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Delete business (owner only) */}
+              {isOwner && (
+                <div className="bg-red-500/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-red-500/30">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-6 h-6 sm:w-7 sm:h-7 text-red-400" />
+                    {language === 'ro' ? 'Șterge afacerea' : language === 'it' ? 'Elimina attività' : 'Delete business'}
+                  </h2>
+
+                  {deletionScheduledAt ? (
+                    <>
+                      <p className="text-sm text-red-200 mb-4">
+                        {language === 'ro'
+                          ? `Afacerea va fi ștearsă definitiv pe ${new Date(deletionScheduledAt).toLocaleDateString('ro-RO')}. Până atunci poți anula.`
+                          : language === 'it'
+                          ? `L'attività verrà eliminata definitivamente il ${new Date(deletionScheduledAt).toLocaleDateString('it-IT')}. Fino ad allora puoi annullare.`
+                          : `Your business will be permanently deleted on ${new Date(deletionScheduledAt).toLocaleDateString('en-GB')}. You can cancel until then.`}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleCancelDeletion}
+                        disabled={deleteBusy}
+                        className="w-full py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl transition-all duration-300 disabled:opacity-50"
+                      >
+                        {language === 'ro' ? 'Anulează ștergerea' : language === 'it' ? 'Annulla eliminazione' : 'Cancel deletion'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-gray-300 mb-4">
+                        {language === 'ro'
+                          ? 'Se șterg afacerea, sediile, produsele, recompensele, cardurile clienților pentru această afacere și conturile de acces ale tale și ale personalului. Conturile clienților rămân. Ai 14 zile în care poți anula.'
+                          : language === 'it'
+                          ? 'Vengono eliminati l\'attività, le sedi, i prodotti, i premi, le carte dei clienti di questa attività e gli account di accesso tuo e del personale. Gli account dei clienti restano. Hai 14 giorni di tempo per annullare.'
+                          : 'This deletes the business, its stores, products, rewards, the customer cards for this business and the login accounts of you and your staff. Customer accounts are kept. You have 14 days to cancel.'}
+                      </p>
+                      {!showDelete ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowDelete(true)}
+                          className="w-full py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-200 font-semibold rounded-xl transition-all duration-300"
+                        >
+                          {language === 'ro' ? 'Șterge afacerea' : language === 'it' ? 'Elimina attività' : 'Delete business'}
+                        </button>
+                      ) : (
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-300">
+                            {language === 'ro'
+                              ? `Scrie numele afacerii pentru a confirma: ${settings.name}`
+                              : language === 'it'
+                              ? `Scrivi il nome dell'attività per confermare: ${settings.name}`
+                              : `Type the business name to confirm: ${settings.name}`}
+                          </label>
+                          <input
+                            type="text"
+                            value={deleteName}
+                            onChange={(e) => setDeleteName(e.target.value)}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-red-400 focus:outline-none transition-colors"
+                          />
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={handleRequestDeletion}
+                              disabled={deleteBusy || deleteName.trim().length === 0}
+                              className="flex-1 py-3 bg-red-500/80 hover:bg-red-500 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {language === 'ro' ? 'Confirmă ștergerea' : language === 'it' ? 'Conferma eliminazione' : 'Confirm deletion'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setShowDelete(false); setDeleteName(''); setDeleteError('') }}
+                              className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors"
+                            >
+                              {language === 'ro' ? 'Anulează' : language === 'it' ? 'Annulla' : 'Cancel'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {deleteError && (
+                    <div className="mt-3 bg-red-500/20 border border-red-500/50 rounded-xl px-4 py-3 text-red-300 text-sm">
+                      {deleteError}
+                    </div>
+                  )}
                 </div>
               )}
 

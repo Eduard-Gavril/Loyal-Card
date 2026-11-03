@@ -5,6 +5,7 @@ import { sectorForPath, sectors } from '@/lib/sectors'
 import { useClientStore } from '@/store'
 import { useCopy, useL } from './shared'
 import { IosIcon, Squircle, type IconName } from './ios'
+import { SIGNUP_OPEN } from '@/lib/features'
 
 const LANGS = [
   ['it', 'IT'],
@@ -82,6 +83,7 @@ export default function GlassNav({ links: custom, home = '#top' }: { links?: Nav
           {links.map((l) => (
             <a key={l.href} href={l.href}>{l.label}</a>
           ))}
+          {SIGNUP_OPEN && <a href="/register" onClick={(e) => { e.preventDefault(); goTo('/register') }}>{L('Crea la tua attività', 'Create your business', 'Creează-ți afacerea')}</a>}
         </nav>
 
         <div className="gn-right">
@@ -123,6 +125,15 @@ export default function GlassNav({ links: custom, home = '#top' }: { links?: Nav
             </ul>
 
             <ul className="gn-list">
+              {SIGNUP_OPEN && (
+                <li>
+                  <button onClick={() => goTo('/register')}>
+                    <Squircle color="linear-gradient(160deg,#ffd166,#f5a623)" size={34}><IosIcon name="plus" /></Squircle>
+                    <span>{L('Crea la tua attività', 'Create your business', 'Creează-ți afacerea')}</span>
+                    <IosIcon name="chev" />
+                  </button>
+                </li>
+              )}
               <li>
                 <button onClick={() => goTo('/admin/login')}>
                   <Squircle color="linear-gradient(160deg,#ffc447,#e5811a)" size={34}><IosIcon name="store" /></Squircle>

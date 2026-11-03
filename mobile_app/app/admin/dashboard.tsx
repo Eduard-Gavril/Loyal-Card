@@ -11,6 +11,7 @@ import { ListGroup, ListRow } from '@/ui/List'
 import Button from '@/ui/Button'
 import PressableScale from '@/ui/PressableScale'
 import AccountInfo from '@/components/AccountInfo'
+import TenantStatusNotice from '@/components/TenantStatusNotice'
 import Txt from '@/ui/Txt'
 
 interface Stats {
@@ -165,6 +166,7 @@ export default function AdminDashboardScreen() {
       />
       <ScreenScroll title={a.title} bottomPad={40}>
         <AccountInfo />
+        <TenantStatusNotice />
 
         {/* One filled button: the thing an admin does most */}
         <Button title={a.scanCard} icon="qr-code-outline" onPress={() => router.push('/admin/scanner')} style={{ marginBottom: 24 }} />

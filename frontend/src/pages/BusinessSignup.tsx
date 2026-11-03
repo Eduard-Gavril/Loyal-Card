@@ -199,7 +199,9 @@ export default function BusinessSignup() {
           <p>{L.done}</p>
         </header>
         <div className="cs-glass cs-formcard">
-          <Link to="/admin/login" className="cs-btn main">{L.login}</Link>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/admin/login" className="cs-btn main">{L.login}</Link>
+          </div>
         </div>
       </ClientShell>
     )

@@ -1,6 +1,6 @@
 import ClientShell from '@/components/client/ClientShell'
 import { IosIcon } from '@/components/landing/ios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore, useClientStore } from '@/store'
@@ -15,6 +15,34 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // A new business arrives here from the confirmation email already signed in: create the (hidden, pending) business now.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (cancelled || !session?.user.user_metadata?.business_slug) return
+      setLoading(true)
+      try {
+        const { error: signupError } = await supabase.rpc('complete_business_signup')
+        if (signupError) throw signupError
+        const { data: admin } = await supabase
+          .from('admins')
+          .select('tenant_id, role')
+          .eq('user_id', session.user.id)
+          .eq('active', true)
+          .single()
+        if (cancelled || !admin) return
+        setAuth(session.user, session, admin.tenant_id, admin.role)
+        navigate('/admin/dashboard')
+      } catch (err: any) {
+        if (!cancelled) setError(err?.message || 'Signup failed')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

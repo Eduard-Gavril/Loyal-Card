@@ -48,7 +48,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Costă ceva? (2026-10-13)
 - [x] Trebuie să descarc o aplicație? (2026-10-20)
 - [x] Cum îmi obțin cardul de fidelitate? (2026-10-27: flusso reale loyalcard.net → "Alege magazinul tău" → card creato in automatico → scansione; la risposta del sito `faq.a3` dice che il card si crea alla scansione, nel codice si crea quando il cliente apre la pagina del negozio)
-- [ ] Datele mele sunt în siguranță?
+- [x] Datele mele sunt în siguranță? (2026-11-03: solo fatti verificati: card senza registrazione, telefono facoltativo per il recupero, "Șterge contul meu" con conferma STERG, "nu vindem datele" da faq.a4; NON usati "conformi GDPR" e "criptate" perché non verificabili dal codice)
 - [ ] Ce se întâmplă dacă îmi schimb telefonul?
 - [ ] Pot să-l folosesc la orice magazin?
 - [ ] Cum funcționează premiile?
@@ -127,3 +127,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-10-31 (sab) | `2026-10-31-carton-vs-0.html` | Prima e dopo | Due scontrini stampati riga per riga: "Carduri de carton" (Design, Tipărire, Ștampilă, Retipărire, Carduri pierdute = ?, TOTAL ???) vs "LoyalCard" (0, 0, 0, Starter 0€, timbro GRATUIT); 15 s + taglio 11 s | 10:30 (15 s) / Reel di prova (11 s) |
 | 2026-11-01 (dom) | `2026-11-01-gratuit-clienti.html` | L'offerta | Cartellino del prezzo che oscilla "? lei" → "0 lei", tre righe a rullo 0 lei / 0 aplicații / 0 formulare, "Zero bariere pentru clienți", Starter 0€; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-02 (lun) | `2026-11-02-pizzerie.html` | Un settore al giorno | Pizzerie: tovaglia a quadri, "Pizza bună face și vecinul", 8 ordini riempiono le 8 fette sul telefono → Pizza gratuită, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
+| 2026-11-03 (mar) | `2026-11-03-datele-sigure.html` | Domanda e risposta | Fumetto "Datele mele sunt în siguranță?" + scudo, modulo "Card nou" con Nume/Email/Parolă = NU e Telefon OPȚIONAL, poi "Șterge contul meu" → STERG → "Toate datele tale au fost șterse."; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |

@@ -1,0 +1,270 @@
+<title>Datele sunt în siguranță?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Domanda e risposta": faq.q4 "Datele mele sunt în siguranță?". Only facts checked in the code:
+   features.step1 "Generare instant, fără înregistrare" (generate-client-id makes an anonymous client);
+   protection.description: the phone number is optional, used to recover cards;
+   userDashboard: "Șterge contul meu" → "Scrie STERG pentru a confirma" → "Șterge definitiv" → "Toate datele tale au fost șterse."
+   faq.a4: "nu vindem niciodată datele tale". "GDPR" and "criptate" from a4 are not shown (not verifiable from the code).
+   Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --navy: #0F1E3D; --navy-2: #172B52; --teal: #14B8A6; --teal-2: #CCFBF1; --ink: #0F1E3D; --ink-2: #5B6782; --red: #E5484D; --red-2: #FDE2E3; --amber: #F5B544; --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --white: #FFFFFF;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--navy); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(15, 30, 61, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--navy); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--navy); color: var(--white); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--teal) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--teal); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(15, 30, 61, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background:
+  radial-gradient(600px 520px at 80% 18%, rgba(20, 184, 166, .22), transparent 70%),
+  radial-gradient(600px 520px at 10% 90%, rgba(124, 58, 237, .25), transparent 70%),
+  linear-gradient(180deg, var(--navy-2), var(--navy)); }
+#hex { position: absolute; inset: 0; opacity: .07; background-image: radial-gradient(circle at 1px 1px, #fff 1.4px, transparent 1.6px); background-size: 28px 28px; }
+.kick { font-family: var(--f-mono); font-size: 18px; font-weight: 500; letter-spacing: .16em; color: var(--teal); white-space: nowrap; }
+#shield { position: absolute; left: 470px; top: 690px; width: 190px; height: 220px; }
+#shield svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* s1 */
+#k1 { position: absolute; left: 56px; top: 236px; }
+#q { position: absolute; left: 56px; top: 286px; width: 580px; padding: 30px 34px; border-radius: 40px 40px 40px 10px; background: var(--white); color: var(--ink); box-shadow: 0 22px 50px rgba(0, 0, 0, .3); font-size: 60px; font-weight: 900; letter-spacing: -.04em; line-height: 1.02; box-sizing: border-box; }
+#r { position: absolute; right: 80px; top: 600px; padding: 22px 28px; border-radius: 34px 34px 10px 34px; background: var(--teal); color: var(--navy); font-size: 34px; font-weight: 800; letter-spacing: -.02em; white-space: nowrap; box-shadow: 0 18px 36px rgba(20, 184, 166, .3); }
+
+/* s2: the form that asks for (almost) nothing */
+.ttl { position: absolute; left: 56px; top: 186px; width: 608px; font-size: 48px; font-weight: 900; letter-spacing: -.04em; line-height: 1.04; }
+.ttl em { font-style: normal; color: var(--teal); }
+#form { position: absolute; left: 56px; top: 310px; width: 608px; border-radius: 32px; background: var(--white); color: var(--ink); padding: 24px 26px 18px; box-sizing: border-box; box-shadow: 0 24px 50px rgba(0, 0, 0, .3); }
+#form .fh { font-family: var(--f-mono); font-size: 15px; letter-spacing: .14em; color: var(--ink-2); }
+.fr { position: relative; display: flex; align-items: center; gap: 14px; height: 86px; border-bottom: 1.5px solid #E6EAF2; }
+.fr:last-child { border-bottom: 0; }
+.fr .lb { width: 120px; font-size: 24px; font-weight: 800; }
+.fr .in { flex: 1; height: 50px; border-radius: 14px; background: #F2F5FA; border: 1.5px solid #DCE3EE; position: relative; }
+.fr .in .st { position: absolute; left: 14px; right: 14px; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px; background: var(--red); transform-origin: 0 50%; }
+.fr .tag { flex: none; height: 40px; padding: 0 14px; border-radius: 12px; display: grid; place-items: center; font-size: 18px; font-weight: 900; letter-spacing: .04em; }
+.fr .no { background: var(--red-2); color: var(--red); }
+.fr .opt { background: #FEF3C7; color: #92400E; }
+.fr .note { position: absolute; left: 134px; bottom: 4px; font-size: 14px; font-weight: 700; color: var(--ink-2); }
+#ok { position: absolute; left: 56px; top: 780px; width: 608px; height: 96px; border-radius: 26px; background: var(--teal); color: var(--navy); display: flex; align-items: center; gap: 16px; padding: 0 24px; box-sizing: border-box; font-size: 28px; font-weight: 900; letter-spacing: -.02em; }
+#ok i { flex: none; width: 50px; height: 50px; border-radius: 50%; background: var(--navy); color: var(--teal); display: grid; place-items: center; font-style: normal; font-size: 26px; }
+
+/* s3: delete the account */
+#panel { position: absolute; left: 56px; top: 330px; width: 608px; height: 400px; border-radius: 32px; background: var(--navy-2); border: 1.5px solid rgba(255, 255, 255, .14); box-shadow: 0 24px 50px rgba(0, 0, 0, .3); overflow: hidden; }
+#del { position: absolute; left: 26px; right: 26px; top: 28px; height: 104px; border-radius: 22px; background: rgba(229, 72, 77, .12); border: 1.5px solid rgba(229, 72, 77, .45); padding: 18px 22px; box-sizing: border-box; }
+#del .a { color: #FCA5A5; font-size: 28px; font-weight: 900; letter-spacing: -.02em; }
+#del .b { color: rgba(252, 165, 165, .7); font-size: 18px; font-weight: 600; margin-top: 4px; }
+#conf { position: absolute; left: 26px; right: 26px; top: 156px; }
+#conf .p { font-size: 20px; font-weight: 700; color: rgba(255, 255, 255, .8); }
+#conf .box { margin-top: 10px; height: 64px; border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1.5px solid rgba(255, 255, 255, .25); display: flex; align-items: center; padding: 0 18px; font-family: var(--f-mono); font-size: 30px; letter-spacing: .12em; }
+#caret { display: inline-block; width: 3px; height: 30px; background: var(--white); margin-left: 3px; }
+#btn { position: absolute; left: 26px; right: 26px; top: 290px; height: 72px; border-radius: 20px; background: var(--red); display: grid; place-items: center; font-size: 26px; font-weight: 900; }
+#done { position: absolute; inset: 0; background: var(--navy-2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 0 40px; }
+#done .c { width: 110px; height: 110px; border-radius: 50%; background: var(--teal); color: var(--navy); display: grid; place-items: center; font-size: 60px; font-weight: 900; }
+#done .m { font-size: 34px; font-weight: 900; letter-spacing: -.02em; line-height: 1.15; }
+#tap { position: absolute; left: 280px; top: 310px; width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 255, 255, .3); border: 3px solid var(--white); box-sizing: border-box; }
+#sell { position: absolute; left: 56px; top: 764px; width: 608px; padding: 20px 24px; box-sizing: border-box; border-radius: 22px; background: rgba(255, 255, 255, .08); border: 1.5px solid rgba(20, 184, 166, .5); font-size: 26px; font-weight: 800; line-height: 1.25; }
+#sell b { color: var(--teal); }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 68px; line-height: 1; letter-spacing: -.045em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · marți · 15 s · Întrebări frecvente</div>
+    <h1>Datele sunt în siguranță?</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: cardul LoyalCard nu cere nume, email sau parolă, telefonul e opțional, iar clientul își poate șterge contul oricând">
+      <div id="stage">
+        <div id="bg"></div><div id="hex"></div>
+
+        <!-- s1: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="kick" id="k1">CLIENȚII TĂI ÎNTREABĂ:</div>
+          <div id="q">„Datele mele sunt în siguranță?”</div>
+          <div id="r">Uite ce date cere cardul ↓</div>
+          <div id="shield"><svg viewBox="0 0 190 220"><path d="M95 8L172 38v66c0 52-34 90-77 108C52 194 18 156 18 104V38z" fill="rgba(20,184,166,.15)" stroke="#14B8A6" stroke-width="6" stroke-linejoin="round"/><path id="shTick" pathLength="1" d="M58 112l26 26 50-56" fill="none" stroke="#14B8A6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1"/></svg></div>
+        </div>
+
+        <!-- s2: what the card asks for -->
+        <div class="scene" id="s2">
+          <div class="ttl" id="t2">Pentru card, clientul <em>nu completează nimic.</em></div>
+          <div id="form">
+            <div class="fh">CARD NOU</div>
+            <div class="fr" id="f1"><div class="lb">Nume</div><div class="in"><span class="st"></span></div><div class="tag no">NU</div></div>
+            <div class="fr" id="f2"><div class="lb">Email</div><div class="in"><span class="st"></span></div><div class="tag no">NU</div></div>
+            <div class="fr" id="f3"><div class="lb">Parolă</div><div class="in"><span class="st"></span></div><div class="tag no">NU</div></div>
+            <div class="fr" id="f4"><div class="lb">Telefon</div><div class="in"></div><div class="tag opt">OPȚIONAL</div><div class="note">doar ca să-și recupereze cardurile</div></div>
+          </div>
+          <div id="ok"><i>✓</i>Card generat instant, fără înregistrare</div>
+        </div>
+
+        <!-- s3: deleting the account -->
+        <div class="scene" id="s3">
+          <div class="ttl" id="t3">Vrea să plece? <em>Își șterge contul singur.</em></div>
+          <div id="panel">
+            <div id="del"><div class="a">Șterge contul meu</div><div class="b">Elimină definitiv toate datele tale</div></div>
+            <div id="conf"><div class="p">Scrie STERG pentru a confirma</div><div class="box"><span id="typed"></span><span id="caret"></span></div></div>
+            <div id="btn">Șterge definitiv</div>
+            <div id="tap"></div>
+            <div id="done"><div class="c">✓</div><div class="m">Toate datele tale au fost șterse.</div></div>
+          </div>
+          <div id="sell">Și promisiunea noastră: <b>nu vindem niciodată datele clienților.</b></div>
+        </div>
+
+        <!-- s4: cta -->
+        <div class="scene" id="s4">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:270px">
+            <div id="cta1">Un card care cere <em>cât mai puțin.</em></div>
+            <div id="cta2">Fără formulare pentru clienții tăi. Începi gratuit cu planul Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  A($('#bg'), [{ translate: '0px 0px' }, { translate: '-50px 40px' }], 0, D, 'linear');
+
+  // ---------- s1 · the question (on screen at frame 0) ----------
+  scene($('#s1'), -.05, 3.0);
+  A($('#q'), [{ translate: '0px 16px' }, { translate: '0px 0px' }], 0, .7, OUT);
+  A($('#shield'), [{ opacity: 0, scale: '.6', rotate: '-10deg' }, { opacity: 1, scale: '1', rotate: '0deg' }], .3, .6, BACK);
+  A($('#shTick'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], .9, .5, IO);
+  A($('#r'), [{ opacity: 0, scale: '.6', translate: '20px 10px' }, { opacity: 1, scale: '1', translate: '0px 0px' }], 1.3, .45, BACK);
+
+  // ---------- s2 · the form asks for nothing ----------
+  scene($('#s2'), 2.9, 7.4);
+  stagger(words($('#t2')), 2.95, .06, { dy: 28, d: .4, e: BACK });
+  enter($('#form'), 3.3, { dy: 40, s: .96, d: .5 });
+  ['#f1', '#f2', '#f3'].forEach((s, i) => {
+    const r = $(s), t0 = 4.0 + i * .45;
+    A($('.st', r), [{ scale: '0 1' }, { scale: '1 1' }], t0, .3, IO);
+    A($('.tag', r), [{ opacity: 0, scale: '1.8', rotate: '-12deg' }, { opacity: 1, scale: '1', rotate: '0deg' }], t0 + .15, .3, IN);
+  });
+  A($('#f4 .tag'), [{ opacity: 0, scale: '1.8' }, { opacity: 1, scale: '1' }], 5.45, .3, IN);
+  enter($('#f4 .note'), 5.6, { dy: 6, d: .3 });
+  enter($('#ok'), 6.0, { dy: 24, s: .95, d: .45, e: BACK });
+
+  // ---------- s3 · the client deletes the account ----------
+  scene($('#s3'), 7.3, 11.4);
+  stagger(words($('#t3')), 7.35, .07, { dy: 28, d: .4, e: BACK });
+  enter($('#panel'), 7.6, { dy: 40, s: .96, d: .5 });
+  const typed = $('#typed');
+  hooks.push(t => { const n = Math.round(5 * Math.max(0, Math.min(1, (t - 8.3) / .6))); const s = 'STERG'.slice(0, n); if (typed.textContent !== s) typed.textContent = s; });
+  A($('#tap'), [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '1', offset: .4 }, { opacity: 0, scale: '1.6' }], 9.1, .45, 'ease-out');
+  A($('#btn'), [{ scale: '1' }, { scale: '.95', offset: .4 }, { scale: '1' }], 9.15, .3, IO);
+  A($('#done'), [{ opacity: 0 }, { opacity: 1 }], 9.45, .3, 'linear');
+  A($('#done .c'), [{ scale: '0' }, { scale: '1' }], 9.5, .4, BACK);
+  enter($('#sell'), 9.9, { dy: 20, d: .45 });
+
+  // ---------- s4 · cta ----------
+  A($('#s4'), [{ opacity: 0 }, { opacity: 1 }], 11.3, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(95% at 50% 50%)' }], 11.3, .7, IO);
+  stagger(words($('#cta1')), 11.6, .09, { dy: 36, d: .45, e: BACK });
+  enter($('#cta2'), 12.4, { dy: 16, d: .45 });
+  enter($('#brand'), 12.8, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.1, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 14.0, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 6.8 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

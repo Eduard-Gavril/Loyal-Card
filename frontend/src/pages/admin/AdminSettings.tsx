@@ -38,7 +38,7 @@ const BUSINESS_TYPES: { id: string; it: string; ro: string; en: string }[] = [
 
 export default function AdminSettings() {
   const navigate = useNavigate()
-  const { tenantId, role } = useAuthStore()
+  const { tenantId, role, clearAuth } = useAuthStore()
   const { language } = useClientStore()
   const isOwner = role === 'owner'
   const { usage: plan } = usePlanUsage(tenantId)
@@ -81,6 +81,8 @@ export default function AdminSettings() {
   const [deleteBusy, setDeleteBusy] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [showDelete, setShowDelete] = useState(false)
+  const [showForce, setShowForce] = useState(false)
+  const [forcePassword, setForcePassword] = useState('')
 
   const handleRequestDeletion = async () => {
     setDeleteBusy(true)
@@ -110,6 +112,27 @@ export default function AdminSettings() {
       setDeletionScheduledAt(null)
     } catch (err: any) {
       setDeleteError(err?.message || 'Error')
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
+
+  // Skips the grace period: deletes everything now and sends the owner back to the landing page
+  const handleForceDeletion = async () => {
+    setDeleteBusy(true)
+    setDeleteError('')
+    try {
+      await api.deleteTenantNow(forcePassword)
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+      clearAuth()
+      navigate('/')
+    } catch (err: any) {
+      const msg = String(err?.message || '')
+      setDeleteError(
+        msg.includes('WRONG_PASSWORD')
+          ? (language === 'ro' ? 'Parolă greșită.' : language === 'it' ? 'Password errata.' : 'Wrong password.')
+          : msg || 'Error'
+      )
     } finally {
       setDeleteBusy(false)
     }
@@ -765,10 +788,10 @@ export default function AdminSettings() {
                     <>
                       <p className="text-sm text-red-200 mb-4">
                         {language === 'ro'
-                          ? `Afacerea va fi ștearsă definitiv pe ${new Date(deletionScheduledAt).toLocaleDateString('ro-RO')}. Până atunci poți anula.`
+                          ? `Afacerea va fi ștearsă definitiv pe ${new Date(deletionScheduledAt).toLocaleDateString('ro-RO')}. Până atunci poți anula. Între timp afacerea este ascunsă și nu apare clienților; dacă anulezi, devine din nou vizibilă.`
                           : language === 'it'
-                          ? `L'attività verrà eliminata definitivamente il ${new Date(deletionScheduledAt).toLocaleDateString('it-IT')}. Fino ad allora puoi annullare.`
-                          : `Your business will be permanently deleted on ${new Date(deletionScheduledAt).toLocaleDateString('en-GB')}. You can cancel until then.`}
+                          ? `L'attività verrà eliminata definitivamente il ${new Date(deletionScheduledAt).toLocaleDateString('it-IT')}. Fino ad allora puoi annullare. Nel frattempo l\'attività è nascosta e non compare ai clienti; se annulli, torna visibile.`
+                          : `Your business will be permanently deleted on ${new Date(deletionScheduledAt).toLocaleDateString('en-GB')}. You can cancel until then. Meanwhile the business is hidden and does not appear to customers; if you cancel, it becomes visible again.`}
                       </p>
                       <button
                         type="button"
@@ -778,15 +801,62 @@ export default function AdminSettings() {
                       >
                         {language === 'ro' ? 'Anulează ștergerea' : language === 'it' ? 'Annulla eliminazione' : 'Cancel deletion'}
                       </button>
+
+                      {!showForce ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowForce(true)}
+                          className="mt-3 w-full py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-200 font-semibold rounded-xl transition-all duration-300"
+                        >
+                          {language === 'ro' ? 'Forțează ștergerea' : language === 'it' ? 'Forza eliminazione' : 'Force deletion'}
+                        </button>
+                      ) : (
+                        <div className="mt-3 space-y-3 rounded-xl border border-red-500/40 bg-red-500/10 p-4">
+                          <p className="text-sm text-red-100">
+                            {language === 'ro'
+                              ? 'Șterge imediat afacerea și toate datele ei, fără să aștepți cele 14 zile. Nu se poate anula.'
+                              : language === 'it'
+                              ? 'Elimina subito l\'attività e tutti i suoi dati, senza aspettare i 14 giorni. Non si può annullare.'
+                              : 'Deletes the business and all its data right now, without waiting for the 14 days. It cannot be undone.'}
+                          </p>
+                          <label className="block text-sm font-medium text-gray-200">
+                            {language === 'ro' ? 'Introdu parola contului pentru a confirma' : language === 'it' ? 'Inserisci la password del tuo account per confermare' : 'Enter your account password to confirm'}
+                          </label>
+                          <input
+                            type="password"
+                            value={forcePassword}
+                            autoComplete="current-password"
+                            onChange={(e) => setForcePassword(e.target.value)}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-red-400 focus:outline-none transition-colors"
+                          />
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={handleForceDeletion}
+                              disabled={deleteBusy || forcePassword.length === 0}
+                              className="flex-1 py-3 bg-red-500/80 hover:bg-red-500 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {language === 'ro' ? 'Șterge definitiv acum' : language === 'it' ? 'Elimina definitivamente adesso' : 'Delete permanently now'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setShowForce(false); setForcePassword(''); setDeleteError('') }}
+                              className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors"
+                            >
+                              {language === 'ro' ? 'Anulează' : language === 'it' ? 'Annulla' : 'Cancel'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
                       <p className="text-sm text-gray-300 mb-4">
                         {language === 'ro'
-                          ? 'Se șterg afacerea, sediile, produsele, recompensele, cardurile clienților pentru această afacere și conturile de acces ale tale și ale personalului. Conturile clienților rămân. Ai 14 zile în care poți anula.'
+                          ? 'Se șterg afacerea, sediile, produsele, recompensele, cardurile clienților pentru această afacere și conturile de acces ale tale și ale personalului. Conturile clienților rămân. Afacerea este ascunsă imediat. Ai 14 zile în care poți anula.'
                           : language === 'it'
-                          ? 'Vengono eliminati l\'attività, le sedi, i prodotti, i premi, le carte dei clienti di questa attività e gli account di accesso tuo e del personale. Gli account dei clienti restano. Hai 14 giorni di tempo per annullare.'
-                          : 'This deletes the business, its stores, products, rewards, the customer cards for this business and the login accounts of you and your staff. Customer accounts are kept. You have 14 days to cancel.'}
+                          ? 'Vengono eliminati l\'attività, le sedi, i prodotti, i premi, le carte dei clienti di questa attività e gli account di accesso tuo e del personale. Gli account dei clienti restano. L\'attività viene nascosta subito. Hai 14 giorni di tempo per annullare.'
+                          : 'This deletes the business, its stores, products, rewards, the customer cards for this business and the login accounts of you and your staff. Customer accounts are kept. The business is hidden immediately. You have 14 days to cancel.'}
                       </p>
                       {!showDelete ? (
                         <button

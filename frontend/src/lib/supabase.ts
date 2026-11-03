@@ -665,5 +665,11 @@ export const api = {
   async cancelTenantDeletion() {
     const { error } = await supabase.rpc('cancel_tenant_deletion')
     if (error) throw error
+  },
+
+  // Owner only, after the deletion was requested: deletes everything right now (needs the account password)
+  async deleteTenantNow(password: string) {
+    const { error } = await supabase.rpc('delete_tenant_now', { p_password: password })
+    if (error) throw error
   }
 }

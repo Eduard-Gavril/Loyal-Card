@@ -207,6 +207,12 @@ export const api = {
     if (error) throw error
   },
 
+  // Owner only, after the deletion was requested: deletes everything right now (needs the account password)
+  async deleteTenantNow(password: string): Promise<void> {
+    const { error } = await supabase.rpc('delete_tenant_now', { p_password: password })
+    if (error) throw error
+  },
+
   async getProductCategories(tenantId: string): Promise<ProductCategory[]> {
     const { data, error } = await supabase
       .from('product_categories')

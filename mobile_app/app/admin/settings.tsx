@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native'
-import { Stack } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import * as Location from 'expo-location'
 import { Ionicons } from '@expo/vector-icons'
 import { useAdminStore, useClientStore } from '@/store'
@@ -62,7 +62,8 @@ function FormGroup({ header, footer, children }: { header?: string; footer?: str
 }
 
 export default function AdminSettingsScreen() {
-  const { tenantId, role } = useAdminStore()
+  const router = useRouter()
+  const { tenantId, role, clearAuth } = useAdminStore()
   const { language } = useClientStore()
   const t = getTranslation(language)
   const a = t.admin
@@ -112,6 +113,8 @@ export default function AdminSettingsScreen() {
   const [deleteName, setDeleteName] = useState('')
   const [deleteBusy, setDeleteBusy] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [showForce, setShowForce] = useState(false)
+  const [forcePassword, setForcePassword] = useState('')
 
   async function handleRequestDeletion() {
     setDeleteBusy(true)
@@ -124,6 +127,23 @@ export default function AdminSettingsScreen() {
     } catch (e: any) {
       const msg = String(e?.message ?? '')
       setDeleteError(msg.includes('NAME_MISMATCH') ? a.deleteBizMismatch : msg || a.errorSaveMsg)
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
+
+  // Skips the grace period: deletes everything now and sends the owner back to the public home
+  async function handleForceDeletion() {
+    setDeleteBusy(true)
+    setDeleteError('')
+    try {
+      await api.deleteTenantNow(forcePassword)
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+      clearAuth()
+      router.replace('/(tabs)/partners')
+    } catch (e: any) {
+      const msg = String(e?.message ?? '')
+      setDeleteError(msg.includes('WRONG_PASSWORD') ? a.wrongPassword : msg || a.errorSaveMsg)
     } finally {
       setDeleteBusy(false)
     }
@@ -456,9 +476,11 @@ export default function AdminSettingsScreen() {
           </FormGroup>
 
           {/* Status */}
+          {!deletionScheduledAt && (
           <ListGroup header={a.shopStatusTitle} footer={form.active ? a.shopVisibleLabel : a.shopHiddenLabel}>
             <ListRow icon="storefront-outline" title={a.shopActiveLabel} switchValue={form.active} onSwitchChange={(v) => setForm((f) => ({ ...f, active: v }))} />
           </ListGroup>
+          )}
 
           {/* Staff accounts: owner only (staff can't reach this screen anyway, the role check stays as defense-in-depth) */}
           {isOwner && (
@@ -537,6 +559,32 @@ export default function AdminSettingsScreen() {
                   <>
                     <Txt v="body">{a.deleteBizScheduled(new Date(deletionScheduledAt).toLocaleDateString())}</Txt>
                     <Button variant="tinted" icon="arrow-undo-outline" title={a.deleteBizCancelBtn} loading={deleteBusy} onPress={handleCancelDeletion} />
+                    {!showForce ? (
+                      <Button variant="destructive" icon="flame-outline" title={a.forceDeleteBtn} onPress={() => setShowForce(true)} />
+                    ) : (
+                      <>
+                        <Txt v="footnote" tone="danger">
+                          {a.forceDeleteWarning}
+                        </Txt>
+                        <Field
+                          label={a.forceDeletePasswordLabel}
+                          value={forcePassword}
+                          onChangeText={setForcePassword}
+                          secureTextEntry
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                        />
+                        <Button
+                          variant="destructive"
+                          icon="trash-outline"
+                          title={a.forceDeleteConfirmBtn}
+                          loading={deleteBusy}
+                          disabled={!forcePassword}
+                          onPress={handleForceDeletion}
+                        />
+                        <Button variant="plain" title={t.dashboard.cancel} onPress={() => { setShowForce(false); setForcePassword(''); setDeleteError('') }} />
+                      </>
+                    )}
                   </>
                 ) : !showDelete ? (
                   <Button variant="destructive" icon="trash-outline" title={a.deleteBizBtn} onPress={() => setShowDelete(true)} />

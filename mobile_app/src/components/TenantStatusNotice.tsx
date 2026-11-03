@@ -77,9 +77,9 @@ export default function TenantStatusNotice() {
           <Ionicons name="warning-outline" size={20} color={colors.danger} />
           <Txt v="subhead" style={s.text}>
             {L(
-              `L'attività verrà eliminata definitivamente il ${date}. Puoi annullare l'eliminazione dalle Impostazioni.`,
-              `Afacerea va fi ștearsă definitiv pe ${date}. Poți anula ștergerea din Setări.`,
-              `Your business will be permanently deleted on ${date}. You can cancel the deletion in Settings.`
+              `L'attività verrà eliminata definitivamente il ${date}. Nel frattempo è nascosta ai clienti: puoi annullare l'eliminazione dalle Impostazioni.`,
+              `Afacerea va fi ștearsă definitiv pe ${date}. Între timp este ascunsă clienților: poți anula ștergerea din Setări.`,
+              `Your business will be permanently deleted on ${date}. Meanwhile it is hidden from customers: you can cancel the deletion in Settings.`
             )}
           </Txt>
         </View>

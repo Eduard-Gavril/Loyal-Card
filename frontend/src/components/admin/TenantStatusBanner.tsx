@@ -68,9 +68,9 @@ export default function TenantStatusBanner() {
           <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
           <p className="text-sm">
             {L(
-              `L'attività verrà eliminata definitivamente il ${date}. Puoi annullare l'eliminazione da Impostazioni.`,
-              `Afacerea va fi ștearsă definitiv pe ${date}. Poți anula ștergerea din Setări.`,
-              `Your business will be permanently deleted on ${date}. You can cancel the deletion in Settings.`
+              `L'attività verrà eliminata definitivamente il ${date}. Nel frattempo è nascosta ai clienti: puoi annullare l'eliminazione da Impostazioni.`,
+              `Afacerea va fi ștearsă definitiv pe ${date}. Între timp este ascunsă clienților: poți anula ștergerea din Setări.`,
+              `Your business will be permanently deleted on ${date}. Meanwhile it is hidden from customers: you can cancel the deletion in Settings.`
             )}
           </p>
         </div>

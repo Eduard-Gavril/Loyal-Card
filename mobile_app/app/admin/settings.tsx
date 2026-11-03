@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native'
 import { Stack } from 'expo-router'
+import * as Location from 'expo-location'
 import { Ionicons } from '@expo/vector-icons'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
@@ -21,7 +22,16 @@ interface TenantSettings {
   brand_color: string
   welcome_message: string
   active: boolean
+  address: string
+  city: string
+  postal_code: string
+  latitude: number | null
+  longitude: number | null
+  type: string
+  description: string
 }
+
+const BUSINESS_TYPES = ['cafe', 'food', 'beauty', 'gym', 'shop'] as const
 
 interface StaffAdmin {
   id: string
@@ -68,7 +78,16 @@ export default function AdminSettingsScreen() {
     brand_color: '#7c3aed',
     welcome_message: '',
     active: true,
+    address: '',
+    city: '',
+    postal_code: '',
+    latitude: null,
+    longitude: null,
+    type: '',
+    description: '',
   })
+  const [geoBusy, setGeoBusy] = useState(false)
+  const [geoMessage, setGeoMessage] = useState('')
   const [originalForm, setOriginalForm] = useState<TenantSettings | null>(null)
   const [rawMetadata, setRawMetadata] = useState<Record<string, any>>({})
 
@@ -197,7 +216,7 @@ export default function AdminSettingsScreen() {
     try {
       const { data, error } = await supabase
         .from('tenants')
-        .select('name, logo_url, brand_color, metadata, active, deletion_scheduled_at')
+        .select('name, logo_url, brand_color, metadata, active, deletion_scheduled_at, address, city, postal_code, latitude, longitude')
         .eq('id', tenantId)
         .single()
       if (error) throw error
@@ -211,6 +230,13 @@ export default function AdminSettingsScreen() {
           brand_color: data.brand_color ?? '#7c3aed',
           welcome_message: meta.welcome_message ?? '',
           active: data.active ?? true,
+          address: (data as any).address ?? '',
+          city: (data as any).city ?? '',
+          postal_code: (data as any).postal_code ?? '',
+          latitude: (data as any).latitude != null ? Number((data as any).latitude) : null,
+          longitude: (data as any).longitude != null ? Number((data as any).longitude) : null,
+          type: meta.type ?? '',
+          description: meta.description ?? '',
         }
         setForm(loaded)
         setOriginalForm(loaded)
@@ -233,7 +259,17 @@ export default function AdminSettingsScreen() {
           name: form.name.trim(),
           logo_url: form.logo_url.trim() || null,
           brand_color: form.brand_color,
-          metadata: { ...rawMetadata, welcome_message: form.welcome_message.trim() || null },
+          metadata: {
+            ...rawMetadata,
+            welcome_message: form.welcome_message.trim() || null,
+            type: form.type || null,
+            description: form.description.trim() || null,
+          },
+          address: form.address.trim() || null,
+          city: form.city.trim() || null,
+          postal_code: form.postal_code.trim() || null,
+          latitude: form.latitude,
+          longitude: form.longitude,
           active: form.active,
         })
         .eq('id', tenantId)
@@ -244,6 +280,41 @@ export default function AdminSettingsScreen() {
       Alert.alert('Error', isPlanError(e) ? planErrorText(e) : e?.message ?? a.errorSaveMsg)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function findPosition() {
+    const q = [form.address, form.postal_code, form.city].map((v) => v.trim()).filter(Boolean).join(', ')
+    if (!q) { setGeoMessage(a.positionNeedAddress); return }
+    setGeoBusy(true)
+    setGeoMessage('')
+    try {
+      const res = await Location.geocodeAsync(q)
+      if (res.length === 0) {
+        setGeoMessage(a.positionNotFound)
+      } else {
+        setForm((f) => ({ ...f, latitude: res[0].latitude, longitude: res[0].longitude }))
+        setGeoMessage('')
+      }
+    } catch {
+      setGeoMessage(a.positionNotFound)
+    } finally {
+      setGeoBusy(false)
+    }
+  }
+
+  async function useMyPosition() {
+    setGeoBusy(true)
+    setGeoMessage('')
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') { setGeoMessage(a.positionDenied); return }
+      const pos = await Location.getCurrentPositionAsync({})
+      setForm((f) => ({ ...f, latitude: pos.coords.latitude, longitude: pos.coords.longitude }))
+    } catch {
+      setGeoMessage(a.positionDenied)
+    } finally {
+      setGeoBusy(false)
     }
   }
 
@@ -325,6 +396,49 @@ export default function AdminSettingsScreen() {
               </View>
             </View>
             <Field value={form.brand_color} onChangeText={(v) => setForm((f) => ({ ...f, brand_color: v }))} placeholder="#7c3aed" autoCapitalize="none" autoCorrect={false} accessibilityLabel={a.primaryColorLabel} />
+          </FormGroup>
+
+          {/* Location and listing */}
+          <FormGroup header={a.locTitle} footer={a.locDesc}>
+            <View style={{ gap: 8 }}>
+              <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+                {a.businessTypeLabel}
+              </Txt>
+              <View style={s.colorRow}>
+                {BUSINESS_TYPES.map((ty) => {
+                  const selected = form.type === ty
+                  const label = { cafe: a.typeCafe, food: a.typeFood, beauty: a.typeBeauty, gym: a.typeGym, shop: a.typeShop }[ty]
+                  return (
+                    <PressableScale
+                      key={ty}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
+                      haptic="selection"
+                      onPress={() => setForm((f) => ({ ...f, type: ty }))}
+                      style={[s.chip, selected && s.chipOn]}
+                    >
+                      <Txt v="subhead" tone={selected ? 'tint' : 'secondary'}>
+                        {label}
+                      </Txt>
+                    </PressableScale>
+                  )
+                })}
+              </View>
+            </View>
+            <Field label={a.bizDescriptionLabel} value={form.description} onChangeText={(v) => setForm((f) => ({ ...f, description: v }))} placeholder={a.bizDescriptionPlaceholder} maxLength={120} />
+            <Field label={a.addressLabel} value={form.address} onChangeText={(v) => setForm((f) => ({ ...f, address: v, latitude: null, longitude: null }))} />
+            <Field label={a.cityLabel} value={form.city} onChangeText={(v) => setForm((f) => ({ ...f, city: v, latitude: null, longitude: null }))} />
+            <Field label={a.postalLabel} value={form.postal_code} onChangeText={(v) => setForm((f) => ({ ...f, postal_code: v, latitude: null, longitude: null }))} />
+            <Button variant="tinted" icon="search-outline" title={a.findPositionBtn} loading={geoBusy} onPress={findPosition} />
+            <Button variant="plain" icon="locate-outline" title={a.useMyPositionBtn} disabled={geoBusy} onPress={useMyPosition} />
+            {geoMessage ? (
+              <Txt v="footnote" tone="danger">
+                {geoMessage}
+              </Txt>
+            ) : null}
+            <Txt v="footnote" tone={form.latitude != null && form.longitude != null ? 'secondary' : 'tint'}>
+              {form.latitude != null && form.longitude != null ? a.positionSet(form.latitude, form.longitude) : a.positionMissing}
+            </Txt>
           </FormGroup>
 
           {/* Welcome message */}
@@ -483,6 +597,8 @@ const s = StyleSheet.create({
   groupFooter: { marginHorizontal: 16, marginTop: 8 },
   form: { gap: 14, padding: 16, borderRadius: 22, backgroundColor: colors.grouped, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, ...continuous },
   colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 4 },
+  chip: { paddingHorizontal: 14, minHeight: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.grouped, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
+  chipOn: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
   colorDot: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   colorDotActive: { borderWidth: 3, borderColor: 'rgba(255,255,255,0.9)' },
   rowLoading: { minHeight: 52, alignItems: 'center', justifyContent: 'center' },

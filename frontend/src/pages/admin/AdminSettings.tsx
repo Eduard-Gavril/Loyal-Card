@@ -19,7 +19,22 @@ interface TenantSettings {
   logo_url: string
   primary_color: string
   welcome_message: string
+  address: string
+  city: string
+  postal_code: string
+  latitude: number | null
+  longitude: number | null
+  type: string
+  description: string
 }
+
+const BUSINESS_TYPES: { id: string; it: string; ro: string; en: string }[] = [
+  { id: 'cafe', it: 'Bar e caffetteria', ro: 'Cafenea', en: 'Cafe' },
+  { id: 'food', it: 'Ristorante e cibo', ro: 'Restaurant și mâncare', en: 'Restaurant and food' },
+  { id: 'beauty', it: 'Bellezza e benessere', ro: 'Frumusețe și wellness', en: 'Beauty and wellness' },
+  { id: 'gym', it: 'Palestra e sport', ro: 'Sală și sport', en: 'Gym and sport' },
+  { id: 'shop', it: 'Negozio', ro: 'Magazin', en: 'Shop' },
+]
 
 export default function AdminSettings() {
   const navigate = useNavigate()
@@ -32,8 +47,18 @@ export default function AdminSettings() {
     name: '',
     logo_url: '',
     primary_color: '#3b82f6',
-    welcome_message: ''
+    welcome_message: '',
+    address: '',
+    city: '',
+    postal_code: '',
+    latitude: null,
+    longitude: null,
+    type: '',
+    description: ''
   })
+  const [rawMetadata, setRawMetadata] = useState<Record<string, any>>({})
+  const [geoBusy, setGeoBusy] = useState(false)
+  const [geoMessage, setGeoMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -158,8 +183,16 @@ export default function AdminSettings() {
           name: data.name || '',
           logo_url: data.logo_url || '',
           primary_color: data.primary_color || '#3b82f6',
-          welcome_message: data.metadata?.welcome_message || ''
+          welcome_message: data.metadata?.welcome_message || '',
+          address: data.address || '',
+          city: data.city || '',
+          postal_code: data.postal_code || '',
+          latitude: data.latitude != null ? Number(data.latitude) : null,
+          longitude: data.longitude != null ? Number(data.longitude) : null,
+          type: data.metadata?.type || '',
+          description: data.metadata?.description || ''
         })
+        setRawMetadata(data.metadata || {})
       }
     } catch (err: any) {
       setError(err?.message || 'Failed to load settings')
@@ -179,7 +212,18 @@ export default function AdminSettings() {
           name: settings.name,
           logo_url: settings.logo_url,
           primary_color: settings.primary_color,
-          metadata: { welcome_message: settings.welcome_message }
+          address: settings.address.trim() || null,
+          city: settings.city.trim() || null,
+          postal_code: settings.postal_code.trim() || null,
+          latitude: settings.latitude,
+          longitude: settings.longitude,
+          // keep the keys this page does not edit (type, description, ...) instead of overwriting them
+          metadata: {
+            ...rawMetadata,
+            welcome_message: settings.welcome_message,
+            type: settings.type || null,
+            description: settings.description.trim() || null
+          }
         }).eq('id', tenantId),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
@@ -194,6 +238,56 @@ export default function AdminSettings() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const L = (it: string, ro: string, en: string) => (language === 'it' ? it : language === 'ro' ? ro : en)
+
+  // Finds the coordinates of the typed address (OpenStreetMap Nominatim, free, no key)
+  const findPosition = async () => {
+    const q = [settings.address, settings.postal_code, settings.city].map((v) => v.trim()).filter(Boolean).join(', ')
+    if (!q) {
+      setGeoMessage(L('Scrivi prima indirizzo e città.', 'Scrie mai întâi adresa și orașul.', 'Type the address and city first.'))
+      return
+    }
+    setGeoBusy(true)
+    setGeoMessage('')
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, {
+        headers: { 'Accept-Language': language }
+      })
+      const rows = await res.json()
+      if (!Array.isArray(rows) || rows.length === 0) {
+        setGeoMessage(L('Indirizzo non trovato. Controlla indirizzo e città, oppure usa la tua posizione attuale.', 'Adresă negăsită. Verifică adresa și orașul sau folosește locația curentă.', 'Address not found. Check the address and city, or use your current location.'))
+      } else {
+        setSettings((prev) => ({ ...prev, latitude: Number(rows[0].lat), longitude: Number(rows[0].lon) }))
+        setGeoMessage(L('Posizione trovata. Ricorda di salvare.', 'Locație găsită. Nu uita să salvezi.', 'Position found. Remember to save.'))
+      }
+    } catch {
+      setGeoMessage(L('Ricerca non riuscita. Riprova.', 'Căutarea a eșuat. Încearcă din nou.', 'Search failed. Try again.'))
+    } finally {
+      setGeoBusy(false)
+    }
+  }
+
+  const useMyPosition = () => {
+    if (!navigator.geolocation) {
+      setGeoMessage(L('Il tuo browser non supporta la posizione.', 'Browserul tău nu suportă localizarea.', 'Your browser does not support location.'))
+      return
+    }
+    setGeoBusy(true)
+    setGeoMessage('')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setSettings((prev) => ({ ...prev, latitude: pos.coords.latitude, longitude: pos.coords.longitude }))
+        setGeoMessage(L('Posizione impostata. Ricorda di salvare.', 'Locație setată. Nu uita să salvezi.', 'Position set. Remember to save.'))
+        setGeoBusy(false)
+      },
+      () => {
+        setGeoMessage(L('Non riesco a leggere la posizione: consenti l\'accesso nel browser.', 'Nu pot citi locația: permite accesul în browser.', 'Cannot read your location: allow access in the browser.'))
+        setGeoBusy(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
   }
 
   const colorPresets = [
@@ -314,6 +408,107 @@ export default function AdminSettings() {
                         : 'Welcome to our loyalty program!'}
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Location and listing */}
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                  {L('Posizione e visibilità', 'Locație și vizibilitate', 'Location and visibility')}
+                </h2>
+                <p className="text-sm text-gray-300 mb-4 sm:mb-6">
+                  {L(
+                    'Per comparire nella lista dei partner serve la posizione della tua attività. I clienti vedono le attività più vicine a loro.',
+                    'Pentru a apărea în lista partenerilor este nevoie de locația afacerii tale. Clienții văd afacerile cele mai apropiate de ei.',
+                    'To appear in the partners list your business needs a location. Customers see the businesses closest to them.'
+                  )}
+                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Tipo di attività', 'Tipul afacerii', 'Business type')}</label>
+                    <select
+                      value={settings.type}
+                      onChange={(e) => setSettings({ ...settings, type: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:border-primary-400 focus:outline-none transition-colors"
+                    >
+                      <option value="" className="text-black">{L('Seleziona...', 'Selectează...', 'Select...')}</option>
+                      {BUSINESS_TYPES.map((b) => (
+                        <option key={b.id} value={b.id} className="text-black">{L(b.it, b.ro, b.en)}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Breve descrizione', 'Scurtă descriere', 'Short description')}</label>
+                    <input
+                      type="text"
+                      value={settings.description}
+                      maxLength={120}
+                      onChange={(e) => setSettings({ ...settings, description: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none transition-colors"
+                      placeholder={L('Es. Caffetteria artigianale in centro', 'Ex. Cafenea artizanală în centru', 'E.g. Craft coffee shop downtown')}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Indirizzo', 'Adresă', 'Address')}</label>
+                    <input
+                      type="text"
+                      value={settings.address}
+                      onChange={(e) => setSettings({ ...settings, address: e.target.value, latitude: null, longitude: null })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none transition-colors"
+                      placeholder={L('Via Roma 1', 'Strada Exemplu 1', '1 Main Street')}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">{L('Città', 'Oraș', 'City')}</label>
+                      <input
+                        type="text"
+                        value={settings.city}
+                        onChange={(e) => setSettings({ ...settings, city: e.target.value, latitude: null, longitude: null })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:border-primary-400 focus:outline-none transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">{L('CAP', 'Cod poștal', 'Postcode')}</label>
+                      <input
+                        type="text"
+                        value={settings.postal_code}
+                        onChange={(e) => setSettings({ ...settings, postal_code: e.target.value, latitude: null, longitude: null })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:border-primary-400 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={findPosition}
+                      disabled={geoBusy}
+                      className="flex-1 py-3 bg-primary-500/20 hover:bg-primary-500/30 border border-primary-400/40 text-primary-100 font-semibold rounded-xl transition-all disabled:opacity-50"
+                    >
+                      {L('Trova la posizione dall\'indirizzo', 'Găsește locația după adresă', 'Find position from address')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={useMyPosition}
+                      disabled={geoBusy}
+                      className="flex-1 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
+                    >
+                      {L('Usa la mia posizione attuale', 'Folosește locația mea curentă', 'Use my current location')}
+                    </button>
+                  </div>
+
+                  {geoMessage && <p className="text-sm text-gray-200">{geoMessage}</p>}
+
+                  <p className={`text-sm ${settings.latitude != null && settings.longitude != null ? 'text-green-300' : 'text-amber-200'}`}>
+                    {settings.latitude != null && settings.longitude != null
+                      ? L(`Posizione impostata (${settings.latitude.toFixed(4)}, ${settings.longitude.toFixed(4)}). Salva per applicarla.`, `Locație setată (${settings.latitude.toFixed(4)}, ${settings.longitude.toFixed(4)}). Salvează pentru a o aplica.`, `Position set (${settings.latitude.toFixed(4)}, ${settings.longitude.toFixed(4)}). Save to apply it.`)
+                      : L('Posizione non impostata: l\'attività non compare ancora nella lista dei partner.', 'Locație nesetată: afacerea nu apare încă în lista partenerilor.', 'Position not set: the business does not appear in the partners list yet.')}
+                  </p>
                 </div>
               </div>
 

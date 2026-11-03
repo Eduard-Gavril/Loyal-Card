@@ -7,7 +7,7 @@ import './CookieBanner.css'
 
 // Pages already redesigned with the amber look. The banner follows the page it sits on;
 // add a route here when its page is migrated.
-const AMBER_ROUTES = ['/', '/it', '/ro', '/dashboard', '/wallet', '/select-tenant', '/recovery', '/privacy', '/terms', '/cookie-policy', '/refund', '/acceptable-use', '/contact']
+const AMBER_ROUTES = ['/', '/it', '/ro', '/dashboard', '/wallet', '/select-tenant', '/recovery', '/privacy', '/terms', '/cookie-policy', '/refund', '/acceptable-use', '/contact', '/register', '/business-terms']
 const AMBER_PREFIXES = ['/card', '/admin', '/super-admin']
 
 export default function CookieBanner() {

@@ -182,7 +182,7 @@ export default function AdminSettings() {
         setSettings({
           name: data.name || '',
           logo_url: data.logo_url || '',
-          primary_color: data.primary_color || '#3b82f6',
+          primary_color: data.brand_color || '#3b82f6',
           welcome_message: data.metadata?.welcome_message || '',
           address: data.address || '',
           city: data.city || '',
@@ -203,15 +203,24 @@ export default function AdminSettings() {
 
   const saveSettings = async () => {
     if (!tenantId) return
+    const T = (it: string, ro: string, en: string) => (language === 'it' ? it : language === 'ro' ? ro : en)
+    if (!settings.type) {
+      setError(T('Seleziona il tipo di attività.', 'Selectează tipul afacerii.', 'Select the business type.'))
+      return
+    }
+    if (settings.latitude == null || settings.longitude == null) {
+      setError(T('Imposta la posizione: cerca l\'indirizzo oppure usa la tua posizione attuale.', 'Setează locația: caută adresa sau folosește locația curentă.', 'Set the position: search the address or use your current location.'))
+      return
+    }
     setSaving(true)
     setError('')
 
     try {
-      await Promise.race([
+      const result = await Promise.race([
         supabase.from('tenants').update({
           name: settings.name,
-          logo_url: settings.logo_url,
-          primary_color: settings.primary_color,
+          logo_url: settings.logo_url || null,
+          brand_color: settings.primary_color,
           address: settings.address.trim() || null,
           city: settings.city.trim() || null,
           postal_code: settings.postal_code.trim() || null,
@@ -228,7 +237,8 @@ export default function AdminSettings() {
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Connection timeout. Close any background tabs and try again.')), 8000)
         )
-      ])
+      ]) as any
+      if (result?.error) throw result.error
 
       setSaved(true)
       setError('')
@@ -242,26 +252,41 @@ export default function AdminSettings() {
 
   const L = (it: string, ro: string, en: string) => (language === 'it' ? it : language === 'ro' ? ro : en)
 
-  // Finds the coordinates of the typed address (OpenStreetMap Nominatim, free, no key)
+  const NOMINATIM = 'https://nominatim.openstreetmap.org'
+
+  const geocode = async (q: string) => {
+    const res = await fetch(`${NOMINATIM}/search?format=json&limit=1&q=${encodeURIComponent(q)}`, {
+      headers: { 'Accept-Language': language }
+    })
+    const rows = await res.json()
+    return Array.isArray(rows) && rows.length > 0 ? { lat: Number(rows[0].lat), lon: Number(rows[0].lon) } : null
+  }
+
+  // Finds the coordinates of the typed address (OpenStreetMap Nominatim, free, no key).
+  // Tries the most precise query first, then looser ones (without the postcode, then the city alone).
   const findPosition = async () => {
-    const q = [settings.address, settings.postal_code, settings.city].map((v) => v.trim()).filter(Boolean).join(', ')
-    if (!q) {
-      setGeoMessage(L('Scrivi prima indirizzo e città.', 'Scrie mai întâi adresa și orașul.', 'Type the address and city first.'))
+    const address = settings.address.trim()
+    const city = settings.city.trim()
+    const postal = settings.postal_code.trim()
+    if (!address && !city) {
+      setGeoMessage(L('Scrivi almeno la città, oppure usa la tua posizione attuale.', 'Scrie cel puțin orașul sau folosește locația curentă.', 'Type at least the city, or use your current location.'))
       return
     }
+    const attempts = [[address, city, postal], [address, city], [address, postal], [city, postal], [city]]
+      .map((parts) => ({ q: parts.filter(Boolean).join(', '), precise: parts.includes(address) && !!address }))
+      .filter((a, i, all) => a.q && all.findIndex((b) => b.q === a.q) === i)
     setGeoBusy(true)
     setGeoMessage('')
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, {
-        headers: { 'Accept-Language': language }
-      })
-      const rows = await res.json()
-      if (!Array.isArray(rows) || rows.length === 0) {
-        setGeoMessage(L('Indirizzo non trovato. Controlla indirizzo e città, oppure usa la tua posizione attuale.', 'Adresă negăsită. Verifică adresa și orașul sau folosește locația curentă.', 'Address not found. Check the address and city, or use your current location.'))
-      } else {
-        setSettings((prev) => ({ ...prev, latitude: Number(rows[0].lat), longitude: Number(rows[0].lon) }))
-        setGeoMessage(L('Posizione trovata. Ricorda di salvare.', 'Locație găsită. Nu uita să salvezi.', 'Position found. Remember to save.'))
+      for (const a of attempts) {
+        const hit = await geocode(a.q)
+        if (hit) {
+          setSettings((prev) => ({ ...prev, latitude: hit.lat, longitude: hit.lon }))
+          setGeoMessage(a.precise ? '' : L('Trovata solo la città: posizione approssimativa. Per più precisione usa la tua posizione attuale.', 'Am găsit doar orașul: locație aproximativă. Pentru precizie folosește locația curentă.', 'Only the city was found: approximate position. For more precision use your current location.'))
+          return
+        }
       }
+      setGeoMessage(L('Indirizzo non trovato. Controlla indirizzo e città, oppure usa la tua posizione attuale.', 'Adresă negăsită. Verifică adresa și orașul sau folosește locația curentă.', 'Address not found. Check the address and city, or use your current location.'))
     } catch {
       setGeoMessage(L('Ricerca non riuscita. Riprova.', 'Căutarea a eșuat. Încearcă din nou.', 'Search failed. Try again.'))
     } finally {
@@ -277,9 +302,25 @@ export default function AdminSettings() {
     setGeoBusy(true)
     setGeoMessage('')
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setSettings((prev) => ({ ...prev, latitude: pos.coords.latitude, longitude: pos.coords.longitude }))
-        setGeoMessage(L('Posizione impostata. Ricorda di salvare.', 'Locație setată. Nu uita să salvezi.', 'Position set. Remember to save.'))
+      async (pos) => {
+        const { latitude, longitude } = pos.coords
+        setSettings((prev) => ({ ...prev, latitude, longitude }))
+        // fill the empty address fields from the position, best effort
+        try {
+          const res = await fetch(`${NOMINATIM}/reverse?format=json&zoom=18&addressdetails=1&lat=${latitude}&lon=${longitude}`, {
+            headers: { 'Accept-Language': language }
+          })
+          const a = (await res.json())?.address || {}
+          const street = [a.road, a.house_number].filter(Boolean).join(' ')
+          setSettings((prev) => ({
+            ...prev,
+            address: prev.address || street,
+            city: prev.city || a.city || a.town || a.village || a.municipality || '',
+            postal_code: prev.postal_code || a.postcode || ''
+          }))
+        } catch {
+          // the coordinates are enough
+        }
         setGeoBusy(false)
       },
       () => {
@@ -418,15 +459,15 @@ export default function AdminSettings() {
                 </h2>
                 <p className="text-sm text-gray-300 mb-4 sm:mb-6">
                   {L(
-                    'Per comparire nella lista dei partner serve la posizione della tua attività. I clienti vedono le attività più vicine a loro.',
-                    'Pentru a apărea în lista partenerilor este nevoie de locația afacerii tale. Clienții văd afacerile cele mai apropiate de ei.',
-                    'To appear in the partners list your business needs a location. Customers see the businesses closest to them.'
+                    'Il tipo di attività e la posizione sono obbligatori per comparire nella lista dei partner: i clienti vedono le attività più vicine a loro. Indirizzo, CAP e descrizione sono facoltativi: basta la posizione, trovata dall\'indirizzo o con la tua posizione attuale.',
+                    'Tipul afacerii și locația sunt obligatorii pentru a apărea în lista partenerilor: clienții văd afacerile cele mai apropiate de ei. Adresa, codul poștal și descrierea sunt opționale: este suficientă locația, găsită după adresă sau cu locația curentă.',
+                    'The business type and the position are required to appear in the partners list: customers see the businesses closest to them. Address, postcode and description are optional: the position is enough, found from the address or with your current location.'
                   )}
                 </p>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Tipo di attività', 'Tipul afacerii', 'Business type')}</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Tipo di attività', 'Tipul afacerii', 'Business type')} *</label>
                     <select
                       value={settings.type}
                       onChange={(e) => setSettings({ ...settings, type: e.target.value })}
@@ -440,7 +481,7 @@ export default function AdminSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Breve descrizione', 'Scurtă descriere', 'Short description')}</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Breve descrizione', 'Scurtă descriere', 'Short description')} ({L('facoltativa', 'opțională', 'optional')})</label>
                     <input
                       type="text"
                       value={settings.description}
@@ -452,7 +493,7 @@ export default function AdminSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Indirizzo', 'Adresă', 'Address')}</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">{L('Indirizzo', 'Adresă', 'Address')} ({L('facoltativo', 'opțional', 'optional')})</label>
                     <input
                       type="text"
                       value={settings.address}

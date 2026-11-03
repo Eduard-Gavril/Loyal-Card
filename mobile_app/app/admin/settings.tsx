@@ -251,6 +251,8 @@ export default function AdminSettingsScreen() {
   async function handleSave() {
     if (!tenantId) return
     if (!form.name.trim()) { Alert.alert('Error', a.shopNameLabel); return }
+    if (!form.type) { Alert.alert('Error', a.typeRequired); return }
+    if (form.latitude == null || form.longitude == null) { Alert.alert('Error', a.positionRequired); return }
     setSaving(true)
     try {
       const { error } = await supabase
@@ -284,18 +286,25 @@ export default function AdminSettingsScreen() {
   }
 
   async function findPosition() {
-    const q = [form.address, form.postal_code, form.city].map((v) => v.trim()).filter(Boolean).join(', ')
-    if (!q) { setGeoMessage(a.positionNeedAddress); return }
+    const address = form.address.trim()
+    const city = form.city.trim()
+    const postal = form.postal_code.trim()
+    if (!address && !city) { setGeoMessage(a.positionNeedAddress); return }
+    // most precise query first, then looser ones (without the postcode, then the city alone)
+    const attempts = [[address, city, postal], [address, city], [address, postal], [city, postal], [city]]
+      .map((parts) => parts.filter(Boolean).join(', '))
+      .filter((q, i, all) => q && all.indexOf(q) === i)
     setGeoBusy(true)
     setGeoMessage('')
     try {
-      const res = await Location.geocodeAsync(q)
-      if (res.length === 0) {
-        setGeoMessage(a.positionNotFound)
-      } else {
-        setForm((f) => ({ ...f, latitude: res[0].latitude, longitude: res[0].longitude }))
-        setGeoMessage('')
+      for (const q of attempts) {
+        const res = await Location.geocodeAsync(q)
+        if (res.length > 0) {
+          setForm((f) => ({ ...f, latitude: res[0].latitude, longitude: res[0].longitude }))
+          return
+        }
       }
+      setGeoMessage(a.positionNotFound)
     } catch {
       setGeoMessage(a.positionNotFound)
     } finally {

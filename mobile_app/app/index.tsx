@@ -1,44 +1,36 @@
-import { useEffect, useRef, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Image, ActivityIndicator } from 'react-native'
+import { useEffect, useState } from 'react'
+import { View, StyleSheet, Image, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import Animated, { FadeInDown, FadeIn, useReducedMotion } from 'react-native-reanimated'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import { colors, continuous } from '@/theme'
+import { ScreenFixed } from '@/ui/Screen'
+import { EASE_OUT } from '@/ui/motion'
+import Button from '@/ui/Button'
+import Txt from '@/ui/Txt'
 
 export default function WelcomeScreen() {
   const router = useRouter()
   const { hasOnboarded, savedCards, language, setHasOnboarded } = useClientStore()
   const t = getTranslation(language)
-  const colors = useTheme()
-  const s = themedStyles(colors)
+  const reduced = useReducedMotion()
   const [hydrated, setHydrated] = useState(false)
-  const fadeAnim = useRef(new Animated.Value(0)).current
-  const loadingScale = useRef(new Animated.Value(0.85)).current
-  const loadingOpacity = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(loadingOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-      Animated.spring(loadingScale, { toValue: 1, friction: 7, tension: 80, useNativeDriver: true }),
-    ]).start()
     const timer = setTimeout(() => setHydrated(true), 200)
     return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
     if (!hydrated) return
-    if (hasOnboarded || savedCards.length > 0) {
-      router.replace('/(tabs)/home')
-      return
-    }
-    Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start()
+    if (hasOnboarded || savedCards.length > 0) router.replace('/(tabs)/home')
   }, [hydrated])
 
   function handleStart() {
     setHasOnboarded()
-    router.replace('/(tabs)/')
+    router.replace('/(tabs)/partners')
   }
 
   function handleMyCards() {
@@ -46,17 +38,17 @@ export default function WelcomeScreen() {
     router.replace('/(tabs)/dashboard')
   }
 
-  if (!hydrated) {
+  if (!hydrated || hasOnboarded || savedCards.length > 0) {
     return (
-      <View style={s.splash}>
-        <Animated.View style={{ opacity: loadingOpacity, transform: [{ scale: loadingScale }], alignItems: 'center', gap: 18 }}>
-          <Image source={require('../assets/logo.png')} style={s.splashLogo} resizeMode="contain" />
-          <Text style={s.splashAppName}>LoyalCard</Text>
-          <ActivityIndicator color={colors.primary} size="large" />
-        </Animated.View>
+      <View style={s.loading}>
+        <Image source={require('../assets/logo.png')} style={s.loadingLogo} resizeMode="contain" />
+        <ActivityIndicator color={colors.primary} />
       </View>
     )
   }
+
+  // Onboarding is the one place that earns an entrance: occasional, 300ms, ease-out, staggered by 60ms.
+  const enter = (i: number) => (reduced ? FadeIn : FadeInDown.delay(i * 60).duration(300).easing(EASE_OUT))
 
   const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
     { icon: 'phone-portrait-outline', text: t.welcome.feature1 },
@@ -65,89 +57,55 @@ export default function WelcomeScreen() {
   ]
 
   return (
-    <SafeAreaView style={s.safe}>
-      <Animated.View style={[s.content, { opacity: fadeAnim }]}>
-        {/* Hero */}
-        <View style={s.hero}>
-          <Image source={require('../assets/logo.png')} style={s.heroLogo} resizeMode="contain" />
-          <Text style={s.appName}>{t.appName}</Text>
-          <Text style={s.tagline}>{t.welcome.tagline}</Text>
-        </View>
-
-        {/* Feature list */}
-        <View style={s.features}>
-          {FEATURES.map((f) => (
-            <View key={f.text} style={s.featureRow}>
-              <View style={s.featureIcon}>
-                <Ionicons name={f.icon} size={20} color={colors.primary} />
-              </View>
-              <Text style={s.featureText}>{f.text}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* CTAs */}
-        <View style={s.ctas}>
-          <TouchableOpacity style={s.primaryBtn} onPress={handleStart} activeOpacity={0.85}>
-            <Text style={s.primaryBtnText}>{t.welcome.discoverBtn}</Text>
-            <Ionicons name="arrow-forward" size={18} color="#fff" />
-          </TouchableOpacity>
-
-          {savedCards.length > 0 && (
-            <TouchableOpacity style={s.secondaryBtn} onPress={handleMyCards} activeOpacity={0.85}>
-              <Ionicons name="card-outline" size={18} color={colors.primary} />
-              <Text style={s.secondaryBtnText}>
-                {t.welcome.myCardsBtn} ({savedCards.length})
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+    <ScreenFixed style={s.page}>
+      <Animated.View entering={enter(0)} style={s.hero}>
+        <Image source={require('../assets/logo.png')} style={s.logo} resizeMode="contain" />
+        <Txt v="largeTitle" style={s.center} accessibilityRole="header">
+          {t.appName}
+        </Txt>
+        <Txt v="body" tone="secondary" style={s.center}>
+          {t.welcome.tagline}
+        </Txt>
       </Animated.View>
-    </SafeAreaView>
+
+      <View style={s.features}>
+        {FEATURES.map((f, i) => (
+          <Animated.View key={f.text} entering={enter(i + 1)} style={s.featureRow}>
+            <View style={s.featureIcon}>
+              <Ionicons name={f.icon} size={24} color={colors.primary} />
+            </View>
+            <Txt v="callout" style={s.featureText}>
+              {f.text}
+            </Txt>
+          </Animated.View>
+        ))}
+      </View>
+
+      <Animated.View entering={enter(4)} style={s.actions}>
+        <Button title={t.welcome.discoverBtn} onPress={handleStart} />
+        {savedCards.length > 0 && (
+          <Button
+            variant="tinted"
+            icon="card-outline"
+            title={`${t.welcome.myCardsBtn} (${savedCards.length})`}
+            onPress={handleMyCards}
+          />
+        )}
+      </Animated.View>
+    </ScreenFixed>
   )
 }
 
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  splash: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
-  splashLogo: { width: 120, height: 120 },
-  splashAppName: { color: colors.ink, fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
-
-  safe: { flex: 1, backgroundColor: colors.bg },
-  content: { flex: 1, paddingHorizontal: 28, justifyContent: 'space-between', paddingVertical: 32 },
-
-  hero: { alignItems: 'center', gap: 10, marginTop: 24 },
-  heroLogo: { width: 120, height: 120 },
-  appName: { color: colors.ink, fontSize: 36, fontWeight: '900', letterSpacing: -0.8 },
-  tagline: { color: colors.inkSoft, fontSize: 16, textAlign: 'center', lineHeight: 24 },
-
-  features: { gap: 12 },
-  featureRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, padding: 16,
-    borderWidth: 1, borderColor: colors.border,
-    ...shadows.card,
-  },
-  featureIcon: {
-    width: 42, height: 42, borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  featureText: { color: colors.inkMid, fontSize: 14, flex: 1, lineHeight: 20, fontWeight: '500' },
-
-  ctas: { gap: 12 },
-  primaryBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: colors.primary, borderRadius: radius.lg,
-    paddingVertical: 16,
-    ...shadows.primaryBtn,
-  },
-  primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 17 },
-  secondaryBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: colors.primarySoft,
-    borderRadius: radius.lg, paddingVertical: 14,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-  },
-  secondaryBtnText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
-}))
+const s = StyleSheet.create({
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24 },
+  loadingLogo: { width: 96, height: 96 },
+  page: { justifyContent: 'space-between', paddingVertical: 24 },
+  hero: { alignItems: 'center', gap: 8, marginTop: 40 },
+  logo: { width: 104, height: 104, marginBottom: 8 },
+  center: { textAlign: 'center' },
+  features: { gap: 20, paddingHorizontal: 8 },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  featureIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', ...continuous },
+  featureText: { flex: 1 },
+  actions: { gap: 10 },
+})

@@ -1,76 +1,42 @@
-import { Tabs } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { NativeTabs } from 'expo-router/native-tabs'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { useTheme } from '@/theme'
+import { colors } from '@/theme'
 
+/**
+ * The platform's real tab bar (Liquid Glass on iOS 26, system tab bar before, Material on Android).
+ * Four peer sections, single-word labels, filled symbol when selected. Tabs never slide.
+ */
 export default function TabLayout() {
   const { language, totalRewards } = useClientStore()
   const t = getTranslation(language)
-  const insets = useSafeAreaInsets()
-  const colors = useTheme()
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        sceneStyle: { backgroundColor: colors.bg },
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
-          height: 62 + insets.bottom,
-          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-          paddingTop: 6,
-        },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.inkFaint,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-      }}
+    <NativeTabs
+      tintColor={colors.primary}
+      iconColor={{ default: colors.labelSecondary, selected: colors.primary }}
+      labelStyle={{ default: { color: colors.labelSecondary }, selected: { color: colors.primary } }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Home',
-          tabBarLabel: t.tabs.home,
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: t.discoverPartners,
-          tabBarLabel: t.tabs.partners,
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: t.dashboard.title,
-          tabBarLabel: t.tabs.myCards,
-          tabBarBadge: totalRewards > 0 ? totalRewards : undefined,
-          tabBarBadgeStyle: { backgroundColor: colors.primary, color: '#fff', fontSize: 10, fontWeight: '700' },
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'card' : 'card-outline'} size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: t.profile.title,
-          tabBarLabel: t.tabs.profile,
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+      <NativeTabs.Trigger name="home">
+        <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
+        <NativeTabs.Trigger.Label>{t.tabs.home}</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="partners">
+        <NativeTabs.Trigger.Icon sf={{ default: 'safari', selected: 'safari.fill' }} md="explore" />
+        <NativeTabs.Trigger.Label>{t.tabs.partners}</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="dashboard">
+        <NativeTabs.Trigger.Icon sf={{ default: 'creditcard', selected: 'creditcard.fill' }} md="credit_card" />
+        <NativeTabs.Trigger.Label>{t.tabs.myCards}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Badge hidden={totalRewards <= 0}>{String(totalRewards)}</NativeTabs.Trigger.Badge>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="profile">
+        <NativeTabs.Trigger.Icon sf={{ default: 'person', selected: 'person.fill' }} md="person" />
+        <NativeTabs.Trigger.Label>{t.tabs.profile}</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   )
 }

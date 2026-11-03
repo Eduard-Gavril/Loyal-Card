@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import {
-  View, Text, TouchableOpacity, StyleSheet, Modal,
-  TextInput, ScrollView, ActivityIndicator, Linking,
-  KeyboardAvoidingView, Platform, RefreshControl, Image,
-} from 'react-native'
+import { View, StyleSheet, Linking, RefreshControl } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import { colors, continuous } from '@/theme'
 import TiltCard from '@/components/TiltCard'
+import { ScreenScroll } from '@/ui/Screen'
+import { ListGroup, ListRow } from '@/ui/List'
+import Button from '@/ui/Button'
+import Sheet from '@/ui/Sheet'
+import Field from '@/ui/Field'
+import StampCard from '@/ui/StampCard'
+import Txt from '@/ui/Txt'
+import { Ionicons } from '@expo/vector-icons'
 
 const CONTACT_EMAIL = 'eduardgavril.1999@gmail.com'
 const WEBSITE_URL = 'https://loyalcard.net'
@@ -28,8 +30,6 @@ export default function HomeScreen() {
   const { language, savedCards, displayName } = useClientStore()
   const t = getTranslation(language)
   const h = t.home
-  const colors = useTheme()
-  const s = themedStyles(colors)
 
   const [contactOpen, setContactOpen] = useState(false)
   const [form, setForm] = useState({ name: displayName ?? '', email: '', shop: '', city: '', message: '' })
@@ -72,457 +72,151 @@ export default function HomeScreen() {
 
   function closeContact() {
     setContactOpen(false)
-    setTimeout(() => { setSent(false); setFormError('') }, 300)
+    setTimeout(() => {
+      setSent(false)
+      setFormError('')
+    }, 300)
   }
 
   return (
-    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
-      <ScrollView
-        contentContainerStyle={s.scroll}
-        showsVerticalScrollIndicator={false}
-        bounces
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }
+    <>
+      <ScreenScroll
+        title={t.tabs.home}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />}
+        bottomPad={40}
       >
-        {/* Top bar */}
-        <View style={s.topBar}>
-          <View style={s.brandRow}>
-            <Image source={require('../../assets/logo.png')} style={s.brandLogo} resizeMode="contain" />
-            <Text style={s.brandName}>LoyalCard</Text>
-          </View>
-          {hasCards && (
-            <TouchableOpacity
-              style={s.cardsPill}
-              onPress={() => router.push('/(tabs)/dashboard')}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="card" size={13} color={colors.primary} />
-              <Text style={s.cardsPillText}>{h.cardCount(savedCards.length)}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Greeting */}
         {hasCards && (
-          <Text style={s.greetingText}>
+          <Txt v="subhead" tone="secondary" style={s.greeting}>
             {displayName ? `${getTimeGreeting(t)}, ${displayName}` : `${getTimeGreeting(t)}!`}
-          </Text>
+          </Txt>
         )}
 
-        {/* Hero copy */}
         <View style={s.hero}>
-          <Text style={s.tagline1}>{h.tagline1}</Text>
-          <Text style={s.tagline2}>{h.tagline2}</Text>
-          <Text style={s.subtitle}>{h.subtitle}</Text>
+          <Txt v="title1">{h.tagline1}</Txt>
+          <Txt v="title1" tone="tint">
+            {h.tagline2}
+          </Txt>
+          <Txt v="body" tone="secondary" style={{ marginTop: 8 }}>
+            {h.subtitle}
+          </Txt>
         </View>
 
-        {/* Night loyalty-card visuals — two examples: in progress, and
-            completed with a reward ready. Each tilts in 3D with the phone's
-            motion, same effect as the real QR card. */}
-        <TiltCard style={s.nightCard}>
-          <View style={s.nightBlob1} pointerEvents="none" />
-          <View style={s.nightBlob2} pointerEvents="none" />
-          <View style={s.nightTop}>
-            <Text style={s.nightBrand}>LOYALCARD</Text>
-            <Ionicons name="qr-code" size={22} color={colors.violetLight} />
-          </View>
-          <View style={s.nightStamps}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <View key={i} style={[s.stampDot, i < 4 && s.stampDotFilled]}>
-                {i < 4 && <Ionicons name="checkmark" size={12} color="#fff" />}
-              </View>
-            ))}
-          </View>
-          <View style={s.nightBottom}>
-            <View>
-              <Text style={s.nightLabel}>{t.dashboard.stamps.toUpperCase()}</Text>
-              <Text style={s.nightValue}>4 / 6</Text>
-            </View>
-            <View style={s.nightReward}>
-              <Ionicons name="gift-outline" size={14} color={colors.violetLight} />
-              <Text style={s.nightRewardText}>{t.dashboard.rewards}</Text>
-            </View>
-          </View>
+        {/* Two example cards: in progress, and complete with a reward ready. They tilt with the phone, like the real card. */}
+        <TiltCard style={s.cardWrap}>
+          <StampCard title="LoyalCard" count={4} total={6} stampsLabel={t.dashboard.stamps} rewardLabel={t.dashboard.rewards} />
+        </TiltCard>
+        <TiltCard style={s.cardWrap}>
+          <StampCard title="LoyalCard" count={6} total={6} stampsLabel={t.dashboard.stamps} readyLabel={t.card.rewardReady} />
         </TiltCard>
 
-        <TiltCard style={s.nightCard}>
-          <View style={[s.nightBlob1, s.nightBlob1Done]} pointerEvents="none" />
-          <View style={[s.nightBlob2, s.nightBlob2Done]} pointerEvents="none" />
-          <View style={s.nightTop}>
-            <Text style={s.nightBrand}>LOYALCARD</Text>
-            <Ionicons name="qr-code" size={22} color={colors.violetLight} />
-          </View>
-          <View style={s.nightStamps}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <View key={i} style={[s.stampDot, s.stampDotFilled]}>
-                <Ionicons name="checkmark" size={12} color="#fff" />
-              </View>
-            ))}
-          </View>
-          <View style={s.nightBottom}>
-            <View>
-              <Text style={s.nightLabel}>{t.dashboard.stamps.toUpperCase()}</Text>
-              <Text style={s.nightValue}>6 / 6</Text>
-            </View>
-            <View style={s.nightRewardReady}>
-              <Ionicons name="gift" size={14} color="#6EE7B7" />
-              <Text style={s.nightRewardReadyText}>{t.card.rewardReady}</Text>
-            </View>
-          </View>
-        </TiltCard>
-
-        {/* Stats — conversion pitch for first-time visitors only; someone
-            with cards already knows the app is free and digital */}
+        {/* Pitch numbers: only for first-time visitors */}
         {!hasCards && (
-          <View style={s.statsRow}>
+          <View style={s.stats}>
             {[
               { val: h.stat1Val, label: h.stat1Label },
               { val: h.stat2Val, label: h.stat2Label },
               { val: h.stat3Val, label: h.stat3Label },
             ].map((stat) => (
-              <View key={stat.label} style={s.statBox}>
-                <Text style={s.statVal}>{stat.val}</Text>
-                <Text style={s.statLabel}>{stat.label}</Text>
+              <View key={stat.label} style={s.stat}>
+                <Txt v="title2" tone="tint">
+                  {stat.val}
+                </Txt>
+                <Txt v="footnote" tone="secondary">
+                  {stat.label}
+                </Txt>
               </View>
             ))}
           </View>
         )}
 
-        {/* One primary action */}
-        <View style={s.ctas}>
-          <TouchableOpacity
-            style={s.primaryBtn}
-            onPress={() => router.navigate('/(tabs)/' as any)}
-            activeOpacity={0.85}
-          >
-            <View style={s.primaryIconCircle}>
-              <Ionicons name="compass" size={18} color="#fff" />
-            </View>
-            <Text style={s.primaryBtnText}>{h.discoverBtn}</Text>
-            <View style={s.btnArrowCircle}>
-              <Ionicons name="arrow-forward" size={14} color={colors.primary} />
-            </View>
-          </TouchableOpacity>
-        </View>
+        {/* One filled button on the screen */}
+        <Button title={h.discoverBtn} icon="compass" onPress={() => router.navigate('/(tabs)/partners' as any)} style={{ marginBottom: 28 }} />
 
-        {/* Secondary/utility links — grouped at equal, lower weight so they
-            don't compete with the primary action above */}
-        <View style={s.moreCard}>
-          <TouchableOpacity
-            style={s.moreRow}
-            onPress={() => { setContactOpen(true); setSent(false) }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="storefront-outline" size={18} color={colors.inkSoft} style={s.moreRowIcon} />
-            <Text style={s.moreRowText}>{h.partnerBtn}</Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />
-          </TouchableOpacity>
-          <View style={s.moreDivider} />
-          <TouchableOpacity
-            style={s.moreRow}
-            onPress={() => Linking.openURL(HELP_URL)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="help-buoy-outline" size={18} color={colors.inkSoft} style={s.moreRowIcon} />
-            <Text style={s.moreRowText}>{t.profile.needHelp}</Text>
-            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
-          </TouchableOpacity>
-          <View style={s.moreDivider} />
-          <TouchableOpacity
-            style={s.moreRow}
-            onPress={() => Linking.openURL(WEBSITE_URL)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="globe-outline" size={18} color={colors.inkSoft} style={s.moreRowIcon} />
-            <Text style={s.moreRowText}>{h.learnMore}</Text>
-            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
-          </TouchableOpacity>
-        </View>
+        <ListGroup>
+          {hasCards && <ListRow icon="card-outline" title={t.tabs.myCards} value={h.cardCount(savedCards.length)} onPress={() => router.push('/(tabs)/dashboard')} />}
+          <ListRow
+            icon="storefront-outline"
+            title={h.partnerBtn}
+            onPress={() => {
+              setContactOpen(true)
+              setSent(false)
+            }}
+          />
+          <ListRow icon="help-buoy-outline" title={t.profile.needHelp} onPress={() => Linking.openURL(HELP_URL)} right={<Ionicons name="open-outline" size={16} color={colors.labelTertiary} />} chevron={false} />
+          <ListRow icon="globe-outline" title={h.learnMore} onPress={() => Linking.openURL(WEBSITE_URL)} right={<Ionicons name="open-outline" size={16} color={colors.labelTertiary} />} chevron={false} />
+        </ListGroup>
 
-        <Text style={s.footer}>LoyalCard • loyalcard.net</Text>
-      </ScrollView>
+        <Txt v="caption1" tone="tertiary" style={s.footer}>
+          LoyalCard • loyalcard.net
+        </Txt>
+      </ScreenScroll>
 
-      {/* Contact modal */}
-      <Modal
+      <Sheet
         visible={contactOpen}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={closeContact}
+        title={h.contactTitle}
+        cancelLabel={t.dashboard.cancel}
+        onClose={closeContact}
+        onDone={sent ? undefined : handleSend}
+        doneLabel={sent ? undefined : h.contactSend}
+        doneDisabled={sending}
       >
-        <SafeAreaView style={s.modal}>
-          <View style={s.modalHeader}>
-            <TouchableOpacity style={s.modalClose} onPress={closeContact}>
-              <Ionicons name="close" size={20} color={colors.ink} />
-            </TouchableOpacity>
-            <View style={{ flex: 1 }}>
-              <Text style={s.modalTitle}>{h.contactTitle}</Text>
-              <Text style={s.modalSub}>{h.contactSubtitle}</Text>
+        {sent ? (
+          <View style={s.sent}>
+            <View style={s.sentIcon}>
+              <Ionicons name="checkmark" size={38} color={colors.success} />
             </View>
+            <Txt v="title3" style={s.center}>
+              {h.contactSentTitle}
+            </Txt>
+            <Txt v="subhead" tone="secondary" style={s.center}>
+              {h.contactSentDesc}
+            </Txt>
+            <Button title={h.contactClose} onPress={closeContact} style={{ alignSelf: 'stretch', marginTop: 12 }} />
           </View>
-
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          >
-            <ScrollView contentContainerStyle={s.modalBody} showsVerticalScrollIndicator={false}>
-              {sent ? (
-                <View style={s.sentBox}>
-                  <View style={s.sentIconWrap}>
-                    <Ionicons name="checkmark" size={40} color={colors.success} />
-                  </View>
-                  <Text style={s.sentTitle}>{h.contactSentTitle}</Text>
-                  <Text style={s.sentDesc}>{h.contactSentDesc}</Text>
-                  <TouchableOpacity style={[s.sendBtn, { alignSelf: 'stretch' }]} onPress={closeContact}>
-                    <Text style={s.sendBtnText}>{h.contactClose}</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <>
-                  <Field label={`${h.contactName} *`} value={form.name} placeholder={h.contactNamePlaceholder}
-                    onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
-                  <Field label={`${h.contactEmail} *`} value={form.email} placeholder={h.contactEmailPlaceholder}
-                    onChange={(v) => setForm((f) => ({ ...f, email: v }))}
-                    keyboardType="email-address" autoCapitalize="none" />
-                  <Field label={`${h.contactShop} *`} value={form.shop} placeholder={h.contactShopPlaceholder}
-                    onChange={(v) => setForm((f) => ({ ...f, shop: v }))} />
-                  <Field label={h.contactCity} value={form.city} placeholder={h.contactCityPlaceholder}
-                    onChange={(v) => setForm((f) => ({ ...f, city: v }))} />
-                  <Field label={h.contactMsg} value={form.message}
-                    placeholder={h.contactMsgPlaceholder}
-                    onChange={(v) => setForm((f) => ({ ...f, message: v }))}
-                    multiline numberOfLines={4} />
-
-                  {formError ? (
-                    <View style={s.errorBox}>
-                      <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
-                      <Text style={s.errorText}>{formError}</Text>
-                    </View>
-                  ) : null}
-
-                  <TouchableOpacity
-                    style={[s.sendBtn, sending && s.btnDisabled]}
-                    onPress={handleSend}
-                    disabled={sending}
-                    activeOpacity={0.85}
-                  >
-                    {sending
-                      ? <ActivityIndicator color="#fff" />
-                      : <>
-                          <Ionicons name="send-outline" size={16} color="#fff" />
-                          <Text style={s.sendBtnText}>{h.contactSend}</Text>
-                        </>}
-                  </TouchableOpacity>
-
-                  <Text style={s.emailHint}>
-                    {h.contactEmailHint}{'\n'}
-                    {CONTACT_EMAIL}
-                  </Text>
-                </>
-              )}
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </Modal>
-    </SafeAreaView>
+        ) : (
+          <View style={{ gap: 16 }}>
+            <Txt v="subhead" tone="secondary">
+              {h.contactSubtitle}
+            </Txt>
+            <Field label={`${h.contactName} *`} value={form.name} placeholder={h.contactNamePlaceholder} onChangeText={(v) => setForm((f) => ({ ...f, name: v }))} />
+            <Field
+              label={`${h.contactEmail} *`}
+              value={form.email}
+              placeholder={h.contactEmailPlaceholder}
+              onChangeText={(v) => setForm((f) => ({ ...f, email: v }))}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <Field label={`${h.contactShop} *`} value={form.shop} placeholder={h.contactShopPlaceholder} onChangeText={(v) => setForm((f) => ({ ...f, shop: v }))} />
+            <Field label={h.contactCity} value={form.city} placeholder={h.contactCityPlaceholder} onChangeText={(v) => setForm((f) => ({ ...f, city: v }))} />
+            <Field label={h.contactMsg} value={form.message} placeholder={h.contactMsgPlaceholder} onChangeText={(v) => setForm((f) => ({ ...f, message: v }))} multiline />
+            {formError ? (
+              <Txt v="footnote" tone="danger">
+                {formError}
+              </Txt>
+            ) : null}
+            <Button title={h.contactSend} icon="send-outline" loading={sending} onPress={handleSend} />
+            <Txt v="footnote" tone="secondary" style={s.center}>
+              {h.contactEmailHint}
+              {'\n'}
+              {CONTACT_EMAIL}
+            </Txt>
+          </View>
+        )}
+      </Sheet>
+    </>
   )
 }
 
-function Field({
-  label, value, onChange, placeholder = '', multiline = false,
-  numberOfLines = 1, keyboardType = 'default' as any, autoCapitalize = 'sentences' as any,
-}: {
-  label: string; value: string; onChange: (v: string) => void
-  placeholder?: string; multiline?: boolean; numberOfLines?: number
-  keyboardType?: any; autoCapitalize?: any
-}) {
-  const colors = useTheme()
-  const s = themedStyles(colors)
-  return (
-    <View style={s.field}>
-      <Text style={s.fieldLabel}>{label}</Text>
-      <TextInput
-        style={[s.fieldInput, multiline && { minHeight: numberOfLines * 40, textAlignVertical: 'top', paddingTop: 12 }]}
-        value={value}
-        onChangeText={onChange}
-        placeholder={placeholder}
-        placeholderTextColor={colors.inkFaint}
-        multiline={multiline}
-        numberOfLines={multiline ? numberOfLines : 1}
-        keyboardType={keyboardType}
-        autoCapitalize={autoCapitalize}
-      />
-    </View>
-  )
-}
-
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  scroll: { paddingHorizontal: 20, paddingBottom: 48, paddingTop: 8 },
-
-  // Top bar
-  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  brandLogo: { width: 32, height: 32 },
-  brandName: { color: colors.ink, fontSize: 19, fontWeight: '800', letterSpacing: -0.4 },
-  cardsPill: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: colors.primarySoft, borderRadius: radius.pill,
-    paddingHorizontal: 11, paddingVertical: 6,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-  },
-  cardsPillText: { color: colors.primary, fontSize: 12, fontWeight: '700' },
-
-  greetingText: { color: colors.inkSoft, fontSize: 14, fontWeight: '500', marginTop: 12 },
-
-  // Hero
-  hero: { paddingTop: 20, paddingBottom: 24, gap: 2 },
-  tagline1: { color: colors.ink, fontSize: 32, fontWeight: '900', lineHeight: 38, letterSpacing: -1 },
-  tagline2: { color: colors.primary, fontSize: 32, fontWeight: '900', lineHeight: 38, letterSpacing: -1 },
-  subtitle: { color: colors.inkSoft, fontSize: 15, lineHeight: 22, marginTop: 10, paddingRight: 24 },
-
-  // Night card visual
-  nightCard: {
-    backgroundColor: colors.night,
-    borderRadius: radius.xl,
-    padding: 22,
-    gap: 20,
-    overflow: 'hidden',
-    marginBottom: 20,
-    ...shadows.night,
-  },
-  nightBlob1: { position: 'absolute', top: -70, right: -50, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(124,58,237,0.35)' },
-  nightBlob2: { position: 'absolute', bottom: -90, left: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(124,58,237,0.16)' },
-  // Completed-card example: green tint instead of violet, reinforcing "done"
-  nightBlob1Done: { backgroundColor: 'rgba(52,211,153,0.30)' },
-  nightBlob2Done: { backgroundColor: 'rgba(52,211,153,0.14)' },
-  nightTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  nightBrand: { color: colors.onNightSoft, fontSize: 12, fontWeight: '800', letterSpacing: 3 },
-  nightStamps: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  stampDot: {
-    width: 28, height: 28, borderRadius: 14,
-    borderWidth: 1.5, borderColor: colors.nightBorder,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  stampDotFilled: { backgroundColor: colors.violet, borderColor: colors.violet },
-  nightBottom: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  nightLabel: { color: colors.onNightSoft, fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
-  nightValue: { color: colors.onNight, fontSize: 22, fontWeight: '800', marginTop: 2 },
-  nightReward: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(124,58,237,0.25)',
-    borderWidth: 1, borderColor: 'rgba(167,139,250,0.35)',
-    borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6,
-  },
-  nightRewardText: { color: colors.violetLight, fontSize: 12, fontWeight: '700', textTransform: 'capitalize' },
-  nightRewardReady: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(52,211,153,0.22)',
-    borderWidth: 1, borderColor: 'rgba(52,211,153,0.45)',
-    borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6,
-  },
-  nightRewardReadyText: { color: '#6EE7B7', fontSize: 12, fontWeight: '700', textTransform: 'capitalize' },
-
-  // Stats
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
-  statBox: {
-    flex: 1, alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    paddingVertical: 16, gap: 3,
-    ...shadows.card,
-  },
-  statVal: { color: colors.ink, fontSize: 21, fontWeight: '900' },
-  statLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: '600' },
-
-  // CTA
-  ctas: { marginBottom: 14 },
-  primaryBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.primary, borderRadius: radius.lg,
-    paddingHorizontal: 16, paddingVertical: 15,
-    ...shadows.primaryBtn,
-  },
-  primaryIconCircle: {
-    width: 36, height: 36, borderRadius: radius.sm,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  primaryBtnText: { flex: 1, color: '#fff', fontWeight: '800', fontSize: 16 },
-  btnArrowCircle: {
-    width: 28, height: 28, borderRadius: 8,
-    backgroundColor: '#fff',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  // Secondary/utility links — one grouped card, equal low weight throughout
-  moreCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    marginBottom: 16, overflow: 'hidden',
-    ...shadows.card,
-  },
-  moreRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  moreRowIcon: { width: 20 },
-  moreRowText: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 14.5 },
-  moreDivider: { height: 1, backgroundColor: colors.border, marginLeft: 48 },
-
-  footer: { color: colors.inkFaint, fontSize: 12, textAlign: 'center', marginTop: 8 },
-
-  // Modal
-  modal: { flex: 1, backgroundColor: colors.bg },
-  modalHeader: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 14,
-    paddingHorizontal: 20, paddingVertical: 16,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  modalClose: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: colors.bgDeep,
-    alignItems: 'center', justifyContent: 'center', marginTop: 2,
-  },
-  modalTitle: { color: colors.ink, fontSize: 20, fontWeight: '800', letterSpacing: -0.3 },
-  modalSub: { color: colors.inkSoft, fontSize: 13, marginTop: 2 },
-  modalBody: { padding: 20, paddingBottom: 40 },
-
-  field: { marginBottom: 14 },
-  fieldLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 7 },
-  fieldInput: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderStrong,
-    color: colors.ink, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15,
-  },
-
-  errorBox: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: colors.dangerSoft, borderRadius: radius.sm,
-    padding: 12, marginBottom: 8,
-    borderWidth: 1, borderColor: colors.dangerBorder,
-  },
-  errorText: { color: colors.danger, fontSize: 13, flex: 1 },
-
-  sendBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: colors.primary, borderRadius: radius.lg,
-    paddingVertical: 15, marginTop: 4,
-    ...shadows.primaryBtn,
-  },
-  sendBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
-  btnDisabled: { opacity: 0.6 },
-  emailHint: { color: colors.inkFaint, fontSize: 12, textAlign: 'center', lineHeight: 18, marginTop: 14 },
-
-  sentBox: { alignItems: 'center', gap: 14, paddingVertical: 36 },
-  sentIconWrap: {
-    width: 80, height: 80, borderRadius: 40,
-    backgroundColor: colors.successSoft,
-    borderWidth: 1, borderColor: colors.successBorder,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  sentTitle: { color: colors.ink, fontSize: 22, fontWeight: '800' },
-  sentDesc: { color: colors.inkSoft, fontSize: 14, textAlign: 'center', lineHeight: 20, paddingHorizontal: 16 },
-}))
+const s = StyleSheet.create({
+  greeting: { marginBottom: 8 },
+  hero: { gap: 2, paddingTop: 4, paddingBottom: 24 },
+  cardWrap: { marginBottom: 16 },
+  stats: { flexDirection: 'row', gap: 10, marginTop: 8, marginBottom: 24 },
+  stat: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: 14, borderRadius: 18, backgroundColor: colors.grouped, ...continuous },
+  footer: { textAlign: 'center', marginTop: -8 },
+  sent: { alignItems: 'center', gap: 10, paddingVertical: 32 },
+  sentIcon: { width: 76, height: 76, borderRadius: 24, backgroundColor: colors.successSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 4, ...continuous },
+  center: { textAlign: 'center' },
+})

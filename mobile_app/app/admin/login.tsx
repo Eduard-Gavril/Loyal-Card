@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { supabase } from '@/lib/supabase'
 import { useAdminStore } from '@/store'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import { colors, continuous } from '@/theme'
+import AmbientBackground from '@/components/AmbientBackground'
+import Button from '@/ui/Button'
+import Field from '@/ui/Field'
+import PressableScale from '@/ui/PressableScale'
+import Txt from '@/ui/Txt'
 
 export default function AdminLoginScreen() {
-  const colors = useTheme()
-  const s = themedStyles(colors)
   const router = useRouter()
   const { setAuth } = useAdminStore()
 
@@ -50,114 +52,71 @@ export default function AdminLoginScreen() {
   }
 
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={colors.ink} />
-          <Text style={s.backText}>Indietro</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={s.body}>
-        <View style={s.iconWrap}>
-          <Ionicons name="shield-checkmark-outline" size={40} color={colors.onNight} />
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <AmbientBackground />
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={s.body}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={s.icon}>
+          <Ionicons name="shield-checkmark" size={34} color={colors.onPrimary} />
         </View>
-        <Text style={s.title}>Admin Login</Text>
-        <Text style={s.sub}>Accesso riservato agli amministratori</Text>
+        <Txt v="title1" style={s.center} accessibilityRole="header">
+          Admin Login
+        </Txt>
+        <Txt v="subhead" tone="secondary" style={[s.center, { marginBottom: 28 }]}>
+          Accesso riservato agli amministratori
+        </Txt>
 
-        <View style={s.formCard}>
-          <TextInput
-            style={s.input}
+        <View style={{ gap: 14, alignSelf: 'stretch' }}>
+          <Field
+            label="Email"
             placeholder="Email"
-            placeholderTextColor={colors.inkFaint}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(v) => { setEmail(v); setError('') }}
             autoCapitalize="none"
+            autoCorrect={false}
             keyboardType="email-address"
             autoComplete="email"
+            textContentType="emailAddress"
           />
-          <View style={s.passWrap}>
-            <TextInput
-              style={[s.input, { flex: 1, marginBottom: 0, borderWidth: 0, backgroundColor: 'transparent' }]}
-              placeholder="Password"
-              placeholderTextColor={colors.inkFaint}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPass}
-              autoComplete="password"
-            />
-            <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPass(!showPass)}>
-              <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.inkFaint} />
-            </TouchableOpacity>
-          </View>
-
+          <Field
+            label="Password"
+            placeholder="Password"
+            value={password}
+            onChangeText={(v) => { setPassword(v); setError('') }}
+            secureTextEntry={!showPass}
+            autoComplete="password"
+            textContentType="password"
+            returnKeyType="go"
+            onSubmitEditing={handleLogin}
+            accessory={
+              <PressableScale accessibilityRole="button" accessibilityLabel={showPass ? 'Hide password' : 'Show password'} onPress={() => setShowPass(!showPass)} hitSlop={6} style={s.eye}>
+                <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.labelSecondary} />
+              </PressableScale>
+            }
+          />
           {error ? (
-            <View style={s.errorBox}>
-              <Ionicons name="alert-circle-outline" size={16} color={colors.danger} />
-              <Text style={s.errorText}>{error}</Text>
+            <View style={s.errorLine} accessibilityRole="alert">
+              <Ionicons name="alert-circle" size={16} color={colors.danger} />
+              <Txt v="footnote" tone="danger" style={{ flex: 1 }}>
+                {error}
+              </Txt>
             </View>
           ) : null}
-
-          <TouchableOpacity
-            style={[s.loginBtn, loading && s.loginBtnDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={s.loginBtnText}>Accedi</Text>}
-          </TouchableOpacity>
+          <Button title="Accedi" loading={loading} onPress={handleLogin} style={{ marginTop: 6 }} />
         </View>
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  header: { paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
-  body: { flex: 1, paddingHorizontal: 24, justifyContent: 'center', gap: 8, paddingBottom: 60 },
-  iconWrap: {
-    width: 84, height: 84, borderRadius: 24,
-    backgroundColor: colors.night,
-    alignItems: 'center', justifyContent: 'center',
-    alignSelf: 'center', marginBottom: 10,
-    ...shadows.night,
-  },
-  title: { color: colors.ink, fontSize: 28, fontWeight: '800', textAlign: 'center', letterSpacing: -0.5 },
-  sub: { color: colors.inkSoft, fontSize: 14, textAlign: 'center', marginBottom: 24 },
-
-  formCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border,
-    padding: 18, gap: 12,
-    ...shadows.card,
-  },
-  input: {
-    backgroundColor: colors.bgDeep,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    color: colors.ink, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15,
-  },
-  passWrap: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: colors.bgDeep,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    paddingRight: 12,
-  },
-  eyeBtn: { padding: 4 },
-  errorBox: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: colors.dangerSoft, borderRadius: radius.sm,
-    padding: 12, borderWidth: 1, borderColor: colors.dangerBorder,
-  },
-  errorText: { color: colors.danger, fontSize: 13, flex: 1 },
-  loginBtn: {
-    backgroundColor: colors.primary, borderRadius: radius.md,
-    paddingVertical: 15, alignItems: 'center', marginTop: 4,
-    ...shadows.primaryBtn,
-  },
-  loginBtnDisabled: { opacity: 0.6 },
-  loginBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-}))
+const s = StyleSheet.create({
+  body: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 32, gap: 4 },
+  icon: { alignSelf: 'center', width: 76, height: 76, borderRadius: 24, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: 16, ...continuous },
+  center: { textAlign: 'center' },
+  eye: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  errorLine: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 },
+})

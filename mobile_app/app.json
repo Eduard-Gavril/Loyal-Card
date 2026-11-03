@@ -4,13 +4,8 @@
     "slug": "loyalcard",
     "version": "1.0.1",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#FAF9F6"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "net.loyalcard.app",
@@ -21,19 +16,27 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-            "NSPrivacyAccessedAPITypeReasons": ["3B52.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "3B52.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
-            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
-            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
           }
         ]
       }
@@ -41,7 +44,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#17121F"
+        "backgroundColor": "#0B0907"
       },
       "package": "net.loyalcard.app",
       "versionCode": 2,
@@ -67,15 +70,23 @@
       ],
       "expo-localization",
       "expo-sharing",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "backgroundColor": "#0B0907",
+          "resizeMode": "cover"
+        }
+      ],
       "expo-status-bar",
       [
         "expo-notifications",
         {
           "icon": "./assets/icon.png",
-          "color": "#7c3aed"
+          "color": "#FFB12A"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "scheme": "loyalcard",
     "extra": {

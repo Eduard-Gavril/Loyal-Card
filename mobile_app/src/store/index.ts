@@ -24,7 +24,6 @@ interface ClientState {
   tenantSlug: string | null
   savedCards: CardData[]
   language: Language
-  darkMode: boolean
   hasOnboarded: boolean
   linkedPhone: string | null
   displayName: string | null
@@ -39,7 +38,6 @@ interface ClientState {
   lifetimeRewards: number
   loyaltySnapshot: LoyaltySnapshot
   setLanguage: (lang: Language) => void
-  setDarkMode: (v: boolean) => void
   setHasOnboarded: () => void
   setClientId: (id: string) => void
   setLinkedPhone: (phone: string) => void
@@ -60,7 +58,6 @@ export const useClientStore = create<ClientState>()(
       tenantSlug: null,
       savedCards: [],
       language: 'en',
-      darkMode: false,
       hasOnboarded: false,
       linkedPhone: null,
       displayName: null,
@@ -84,7 +81,6 @@ export const useClientStore = create<ClientState>()(
       getAllCards: () => get().savedCards,
       replaceAllCards: (cards) => set({ savedCards: cards }),
       setLanguage: (lang) => set({ language: lang }),
-      setDarkMode: (v) => set({ darkMode: v }),
       setHasOnboarded: () => set({ hasOnboarded: true }),
       setClientId: (id) => set({ clientId: id }),
       setLinkedPhone: (phone) => set({ linkedPhone: phone }),

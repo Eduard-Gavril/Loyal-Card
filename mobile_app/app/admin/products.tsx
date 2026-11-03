@@ -1,17 +1,23 @@
 import { useEffect, useState } from 'react'
-import {
-  View, Text, TouchableOpacity, StyleSheet, FlatList,
-  Modal, TextInput, Switch, Alert, ActivityIndicator, ScrollView,
-} from 'react-native'
-import { useRouter } from 'expo-router'
+import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native'
+import { Stack } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { api, supabase, ProductCategory } from '@/lib/supabase'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import { isPlanError, planErrorText } from '@/lib/plan'
+import { colors, continuous } from '@/theme'
 import { resolveCategoryIcon, CURATED_CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '@/lib/categoryIcons'
 import ProductIcon from '@/components/ProductIcon'
+import { ScreenScroll } from '@/ui/Screen'
+import { ListGroup, ListRow } from '@/ui/List'
+import Sheet from '@/ui/Sheet'
+import Field from '@/ui/Field'
+import Button from '@/ui/Button'
+import Segmented from '@/ui/Segmented'
+import PressableScale from '@/ui/PressableScale'
+import Empty from '@/ui/Empty'
+import Txt from '@/ui/Txt'
 
 interface Product {
   id: string
@@ -38,10 +44,28 @@ interface Rule {
 const emptyProduct = { name: '', emoji: DEFAULT_CATEGORY_ICON, category_id: '', price: '', scansRequired: '5' }
 const emptyRule = { name: '', description: '', buy_count: '5', reward_count: '1', discount_percent: '', priority: '1', reward_type: 'free_product' as 'free_product' | 'percentage_discount' }
 
+/** One selectable chip (category / icon): 44pt target, tinted when selected. */
+function Chip({ selected, onPress, icon, label }: { selected: boolean; onPress: () => void; icon?: keyof typeof Ionicons.glyphMap; label?: string }) {
+  return (
+    <PressableScale
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={label}
+      haptic="selection"
+      onPress={onPress}
+      style={[s.chip, selected && s.chipSelected, !label && s.chipIcon]}
+    >
+      {icon ? <Ionicons name={icon} size={18} color={selected ? colors.onPrimary : colors.labelSecondary} /> : null}
+      {label ? (
+        <Txt v="subhead" tone={selected ? 'onTint' : 'secondary'} style={{ fontWeight: selected ? '600' : '400' }}>
+          {label}
+        </Txt>
+      ) : null}
+    </PressableScale>
+  )
+}
+
 export default function AdminProductsScreen() {
-  const colors = useTheme()
-  const s = themedStyles(colors)
-  const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
   const t = getTranslation(language)
@@ -292,15 +316,15 @@ export default function AdminProductsScreen() {
         priority: parseInt(ruleForm.priority) || 1,
         active: true,
       }
-      if (editingRule) {
-        await supabase.from('reward_rules').update(payload).eq('id', editingRule.id)
-      } else {
-        await supabase.from('reward_rules').insert(payload)
-      }
+      // supabase-js returns the error instead of throwing it: without this check a refused save looked successful
+      const { error } = editingRule
+        ? await supabase.from('reward_rules').update(payload).eq('id', editingRule.id)
+        : await supabase.from('reward_rules').insert(payload)
+      if (error) throw error
       setRuleFormVisible(false)
       await loadData()
     } catch (e: any) {
-      Alert.alert(a.errorTitle, e?.message ?? a.errorSaveMsg)
+      Alert.alert(a.errorTitle, isPlanError(e) ? planErrorText(e) : e?.message ?? a.errorSaveMsg)
     } finally {
       setSavingRule(false)
     }
@@ -320,620 +344,266 @@ export default function AdminProductsScreen() {
   }
 
   async function toggleRuleActive(r: Rule) {
-    await supabase.from('reward_rules').update({ active: !r.active }).eq('id', r.id)
+    const { error } = await supabase.from('reward_rules').update({ active: !r.active }).eq('id', r.id)
+    if (error) {
+      Alert.alert(a.errorTitle, isPlanError(error) ? planErrorText(error) : error.message)
+      return
+    }
     setRules((prev) => prev.map((x) => x.id === r.id ? { ...x, active: !x.active } : x))
   }
 
   const productRules = (pid: string) => rules.filter((r) => r.product_id === pid)
 
   // ── RENDER ────────────────────────────────────────────────────
+  const cancel = t.dashboard.cancel
+
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={colors.ink} />
-          <Text style={s.backText}>{t.back}</Text>
-        </TouchableOpacity>
-        <Text style={s.headerTitle}>{a.products}</Text>
-        <View style={{ width: 80 }} />
-      </View>
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <PressableScale accessibilityRole="button" accessibilityLabel={a.newProductTitle} onPress={openAddProduct} haptic="light" hitSlop={6} style={s.headerBtn}>
+              <Ionicons name="add" size={28} color={colors.primary} />
+            </PressableScale>
+          ),
+        }}
+      />
 
-      <View style={s.actionRow}>
-        <TouchableOpacity style={s.actionBtnPrimary} onPress={openAddProduct}>
-          <Ionicons name="add" size={18} color="#fff" />
-          <Text style={s.actionBtnPrimaryText}>{a.newProductTitle}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={s.actionBtnSecondary} onPress={() => setCategoriesModal(true)}>
-          <Ionicons name="pricetag-outline" size={16} color="#fff" />
-          <Text style={s.actionBtnSecondaryText}>{a.manageCategoriesBtn}</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenScroll title={a.products} bottomPad={40}>
+        <ListGroup>
+          <ListRow icon="pricetag-outline" title={a.manageCategoriesBtn} value={String(categories.length)} onPress={() => setCategoriesModal(true)} />
+        </ListGroup>
 
-      {loading ? (
-        <View style={s.center}><ActivityIndicator size="large" color={colors.primary} /></View>
-      ) : (
-        <FlatList
-          data={products}
-          keyExtractor={(i) => i.id}
-          contentContainerStyle={s.list}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={s.center}>
-              <Ionicons name="cube-outline" size={48} color={colors.inkFaint} />
-              <Text style={s.emptyText}>{a.noProductsMsg}</Text>
-            </View>
-          }
-          renderItem={({ item: p }) => (
-            <View style={s.productCard}>
-              <View style={s.productTop}>
-                <View style={s.productLeft}>
-                  <View style={s.productEmojiWrap}>
-                    <ProductIcon emoji={p.metadata?.emoji} size={26} color={colors.ink} textStyle={s.productEmoji} />
-                  </View>
-                  <View>
-                    <Text style={s.productName}>{p.name}</Text>
-                    {p.product_categories?.name && (
-                      <View style={s.productCatRow}>
-                        <Ionicons name={resolveCategoryIcon(p.product_categories.icon)} size={11} color={colors.inkSoft} />
-                        <Text style={s.productCat}>{p.product_categories.name}</Text>
-                      </View>
-                    )}
-                    {p.price != null && <Text style={s.productPrice}>{p.price.toFixed(2)} lei</Text>}
-                  </View>
-                </View>
-                <Switch
-                  value={p.active}
-                  onValueChange={() => toggleProductActive(p)}
-                  trackColor={{ false: colors.borderStrong, true: colors.primary }}
-                  thumbColor="#fff"
-                />
-              </View>
-
-              {/* Rules list */}
-              {productRules(p.id).length > 0 && (
-                <View style={s.rulesList}>
-                  {productRules(p.id).map((r) => (
-                    <View key={r.id} style={s.ruleChip}>
-                      <Ionicons
-                        name={r.active ? 'checkmark-circle' : 'pause-circle-outline'}
-                        size={13}
-                        color={r.active ? colors.primary : colors.inkFaint}
-                      />
-                      <Text style={s.ruleChipText} numberOfLines={1}>
-                        {r.name} · {r.buy_count} → {r.reward_count > 0 ? `×${r.reward_count}` : `${r.discount_percent}%`}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {/* Actions */}
-              <View style={s.productActions}>
-                <TouchableOpacity style={s.actionBtn} onPress={() => openRules(p)}>
-                  <Ionicons name="trophy-outline" size={15} color={colors.primary} />
-                  <Text style={s.actionText}>{a.rulesBtn}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={s.actionBtn} onPress={() => openEditProduct(p)}>
-                  <Ionicons name="pencil-outline" size={15} color={colors.primary} />
-                  <Text style={s.actionText}>{a.edit}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[s.actionBtn, s.actionBtnDanger]} onPress={() => handleDeleteProduct(p)}>
-                  <Ionicons name="trash-outline" size={15} color={colors.danger} />
-                  <Text style={[s.actionText, { color: colors.danger }]}>{t.dashboard.delete}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-        />
-      )}
-
-      {/* ── PRODUCT MODAL ─────────────────────────────────────── */}
-      <Modal visible={productModal} animationType="slide" presentationStyle="pageSheet">
-        <SafeAreaView style={s.modal}>
-          <View style={s.modalHeader}>
-            <TouchableOpacity onPress={() => setProductModal(false)}>
-              <Ionicons name="close" size={24} color={colors.ink} />
-            </TouchableOpacity>
-            <Text style={s.modalTitle}>{editingProduct ? a.editProductTitle : a.newProductTitle}</Text>
-            <TouchableOpacity onPress={handleSaveProduct} disabled={savingProduct}>
-              {savingProduct ? <ActivityIndicator color={colors.primary} /> : <Text style={s.modalSave}>{a.save}</Text>}
-            </TouchableOpacity>
+        {loading ? (
+          <View style={s.center}>
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
-          <ScrollView contentContainerStyle={s.modalBody}>
-            <Text style={s.fieldLabel}>{a.productNameLabel}</Text>
-            <TextInput
-              style={s.input}
-              placeholder={a.productNamePlaceholder}
-              placeholderTextColor={colors.inkFaint}
-              value={productForm.name}
-              onChangeText={(v) => setProductForm((f) => ({ ...f, name: v }))}
-            />
+        ) : products.length === 0 ? (
+          <Empty icon="cube-outline" title={a.noProductsMsg} actionLabel={a.newProductTitle} onAction={openAddProduct} />
+        ) : (
+          products.map((p) => {
+            const pr = productRules(p.id)
+            return (
+              <ListGroup key={p.id}>
+                <ListRow
+                  leading={
+                    <View style={s.productIcon}>
+                      <ProductIcon emoji={p.metadata?.emoji} size={24} color={colors.label} />
+                    </View>
+                  }
+                  title={p.name}
+                  subtitle={[p.product_categories?.name, p.price != null ? `${p.price.toFixed(2)} lei` : null].filter(Boolean).join(' · ') || undefined}
+                  switchValue={p.active}
+                  onSwitchChange={() => toggleProductActive(p)}
+                />
+                <ListRow icon="trophy-outline" title={a.rulesBtn} value={String(pr.length)} onPress={() => openRules(p)} />
+                <ListRow icon="pencil-outline" title={a.edit} onPress={() => openEditProduct(p)} />
+              </ListGroup>
+            )
+          })
+        )}
+      </ScreenScroll>
 
-            <Text style={s.fieldLabel}>{a.iconLabel}</Text>
-            <View style={s.emojiGrid}>
+      {/* ── PRODUCT SHEET ─────────────────────────────────────── */}
+      <Sheet
+        visible={productModal}
+        title={editingProduct ? a.editProductTitle : a.newProductTitle}
+        cancelLabel={cancel}
+        onClose={() => setProductModal(false)}
+        onDone={handleSaveProduct}
+        doneLabel={a.save}
+        doneDisabled={savingProduct}
+      >
+        <View style={{ gap: 18 }}>
+          <Field label={a.productNameLabel} placeholder={a.productNamePlaceholder} value={productForm.name} onChangeText={(v) => setProductForm((f) => ({ ...f, name: v }))} />
+
+          <View style={{ gap: 8 }}>
+            <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+              {a.iconLabel}
+            </Txt>
+            <View style={s.chips}>
               {CURATED_CATEGORY_ICONS.map((iconName) => (
-                <TouchableOpacity
-                  key={iconName}
-                  style={[s.emojiBtn, productForm.emoji === iconName && s.emojiBtnActive]}
-                  onPress={() => setProductForm((f) => ({ ...f, emoji: iconName }))}
-                >
-                  <Ionicons
-                    name={resolveCategoryIcon(iconName)}
-                    size={20}
-                    color={productForm.emoji === iconName ? colors.primary : colors.inkMid}
-                  />
-                </TouchableOpacity>
+                <Chip key={iconName} selected={productForm.emoji === iconName} icon={resolveCategoryIcon(iconName)} onPress={() => setProductForm((f) => ({ ...f, emoji: iconName }))} />
               ))}
             </View>
+          </View>
 
-            <Text style={s.fieldLabel}>{a.categoryLabel}</Text>
-            <View style={s.categoryChipsWrap}>
-              <TouchableOpacity
-                style={[s.categoryChip, !productForm.category_id && s.categoryChipActive]}
-                onPress={() => setProductForm((f) => ({ ...f, category_id: '' }))}
-              >
-                <Text style={[s.categoryChipText, !productForm.category_id && s.categoryChipTextActive]}>
-                  {a.noCategoryLabel}
-                </Text>
-              </TouchableOpacity>
-              {categories.map((cat) => {
-                const active = productForm.category_id === cat.id
-                return (
-                  <TouchableOpacity
-                    key={cat.id}
-                    style={[s.categoryChip, active && s.categoryChipActive]}
-                    onPress={() => setProductForm((f) => ({ ...f, category_id: cat.id }))}
-                  >
-                    <Ionicons
-                      name={resolveCategoryIcon(cat.icon)}
-                      size={13}
-                      color={active ? '#fff' : colors.inkMid}
-                    />
-                    <Text style={[s.categoryChipText, active && s.categoryChipTextActive]}>{cat.name}</Text>
-                  </TouchableOpacity>
-                )
-              })}
+          <View style={{ gap: 8 }}>
+            <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+              {a.categoryLabel}
+            </Txt>
+            <View style={s.chips}>
+              <Chip selected={!productForm.category_id} label={a.noCategoryLabel} onPress={() => setProductForm((f) => ({ ...f, category_id: '' }))} />
+              {categories.map((cat) => (
+                <Chip key={cat.id} selected={productForm.category_id === cat.id} icon={resolveCategoryIcon(cat.icon)} label={cat.name} onPress={() => setProductForm((f) => ({ ...f, category_id: cat.id }))} />
+              ))}
             </View>
             {categories.length === 0 && (
-              <Text style={s.categoryHint}>{a.noCategoriesYetHint}</Text>
+              <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+                {a.noCategoriesYetHint}
+              </Txt>
             )}
+          </View>
 
-            <Text style={s.fieldLabel}>{a.priceLabel}</Text>
-            <TextInput
-              style={s.input}
-              placeholder="0.00 lei"
-              placeholderTextColor={colors.inkFaint}
-              value={productForm.price}
-              onChangeText={(v) => setProductForm((f) => ({ ...f, price: v }))}
-              keyboardType="decimal-pad"
+          <Field label={a.priceLabel} placeholder="0.00 lei" value={productForm.price} onChangeText={(v) => setProductForm((f) => ({ ...f, price: v }))} keyboardType="decimal-pad" />
+
+          {!editingProduct && (
+            <Field label={a.scansForRewardLabel} placeholder="5" value={productForm.scansRequired} onChangeText={(v) => setProductForm((f) => ({ ...f, scansRequired: v }))} keyboardType="number-pad" />
+          )}
+
+          {editingProduct && (
+            <Button
+              variant="destructive"
+              icon="trash-outline"
+              title={t.dashboard.delete}
+              onPress={() => {
+                const p = editingProduct
+                setProductModal(false)
+                setTimeout(() => handleDeleteProduct(p), 350)
+              }}
+              style={{ marginTop: 8 }}
             />
+          )}
+        </View>
+      </Sheet>
 
-            {!editingProduct && (
-              <>
-                <Text style={s.fieldLabel}>{a.scansForRewardLabel}</Text>
-                <TextInput
-                  style={s.input}
-                  placeholder="5"
-                  placeholderTextColor={colors.inkFaint}
-                  value={productForm.scansRequired}
-                  onChangeText={(v) => setProductForm((f) => ({ ...f, scansRequired: v }))}
-                  keyboardType="number-pad"
-                />
-              </>
-            )}
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-
-      {/* ── CATEGORIES MODAL ──────────────────────────────────── */}
-      <Modal
+      {/* ── CATEGORIES SHEET ──────────────────────────────────── */}
+      <Sheet
         visible={categoriesModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => { setCategoriesModal(false); closeCategoryForm() }}
+        title={a.manageCategoriesBtn}
+        cancelLabel={cancel}
+        onClose={() => {
+          setCategoriesModal(false)
+          closeCategoryForm()
+        }}
       >
-        <SafeAreaView style={s.modal}>
-          <View style={s.modalHeader}>
-            <TouchableOpacity onPress={() => { setCategoriesModal(false); closeCategoryForm() }}>
-              <Ionicons name="close" size={24} color={colors.ink} />
-            </TouchableOpacity>
-            <Text style={s.modalTitle}>{a.manageCategoriesBtn}</Text>
-            <View style={{ width: 24 }} />
-          </View>
-          <ScrollView contentContainerStyle={s.modalBody}>
-            {categories.length === 0 ? (
-              <Text style={s.categoryHint}>{a.noCategoriesYetHint}</Text>
-            ) : (
-              <View style={{ gap: 8, marginBottom: 14 }}>
-                {categories.map((cat) => (
-                  <View key={cat.id} style={s.categoryManageRow}>
-                    <View style={s.categoryManageIcon}>
-                      <Ionicons name={resolveCategoryIcon(cat.icon)} size={16} color={colors.primary} />
+        <View style={{ gap: 16 }}>
+          {categories.length === 0 ? (
+            <Txt v="subhead" tone="secondary">
+              {a.noCategoriesYetHint}
+            </Txt>
+          ) : (
+            <ListGroup>
+              {categories.map((cat) => (
+                <ListRow
+                  key={cat.id}
+                  icon={resolveCategoryIcon(cat.icon)}
+                  title={cat.name}
+                  right={
+                    <View style={s.rowActions}>
+                      <PressableScale accessibilityRole="button" accessibilityLabel={a.edit} onPress={() => startEditCategory(cat)} hitSlop={4} style={s.iconBtn}>
+                        <Ionicons name="pencil-outline" size={20} color={colors.primary} />
+                      </PressableScale>
+                      <PressableScale accessibilityRole="button" accessibilityLabel={t.dashboard.delete} onPress={() => handleDeleteCategory(cat)} hitSlop={4} style={s.iconBtn}>
+                        <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                      </PressableScale>
                     </View>
-                    <Text style={s.categoryManageName} numberOfLines={1}>{cat.name}</Text>
-                    <TouchableOpacity style={s.categoryManageAction} onPress={() => startEditCategory(cat)}>
-                      <Ionicons name="pencil-outline" size={16} color={colors.primary} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={s.categoryManageAction} onPress={() => handleDeleteCategory(cat)}>
-                      <Ionicons name="trash-outline" size={16} color={colors.danger} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            )}
+                  }
+                />
+              ))}
+            </ListGroup>
+          )}
 
-            <View style={s.newCategoryBox}>
-              <View style={s.newCategoryEditRow}>
-                <Text style={s.newCategoryEditLabel}>
-                  {editingCategoryId ? a.editCategoryTitle : a.newCategoryNamePlaceholder}
-                </Text>
-                {editingCategoryId && (
-                  <TouchableOpacity onPress={closeCategoryForm}>
-                    <Ionicons name="close" size={18} color={colors.inkFaint} />
-                  </TouchableOpacity>
-                )}
-              </View>
-              <TextInput
-                style={s.input}
-                placeholder={a.newCategoryNamePlaceholder}
-                placeholderTextColor={colors.inkFaint}
-                value={newCategoryName}
-                onChangeText={setNewCategoryName}
-              />
-              <View style={s.iconPickerGrid}>
-                {CURATED_CATEGORY_ICONS.map((iconName) => (
-                  <TouchableOpacity
-                    key={iconName}
-                    style={[s.iconPickerBtn, newCategoryIcon === iconName && s.iconPickerBtnActive]}
-                    onPress={() => setNewCategoryIcon(iconName)}
-                  >
-                    <Ionicons
-                      name={resolveCategoryIcon(iconName)}
-                      size={16}
-                      color={newCategoryIcon === iconName ? '#fff' : colors.inkMid}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <TouchableOpacity
-                style={[s.newCategorySaveBtn, (!newCategoryName.trim() || savingCategory) && s.btnDisabled]}
-                onPress={handleSaveCategory}
-                disabled={!newCategoryName.trim() || savingCategory}
-              >
-                {savingCategory
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Text style={s.newCategorySaveBtnText}>{editingCategoryId ? a.save : a.createCategoryBtn}</Text>}
-              </TouchableOpacity>
+          <View style={s.formCard}>
+            <Txt v="headline">{editingCategoryId ? a.editCategoryTitle : a.newCategoryNamePlaceholder}</Txt>
+            <Field placeholder={a.newCategoryNamePlaceholder} value={newCategoryName} onChangeText={setNewCategoryName} accessibilityLabel={a.newCategoryNamePlaceholder} />
+            <View style={s.chips}>
+              {CURATED_CATEGORY_ICONS.map((iconName) => (
+                <Chip key={iconName} selected={newCategoryIcon === iconName} icon={resolveCategoryIcon(iconName)} onPress={() => setNewCategoryIcon(iconName)} />
+              ))}
             </View>
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-
-      {/* ── RULES MODAL ───────────────────────────────────────── */}
-      <Modal visible={rulesModal} animationType="slide" presentationStyle="pageSheet">
-        <SafeAreaView style={s.modal}>
-          <View style={s.modalHeader}>
-            <TouchableOpacity onPress={() => setRulesModal(false)}>
-              <Ionicons name="close" size={24} color={colors.ink} />
-            </TouchableOpacity>
-            <Text style={s.modalTitle} numberOfLines={1}>{a.rulesBtn} — {selectedProduct?.name}</Text>
-            <TouchableOpacity onPress={openAddRule}>
-              <Ionicons name="add-circle" size={26} color={colors.primary} />
-            </TouchableOpacity>
+            <Button
+              title={editingCategoryId ? a.save : a.createCategoryBtn}
+              loading={savingCategory}
+              disabled={!newCategoryName.trim()}
+              onPress={handleSaveCategory}
+            />
+            {editingCategoryId ? <Button variant="plain" title={cancel} onPress={closeCategoryForm} /> : null}
           </View>
-          <ScrollView contentContainerStyle={s.modalBody}>
-            {/* Existing rules */}
-            {productRules(selectedProduct?.id ?? '').map((r) => (
-              <View key={r.id} style={s.ruleCard}>
-                <View style={s.ruleCardTop}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.ruleName}>{r.name}</Text>
-                    <Text style={s.ruleSub}>
-                      {a.ruleSummaryLine(
-                        r.buy_count,
-                        r.reward_count > 0 ? a.freeRewardLabel(r.reward_count) : a.discountRewardLabel(r.discount_percent ?? 0),
-                        r.priority
-                      )}
-                    </Text>
-                    {r.description && <Text style={s.ruleDesc}>{r.description}</Text>}
-                  </View>
-                  <Switch
-                    value={r.active}
-                    onValueChange={() => toggleRuleActive(r)}
-                    trackColor={{ false: colors.borderStrong, true: colors.primary }}
-                    thumbColor="#fff"
-                    style={{ transform: [{ scale: 0.8 }] }}
-                  />
-                </View>
-                <View style={s.ruleActions}>
-                  <TouchableOpacity style={s.actionBtn} onPress={() => openEditRule(r)}>
-                    <Ionicons name="pencil-outline" size={14} color={colors.primary} />
-                    <Text style={s.actionText}>{a.edit}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[s.actionBtn, s.actionBtnDanger]} onPress={() => handleDeleteRule(r)}>
-                    <Ionicons name="trash-outline" size={14} color={colors.danger} />
-                    <Text style={[s.actionText, { color: colors.danger }]}>{t.dashboard.delete}</Text>
-                  </TouchableOpacity>
-                </View>
+        </View>
+      </Sheet>
+
+      {/* ── RULES SHEET ───────────────────────────────────────── */}
+      <Sheet
+        visible={rulesModal}
+        title={`${a.rulesBtn} — ${selectedProduct?.name ?? ''}`}
+        cancelLabel={cancel}
+        onClose={() => setRulesModal(false)}
+        onDone={openAddRule}
+        doneLabel="+"
+      >
+        <View style={{ gap: 16 }}>
+          {productRules(selectedProduct?.id ?? '').length > 0 && (
+            <ListGroup>
+              {productRules(selectedProduct?.id ?? '').map((r) => (
+                <ListRow
+                  key={r.id}
+                  title={r.name}
+                  subtitle={`${a.ruleSummaryLine(r.buy_count, r.reward_count > 0 ? a.freeRewardLabel(r.reward_count) : a.discountRewardLabel(r.discount_percent ?? 0), r.priority)}${r.description ? '\n' + r.description : ''}`}
+                  switchValue={r.active}
+                  onSwitchChange={() => toggleRuleActive(r)}
+                />
+              ))}
+            </ListGroup>
+          )}
+
+          {productRules(selectedProduct?.id ?? '').length > 0 && (
+            <ListGroup>
+              {productRules(selectedProduct?.id ?? '').map((r) => (
+                <ListRow key={r.id} icon="pencil-outline" title={`${a.edit}: ${r.name}`} onPress={() => openEditRule(r)} />
+              ))}
+              {productRules(selectedProduct?.id ?? '').map((r) => (
+                <ListRow key={'d' + r.id} icon="trash-outline" destructive title={`${t.dashboard.delete}: ${r.name}`} onPress={() => handleDeleteRule(r)} chevron={false} />
+              ))}
+            </ListGroup>
+          )}
+
+          {ruleFormVisible ? (
+            <View style={s.formCard}>
+              <Txt v="headline">{editingRule ? a.ruleFormEditTitle : a.ruleFormNewTitle}</Txt>
+              <Field label={a.ruleNameLabel} placeholder={a.ruleNamePlaceholder} value={ruleForm.name} onChangeText={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
+              <Field label={a.descriptionLabel} placeholder={a.descriptionPlaceholder} value={ruleForm.description} onChangeText={(v) => setRuleForm((f) => ({ ...f, description: v }))} />
+              <Field label={a.scansNeededLabel} placeholder="5" value={ruleForm.buy_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, buy_count: v }))} keyboardType="number-pad" />
+              <View style={{ gap: 6 }}>
+                <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+                  {a.rewardTypeLabel}
+                </Txt>
+                <Segmented
+                  options={[
+                    { value: 'free_product', label: a.freeProductOption },
+                    { value: 'percentage_discount', label: a.discountOption },
+                  ]}
+                  value={ruleForm.reward_type}
+                  onChange={(v) => setRuleForm((f) => ({ ...f, reward_type: v as 'free_product' | 'percentage_discount' }))}
+                />
               </View>
-            ))}
-
-            {/* Rule form */}
-            {ruleFormVisible && (
-              <View style={s.ruleFormBox}>
-                <Text style={s.ruleFormTitle}>{editingRule ? a.ruleFormEditTitle : a.ruleFormNewTitle}</Text>
-
-                <Text style={s.fieldLabel}>{a.ruleNameLabel}</Text>
-                <TextInput style={s.input} placeholder={a.ruleNamePlaceholder} placeholderTextColor={colors.inkFaint}
-                  value={ruleForm.name} onChangeText={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
-
-                <Text style={s.fieldLabel}>{a.descriptionLabel}</Text>
-                <TextInput style={s.input} placeholder={a.descriptionPlaceholder} placeholderTextColor={colors.inkFaint}
-                  value={ruleForm.description} onChangeText={(v) => setRuleForm((f) => ({ ...f, description: v }))} />
-
-                <Text style={s.fieldLabel}>{a.scansNeededLabel}</Text>
-                <TextInput style={s.input} placeholder="5" placeholderTextColor={colors.inkFaint}
-                  value={ruleForm.buy_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, buy_count: v }))}
-                  keyboardType="number-pad" />
-
-                <Text style={s.fieldLabel}>{a.rewardTypeLabel}</Text>
-                <View style={s.rewardTypeRow}>
-                  {(['free_product', 'percentage_discount'] as const).map((type) => (
-                    <TouchableOpacity
-                      key={type}
-                      style={[s.rewardTypeBtn, ruleForm.reward_type === type && s.rewardTypeBtnActive]}
-                      onPress={() => setRuleForm((f) => ({ ...f, reward_type: type }))}
-                    >
-                      <Text style={[s.rewardTypeText, ruleForm.reward_type === type && s.rewardTypeTextActive]}>
-                        {type === 'free_product' ? a.freeProductOption : a.discountOption}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {ruleForm.reward_type === 'free_product' ? (
-                  <>
-                    <Text style={s.fieldLabel}>{a.freeQuantityLabel}</Text>
-                    <TextInput style={s.input} placeholder="1" placeholderTextColor={colors.inkFaint}
-                      value={ruleForm.reward_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, reward_count: v }))}
-                      keyboardType="number-pad" />
-                  </>
-                ) : (
-                  <>
-                    <Text style={s.fieldLabel}>{a.discountPercentLabel}</Text>
-                    <TextInput style={s.input} placeholder="10" placeholderTextColor={colors.inkFaint}
-                      value={ruleForm.discount_percent} onChangeText={(v) => setRuleForm((f) => ({ ...f, discount_percent: v }))}
-                      keyboardType="number-pad" />
-                  </>
-                )}
-
-                <Text style={s.fieldLabel}>{a.priorityLabel}</Text>
-                <TextInput style={s.input} placeholder="1" placeholderTextColor={colors.inkFaint}
-                  value={ruleForm.priority} onChangeText={(v) => setRuleForm((f) => ({ ...f, priority: v }))}
-                  keyboardType="number-pad" />
-
-                <View style={s.ruleFormActions}>
-                  <TouchableOpacity style={s.cancelBtn} onPress={() => setRuleFormVisible(false)}>
-                    <Text style={s.cancelBtnText}>{t.dashboard.cancel}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[s.saveBtn, savingRule && s.btnDisabled]} onPress={handleSaveRule} disabled={savingRule}>
-                    {savingRule ? <ActivityIndicator size="small" color="#fff" /> : <Text style={s.saveBtnText}>{a.saveRuleBtn}</Text>}
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-    </SafeAreaView>
+              {ruleForm.reward_type === 'free_product' ? (
+                <Field label={a.freeQuantityLabel} placeholder="1" value={ruleForm.reward_count} onChangeText={(v) => setRuleForm((f) => ({ ...f, reward_count: v }))} keyboardType="number-pad" />
+              ) : (
+                <Field label={a.discountPercentLabel} placeholder="10" value={ruleForm.discount_percent} onChangeText={(v) => setRuleForm((f) => ({ ...f, discount_percent: v }))} keyboardType="number-pad" />
+              )}
+              <Field label={a.priorityLabel} placeholder="1" value={ruleForm.priority} onChangeText={(v) => setRuleForm((f) => ({ ...f, priority: v }))} keyboardType="number-pad" />
+              <Button title={a.saveRuleBtn} loading={savingRule} onPress={handleSaveRule} />
+              <Button variant="plain" title={cancel} onPress={() => setRuleFormVisible(false)} />
+            </View>
+          ) : (
+            <Button variant="tinted" icon="add-circle-outline" title={a.ruleFormNewTitle} onPress={openAddRule} />
+          )}
+        </View>
+      </Sheet>
+    </>
   )
 }
 
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-  },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
-  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
-  headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' },
-  addBtn: {
-    width: 36, height: 36, borderRadius: radius.sm,
-    backgroundColor: colors.primary,
-    alignItems: 'center', justifyContent: 'center',
-    ...shadows.primaryBtn,
-  },
-  list: { padding: 20, gap: 12, paddingBottom: 40 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 40 },
-  emptyText: { color: colors.inkSoft, fontSize: 14, textAlign: 'center' },
-
-  productCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, gap: 12,
-    ...shadows.card,
-  },
-  productTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  productLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  productEmojiWrap: {
-    width: 48, height: 48, borderRadius: radius.md,
-    backgroundColor: colors.bgDeep,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  productEmoji: { fontSize: 26 },
-  productName: { color: colors.ink, fontWeight: '700', fontSize: 16 },
-  productCatRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  productCat: { color: colors.inkSoft, fontSize: 12 },
-  productPrice: { color: colors.primary, fontSize: 13, marginTop: 2, fontWeight: '600' },
-
-  rulesList: { gap: 6 },
-  ruleChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: colors.primarySoft, borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 6,
-  },
-  ruleChipText: { color: colors.inkMid, fontSize: 12, flex: 1 },
-
-  productActions: { flexDirection: 'row', gap: 8 },
-  actionBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
-    paddingVertical: 8, borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-  },
-  actionBtnDanger: { backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder },
-  actionText: { color: colors.primary, fontWeight: '700', fontSize: 12 },
-
-  modal: { flex: 1, backgroundColor: colors.bg },
-  modalHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
-    backgroundColor: colors.surface,
-    gap: 12,
-  },
-  modalTitle: { color: colors.ink, fontSize: 17, fontWeight: '800', flex: 1, textAlign: 'center' },
-  modalSave: { color: colors.primary, fontWeight: '700', fontSize: 16 },
-  modalBody: { padding: 20, gap: 4, paddingBottom: 40 },
-
-  fieldLabel: {
-    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
-    textTransform: 'uppercase', letterSpacing: 0.8,
-    marginTop: 12, marginBottom: 6,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderStrong,
-    color: colors.ink, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15,
-  },
-
-  emojiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  emojiBtn: {
-    width: 44, height: 44,
-    alignItems: 'center', justifyContent: 'center',
-    borderRadius: radius.sm,
-    backgroundColor: colors.surface,
-    borderWidth: 1, borderColor: colors.borderStrong,
-  },
-  emojiBtnActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft, borderWidth: 1.5 },
-  emojiChar: { fontSize: 22 },
-
-  categoryChipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
-  categoryChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    paddingHorizontal: 11, paddingVertical: 7,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  categoryChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  categoryChipText: { color: colors.inkMid, fontSize: 12.5, fontWeight: '600' },
-  categoryChipTextActive: { color: '#fff' },
-  categoryChipAdd: {
-    width: 30, height: 30, borderRadius: 15,
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: colors.primarySoft,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-  },
-  categoryHint: { color: colors.inkFaint, fontSize: 11, marginTop: 6 },
-
-  actionRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 14 },
-  actionBtnPrimary: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: colors.success, borderRadius: radius.md, paddingVertical: 13,
-    ...shadows.primaryBtn,
-  },
-  actionBtnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 13.5 },
-  actionBtnSecondary: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: 13,
-    ...shadows.primaryBtn,
-  },
-  actionBtnSecondaryText: { color: '#fff', fontWeight: '700', fontSize: 13.5 },
-
-  categoryManageRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: colors.bgDeep, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border,
-    paddingHorizontal: 12, paddingVertical: 10,
-  },
-  categoryManageIcon: {
-    width: 28, height: 28, borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  categoryManageName: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 13.5 },
-  categoryManageAction: {
-    width: 30, height: 30, borderRadius: radius.sm,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  newCategoryBox: {
-    marginTop: 10, padding: 12, gap: 10,
-    backgroundColor: colors.bgDeep, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  newCategoryEditRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  newCategoryEditLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: '700' },
-  iconPickerGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  iconPickerBtn: {
-    width: 32, height: 32, borderRadius: radius.sm,
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  iconPickerBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  newCategorySaveBtn: {
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: colors.primary, borderRadius: radius.sm,
-    paddingVertical: 10,
-  },
-  newCategorySaveBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-
-  ruleCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    padding: 12, marginBottom: 10, gap: 10,
-    ...shadows.card,
-  },
-  ruleCardTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  ruleName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
-  ruleSub: { color: colors.primary, fontSize: 12, marginTop: 2, fontWeight: '600' },
-  ruleDesc: { color: colors.inkSoft, fontSize: 12, marginTop: 4 },
-  ruleActions: { flexDirection: 'row', gap: 8 },
-  ruleFormBox: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1.5, borderColor: colors.primaryBorder,
-    padding: 14, marginTop: 8, gap: 4,
-    ...shadows.card,
-  },
-  ruleFormTitle: { color: colors.primary, fontWeight: '700', fontSize: 14, marginBottom: 4 },
-
-  rewardTypeRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
-  rewardTypeBtn: {
-    flex: 1, padding: 10, borderRadius: radius.sm,
-    backgroundColor: colors.bgDeep,
-    borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center',
-  },
-  rewardTypeBtnActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
-  rewardTypeText: { color: colors.inkSoft, fontWeight: '600', fontSize: 13 },
-  rewardTypeTextActive: { color: colors.primary },
-
-  ruleFormActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  cancelBtn: {
-    flex: 1, padding: 12, borderRadius: radius.md,
-    backgroundColor: colors.bgDeep, alignItems: 'center',
-    borderWidth: 1, borderColor: colors.border,
-  },
-  cancelBtnText: { color: colors.inkSoft, fontWeight: '600', fontSize: 14 },
-  saveBtn: {
-    flex: 2, padding: 12, borderRadius: radius.md,
-    backgroundColor: colors.primary,
-    alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8,
-    ...shadows.primaryBtn,
-  },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  btnDisabled: { opacity: 0.6 },
-}))
+const s = StyleSheet.create({
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center', paddingVertical: 48 },
+  productIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.fill, alignItems: 'center', justifyContent: 'center', ...continuous },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 14, borderRadius: 22, backgroundColor: colors.fill, ...continuous },
+  chipIcon: { width: 44, paddingHorizontal: 0, justifyContent: 'center' },
+  chipSelected: { backgroundColor: colors.primary },
+  rowActions: { flexDirection: 'row', alignItems: 'center' },
+  iconBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  formCard: { gap: 14, padding: 16, borderRadius: 22, backgroundColor: colors.grouped, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, ...continuous },
+})

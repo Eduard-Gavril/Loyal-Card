@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react'
-import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput,
-} from 'react-native'
-import { useRouter } from 'expo-router'
+import { View, StyleSheet, ActivityIndicator } from 'react-native'
+import { Stack, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { useAdminStore } from '@/store'
-import { useClientStore } from '@/store'
+import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import { colors } from '@/theme'
+import { ScreenScroll } from '@/ui/Screen'
+import { ListGroup, ListRow } from '@/ui/List'
+import PressableScale from '@/ui/PressableScale'
+import Empty from '@/ui/Empty'
+import SearchField from '@/ui/SearchField'
+import Button from '@/ui/Button'
+import Txt from '@/ui/Txt'
 
 interface ClientRecord {
   id: string
@@ -21,8 +23,6 @@ interface ClientRecord {
 }
 
 export default function ClientsScreen() {
-  const colors = useTheme()
-  const s = themedStyles(colors)
   const router = useRouter()
   const { tenantId } = useAdminStore()
   const { language } = useClientStore()
@@ -79,166 +79,68 @@ export default function ClientsScreen() {
     return { stamps, rewards }
   }
 
-  const filtered = clients.filter((c) =>
-    c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    (c.phone ?? '').includes(search)
-  )
+  const filtered = clients.filter((c) => c.name?.toLowerCase().includes(search.toLowerCase()) || (c.phone ?? '').includes(search))
 
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={colors.ink} />
-          <Text style={s.backText}>{t.back}</Text>
-        </TouchableOpacity>
-        <Text style={s.title}>{a.clients}</Text>
-        <TouchableOpacity style={s.refreshBtn} onPress={loadClients}>
-          <Ionicons name="refresh-outline" size={20} color={colors.primary} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Search */}
-      <View style={s.searchWrap}>
-        <Ionicons name="search-outline" size={16} color={colors.inkFaint} />
-        <TextInput
-          style={s.searchInput}
-          placeholder="Cerca per nome o telefono..."
-          placeholderTextColor={colors.inkFaint}
-          value={search}
-          onChangeText={setSearch}
-        />
-        {search.length > 0 && (
-          <TouchableOpacity onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={16} color={colors.inkFaint} />
-          </TouchableOpacity>
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <PressableScale accessibilityRole="button" accessibilityLabel="Refresh" onPress={loadClients} hitSlop={6} style={s.headerBtn}>
+              <Ionicons name="refresh-outline" size={22} color={colors.primary} />
+            </PressableScale>
+          ),
+        }}
+      />
+      <ScreenScroll title={a.clients} bottomPad={40}>
+        <SearchField value={search} onChangeText={setSearch} placeholder="Cerca per nome o telefono..." />
+        {loading ? (
+          <View style={s.center}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Txt v="subhead" tone="secondary">
+              {t.loading}
+            </Txt>
+          </View>
+        ) : error ? (
+          <View style={s.center}>
+            <Ionicons name="alert-circle-outline" size={44} color={colors.danger} />
+            <Txt v="body" tone="danger" style={{ textAlign: 'center' }}>
+              {error}
+            </Txt>
+            <Button title="Riprova" onPress={loadClients} style={{ alignSelf: 'stretch' }} />
+          </View>
+        ) : filtered.length === 0 ? (
+          <Empty icon="people-outline" title={a.noClients} />
+        ) : (
+          <ListGroup footer={`${filtered.length}`}>
+            {filtered.map((item) => {
+              const { stamps, rewards } = getTotals(item.cards)
+              const initial = (item.name ?? '?').charAt(0).toUpperCase()
+              return (
+                <ListRow
+                  key={item.id}
+                  leading={
+                    <View style={s.avatar}>
+                      <Txt v="headline" tone="tint">
+                        {initial}
+                      </Txt>
+                    </View>
+                  }
+                  title={item.name ?? 'Anonimo'}
+                  subtitle={`${item.phone ? item.phone + ' · ' : ''}${stamps} ${a.stamps} · ${rewards} ${a.rewards} · ${item.cards.length} card`}
+                  onPress={item.cards.length > 0 ? () => router.push('/admin/scanner') : undefined}
+                />
+              )
+            })}
+          </ListGroup>
         )}
-      </View>
-
-      {loading ? (
-        <View style={s.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={s.loadingText}>{t.loading}</Text>
-        </View>
-      ) : error ? (
-        <View style={s.center}>
-          <Ionicons name="alert-circle-outline" size={48} color={colors.danger} />
-          <Text style={s.errorText}>{error}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={loadClients}>
-            <Text style={s.retryText}>Riprova</Text>
-          </TouchableOpacity>
-        </View>
-      ) : filtered.length === 0 ? (
-        <View style={s.center}>
-          <Ionicons name="people-outline" size={56} color={colors.inkFaint} />
-          <Text style={s.emptyText}>{a.noClients}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={s.list}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => {
-            const { stamps, rewards } = getTotals(item.cards)
-            const hasCards = item.cards.length > 0
-            return (
-              <View style={s.row}>
-                <View style={s.avatar}>
-                  <Text style={s.avatarLetter}>
-                    {(item.name ?? '?').charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-                <View style={s.rowBody}>
-                  <Text style={s.clientName} numberOfLines={1}>{item.name ?? 'Anonimo'}</Text>
-                  {item.phone && (
-                    <Text style={s.clientPhone}>{item.phone}</Text>
-                  )}
-                  <View style={s.statsRow}>
-                    <View style={s.stat}>
-                      <Text style={s.statNum}>{stamps}</Text>
-                      <Text style={s.statLabel}>{a.stamps}</Text>
-                    </View>
-                    <View style={s.statDivider} />
-                    <View style={s.stat}>
-                      <Text style={s.statNum}>{rewards}</Text>
-                      <Text style={s.statLabel}>{a.rewards}</Text>
-                    </View>
-                    <View style={s.statDivider} />
-                    <View style={s.stat}>
-                      <Text style={s.statNum}>{item.cards.length}</Text>
-                      <Text style={s.statLabel}>card</Text>
-                    </View>
-                  </View>
-                </View>
-                {hasCards && (
-                  <TouchableOpacity
-                    style={s.stampBtn}
-                    onPress={() => router.push('/admin/scanner')}
-                  >
-                    <Ionicons name="scan-outline" size={18} color="#fff" />
-                    <Text style={s.stampBtnText}>Scanner</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            )
-          }}
-        />
-      )}
-    </SafeAreaView>
+      </ScreenScroll>
+    </>
   )
 }
 
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-  },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
-  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
-  title: { color: colors.ink, fontSize: 18, fontWeight: '800' },
-  refreshBtn: { width: 40, alignItems: 'flex-end' },
-  searchWrap: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 20, marginBottom: 12,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderStrong,
-    paddingHorizontal: 12, paddingVertical: 10,
-    ...shadows.card,
-  },
-  searchInput: { flex: 1, color: colors.ink, fontSize: 14, padding: 0 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingText: { color: colors.inkSoft, fontSize: 14 },
-  errorText: { color: colors.danger, fontSize: 14, textAlign: 'center' },
-  retryBtn: { backgroundColor: colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: radius.md },
-  retryText: { color: '#fff', fontWeight: '700' },
-  emptyText: { color: colors.inkSoft, fontSize: 15, textAlign: 'center' },
-  list: { paddingHorizontal: 20, paddingBottom: 24, gap: 10 },
-  row: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, padding: 14,
-    borderWidth: 1, borderColor: colors.border,
-    ...shadows.card,
-  },
-  avatar: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  avatarLetter: { color: colors.primary, fontSize: 20, fontWeight: '800' },
-  rowBody: { flex: 1, gap: 4 },
-  clientName: { color: colors.ink, fontWeight: '700', fontSize: 15 },
-  clientPhone: { color: colors.inkSoft, fontSize: 12 },
-  statsRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
-  stat: { alignItems: 'center', gap: 1 },
-  statNum: { color: colors.primary, fontSize: 14, fontWeight: '800' },
-  statLabel: { color: colors.inkFaint, fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-  statDivider: { width: 1, height: 20, backgroundColor: colors.border },
-  stampBtn: {
-    alignItems: 'center', gap: 3,
-    backgroundColor: colors.primary, borderRadius: radius.sm,
-    paddingHorizontal: 10, paddingVertical: 8,
-  },
-  stampBtnText: { color: '#fff', fontSize: 9, fontWeight: '700' },
-}))
+const s = StyleSheet.create({
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center', gap: 12, paddingVertical: 48, paddingHorizontal: 16 },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+})

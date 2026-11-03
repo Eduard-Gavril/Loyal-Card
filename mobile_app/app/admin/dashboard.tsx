@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
-import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, Share, Alert,
-} from 'react-native'
-import { useRouter } from 'expo-router'
+import { View, StyleSheet, ActivityIndicator, Share, Alert } from 'react-native'
+import { Stack, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
-import ProductIcon from '@/components/ProductIcon'
+import { colors, continuous } from '@/theme'
+import { ScreenScroll } from '@/ui/Screen'
+import { ListGroup, ListRow } from '@/ui/List'
+import Button from '@/ui/Button'
+import PressableScale from '@/ui/PressableScale'
+import AccountInfo from '@/components/AccountInfo'
+import Txt from '@/ui/Txt'
 
 interface Stats {
   totalCards: number
@@ -28,8 +29,6 @@ interface RecentEvent {
 }
 
 export default function AdminDashboardScreen() {
-  const colors = useTheme()
-  const s = themedStyles(colors)
   const router = useRouter()
   const { user, tenantId, role, clearAuth } = useAdminStore()
   const { language } = useClientStore()
@@ -138,214 +137,97 @@ export default function AdminDashboardScreen() {
         onPress: async () => {
           await supabase.auth.signOut()
           clearAuth()
-          router.replace('/(tabs)/')
+          router.replace('/(tabs)/partners')
         },
       },
     ])
   }
 
-  const NAV_GRID: { icon: keyof typeof Ionicons.glyphMap; label: string; route: string }[] = [
-    { icon: 'qr-code-outline', label: a.scanCard, route: '/admin/scanner' },
-    { icon: 'cube-outline', label: a.products, route: '/admin/products' },
-    { icon: 'people-outline', label: a.clients, route: '/admin/clients' },
-    { icon: 'time-outline', label: a.history, route: '/admin/scan-history' },
-    { icon: 'bar-chart-outline', label: a.reports, route: '/admin/reports' },
-    { icon: 'settings-outline', label: a.settings, route: '/admin/settings' },
-  ]
+  const timeLocale = language === 'ro' ? 'ro-RO' : language === 'en' ? 'en-GB' : 'it-IT'
+
+  const STATS = [
+    { label: a.cardsLabel, value: stats.totalCards, icon: 'card-outline' },
+    { label: a.scansTodayLabel, value: stats.scansToday, icon: 'scan-outline' },
+    { label: a.rewards, value: stats.totalRewards, icon: 'gift-outline' },
+    { label: a.totalScansLabel, value: stats.totalScans, icon: 'analytics-outline' },
+  ] as const
 
   return (
-    <SafeAreaView style={s.safe}>
-      {/* Header */}
-      <View style={s.header}>
-        <View>
-          <Text style={s.title}>{a.title}</Text>
-          <Text style={s.sub}>{user?.email} · {role}</Text>
-        </View>
-        <View style={s.headerActions}>
-          <TouchableOpacity style={s.exportBtn} onPress={handleExport} disabled={exporting}>
-            {exporting
-              ? <ActivityIndicator size="small" color={colors.primary} />
-              : <Ionicons name="download-outline" size={20} color={colors.primary} />}
-          </TouchableOpacity>
-          <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-          </TouchableOpacity>
-        </View>
-      </View>
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <PressableScale accessibilityRole="button" accessibilityLabel="Export" onPress={handleExport} disabled={exporting} hitSlop={8} style={s.headerBtn}>
+              {exporting ? <ActivityIndicator size="small" color={colors.primary} /> : <Ionicons name="share-outline" size={22} color={colors.primary} />}
+            </PressableScale>
+          ),
+        }}
+      />
+      <ScreenScroll title={a.title} bottomPad={40}>
+        <AccountInfo />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Stats */}
-        <Text style={s.sectionLabel}>{a.summaryLabel}</Text>
+        {/* One filled button: the thing an admin does most */}
+        <Button title={a.scanCard} icon="qr-code-outline" onPress={() => router.push('/admin/scanner')} style={{ marginBottom: 24 }} />
+
+        <Txt v="footnote" tone="secondary" style={s.section}>
+          {a.summaryLabel.toUpperCase()}
+        </Txt>
         {loading ? (
-          <View style={s.loadingRow}>
+          <View style={s.loading}>
             <ActivityIndicator color={colors.primary} />
-            <Text style={s.loadingText}>{t.loading}</Text>
+            <Txt v="subhead" tone="secondary">
+              {t.loading}
+            </Txt>
           </View>
         ) : (
-          <View style={s.statsGrid}>
-            {([
-              { label: a.cardsLabel, value: stats.totalCards, icon: 'card-outline' },
-              { label: a.scansTodayLabel, value: stats.scansToday, icon: 'scan-outline' },
-              { label: a.rewards, value: stats.totalRewards, icon: 'gift-outline' },
-              { label: a.totalScansLabel, value: stats.totalScans, icon: 'analytics-outline' },
-            ] as const).map((stat) => (
-              <View key={stat.label} style={s.statCard}>
-                <View style={s.statIcon}>
-                  <Ionicons name={stat.icon} size={17} color={colors.primary} />
-                </View>
-                <Text style={s.statValue}>{stat.value}</Text>
-                <Text style={s.statLabel}>{stat.label}</Text>
+          <View style={s.grid}>
+            {STATS.map((stat) => (
+              <View key={stat.label} style={s.stat}>
+                <Ionicons name={stat.icon} size={18} color={colors.primary} />
+                <Txt v="title1">{stat.value}</Txt>
+                <Txt v="footnote" tone="secondary" numberOfLines={1}>
+                  {stat.label}
+                </Txt>
               </View>
             ))}
           </View>
         )}
 
-        {/* Navigation grid */}
-        <Text style={s.sectionLabel}>{a.sectionsLabel}</Text>
-        <View style={s.navGrid}>
-          {NAV_GRID.map((item, i) => (
-            <TouchableOpacity
-              key={item.route}
-              style={[s.navBtn, i === 0 && s.navBtnPrimary]}
-              onPress={() => router.push(item.route as any)}
-              activeOpacity={0.7}
-            >
-              <View style={[s.navIcon, i === 0 && s.navIconPrimary]}>
-                <Ionicons name={item.icon} size={20} color={i === 0 ? '#fff' : colors.primary} />
-              </View>
-              <Text style={[s.navLabel, i === 0 && s.navLabelPrimary]} numberOfLines={1}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <ListGroup header={a.sectionsLabel}>
+          <ListRow icon="cube-outline" title={a.products} onPress={() => router.push('/admin/products')} />
+          <ListRow icon="people-outline" title={a.clients} onPress={() => router.push('/admin/clients')} />
+          <ListRow icon="time-outline" title={a.history} onPress={() => router.push('/admin/scan-history')} />
+          <ListRow icon="bar-chart-outline" title={a.reports} onPress={() => router.push('/admin/reports')} />
+          <ListRow icon="settings-outline" title={a.settings} onPress={() => router.push('/admin/settings')} />
+        </ListGroup>
 
-        {/* Recent activity */}
         {recent.length > 0 && (
-          <View style={s.recentSection}>
-            <Text style={s.sectionLabelInline}>{a.recentActivityTitle}</Text>
-            <View style={s.recentCard}>
-              {recent.map((e, i) => (
-                <View key={e.id} style={[s.recentRow, i < recent.length - 1 && s.recentRowBorder]}>
-                  <View style={[s.recentDot, { backgroundColor: e.reward_applied ? colors.violet : colors.success }]} />
-                  <View style={s.recentBody}>
-                    <Text style={s.recentClient} numberOfLines={1}>
-                      {(e as any).clients?.name ?? a.anonClient}
-                    </Text>
-                    <Text style={s.recentProduct} numberOfLines={1}>
-                      <ProductIcon emoji={(e as any).products?.metadata?.emoji} size={13} /> {(e as any).products?.name ?? a.productDefault}
-                      {e.reward_applied && ' · 🎁 ' + a.rewardLabel}
-                    </Text>
-                  </View>
-                  <Text style={s.recentTime}>
-                    {new Date(e.scanned_at).toLocaleTimeString(
-                      language === 'ro' ? 'ro-RO' : language === 'en' ? 'en-GB' : 'it-IT',
-                      { hour: '2-digit', minute: '2-digit' }
-                    )}
-                  </Text>
-                </View>
-              ))}
-              <TouchableOpacity style={s.seeAllBtn} onPress={() => router.push('/admin/scan-history')}>
-                <Text style={s.seeAllText}>{a.viewAllHistory}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <ListGroup header={a.recentActivityTitle}>
+            {recent.map((e) => (
+              <ListRow
+                key={e.id}
+                title={(e as any).clients?.name ?? a.anonClient}
+                subtitle={`${(e as any).products?.name ?? a.productDefault}${e.reward_applied ? ' · ' + a.rewardLabel : ''}`}
+                value={new Date(e.scanned_at).toLocaleTimeString(timeLocale, { hour: '2-digit', minute: '2-digit' })}
+                right={e.reward_applied ? <Ionicons name="gift" size={16} color={colors.primary} /> : undefined}
+              />
+            ))}
+            <ListRow title={a.viewAllHistory} onPress={() => router.push('/admin/scan-history')} />
+          </ListGroup>
         )}
-      </ScrollView>
-    </SafeAreaView>
+
+        <ListGroup>
+          <ListRow icon="log-out-outline" destructive title={a.logout} onPress={handleLogout} chevron={false} />
+        </ListGroup>
+      </ScreenScroll>
+    </>
   )
 }
 
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 20, paddingVertical: 14,
-  },
-  title: { color: colors.ink, fontSize: 21, fontWeight: '800', letterSpacing: -0.4 },
-  sub: { color: colors.inkSoft, fontSize: 12, marginTop: 2 },
-  headerActions: { flexDirection: 'row', gap: 8 },
-  exportBtn: {
-    padding: 9, backgroundColor: colors.primarySoft, borderRadius: radius.sm,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-  },
-  logoutBtn: {
-    padding: 9, backgroundColor: colors.dangerSoft, borderRadius: radius.sm,
-    borderWidth: 1, borderColor: colors.dangerBorder,
-  },
-  loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 24, justifyContent: 'center' },
-  loadingText: { color: colors.inkSoft, fontSize: 14 },
-
-  sectionLabel: {
-    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
-    textTransform: 'uppercase', letterSpacing: 1,
-    paddingHorizontal: 20, marginBottom: 10, marginTop: 4,
-  },
-  sectionLabelInline: {
-    color: colors.inkSoft, fontSize: 11, fontWeight: '700',
-    textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10,
-  },
-
-  // Fixed percentage widths: flex+minWidth% doesn't wrap reliably in RN
-  statsGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
-    rowGap: 10, paddingHorizontal: 20, marginBottom: 20,
-  },
-  statCard: {
-    width: '48.5%',
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 12, gap: 4,
-    ...shadows.card,
-  },
-  statIcon: {
-    width: 28, height: 28, borderRadius: 8,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  statValue: { color: colors.ink, fontSize: 24, fontWeight: '800' },
-  statLabel: { color: colors.inkSoft, fontSize: 11 },
-
-  navGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
-    rowGap: 10, paddingHorizontal: 20, marginBottom: 24,
-  },
-  navBtn: {
-    width: '31.5%',
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingVertical: 14, paddingHorizontal: 6,
-    alignItems: 'center', gap: 8,
-    ...shadows.card,
-  },
-  navBtnPrimary: {
-    backgroundColor: colors.night,
-    borderColor: colors.night,
-    ...shadows.night,
-  },
-  navIcon: {
-    width: 40, height: 40, borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  navIconPrimary: { backgroundColor: 'rgba(124,58,237,0.4)' },
-  navLabel: { fontWeight: '700', fontSize: 12, color: colors.ink, textAlign: 'center' },
-  navLabelPrimary: { color: colors.onNight },
-
-  recentSection: { paddingHorizontal: 20, marginBottom: 32 },
-  recentCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    paddingHorizontal: 14,
-    ...shadows.card,
-  },
-  recentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 },
-  recentRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  recentDot: { width: 8, height: 8, borderRadius: 4 },
-  recentBody: { flex: 1 },
-  recentClient: { color: colors.ink, fontWeight: '600', fontSize: 14 },
-  recentProduct: { color: colors.inkSoft, fontSize: 12, marginTop: 1 },
-  recentTime: { color: colors.inkFaint, fontSize: 12 },
-  seeAllBtn: { paddingVertical: 12, alignItems: 'center' },
-  seeAllText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
-}))
+const s = StyleSheet.create({
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  section: { marginLeft: 16, marginBottom: 6 },
+  loading: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 24, justifyContent: 'center' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
+  stat: { width: '48.4%', gap: 4, padding: 16, borderRadius: 20, backgroundColor: colors.grouped, ...continuous },
+})

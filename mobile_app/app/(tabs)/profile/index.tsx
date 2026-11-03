@@ -1,29 +1,35 @@
-import { useEffect, useRef, useState } from 'react'
-import {
-  View, Text, TouchableOpacity, StyleSheet, TextInput,
-  ScrollView, ActivityIndicator, Linking, RefreshControl,
-  Modal, Alert, Switch,
-} from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { View, StyleSheet, Linking, RefreshControl, Alert } from 'react-native'
 import * as Clipboard from 'expo-clipboard'
+import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useClientStore } from '@/store'
 import { getTranslation, Language } from '@/lib/i18n'
 import { api, supabase } from '@/lib/supabase'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import { colors, continuous } from '@/theme'
+import { ScreenScroll } from '@/ui/Screen'
+import { ListGroup, ListRow } from '@/ui/List'
+import Segmented from '@/ui/Segmented'
+import Sheet from '@/ui/Sheet'
+import Field from '@/ui/Field'
+import Button from '@/ui/Button'
+import PressableScale from '@/ui/PressableScale'
+import Txt from '@/ui/Txt'
 
-const LANGUAGES: { code: Language; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'ro', label: 'Română' },
-  { code: 'it', label: 'Italiano' },
+type T = ReturnType<typeof getTranslation>
+
+const LANGUAGES: { value: Language; label: string }[] = [
+  { value: 'en', label: 'EN' },
+  { value: 'ro', label: 'RO' },
+  { value: 'it', label: 'IT' },
 ]
 
 const PREFIXES = [
-  { country: 'IT', prefix: '+39', flag: '🇮🇹' },
-  { country: 'RO', prefix: '+40', flag: '🇷🇴' },
-  { country: 'UK', prefix: '+44', flag: '🇬🇧' },
-  { country: '...', prefix: '+', flag: '🌍' },
+  { value: '+39', label: 'IT +39' },
+  { value: '+40', label: 'RO +40' },
+  { value: '+44', label: 'UK +44' },
+  { value: '+', label: '+ …' },
 ]
 
 function maskPhone(phone: string): string {
@@ -34,30 +40,32 @@ function maskPhone(phone: string): string {
   return `${visible} ${masked}${tail}`
 }
 
-// ─── Name section ───────────────────────────────────────────────
-function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
-  const colors = useTheme()
-  const s = themedStyles(colors)
+function ErrorLine({ message }: { message: string }) {
+  if (!message) return null
+  return (
+    <View style={s.errorLine} accessibilityRole="alert">
+      <Ionicons name="alert-circle" size={16} color={colors.danger} />
+      <Txt v="footnote" tone="danger" style={{ flex: 1 }}>
+        {message}
+      </Txt>
+    </View>
+  )
+}
+
+// ─── Name ───────────────────────────────────────────────────────
+function NameSheet({ t, visible, onClose }: { t: T; visible: boolean; onClose: () => void }) {
   const { clientId, displayName, setDisplayName } = useClientStore()
   const p = t.profile
-  const inputRef = useRef<TextInput>(null)
-
-  const [editing, setEditing] = useState(!displayName)
   const [value, setValue] = useState(displayName ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!displayName && clientId) {
-      supabase.from('clients').select('name').eq('id', clientId).single().then(({ data }) => {
-        if (data?.name) {
-          setDisplayName(data.name)
-          setValue(data.name)
-          setEditing(false)
-        }
-      })
+    if (visible) {
+      setValue(displayName ?? '')
+      setError('')
     }
-  }, [clientId])
+  }, [visible])
 
   async function handleSave() {
     const trimmed = value.trim()
@@ -68,7 +76,8 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     try {
       await api.updateClientName(clientId, trimmed)
       setDisplayName(trimmed)
-      setEditing(false)
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
+      onClose()
     } catch (e: any) {
       setError(e?.message ?? 'Error saving')
     } finally {
@@ -76,86 +85,31 @@ function NameSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     }
   }
 
-  function startEdit() {
-    setValue(displayName ?? '')
-    setError('')
-    setEditing(true)
-    setTimeout(() => inputRef.current?.focus(), 100)
-  }
-
   return (
-    <View style={s.section}>
-      <View style={s.sectionHeader}>
-        <View style={s.iconWrap}>
-          <Ionicons name="person-outline" size={20} color={colors.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={s.sectionTitleBig}>{p.nameTitle}</Text>
-          <Text style={s.sectionDesc}>{p.nameHint}</Text>
-        </View>
-        {!editing && displayName && (
-          <TouchableOpacity style={s.editBtn} onPress={startEdit} activeOpacity={0.7}>
-            <Ionicons name="pencil-outline" size={14} color={colors.primary} />
-            <Text style={s.editBtnText}>{p.nameEdit}</Text>
-          </TouchableOpacity>
-        )}
+    <Sheet visible={visible} title={p.nameTitle} cancelLabel={t.dashboard.cancel} onClose={onClose} onDone={handleSave} doneLabel={p.nameConfirm} doneDisabled={saving}>
+      <View style={{ gap: 12 }}>
+        <Field
+          value={value}
+          onChangeText={(v) => { setValue(v); setError('') }}
+          placeholder={p.namePlaceholder}
+          autoCapitalize="words"
+          autoFocus
+          returnKeyType="done"
+          onSubmitEditing={handleSave}
+          error={error}
+        />
+        <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+          {p.nameHint}
+        </Txt>
       </View>
-
-      {!editing && displayName ? (
-        <View style={s.nameDisplay}>
-          <Text style={s.nameDisplayText}>{displayName}</Text>
-        </View>
-      ) : (
-        <>
-          <TextInput
-            ref={inputRef}
-            style={s.input}
-            placeholder={p.namePlaceholder}
-            placeholderTextColor={colors.inkFaint}
-            value={value}
-            onChangeText={(v) => { setValue(v); setError('') }}
-            autoCapitalize="words"
-            returnKeyType="done"
-            onSubmitEditing={handleSave}
-          />
-          {error ? (
-            <View style={[s.errorBox, { marginBottom: 10 }]}>
-              <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
-              <Text style={s.errorText}>{error}</Text>
-            </View>
-          ) : null}
-          <View style={s.nameActions}>
-            {editing && displayName && (
-              <TouchableOpacity
-                style={s.cancelBtn}
-                onPress={() => { setEditing(false); setValue(displayName); setError('') }}
-              >
-                <Text style={s.cancelBtnText}>{t.dashboard.cancel}</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={[s.primaryBtn, saving && s.btnDisabled, { flex: 1 }]}
-              onPress={handleSave}
-              disabled={saving}
-            >
-              {saving
-                ? <><ActivityIndicator size="small" color="#fff" /><Text style={s.primaryBtnText}>{p.nameSaving}</Text></>
-                : <><Ionicons name="checkmark" size={16} color="#fff" /><Text style={s.primaryBtnText}>{p.nameConfirm}</Text></>}
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-    </View>
+    </Sheet>
   )
 }
 
-// ─── Link phone section ─────────────────────────────────────────
-function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
-  const colors = useTheme()
-  const s = themedStyles(colors)
-  const { clientId, linkedPhone, setLinkedPhone } = useClientStore()
+// ─── Link phone ─────────────────────────────────────────────────
+function PhoneSheet({ t, visible, onClose }: { t: T; visible: boolean; onClose: () => void }) {
+  const { clientId, setLinkedPhone } = useClientStore()
   const p = t.profile
-
   const [prefix, setPrefix] = useState('+39')
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState('')
@@ -163,31 +117,13 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [backupCodes, setBackupCodes] = useState<string[]>([])
-  const [showingCodes, setShowingCodes] = useState(false)
+  const [copied, setCopied] = useState<string | null>(null)
 
-  // Already linked
-  if (linkedPhone && !showingCodes) {
-    return (
-      <View style={s.section}>
-        <View style={s.sectionHeader}>
-          <View style={[s.iconWrap, { backgroundColor: colors.successSoft }]}>
-            <Ionicons name="shield-checkmark-outline" size={20} color={colors.success} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-              <Text style={s.sectionTitleBig}>{p.linkedStatus}</Text>
-              <View style={s.linkedBadge}>
-                <Ionicons name="lock-closed" size={10} color={colors.success} />
-                <Text style={s.linkedBadgeText}>{p.linkedBadge}</Text>
-              </View>
-            </View>
-            <Text style={s.linkedPhone}>{maskPhone(linkedPhone)}</Text>
-            <Text style={s.sectionDesc}>{p.linkedDesc}</Text>
-          </View>
-        </View>
-      </View>
-    )
-  }
+  useEffect(() => {
+    if (visible) {
+      setPhone(''); setPin(''); setPinConfirm(''); setError(''); setBackupCodes([]); setCopied(null)
+    }
+  }, [visible])
 
   async function handleLink() {
     const digits = phone.replace(/\s/g, '')
@@ -202,8 +138,8 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     try {
       const result = await api.linkPhone(clientId, fullNumber, pin)
       setBackupCodes(result.backupCodes)
-      setShowingCodes(true)
       setLinkedPhone(fullNumber)
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
     } catch (e: any) {
       setError(e?.message ?? 'Errore durante il salvataggio')
     } finally {
@@ -211,142 +147,75 @@ function LinkPhoneSection({ t }: { t: ReturnType<typeof getTranslation> }) {
     }
   }
 
-  if (showingCodes && backupCodes.length > 0) {
-    return (
-      <View style={s.section}>
-        <View style={s.sectionHeader}>
-          <View style={[s.iconWrap, { backgroundColor: colors.successSoft }]}>
-            <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.sectionTitleBig}>{p.phoneTitle}</Text>
-            <Text style={[s.sectionDesc, { color: colors.success }]}>{p.phoneDone}</Text>
-          </View>
-        </View>
-        <View style={s.backupWarn}>
-          <Ionicons name="warning-outline" size={16} color={colors.primary} />
-          <Text style={s.backupWarnText}>{p.phoneBackupWarning}</Text>
-        </View>
-        <View style={s.backupGrid}>
-          {backupCodes.map((code, i) => (
-            <TouchableOpacity
-              key={code}
-              style={s.backupCode}
-              onPress={() => Clipboard.setStringAsync(code)}
-            >
-              <Text style={s.backupCodeNum}>{i + 1}</Text>
-              <Text style={s.backupCodeText}>{code}</Text>
-              <Ionicons name="copy-outline" size={13} color={colors.inkFaint} />
-            </TouchableOpacity>
-          ))}
-        </View>
-        <TouchableOpacity
-          style={s.primaryBtn}
-          onPress={() => { setShowingCodes(false); setBackupCodes([]); setPhone(''); setPin(''); setPinConfirm('') }}
-        >
-          <Ionicons name="checkmark" size={16} color="#fff" />
-          <Text style={s.primaryBtnText}>{p.phoneBackupDone}</Text>
-        </TouchableOpacity>
-      </View>
-    )
-  }
+  const showingCodes = backupCodes.length > 0
 
   return (
-    <View style={s.section}>
-      <View style={s.sectionHeader}>
-        <View style={s.iconWrap}>
-          <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
+    <Sheet
+      visible={visible}
+      title={p.phoneTitle}
+      cancelLabel={t.dashboard.cancel}
+      onClose={onClose}
+      onDone={showingCodes ? onClose : handleLink}
+      doneLabel={showingCodes ? p.phoneBackupDone : p.phoneSave}
+      doneDisabled={loading}
+    >
+      {showingCodes ? (
+        <View style={{ gap: 16 }}>
+          <View style={s.successRow}>
+            <Ionicons name="checkmark-circle" size={22} color={colors.success} />
+            <Txt v="headline" tone="success">
+              {p.phoneDone}
+            </Txt>
+          </View>
+          <View style={s.warnBox}>
+            <Ionicons name="warning" size={18} color={colors.primary} />
+            <Txt v="footnote" style={{ flex: 1 }}>
+              {p.phoneBackupWarning}
+            </Txt>
+          </View>
+          <ListGroup>
+            {backupCodes.map((code, i) => (
+              <ListRow
+                key={code}
+                title={code}
+                value={String(i + 1)}
+                onPress={() => {
+                  Clipboard.setStringAsync(code)
+                  Haptics.selectionAsync().catch(() => {})
+                  setCopied(code)
+                }}
+                right={<Ionicons name={copied === code ? 'checkmark' : 'copy-outline'} size={16} color={copied === code ? colors.success : colors.labelTertiary} />}
+                chevron={false}
+              />
+            ))}
+          </ListGroup>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={s.sectionTitleBig}>{p.phoneTitle}</Text>
-          <Text style={s.sectionDesc}>{p.phoneDesc}</Text>
+      ) : (
+        <View style={{ gap: 16 }}>
+          <Txt v="subhead" tone="secondary">
+            {p.phoneDesc}
+          </Txt>
+          <View style={{ gap: 6 }}>
+            <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+              {p.prefixLabel}
+            </Txt>
+            <Segmented options={PREFIXES} value={prefix} onChange={setPrefix} />
+          </View>
+          <Field label={`${p.phoneLabel} (${prefix === '+' ? '+' : prefix})`} placeholder={p.phonePlaceholder} value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoComplete="tel" />
+          <Field label="PIN" placeholder={p.pinPlaceholder} value={pin} onChangeText={setPin} keyboardType="number-pad" maxLength={6} secureTextEntry />
+          <Field label={p.pinConfirmLabel} placeholder={p.pinConfirmPlaceholder} value={pinConfirm} onChangeText={setPinConfirm} keyboardType="number-pad" maxLength={6} secureTextEntry />
+          <ErrorLine message={error} />
+          <Button title={p.phoneSave} icon="save-outline" loading={loading} onPress={handleLink} />
         </View>
-      </View>
-
-      <Text style={s.inputLabel}>{p.prefixLabel}</Text>
-      <View style={s.prefixRow}>
-        {PREFIXES.map((pr) => (
-          <TouchableOpacity
-            key={pr.prefix}
-            style={[s.prefixBtn, prefix === pr.prefix && s.prefixBtnActive]}
-            onPress={() => setPrefix(pr.prefix)}
-          >
-            <Text style={s.prefixFlag}>{pr.flag}</Text>
-            <Text style={[s.prefixCode, prefix === pr.prefix && s.prefixCodeActive]}>
-              {pr.prefix !== '+' ? pr.prefix : pr.country}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={s.inputLabel}>{p.phoneLabel}</Text>
-      <View style={s.phoneRow}>
-        <View style={s.prefixDisplay}>
-          <Text style={s.prefixDisplayText}>{prefix}</Text>
-        </View>
-        <TextInput
-          style={s.phoneInput}
-          placeholder={p.phonePlaceholder}
-          placeholderTextColor={colors.inkFaint}
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          autoComplete="tel"
-        />
-      </View>
-
-      <Text style={s.inputLabel}>PIN</Text>
-      <TextInput
-        style={s.input}
-        placeholder={p.pinPlaceholder}
-        placeholderTextColor={colors.inkFaint}
-        value={pin}
-        onChangeText={setPin}
-        keyboardType="number-pad"
-        maxLength={6}
-        secureTextEntry
-      />
-
-      <Text style={s.inputLabel}>{p.pinConfirmLabel}</Text>
-      <TextInput
-        style={[s.input, { marginBottom: 14 }]}
-        placeholder={p.pinConfirmPlaceholder}
-        placeholderTextColor={colors.inkFaint}
-        value={pinConfirm}
-        onChangeText={setPinConfirm}
-        keyboardType="number-pad"
-        maxLength={6}
-        secureTextEntry
-      />
-
-      {error ? (
-        <View style={s.errorBox}>
-          <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
-          <Text style={s.errorText}>{error}</Text>
-        </View>
-      ) : null}
-
-      <TouchableOpacity
-        style={[s.primaryBtn, loading && s.btnDisabled]}
-        onPress={handleLink}
-        disabled={loading}
-      >
-        {loading
-          ? <><ActivityIndicator size="small" color="#fff" /><Text style={s.primaryBtnText}>{p.phoneSaving}</Text></>
-          : <><Ionicons name="save-outline" size={16} color="#fff" /><Text style={s.primaryBtnText}>{p.phoneSave}</Text></>}
-      </TouchableOpacity>
-    </View>
+      )}
+    </Sheet>
   )
 }
 
-// ─── Recovery section ───────────────────────────────────────────
-function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
-  const colors = useTheme()
-  const s = themedStyles(colors)
+// ─── Recovery ───────────────────────────────────────────────────
+function RecoverySheet({ t, visible, onClose }: { t: T; visible: boolean; onClose: () => void }) {
   const { clientId, replaceAllCards, setClientId, setLinkedPhone } = useClientStore()
   const p = t.profile
-
-  const [show, setShow] = useState(false)
   const [prefix, setPrefix] = useState('+39')
   const [phone, setPhone] = useState('')
   const [step, setStep] = useState<'phone' | 'pin'>('phone')
@@ -359,6 +228,12 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
   const [restoredCount, setRestoredCount] = useState(0)
 
   const fullNumber = prefix === '+' ? phone.replace(/\s/g, '') : `${prefix}${phone.replace(/\s/g, '')}`
+
+  useEffect(() => {
+    if (visible) {
+      setStep('phone'); setPhone(''); setPin(''); setBackupCode(''); setError(''); setDone(false); setUseBackup(false)
+    }
+  }, [visible])
 
   async function handleSearch() {
     if (phone.replace(/\s/g, '').length < 7) { setError(p.phoneInvalid); return }
@@ -394,6 +269,7 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
       setLinkedPhone(fullNumber)
       setRestoredCount(mapped.length)
       setDone(true)
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
     } catch (e: any) {
       setError(e?.message ?? p.recoveryPinWrong)
     } finally {
@@ -401,184 +277,84 @@ function RecoverySection({ t }: { t: ReturnType<typeof getTranslation> }) {
     }
   }
 
-  function reset() {
-    setStep('phone')
-    setPhone('')
-    setPin('')
-    setBackupCode('')
-    setError('')
-    setDone(false)
-    setUseBackup(false)
-  }
+  const primary = done ? onClose : step === 'phone' ? handleSearch : handleVerify
+  const primaryLabel = done ? t.profile.phoneBackupDone : step === 'phone' ? p.recoverySearch : p.recoveryVerify
 
   return (
-    <View style={s.section}>
-      <TouchableOpacity
-        style={s.toggleRow}
-        onPress={() => { setShow(!show); if (!show) reset() }}
-      >
-        <View style={s.iconWrap}>
-          <Ionicons name="refresh-circle-outline" size={20} color={colors.primary} />
+    <Sheet visible={visible} title={p.recoveryTitle} cancelLabel={t.dashboard.cancel} onClose={onClose} onDone={primary} doneLabel={primaryLabel} doneDisabled={loading}>
+      {done ? (
+        <View style={s.successRow}>
+          <Ionicons name="checkmark-circle" size={26} color={colors.success} />
+          <Txt v="headline" tone="success" style={{ flex: 1 }}>
+            {p.recoveryDone(restoredCount)}
+          </Txt>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={s.sectionTitleBig}>{p.recoveryTitle}</Text>
-          <Text style={s.sectionDesc} numberOfLines={2}>{p.recoveryDesc}</Text>
+      ) : step === 'phone' ? (
+        <View style={{ gap: 16 }}>
+          <Txt v="subhead" tone="secondary">
+            {p.recoveryDesc}
+          </Txt>
+          <Txt v="footnote" tone="tint" style={{ marginLeft: 4 }}>
+            {p.recoveryStep1}
+          </Txt>
+          <View style={{ gap: 6 }}>
+            <Txt v="footnote" tone="secondary" style={{ marginLeft: 4 }}>
+              {p.prefixLabel}
+            </Txt>
+            <Segmented options={PREFIXES} value={prefix} onChange={setPrefix} />
+          </View>
+          <Field label={p.phoneLabel} placeholder={p.phonePlaceholder} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+          <ErrorLine message={error} />
+          <Button title={p.recoverySearch} icon="search-outline" loading={loading} onPress={handleSearch} />
         </View>
-        <Ionicons name={show ? 'chevron-up' : 'chevron-down'} size={18} color={colors.inkFaint} />
-      </TouchableOpacity>
-
-      {show && (
-        <View style={s.recoveryBody}>
-          {done ? (
-            <View style={s.successBox}>
-              <Ionicons name="checkmark-circle" size={28} color={colors.success} />
-              <View style={{ flex: 1 }}>
-                <Text style={s.successText}>{p.recoveryDone(restoredCount)}</Text>
-              </View>
-            </View>
-          ) : step === 'phone' ? (
-            <>
-              <Text style={s.stepBadge}>{p.recoveryStep1}</Text>
-
-              <Text style={s.inputLabel}>{p.prefixLabel}</Text>
-              <View style={s.prefixRow}>
-                {PREFIXES.map((pr) => (
-                  <TouchableOpacity
-                    key={pr.prefix}
-                    style={[s.prefixBtn, prefix === pr.prefix && s.prefixBtnActive]}
-                    onPress={() => setPrefix(pr.prefix)}
-                  >
-                    <Text style={s.prefixFlag}>{pr.flag}</Text>
-                    <Text style={[s.prefixCode, prefix === pr.prefix && s.prefixCodeActive]}>
-                      {pr.prefix !== '+' ? pr.prefix : pr.country}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={s.inputLabel}>{p.phoneLabel}</Text>
-              <View style={[s.phoneRow, { marginBottom: 14 }]}>
-                <View style={s.prefixDisplay}>
-                  <Text style={s.prefixDisplayText}>{prefix}</Text>
-                </View>
-                <TextInput
-                  style={s.phoneInput}
-                  placeholder={p.phonePlaceholder}
-                  placeholderTextColor={colors.inkFaint}
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                />
-              </View>
-
-              {error ? (
-                <View style={s.errorBox}>
-                  <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
-                  <Text style={s.errorText}>{error}</Text>
-                </View>
-              ) : null}
-
-              <TouchableOpacity
-                style={[s.primaryBtn, loading && s.btnDisabled]}
-                onPress={handleSearch}
-                disabled={loading}
-              >
-                {loading
-                  ? <><ActivityIndicator size="small" color="#fff" /><Text style={s.primaryBtnText}>{p.recoverySearching}</Text></>
-                  : <><Ionicons name="search-outline" size={16} color="#fff" /><Text style={s.primaryBtnText}>{p.recoverySearch}</Text></>}
-              </TouchableOpacity>
-            </>
+      ) : (
+        <View style={{ gap: 16 }}>
+          <Txt v="footnote" tone="tint" style={{ marginLeft: 4 }}>
+            {p.recoveryStep2}
+          </Txt>
+          <ListGroup>
+            <ListRow icon="checkmark-circle-outline" iconColor={colors.success} title={fullNumber} value={p.change} onPress={() => setStep('phone')} chevron={false} />
+          </ListGroup>
+          {!useBackup ? (
+            <Field label="PIN" placeholder="••••••" value={pin} onChangeText={setPin} keyboardType="number-pad" maxLength={6} secureTextEntry autoFocus />
           ) : (
-            <>
-              <Text style={s.stepBadge}>{p.recoveryStep2}</Text>
-              <TouchableOpacity style={s.phoneFoundRow} onPress={() => setStep('phone')}>
-                <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                <Text style={s.phoneFoundText}>{fullNumber}</Text>
-                <Text style={s.changeLink}>{p.change}</Text>
-              </TouchableOpacity>
-
-              {!useBackup ? (
-                <>
-                  <Text style={s.inputLabel}>PIN</Text>
-                  <TextInput
-                    style={[s.input, { marginBottom: 8 }]}
-                    placeholder="••••••"
-                    placeholderTextColor={colors.inkFaint}
-                    value={pin}
-                    onChangeText={setPin}
-                    keyboardType="number-pad"
-                    maxLength={6}
-                    secureTextEntry
-                    autoFocus
-                  />
-                  <TouchableOpacity style={s.altLink} onPress={() => { setUseBackup(true); setPin(''); setError('') }}>
-                    <Text style={s.altLinkText}>{p.recoveryBackupCode}</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <Text style={s.inputLabel}>{p.backupCodeLabel}</Text>
-                  <TextInput
-                    style={[s.input, { marginBottom: 8 }]}
-                    placeholder={p.recoveryBackupPlaceholder}
-                    placeholderTextColor={colors.inkFaint}
-                    value={backupCode}
-                    onChangeText={setBackupCode}
-                    autoCapitalize="characters"
-                    autoFocus
-                  />
-                  <TouchableOpacity style={s.altLink} onPress={() => { setUseBackup(false); setBackupCode(''); setError('') }}>
-                    <Text style={s.altLinkText}>{p.recoveryUsePIN}</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-
-              {error ? (
-                <View style={[s.errorBox, { marginTop: 8 }]}>
-                  <Ionicons name="alert-circle-outline" size={15} color={colors.danger} />
-                  <Text style={s.errorText}>{error}</Text>
-                </View>
-              ) : null}
-
-              <TouchableOpacity
-                style={[s.primaryBtn, { marginTop: 14 }, loading && s.btnDisabled]}
-                onPress={handleVerify}
-                disabled={loading}
-              >
-                {loading
-                  ? <><ActivityIndicator size="small" color="#fff" /><Text style={s.primaryBtnText}>{p.recoveryVerifying}</Text></>
-                  : <><Ionicons name="download-outline" size={16} color="#fff" /><Text style={s.primaryBtnText}>{p.recoveryVerify}</Text></>}
-              </TouchableOpacity>
-            </>
+            <Field label={p.backupCodeLabel} placeholder={p.recoveryBackupPlaceholder} value={backupCode} onChangeText={setBackupCode} autoCapitalize="characters" autoFocus />
           )}
+          <PressableScale
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={() => { setUseBackup(!useBackup); setPin(''); setBackupCode(''); setError('') }}
+            style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' }}
+          >
+            <Txt v="subhead" tone="tint">
+              {useBackup ? p.recoveryUsePIN : p.recoveryBackupCode}
+            </Txt>
+          </PressableScale>
+          <ErrorLine message={error} />
+          <Button title={p.recoveryVerify} icon="download-outline" loading={loading} onPress={handleVerify} />
         </View>
       )}
-    </View>
+    </Sheet>
   )
 }
 
-// ─── Main screen ────────────────────────────────────────────────
-export default function ProfileScreen() {
-  const router = useRouter()
-  const { language, setLanguage, savedCards, displayName, clientId, linkedPhone, clearAll, darkMode, setDarkMode } = useClientStore()
-  const t = getTranslation(language)
+// ─── Delete account ─────────────────────────────────────────────
+function DeleteSheet({ t, visible, onClose }: { t: T; visible: boolean; onClose: () => void }) {
+  const { clientId, linkedPhone, clearAll } = useClientStore()
   const p = t.profile
-  const colors = useTheme()
-  const s = themedStyles(colors)
-  const [refreshing, setRefreshing] = useState(false)
-  const [deleteModal, setDeleteModal] = useState(false)
-  const [deleteInput, setDeleteInput] = useState('')
+  const [input, setInput] = useState('')
   const [deleting, setDeleting] = useState(false)
 
-  async function handleDeleteAccount() {
+  useEffect(() => {
+    if (visible) setInput('')
+  }, [visible])
+
+  async function handleDelete() {
     setDeleting(true)
     try {
-      if (clientId) {
-        await api.deleteAccount(clientId)
-      }
+      if (clientId) await api.deleteAccount(clientId)
       clearAll()
-      setDeleteModal(false)
-      setDeleteInput('')
+      onClose()
     } catch (e: any) {
       Alert.alert('Error', e?.message ?? 'Failed to delete data')
     } finally {
@@ -586,392 +362,131 @@ export default function ProfileScreen() {
     }
   }
 
+  const ready = input === p.deleteConfirmWord
+
+  return (
+    <Sheet visible={visible} title={p.deleteAccountTitle} cancelLabel={t.dashboard.cancel} onClose={onClose}>
+      <View style={{ gap: 16 }}>
+        <View style={s.dangerIcon}>
+          <Ionicons name="warning" size={30} color={colors.danger} />
+        </View>
+        <Txt v="subhead" tone="secondary" style={{ textAlign: 'center' }}>
+          {linkedPhone ? p.deleteLinkedWarning : p.deleteUnlinkedWarning}
+        </Txt>
+        <Field
+          label={p.deleteConfirmPrompt}
+          value={input}
+          onChangeText={(v) => setInput(v.toUpperCase())}
+          placeholder={p.deleteConfirmWord}
+          autoCapitalize="characters"
+          autoCorrect={false}
+        />
+        <Button variant="destructive" icon="trash" title={p.deleteConfirmBtn} loading={deleting} disabled={!ready} onPress={handleDelete} />
+      </View>
+    </Sheet>
+  )
+}
+
+// ─── Main screen ────────────────────────────────────────────────
+export default function ProfileScreen() {
+  const router = useRouter()
+  const { language, setLanguage, savedCards, displayName, clientId, linkedPhone, setDisplayName } = useClientStore()
+  const t = getTranslation(language)
+  const p = t.profile
+  const [refreshing, setRefreshing] = useState(false)
+  const [sheet, setSheet] = useState<null | 'name' | 'phone' | 'recovery' | 'delete'>(null)
+
+  // Same behaviour as before: if the name is not stored locally, fetch it once for this client.
+  useEffect(() => {
+    if (!displayName && clientId) {
+      supabase.from('clients').select('name').eq('id', clientId).single().then(({ data }) => {
+        if (data?.name) setDisplayName(data.name)
+      })
+    }
+  }, [clientId])
+
   function onRefresh() {
     setRefreshing(true)
     setTimeout(() => setRefreshing(false), 600)
   }
 
+  const initial = (displayName ?? '').trim().charAt(0).toUpperCase()
+
   return (
-    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
-      <ScrollView
-        contentContainerStyle={s.scroll}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }
+    <>
+      <ScreenScroll
+        title={p.title}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />}
+        bottomPad={40}
       >
-        <View style={s.header}>
-          <Text style={s.headerTitle}>{displayName ? displayName : p.title}</Text>
-          <Text style={s.headerSub}>{savedCards.length} {p.savedCards}</Text>
+        {/* Identity */}
+        <View style={s.identity}>
+          <View style={s.avatar}>
+            {initial ? <Txt v="title1" tone="onTint">{initial}</Txt> : <Ionicons name="person" size={34} color={colors.onPrimary} />}
+          </View>
+          <Txt v="title2" numberOfLines={1}>
+            {displayName ? displayName : p.title}
+          </Txt>
+          <Txt v="subhead" tone="secondary">
+            {savedCards.length} {p.savedCards}
+          </Txt>
         </View>
 
-        <NameSection t={t} />
-        <LinkPhoneSection t={t} />
-        <RecoverySection t={t} />
+        <ListGroup header={p.nameTitle} footer={p.nameHint}>
+          <ListRow icon="person-outline" title={p.nameTitle} value={displayName ?? p.namePlaceholder} onPress={() => setSheet('name')} />
+        </ListGroup>
 
-        {/* Admin access */}
-        <TouchableOpacity style={s.adminBtn} onPress={() => router.push('/admin/login')}>
-          <View style={s.adminIconWrap}>
-            <Ionicons name="shield-half-outline" size={20} color={colors.onNight} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.adminBtnTitle}>{p.adminAccess}</Text>
-            <Text style={s.adminBtnSub}>{p.adminSubtitle}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={colors.onNightSoft} />
-        </TouchableOpacity>
+        <ListGroup header={p.phoneTitle}>
+          {linkedPhone ? (
+            <ListRow icon="shield-checkmark-outline" iconColor={colors.success} title={p.linkedStatus} subtitle={p.linkedDesc} value={maskPhone(linkedPhone)} />
+          ) : (
+            <ListRow icon="phone-portrait-outline" title={p.phoneTitle} subtitle={p.phoneDesc} onPress={() => setSheet('phone')} />
+          )}
+          <ListRow icon="refresh-circle-outline" title={p.recoveryTitle} subtitle={p.recoveryDesc} onPress={() => setSheet('recovery')} />
+        </ListGroup>
 
-        {/* Settings — one grouped list: language, appearance, support, legal,
-            account deletion. Kept inside the existing Profile tab, not a new
-            menu entry. */}
-        <Text style={s.settingsTitle}>{p.settingsTitle}</Text>
-        <View style={s.settingsCard}>
-          <View style={s.settingsRow}>
-            <Ionicons name="language-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
-            <Text style={s.settingsRowText}>{p.language}</Text>
-            <View style={s.langSegment}>
-              {LANGUAGES.map((l) => (
-                <TouchableOpacity
-                  key={l.code}
-                  style={[s.langSegmentBtn, language === l.code && s.langSegmentBtnActive]}
-                  onPress={() => setLanguage(l.code)}
-                  accessibilityLabel={l.label}
-                >
-                  <Text style={[s.langSegmentText, language === l.code && s.langSegmentTextActive]}>
-                    {l.code.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-          <View style={s.settingsDivider} />
+        <ListGroup>
+          <ListRow icon="shield-half-outline" title={p.adminAccess} subtitle={p.adminSubtitle} onPress={() => router.push('/admin/login')} />
+        </ListGroup>
 
-          <View style={s.settingsRow}>
-            <Ionicons name={darkMode ? 'moon' : 'moon-outline'} size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
-            <Text style={s.settingsRowText}>{p.darkMode}</Text>
-            <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
-              trackColor={{ false: colors.borderStrong, true: colors.primary }}
-              thumbColor="#fff"
-            />
-          </View>
-          <View style={s.settingsDivider} />
-
-          <TouchableOpacity
-            style={s.settingsRow}
-            onPress={() => Linking.openURL('https://loyalcard.net/contact')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="help-buoy-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
-            <Text style={s.settingsRowText}>{p.needHelp}</Text>
-            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
-          </TouchableOpacity>
-          <View style={s.settingsDivider} />
-
-          <TouchableOpacity
-            style={s.settingsRow}
-            onPress={() => Linking.openURL('https://loyalcard.net/privacy')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="document-text-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
-            <Text style={s.settingsRowText}>{p.privacyPolicy}</Text>
-            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
-          </TouchableOpacity>
-          <View style={s.settingsDivider} />
-
-          <TouchableOpacity
-            style={s.settingsRow}
-            onPress={() => Linking.openURL('https://loyalcard.net/cookie-policy')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="shield-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
-            <Text style={s.settingsRowText}>{p.cookiePolicy}</Text>
-            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
-          </TouchableOpacity>
-          <View style={s.settingsDivider} />
-
-          <TouchableOpacity
-            style={s.settingsRow}
-            onPress={() => Linking.openURL('https://loyalcard.net/terms')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="reader-outline" size={18} color={colors.inkSoft} style={s.settingsRowIcon} />
-            <Text style={s.settingsRowText}>{p.termsOfService}</Text>
-            <Ionicons name="open-outline" size={14} color={colors.inkFaint} />
-          </TouchableOpacity>
-          <View style={s.settingsDivider} />
-
-          <TouchableOpacity
-            style={s.settingsRow}
-            onPress={() => { setDeleteInput(''); setDeleteModal(true) }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="trash-outline" size={18} color={colors.danger} style={s.settingsRowIcon} />
-            <Text style={[s.settingsRowText, s.settingsRowTextDanger]}>{p.deleteAccountTitle}</Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.danger} />
-          </TouchableOpacity>
-        </View>
-
-        <Text style={s.version}>{p.appVersion}</Text>
-      </ScrollView>
-
-      {/* Delete confirmation modal */}
-      <Modal visible={deleteModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setDeleteModal(false)}>
-        <View style={s.modalWrap}>
-          <View style={s.modalHandle} />
-
-          <View style={s.modalIconWrap}>
-            <Ionicons name="warning" size={34} color={colors.danger} />
-          </View>
-          <Text style={s.modalTitle}>{p.deleteAccountTitle}</Text>
-
-          <View style={s.modalWarnBox}>
-            <Text style={s.modalWarnText}>
-              {linkedPhone ? p.deleteLinkedWarning : p.deleteUnlinkedWarning}
-            </Text>
-          </View>
-
-          <Text style={s.modalPrompt}>{p.deleteConfirmPrompt}</Text>
-          <TextInput
-            style={[s.modalInput, deleteInput === p.deleteConfirmWord && s.modalInputValid]}
-            value={deleteInput}
-            onChangeText={(v) => setDeleteInput(v.toUpperCase())}
-            placeholder={p.deleteConfirmWord}
-            placeholderTextColor={colors.inkFaint}
-            autoCapitalize="characters"
-            autoCorrect={false}
+        <ListGroup header={p.settingsTitle}>
+          <ListRow
+            icon="language-outline"
+            title={p.language}
+            right={
+              <View style={{ width: 150 }}>
+                <Segmented options={LANGUAGES} value={language} onChange={(v) => setLanguage(v)} />
+              </View>
+            }
           />
+          <ListRow icon="help-buoy-outline" title={p.needHelp} onPress={() => Linking.openURL('https://loyalcard.net/contact')} right={<Ionicons name="open-outline" size={16} color={colors.labelTertiary} />} chevron={false} />
+          <ListRow icon="document-text-outline" title={p.privacyPolicy} onPress={() => Linking.openURL('https://loyalcard.net/privacy')} right={<Ionicons name="open-outline" size={16} color={colors.labelTertiary} />} chevron={false} />
+          <ListRow icon="shield-outline" title={p.cookiePolicy} onPress={() => Linking.openURL('https://loyalcard.net/cookie-policy')} right={<Ionicons name="open-outline" size={16} color={colors.labelTertiary} />} chevron={false} />
+          <ListRow icon="reader-outline" title={p.termsOfService} onPress={() => Linking.openURL('https://loyalcard.net/terms')} right={<Ionicons name="open-outline" size={16} color={colors.labelTertiary} />} chevron={false} />
+        </ListGroup>
 
-          <TouchableOpacity
-            style={[s.modalDeleteBtn, (deleteInput !== p.deleteConfirmWord || deleting) && s.modalDeleteBtnDisabled]}
-            onPress={handleDeleteAccount}
-            disabled={deleteInput !== p.deleteConfirmWord || deleting}
-          >
-            {deleting
-              ? <><ActivityIndicator size="small" color="#fff" /><Text style={s.modalDeleteBtnText}>{p.deleteConfirmBtn}</Text></>
-              : <><Ionicons name="trash" size={16} color="#fff" /><Text style={s.modalDeleteBtnText}>{p.deleteConfirmBtn}</Text></>}
-          </TouchableOpacity>
+        <ListGroup>
+          <ListRow icon="trash-outline" destructive title={p.deleteAccountTitle} onPress={() => setSheet('delete')} chevron={false} />
+        </ListGroup>
 
-          <TouchableOpacity style={s.modalCancelBtn} onPress={() => setDeleteModal(false)}>
-            <Text style={s.modalCancelText}>{t.dashboard.cancel}</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    </SafeAreaView>
+        <Txt v="caption1" tone="tertiary" style={{ textAlign: 'center' }}>
+          {p.appVersion}
+        </Txt>
+      </ScreenScroll>
+
+      <NameSheet t={t} visible={sheet === 'name'} onClose={() => setSheet(null)} />
+      <PhoneSheet t={t} visible={sheet === 'phone'} onClose={() => setSheet(null)} />
+      <RecoverySheet t={t} visible={sheet === 'recovery'} onClose={() => setSheet(null)} />
+      <DeleteSheet t={t} visible={sheet === 'delete'} onClose={() => setSheet(null)} />
+    </>
   )
 }
 
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  scroll: { padding: 20, paddingBottom: 40 },
-  header: { marginBottom: 20, paddingTop: 8 },
-  headerTitle: { color: colors.ink, fontSize: 26, fontWeight: '800', letterSpacing: -0.5 },
-  headerSub: { color: colors.inkSoft, fontSize: 14, marginTop: 4 },
-
-  section: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 16, marginBottom: 14,
-    ...shadows.card,
-  },
-  sectionHeader: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 14 },
-  sectionTitleBig: { color: colors.ink, fontSize: 15, fontWeight: '700', marginBottom: 2 },
-  sectionDesc: { color: colors.inkSoft, fontSize: 12, lineHeight: 17 },
-  iconWrap: {
-    width: 40, height: 40, borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-  },
-  toggleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  recoveryBody: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
-  stepBadge: { color: colors.primary, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 14 },
-  phoneFoundRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: colors.successSoft, borderRadius: radius.sm,
-    padding: 10, marginBottom: 14,
-    borderWidth: 1, borderColor: colors.successBorder,
-  },
-  phoneFoundText: { color: colors.ink, fontWeight: '600', flex: 1 },
-  changeLink: { color: colors.primary, fontSize: 12, fontWeight: '700' },
-  altLink: { marginBottom: 4 },
-  altLinkText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
-
-  inputLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 },
-  prefixRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
-  prefixBtn: {
-    flex: 1, alignItems: 'center', paddingVertical: 9,
-    borderRadius: radius.sm, backgroundColor: colors.bgDeep,
-    borderWidth: 1, borderColor: colors.border, gap: 2,
-  },
-  prefixBtnActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
-  prefixFlag: { fontSize: 18 },
-  prefixCode: { color: colors.inkSoft, fontSize: 11, fontWeight: '700' },
-  prefixCodeActive: { color: colors.primary },
-  phoneRow: { flexDirection: 'row', gap: 8 },
-  prefixDisplay: {
-    backgroundColor: colors.primarySoft, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-    paddingHorizontal: 12, justifyContent: 'center',
-  },
-  prefixDisplayText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
-  phoneInput: {
-    flex: 1, backgroundColor: colors.bgDeep,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    color: colors.ink, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15,
-  },
-  input: {
-    backgroundColor: colors.bgDeep,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    color: colors.ink, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15, marginBottom: 12,
-  },
-
-  errorBox: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
-    backgroundColor: colors.dangerSoft, borderRadius: radius.sm,
-    padding: 10, marginBottom: 10,
-    borderWidth: 1, borderColor: colors.dangerBorder,
-  },
-  errorText: { color: colors.danger, fontSize: 13, flex: 1 },
-  successBox: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.successSoft, borderRadius: radius.md,
-    padding: 14, borderWidth: 1, borderColor: colors.successBorder,
-  },
-  successText: { color: colors.success, fontWeight: '700', fontSize: 14 },
-
-  backupWarn: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
-    backgroundColor: colors.primarySoft, borderRadius: radius.sm,
-    padding: 10, marginBottom: 14,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-  },
-  backupWarnText: { color: colors.inkMid, fontSize: 12, flex: 1, lineHeight: 18 },
-  backupGrid: { gap: 8, marginBottom: 16 },
-  backupCode: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: colors.night, borderRadius: radius.sm,
-    padding: 12, borderWidth: 1, borderColor: colors.nightBorder,
-  },
-  backupCodeNum: { color: colors.onNightSoft, fontSize: 12, fontWeight: '700', width: 16 },
-  backupCodeText: { flex: 1, color: colors.onNight, fontFamily: 'monospace', fontSize: 16, fontWeight: '700', letterSpacing: 2 },
-
-  primaryBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: 13,
-    ...shadows.primaryBtn,
-  },
-  btnDisabled: { opacity: 0.6 },
-  primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-
-  linkedBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 3,
-    backgroundColor: colors.successSoft, borderRadius: 8,
-    paddingHorizontal: 7, paddingVertical: 3,
-    borderWidth: 1, borderColor: colors.successBorder,
-  },
-  linkedBadgeText: { color: colors.success, fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  linkedPhone: { color: colors.ink, fontSize: 16, fontWeight: '700', fontFamily: 'monospace', letterSpacing: 1, marginBottom: 6 },
-  nameDisplay: {
-    backgroundColor: colors.bgDeep, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border,
-    paddingHorizontal: 14, paddingVertical: 12,
-  },
-  nameDisplayText: { color: colors.ink, fontSize: 17, fontWeight: '700' },
-  nameActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  editBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: colors.primarySoft, borderRadius: radius.sm,
-    paddingHorizontal: 10, paddingVertical: 6,
-    borderWidth: 1, borderColor: colors.primaryBorder,
-  },
-  editBtnText: { color: colors.primary, fontSize: 12, fontWeight: '700' },
-  cancelBtn: {
-    paddingHorizontal: 16, paddingVertical: 13, borderRadius: radius.md,
-    backgroundColor: colors.bgDeep,
-    borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  cancelBtnText: { color: colors.inkSoft, fontWeight: '600', fontSize: 14 },
-
-  adminBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: colors.night,
-    borderRadius: radius.lg, padding: 16, marginBottom: 14,
-    ...shadows.night,
-  },
-  adminIconWrap: {
-    width: 40, height: 40, borderRadius: radius.md,
-    backgroundColor: 'rgba(124,58,237,0.35)',
-    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-  },
-  adminBtnTitle: { color: colors.onNight, fontSize: 15, fontWeight: '700', marginBottom: 2 },
-  adminBtnSub: { color: colors.onNightSoft, fontSize: 11 },
-
-  version: { color: colors.inkFaint, fontSize: 12, textAlign: 'center', marginTop: 8 },
-
-  // Settings group — one card, equal-weight rows, matches the pattern used
-  // for secondary links on the Home tab
-  settingsTitle: {
-    color: colors.inkFaint, fontSize: 10, fontWeight: '700',
-    textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8, paddingHorizontal: 4,
-  },
-  settingsCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    marginBottom: 14, overflow: 'hidden',
-    ...shadows.card,
-  },
-  settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  settingsRowIcon: { width: 20 },
-  settingsRowText: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 14.5 },
-  settingsRowTextDanger: { color: colors.danger },
-  settingsDivider: { height: 1, backgroundColor: colors.border, marginLeft: 48 },
-
-  langSegment: {
-    flexDirection: 'row', backgroundColor: colors.bgDeep,
-    borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, padding: 2, gap: 2,
-  },
-  langSegmentBtn: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.sm - 2 },
-  langSegmentBtnActive: { backgroundColor: colors.primary },
-  langSegmentText: { color: colors.inkSoft, fontSize: 12, fontWeight: '700' },
-  langSegmentTextActive: { color: '#fff' },
-
-  modalWrap: { flex: 1, backgroundColor: colors.bg, padding: 24, paddingTop: 16 },
-  modalHandle: { width: 36, height: 4, backgroundColor: colors.borderStrong, borderRadius: 2, alignSelf: 'center', marginBottom: 28 },
-  modalIconWrap: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: colors.dangerSoft,
-    alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 16,
-    borderWidth: 1, borderColor: colors.dangerBorder,
-  },
-  modalTitle: { color: colors.ink, fontSize: 22, fontWeight: '800', textAlign: 'center', marginBottom: 20 },
-  modalWarnBox: {
-    backgroundColor: colors.dangerSoft, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.dangerBorder,
-    padding: 16, marginBottom: 24,
-  },
-  modalWarnText: { color: colors.inkMid, fontSize: 14, lineHeight: 21 },
-  modalPrompt: { color: colors.inkSoft, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
-  modalInput: {
-    backgroundColor: colors.surface, borderRadius: radius.md,
-    borderWidth: 1.5, borderColor: colors.dangerBorder,
-    color: colors.ink, paddingHorizontal: 16, paddingVertical: 13,
-    fontSize: 18, fontWeight: '700', letterSpacing: 2, textAlign: 'center', marginBottom: 20,
-  },
-  modalInputValid: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
-  modalDeleteBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: colors.danger, borderRadius: radius.md,
-    paddingVertical: 14, marginBottom: 12,
-  },
-  modalDeleteBtnDisabled: { opacity: 0.35 },
-  modalDeleteBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
-  modalCancelBtn: { alignItems: 'center', paddingVertical: 14 },
-  modalCancelText: { color: colors.inkSoft, fontSize: 15, fontWeight: '600' },
-}))
+const s = StyleSheet.create({
+  identity: { alignItems: 'center', gap: 4, paddingVertical: 16, marginBottom: 12 },
+  avatar: { width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  errorLine: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 },
+  successRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  warnBox: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', padding: 14, borderRadius: 14, backgroundColor: colors.primarySoft, ...continuous },
+  dangerIcon: { alignSelf: 'center', width: 68, height: 68, borderRadius: 22, backgroundColor: colors.dangerSoft, alignItems: 'center', justifyContent: 'center', ...continuous },
+})

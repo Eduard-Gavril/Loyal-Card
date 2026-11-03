@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native'
-import { useRouter } from 'expo-router'
+import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native'
+import { Stack } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAdminStore, useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
+import { usePlanUsage } from '@/lib/plan'
 import { api, supabase } from '@/lib/supabase'
 import * as XLSX from 'xlsx'
 import { exportExcel } from '@/lib/excel'
-import { radius, shadows, useTheme, createThemedStyles } from '@/theme'
+import { colors, continuous } from '@/theme'
 import ProductIcon from '@/components/ProductIcon'
+import { ScreenScroll } from '@/ui/Screen'
+import { ListGroup, ListRow } from '@/ui/List'
+import Segmented from '@/ui/Segmented'
+import PressableScale from '@/ui/PressableScale'
+import Empty from '@/ui/Empty'
+import Txt from '@/ui/Txt'
 
 type Range = '7d' | '30d' | '90d'
 
@@ -45,13 +51,11 @@ const RANGE_DAYS: Record<Range, number> = { '7d': 7, '30d': 30, '90d': 90 }
 const RANGE_LABELS: Record<Range, string> = { '7d': '7d', '30d': '30d', '90d': '90d' }
 
 export default function AdminReportsScreen() {
-  const colors = useTheme()
-  const s = themedStyles(colors)
-  const router = useRouter()
   const { tenantId, user, role } = useAdminStore()
   const { language } = useClientStore()
   const t = getTranslation(language)
   const a = t.admin
+  const { usage: plan } = usePlanUsage(tenantId)
   const isOwner = role === 'owner'
 
   const [range, setRange] = useState<Range>('30d')
@@ -166,6 +170,7 @@ export default function AdminReportsScreen() {
   }
 
   async function handleExport() {
+    if (plan && !plan.limits.can_export) { Alert.alert(a.planTitle, a.planExportLocked); return }
     setExporting(true)
     try {
       const wb = XLSX.utils.book_new()
@@ -226,282 +231,168 @@ export default function AdminReportsScreen() {
 
   const maxScans = Math.max(...dailyStats.map((d) => d.scans), 1)
 
+  const timeLocale = language === 'ro' ? 'ro-RO' : language === 'en' ? 'en-GB' : 'it-IT'
+
+  const KPIS = [
+    { label: a.totalScansLabel, value: totalScans, icon: 'scan-outline' },
+    { label: a.rewardsGivenLabel, value: totalRewards, icon: 'gift-outline' },
+    { label: a.uniqueClientsLabel, value: uniqueClients, icon: 'people-outline' },
+    { label: a.avgPerDayLabel, value: avgPerDay, icon: 'trending-up-outline' },
+    { label: a.rewardRateLabel, value: `${conversionRate}%`, icon: 'trophy-outline' },
+  ] as const
+
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={colors.ink} />
-          <Text style={s.backText}>{t.back}</Text>
-        </TouchableOpacity>
-        <Text style={s.headerTitle}>{t.admin.reports}</Text>
-        <TouchableOpacity
-          style={[s.exportBtn, (loading || exporting) && { opacity: 0.4 }]}
-          onPress={handleExport}
-          disabled={loading || exporting || totalScans === 0}
-        >
-          {exporting
-            ? <ActivityIndicator size="small" color="#fff" />
-            : <Ionicons name="download-outline" size={18} color="#fff" />}
-          {!exporting && <Text style={s.exportBtnText}>Excel</Text>}
-        </TouchableOpacity>
-      </View>
-
-      {/* Range picker */}
-      <View style={s.rangePicker}>
-        {(['7d', '30d', '90d'] as Range[]).map((r) => (
-          <TouchableOpacity
-            key={r}
-            style={[s.rangeBtn, range === r && s.rangeBtnActive]}
-            onPress={() => setRange(r)}
-          >
-            <Text style={[s.rangeBtnText, range === r && s.rangeBtnTextActive]}>{RANGE_LABELS[r]}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {loading ? (
-        <View style={s.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={s.loadingText}>{t.loading}</Text>
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <PressableScale
+              accessibilityRole="button"
+              accessibilityLabel="Excel"
+              onPress={handleExport}
+              disabled={loading || exporting || totalScans === 0}
+              hitSlop={6}
+              style={[s.headerBtn, (loading || totalScans === 0) && { opacity: 0.35 }]}
+            >
+              {exporting ? <ActivityIndicator size="small" color={colors.primary} /> : <Ionicons name="share-outline" size={22} color={colors.primary} />}
+            </PressableScale>
+          ),
+        }}
+      />
+      <ScreenScroll title={a.reports} bottomPad={40}>
+        <View style={{ marginBottom: 20 }}>
+          <Segmented
+            options={[
+              { value: '7d', label: RANGE_LABELS['7d'] },
+              { value: '30d', label: RANGE_LABELS['30d'] },
+              { value: '90d', label: RANGE_LABELS['90d'] },
+            ]}
+            value={range}
+            onChange={(v) => setRange(v as Range)}
+          />
         </View>
-      ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.body}>
-          {/* KPI grid */}
-          <View style={s.kpiGrid}>
-            {([
-              { label: a.totalScansLabel, value: totalScans, icon: 'scan-outline' },
-              { label: a.rewardsGivenLabel, value: totalRewards, icon: 'gift-outline' },
-              { label: a.uniqueClientsLabel, value: uniqueClients, icon: 'people-outline' },
-              { label: a.avgPerDayLabel, value: avgPerDay, icon: 'trending-up-outline' },
-              { label: a.rewardRateLabel, value: `${conversionRate}%`, icon: 'trophy-outline' },
-            ] as const).map((kpi) => (
-              <View key={kpi.label} style={s.kpiCard}>
-                <View style={s.kpiIcon}>
-                  <Ionicons name={kpi.icon} size={16} color={colors.primary} />
-                </View>
-                <Text style={s.kpiValue}>{kpi.value}</Text>
-                <Text style={s.kpiLabel}>{kpi.label}</Text>
-              </View>
-            ))}
+
+        {loading ? (
+          <View style={s.center}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Txt v="subhead" tone="secondary">
+              {t.loading}
+            </Txt>
           </View>
-
-          {/* Daily chart */}
-          {dailyStats.length > 0 && (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>{a.scanTrendTitle}</Text>
-              <View style={s.chartWrap}>
-                {dailyStats.map((d) => (
-                  <View key={d.date} style={s.barCol}>
-                    <View style={s.barTrack}>
-                      <View
-                        style={[s.barFill, { height: `${Math.round((d.scans / maxScans) * 100)}%` }]}
-                      />
-                    </View>
-                    <Text style={s.barLabel}>{d.date.slice(5)}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* Top products */}
-          {topProducts.length > 0 && (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>{a.topProductsTitle}</Text>
-              {topProducts.map((p, i) => (
-                <View key={p.name} style={s.prodRow}>
-                  <Text style={s.prodRank}>#{i + 1}</Text>
-                  <ProductIcon emoji={p.emoji} size={22} color={colors.ink} textStyle={s.prodEmoji} />
-                  <Text style={s.prodName} numberOfLines={1}>{p.name}</Text>
-                  <View style={s.prodStats}>
-                    <Text style={s.prodStat}>
-                      <Text style={s.prodStatNum}>{p.scans}</Text>
-                      {' '}scans
-                    </Text>
-                    {p.rewards > 0 && (
-                      <Text style={s.prodReward}>🎁 {p.rewards}</Text>
-                    )}
-                  </View>
+        ) : totalScans === 0 ? (
+          <Empty icon="bar-chart-outline" title={a.noScansMsg} />
+        ) : (
+          <>
+            <View style={s.kpiGrid}>
+              {KPIS.map((kpi) => (
+                <View key={kpi.label} style={s.kpi}>
+                  <Ionicons name={kpi.icon} size={18} color={colors.primary} />
+                  <Txt v="title2">{kpi.value}</Txt>
+                  <Txt v="footnote" tone="secondary" numberOfLines={2}>
+                    {kpi.label}
+                  </Txt>
                 </View>
               ))}
             </View>
-          )}
 
-          {/* Scans by staff — owner only */}
-          {isOwner && staffScans.length > 0 && (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>{a.scansByStaffTitle}</Text>
-              <View style={s.staffCard}>
-                {staffScans.map((st) => (
-                  <View key={st.label} style={s.staffBarRow}>
-                    <View style={s.staffBarTop}>
-                      <Text style={s.staffBarLabel} numberOfLines={1}>{st.label}</Text>
-                      <Text style={s.staffBarCount}>{st.count}</Text>
-                    </View>
-                    <View style={s.staffBarTrack}>
-                      <View
-                        style={[s.staffBarFill, { width: `${Math.round((st.count / (staffScans[0]?.count || 1)) * 100)}%` }]}
-                      />
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* Recent scans with client + staff name */}
-          {recentScans.length > 0 && (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>{a.recentScansTitle}</Text>
-              <View style={{ gap: 8 }}>
-                {recentScans.map((scan) => (
-                  <View key={scan.id} style={s.recentScanRow}>
-                    <ProductIcon emoji={scan.product_emoji} size={22} color={colors.ink} textStyle={s.prodEmoji} />
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <View style={s.recentScanTop}>
-                        <Text style={s.recentScanProduct} numberOfLines={1}>{scan.product_name}</Text>
-                        <Text style={s.recentScanDot}>·</Text>
-                        <Text style={s.recentScanClient} numberOfLines={1}>{scan.client_label}</Text>
-                        {scan.reward_applied && (
-                          <View style={s.rewardBadge}>
-                            <Text style={s.rewardBadgeText}>{a.rewardLabel}</Text>
-                          </View>
-                        )}
+            {dailyStats.length > 0 && (
+              <View style={s.chartCard}>
+                <Txt v="headline" style={{ marginBottom: 14 }}>
+                  {a.scanTrendTitle}
+                </Txt>
+                <View style={s.chart} accessible accessibilityLabel={a.scanTrendTitle}>
+                  {dailyStats.map((d) => (
+                    <View key={d.date} style={s.barCol}>
+                      <View style={s.barTrack}>
+                        <View style={[s.barFill, { height: `${Math.max(Math.round((d.scans / maxScans) * 100), 4)}%` }]} />
                       </View>
-                      <Text style={s.recentScanStaff} numberOfLines={1}>{scan.staff_label}</Text>
+                      <Txt v="caption2" tone="secondary" numberOfLines={1}>
+                        {d.date.slice(8)}
+                      </Txt>
                     </View>
-                    <Text style={s.recentScanTime}>
-                      {new Date(scan.scanned_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </Text>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {topProducts.length > 0 && (
+              <ListGroup header={a.topProductsTitle}>
+                {topProducts.map((p, i) => (
+                  <ListRow
+                    key={p.name}
+                    leading={
+                      <View style={s.rank}>
+                        <Txt v="subhead" tone="tint" style={{ fontWeight: '700' }}>
+                          {i + 1}
+                        </Txt>
+                      </View>
+                    }
+                    title={p.name}
+                    subtitle={`${p.scans} scans${p.rewards > 0 ? ` · ${p.rewards} ${a.rewardLabel}` : ''}`}
+                    right={<ProductIcon emoji={p.emoji} size={20} color={colors.label} />}
+                  />
+                ))}
+              </ListGroup>
+            )}
+
+            {isOwner && staffScans.length > 0 && (
+              <ListGroup header={a.scansByStaffTitle}>
+                {staffScans.map((st) => (
+                  <View key={st.label} style={s.staffRow}>
+                    <View style={s.staffTop}>
+                      <Txt v="body" numberOfLines={1} style={{ flex: 1 }}>
+                        {st.label}
+                      </Txt>
+                      <Txt v="body" tone="secondary">
+                        {st.count}
+                      </Txt>
+                    </View>
+                    <View style={s.staffTrack}>
+                      <View style={[s.staffFill, { width: `${Math.round((st.count / (staffScans[0]?.count || 1)) * 100)}%` }]} />
+                    </View>
                   </View>
                 ))}
-              </View>
-            </View>
-          )}
+              </ListGroup>
+            )}
 
-          {totalScans === 0 && (
-            <View style={s.emptyBox}>
-              <Ionicons name="bar-chart-outline" size={48} color={colors.inkFaint} />
-              <Text style={s.emptyText}>{a.noScansMsg}</Text>
-            </View>
-          )}
-        </ScrollView>
-      )}
-    </SafeAreaView>
+            {recentScans.length > 0 && (
+              <ListGroup header={a.recentScansTitle}>
+                {recentScans.map((scan) => (
+                  <ListRow
+                    key={scan.id}
+                    leading={
+                      <View style={s.badge}>
+                        <ProductIcon emoji={scan.product_emoji} size={20} color={colors.label} />
+                      </View>
+                    }
+                    title={`${scan.product_name} · ${scan.client_label}`}
+                    subtitle={`${scan.staff_label}${scan.reward_applied ? ' · ' + a.rewardLabel : ''}`}
+                    value={new Date(scan.scanned_at).toLocaleString(timeLocale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  />
+                ))}
+              </ListGroup>
+            )}
+          </>
+        )}
+      </ScreenScroll>
+    </>
   )
 }
 
-const themedStyles = createThemedStyles((colors) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-  },
-  exportBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.sm,
-    ...shadows.primaryBtn,
-  },
-  exportBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, width: 80 },
-  backText: { color: colors.ink, fontSize: 15, fontWeight: '500' },
-  headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' },
-
-  rangePicker: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, marginBottom: 16 },
-  rangeBtn: {
-    flex: 1, paddingVertical: 9, borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1, borderColor: colors.borderStrong,
-    alignItems: 'center',
-  },
-  rangeBtnActive: { backgroundColor: colors.ink, borderColor: colors.ink },
-  rangeBtnText: { color: colors.inkMid, fontWeight: '600', fontSize: 13 },
-  // Inverse of ink: readable on the ink-filled active button in both themes
-  rangeBtnTextActive: { color: colors.bg },
-
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingText: { color: colors.inkSoft, fontSize: 14 },
-  body: { paddingHorizontal: 20, paddingBottom: 40, gap: 20 },
-
-  kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  kpiCard: {
-    flex: 1, minWidth: '45%',
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, gap: 5,
-    ...shadows.card,
-  },
-  kpiIcon: {
-    width: 32, height: 32, borderRadius: 9,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  kpiValue: { color: colors.ink, fontSize: 24, fontWeight: '800', marginTop: 4 },
-  kpiLabel: { color: colors.inkSoft, fontSize: 11 },
-
-  section: { gap: 12 },
-  sectionTitle: { color: colors.inkSoft, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8 },
-  chartWrap: {
-    flexDirection: 'row', alignItems: 'flex-end',
-    height: 110, gap: 3,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 12,
-    ...shadows.card,
-  },
-  barCol: { flex: 1, alignItems: 'center', gap: 4 },
+const s = StyleSheet.create({
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center', gap: 12, paddingVertical: 48 },
+  kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  kpi: { width: '48.4%', gap: 4, padding: 16, borderRadius: 20, backgroundColor: colors.grouped, ...continuous },
+  chartCard: { padding: 16, borderRadius: 22, backgroundColor: colors.grouped, marginBottom: 24, ...continuous },
+  chart: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 140 },
+  barCol: { flex: 1, height: '100%', alignItems: 'center', gap: 6 },
   barTrack: { flex: 1, width: '100%', justifyContent: 'flex-end' },
-  barFill: { width: '100%', backgroundColor: colors.primary, borderRadius: 3, minHeight: 3 },
-  barLabel: { color: colors.inkFaint, fontSize: 8 },
-
-  prodRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    padding: 12,
-    ...shadows.card,
-  },
-  prodRank: { color: colors.inkFaint, fontWeight: '800', fontSize: 14, width: 24, textAlign: 'center' },
-  prodEmoji: { fontSize: 22 },
-  prodName: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 14 },
-  prodStats: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  prodStat: { color: colors.inkSoft, fontSize: 12 },
-  prodStatNum: { color: colors.primary, fontWeight: '800' },
-  prodReward: { color: colors.primary, fontSize: 12, fontWeight: '600' },
-
-  staffCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, gap: 14,
-    ...shadows.card,
-  },
-  staffBarRow: { gap: 6 },
-  staffBarTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  staffBarLabel: { flex: 1, color: colors.ink, fontWeight: '600', fontSize: 13.5 },
-  staffBarCount: { color: colors.inkSoft, fontSize: 12.5 },
-  staffBarTrack: { height: 7, borderRadius: 4, backgroundColor: colors.bgDeep, overflow: 'hidden' },
-  staffBarFill: { height: '100%', borderRadius: 4, backgroundColor: colors.primary },
-
-  recentScanRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    padding: 12,
-    ...shadows.card,
-  },
-  recentScanTop: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  recentScanProduct: { color: colors.ink, fontWeight: '600', fontSize: 13.5, flexShrink: 1 },
-  recentScanDot: { color: colors.inkFaint, fontSize: 13 },
-  recentScanClient: { color: colors.inkSoft, fontSize: 12.5, flexShrink: 1 },
-  recentScanStaff: { color: colors.inkFaint, fontSize: 11, marginTop: 2 },
-  recentScanTime: { color: colors.inkSoft, fontSize: 11, flexShrink: 0 },
-  rewardBadge: {
-    backgroundColor: colors.primarySoft, borderRadius: radius.pill,
-    paddingHorizontal: 7, paddingVertical: 2,
-  },
-  rewardBadgeText: { color: colors.primary, fontSize: 10, fontWeight: '700' },
-
-  emptyBox: { alignItems: 'center', gap: 12, paddingVertical: 40 },
-  emptyText: { color: colors.inkSoft, fontSize: 14, textAlign: 'center' },
-}))
+  barFill: { width: '100%', borderTopLeftRadius: 5, borderTopRightRadius: 5, backgroundColor: colors.primary },
+  rank: { width: 30, height: 30, borderRadius: 9, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', ...continuous },
+  badge: { width: 36, height: 36, borderRadius: 11, backgroundColor: colors.fill, alignItems: 'center', justifyContent: 'center', ...continuous },
+  staffRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
+  staffTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  staffTrack: { height: 6, borderRadius: 3, backgroundColor: colors.fill, overflow: 'hidden' },
+  staffFill: { height: '100%', borderRadius: 3, backgroundColor: colors.primary },
+})

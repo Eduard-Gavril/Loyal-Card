@@ -1,100 +1,67 @@
 // ─────────────────────────────────────────────────────────────────
-// LoyalCard design system — "Ivory" (light) / "Midnight" (dark)
-// Base: warm white / ivory surfaces, near-black ink.
-// Accent: violet only. Black ("night") for premium surfaces.
+// LoyalCard design system — "Amber glass" (same look as the website)
+// Near-black warm background with amber glow, translucent glass surfaces,
+// amber accent. One dark theme: there is no light mode.
+// Token names are kept from the old palette so screens did not need rewrites.
 // ─────────────────────────────────────────────────────────────────
-import { useClientStore } from '@/store'
 
-const lightColors = {
+export const colors = {
   // Surfaces
-  bg: '#FAF9F6',          // ivory app background
-  bgDeep: '#F3F1EB',      // inset / recessed areas
-  surface: '#FFFFFF',     // cards
-  overlay: 'rgba(26,22,37,0.45)',
+  bg: '#0B0907',                    // app background (the glow is drawn above it, see AmbientBackground)
+  bgDeep: '#13100C',                // inset / recessed areas (inputs)
+  surface: '#1A1510',               // cards
+  overlay: 'rgba(0,0,0,0.62)',
 
   // Ink (text)
-  ink: '#1A1625',         // headings — near-black, violet undertone
-  inkMid: '#4C4657',      // body / secondary
-  inkSoft: '#8A8496',     // muted labels
-  inkFaint: '#B6B1C0',    // placeholders, disabled
+  ink: '#F7F0E6',                   // headings
+  inkMid: '#CDBFAE',                // body / secondary
+  inkSoft: '#9A8C7A',               // muted labels
+  inkFaint: '#6B5F52',              // placeholders, disabled
+
+  // Apple-style semantic layers (use these in new code)
+  label: '#F7F0E6',                          // primary text
+  labelSecondary: 'rgba(247,240,230,0.64)',  // secondary text (>= 4.5:1 on bg)
+  labelTertiary: 'rgba(247,240,230,0.40)',   // disabled, decorative: never for essential text
+  placeholder: 'rgba(247,240,230,0.58)',     // placeholder text in fields (>= 4.5:1 on the field fill)
+  grouped: 'rgba(255,226,186,0.075)',        // grouped list / card background
+  fill: 'rgba(255,226,186,0.10)',            // controls: inputs, segmented track
+  fillPressed: 'rgba(255,226,186,0.18)',     // pressed row
+  separator: 'rgba(255,226,186,0.12)',       // hairline between rows
 
   // Hairlines
-  border: '#ECE9E2',
-  borderStrong: '#DDD9CF',
+  border: 'rgba(255,226,186,0.14)',
+  borderStrong: 'rgba(255,226,186,0.26)',
 
-  // Violet accent
-  primary: '#6D28D9',
-  primaryPressed: '#5B21B6',
-  primarySoft: '#F2EDFC',     // violet-tinted surface
-  primaryBorder: '#E3DAF8',
-  violet: '#7C3AED',
-  violetLight: '#A78BFA',     // on dark surfaces only
+  // Amber accent
+  primary: '#FFB12A',
+  primaryPressed: '#F59E0B',
+  primarySoft: 'rgba(255,177,42,0.14)',     // amber-tinted surface
+  primaryBorder: 'rgba(255,177,42,0.38)',
+  violet: '#FFB12A',                        // legacy name: the accent
+  violetLight: '#FFD166',                   // accent on dark surfaces
+  onPrimary: '#1A1000',                     // text/icons on the amber accent
 
-  // Night (black premium surfaces)
-  night: '#17121F',
-  nightSoft: '#241D31',
-  nightBorder: '#332A45',
+  // Night (premium surfaces, e.g. the loyalty card itself)
+  night: '#2A1D10',
+  nightSoft: '#36250F',
+  nightBorder: '#5A4122',
   onNight: '#FFFFFF',
-  onNightSoft: '#B6ACD1',
+  onNightSoft: '#D8C3A3',
 
   // Semantic (used sparingly)
-  success: '#0E9F6E',
-  successSoft: '#E6F6EF',
-  successBorder: '#C4EADA',
-  danger: '#DC2626',
-  dangerSoft: '#FDEDED',
-  dangerBorder: '#F6CFCF',
-}
-
-export type Palette = { [K in keyof typeof lightColors]: string }
-
-// Static light palette — admin screens (always light) and the type/shadow
-// tokens below keep importing this directly.
-export const colors: Palette = lightColors
-
-// "Midnight" — neutral near-black dark theme. Backgrounds and surfaces stay
-// gray (no violet cast); violet lives only in interactive accents.
-export const darkColors: Palette = {
-  bg: '#0F0F13',
-  bgDeep: '#18181D',
-  surface: '#1B1B21',
-  overlay: 'rgba(0,0,0,0.6)',
-
-  ink: '#F2F2F4',
-  inkMid: '#C4C4CC',
-  inkSoft: '#8F8F99',
-  inkFaint: '#5D5D67',
-
-  border: '#27272E',
-  borderStrong: '#36363F',
-
-  primary: '#8B5CF6',
-  primaryPressed: '#A78BFA',
-  primarySoft: '#211E2D',     // barely-violet tinted surface
-  primaryBorder: '#332D47',
-  violet: '#8B5CF6',
-  violetLight: '#A78BFA',
-
-  // Night surfaces sit slightly above the dark background
-  night: '#222229',
-  nightSoft: '#2B2B33',
-  nightBorder: '#3C3C46',
-  onNight: '#FFFFFF',
-  onNightSoft: '#ABABB6',
-
   success: '#34D399',
-  successSoft: '#122A20',
-  successBorder: '#1E4634',
+  successSoft: 'rgba(52,211,153,0.12)',
+  successBorder: 'rgba(52,211,153,0.34)',
   danger: '#F87171',
-  dangerSoft: '#331519',
-  dangerBorder: '#55232A',
+  dangerSoft: 'rgba(248,113,113,0.12)',
+  dangerBorder: 'rgba(248,113,113,0.36)',
 }
 
-// Active palette for the client app; admin screens stay on the static light
-// `colors` export.
+export type Palette = { [K in keyof typeof colors]: string }
+
+// Kept so screens can keep calling useTheme(); there is a single palette now.
 export function useTheme(): Palette {
-  const darkMode = useClientStore((st) => st.darkMode)
-  return darkMode ? darkColors : colors
+  return colors
 }
 
 // Wraps a style factory with a per-palette cache so StyleSheet.create runs at
@@ -127,33 +94,33 @@ export const spacing = {
   xxl: 28,
 } as const
 
-// Shadows tuned for light backgrounds (iOS shadow* + Android elevation)
+// Shadows (iOS shadow* + Android elevation)
 export const shadows = {
   card: {
-    shadowColor: '#1A1625',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 2,
   },
   raised: {
-    shadowColor: '#1A1625',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.09,
+    shadowOpacity: 0.5,
     shadowRadius: 22,
     elevation: 6,
   },
   primaryBtn: {
-    shadowColor: '#6D28D9',
+    shadowColor: '#FFB12A',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.28,
     shadowRadius: 14,
     elevation: 5,
   },
   night: {
-    shadowColor: '#17121F',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.55,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -178,4 +145,35 @@ export const type = {
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
   },
+} as const
+
+// ── Typography: Apple's text styles (HIG › Typography). System font (SF on iOS), scales with Dynamic Type.
+// Body is 17pt; nothing below 11pt. Weight and size carry the hierarchy, not colour.
+export const ty = {
+  largeTitle: { fontSize: 34, lineHeight: 41, fontWeight: '700' as const, letterSpacing: 0.37 },
+  title1:     { fontSize: 28, lineHeight: 34, fontWeight: '700' as const, letterSpacing: 0.36 },
+  title2:     { fontSize: 22, lineHeight: 28, fontWeight: '700' as const, letterSpacing: 0.35 },
+  title3:     { fontSize: 20, lineHeight: 25, fontWeight: '600' as const, letterSpacing: 0.38 },
+  headline:   { fontSize: 17, lineHeight: 22, fontWeight: '600' as const, letterSpacing: -0.41 },
+  body:       { fontSize: 17, lineHeight: 22, fontWeight: '400' as const, letterSpacing: -0.41 },
+  callout:    { fontSize: 16, lineHeight: 21, fontWeight: '400' as const, letterSpacing: -0.32 },
+  subhead:    { fontSize: 15, lineHeight: 20, fontWeight: '400' as const, letterSpacing: -0.24 },
+  footnote:   { fontSize: 13, lineHeight: 18, fontWeight: '400' as const, letterSpacing: -0.08 },
+  caption1:   { fontSize: 12, lineHeight: 16, fontWeight: '400' as const, letterSpacing: 0 },
+  caption2:   { fontSize: 11, lineHeight: 13, fontWeight: '400' as const, letterSpacing: 0.07 },
+} as const
+
+export type TextStyleName = keyof typeof ty
+
+// iOS "continuous" (squircle) corners; ignored on Android.
+export const continuous = { borderCurve: 'continuous' as const }
+
+// 8pt grid, 16pt page margins, 44pt minimum hit target (HIG › Layout, Accessibility)
+export const layout = {
+  margin: 16,
+  gap: 8,
+  rowMin: 52,
+  target: 44,
+  cardRadius: 22,
+  controlRadius: 14,
 } as const

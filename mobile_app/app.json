@@ -10,6 +10,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "net.loyalcard.app",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSMotionUsageDescription": "LoyalCard uses motion data to add a subtle 3D tilt effect to your loyalty card."
       },
       "privacyManifests": {

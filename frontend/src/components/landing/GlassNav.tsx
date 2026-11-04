@@ -83,7 +83,7 @@ export default function GlassNav({ links: custom, home = '#top' }: { links?: Nav
           {links.map((l) => (
             <a key={l.href} href={l.href}>{l.label}</a>
           ))}
-          {SIGNUP_OPEN && <a href="/register" onClick={(e) => { e.preventDefault(); goTo('/register') }}>{L('Crea la tua attività', 'Create your business', 'Creează-ți afacerea')}</a>}
+          {SIGNUP_OPEN && <a href="/register" className="gn-signup" onClick={(e) => { e.preventDefault(); goTo('/register') }}>{L('Crea la tua attività', 'Create your business', 'Creează-ți afacerea')}</a>}
         </nav>
 
         <div className="gn-right">

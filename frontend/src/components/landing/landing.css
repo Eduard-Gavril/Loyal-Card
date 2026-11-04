@@ -34,9 +34,12 @@ html:has(.la) { scroll-behavior: smooth; }
 .lv-gift svg { width: 100%; height: 100%; }
 
 /* ---------- Navigation ---------- */
-.gn-in { gap: 24px; }
+.gn .ap-nav-in { max-width: 1280px; }
+.gn-in { gap: 32px; }
 .gn .ap-logo { text-decoration: none; }
-.gn-links { flex: 1 1 auto; min-width: 0; justify-content: center; margin-left: 0; gap: clamp(14px, 1.7vw, 26px); }
+.gn-links { flex: 1 1 auto; min-width: 0; justify-content: center; margin-left: 0; padding-inline: 8px; gap: clamp(16px, 1.9vw, 30px); }
+.gn-links a.gn-signup { color: var(--accent); font-weight: 600; }
+.gn-links a.gn-signup:hover { color: var(--text); }
 .gn .ap-logo, .gn-right { flex: none; }
 .gn-links a, .gn-right button, .gn-lang button, .gn-me, .gn-list a, .gn-list button { white-space: nowrap; }
 .gn-right { display: flex; align-items: center; gap: 10px; }
@@ -68,7 +71,7 @@ html:has(.la) { scroll-behavior: smooth; }
 @keyframes gn-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes gn-drop { from { opacity: 0; transform: translateY(-10px) scale(.98); } to { opacity: 1; transform: none; } }
 
-@media (max-width: 1180px) {
+@media (max-width: 1280px) {
   .gn-right { margin-left: auto; }
   .ap-nav .gn-links, .gn-biz, .gn-right > .gn-lang { display: none; }
   .gn-burger { display: grid; }

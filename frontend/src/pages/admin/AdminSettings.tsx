@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore, useClientStore } from '@/store'
 import { api, supabase } from '@/lib/supabase'
 import StaticBackground from '@/components/admin/AdminBackdrop'
 import PlanCard from '@/components/admin/PlanCard'
 import { usePlanUsage, isPlanError, planErrorText } from '@/lib/plan'
-import { Settings, Users, QrCode, Trash2, AlertTriangle } from 'lucide-react'
+import { Settings, Users, QrCode, Trash2, AlertTriangle, Building2, MapPin, CreditCard } from 'lucide-react'
 
 interface StaffAdmin {
   id: string
@@ -41,6 +41,16 @@ export default function AdminSettings() {
   const { tenantId, role, clearAuth } = useAuthStore()
   const { language } = useClientStore()
   const isOwner = role === 'owner'
+  const [searchParams, setSearchParams] = useSearchParams()
+  type TabId = 'profile' | 'location' | 'plan' | 'team' | 'danger'
+  const requestedTab = searchParams.get('tab') as TabId | null
+  const tab: TabId =
+    requestedTab && ['profile', 'location', 'plan'].includes(requestedTab)
+      ? requestedTab
+      : isOwner && requestedTab && ['team', 'danger'].includes(requestedTab)
+      ? requestedTab
+      : 'profile'
+  const setTab = (id: TabId) => setSearchParams(id === 'profile' ? {} : { tab: id }, { replace: true })
   const { usage: plan } = usePlanUsage(tenantId)
   const canLogo = !plan || plan.limits.can_white_label
   const [settings, setSettings] = useState<TenantSettings>({
@@ -228,10 +238,12 @@ export default function AdminSettings() {
     if (!tenantId) return
     const T = (it: string, ro: string, en: string) => (language === 'it' ? it : language === 'ro' ? ro : en)
     if (!settings.type) {
+      setTab('location')
       setError(T('Seleziona il tipo di attività.', 'Selectează tipul afacerii.', 'Select the business type.'))
       return
     }
     if (settings.latitude == null || settings.longitude == null) {
+      setTab('location')
       setError(T('Imposta la posizione: cerca l\'indirizzo oppure usa la tua posizione attuale.', 'Setează locația: caută adresa sau folosește locația curentă.', 'Set the position: search the address or use your current location.'))
       return
     }
@@ -365,6 +377,18 @@ export default function AdminSettings() {
     { name: 'Teal', value: '#14b8a6' },
   ]
 
+  const tabs: { id: TabId; label: string; icon: JSX.Element; danger?: boolean }[] = [
+    { id: 'profile', label: L('Profilo', 'Profil', 'Profile'), icon: <Building2 className="w-4 h-4" /> },
+    { id: 'location', label: L('Posizione', 'Locație', 'Location'), icon: <MapPin className="w-4 h-4" /> },
+    { id: 'plan', label: L('Piano', 'Plan', 'Plan'), icon: <CreditCard className="w-4 h-4" /> },
+    ...(isOwner
+      ? [
+          { id: 'team' as TabId, label: L('Staff', 'Personal', 'Staff'), icon: <Users className="w-4 h-4" /> },
+          { id: 'danger' as TabId, label: L('Elimina', 'Șterge', 'Delete'), icon: <AlertTriangle className="w-4 h-4" />, danger: true },
+        ]
+      : []),
+  ]
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Animated background */}
@@ -404,8 +428,33 @@ export default function AdminSettings() {
             </div>
           ) : (
             <div className="space-y-6 sm:space-y-8">
-              {plan && <PlanCard usage={plan} />}
+              <div className="sticky top-2 z-30">
+                <div role="tablist" className="flex gap-1.5 overflow-x-auto rounded-2xl bg-black/50 backdrop-blur-xl border border-white/15 p-1.5 shadow-lg" style={{ scrollbarWidth: 'none' }}>
+                  {tabs.map((tb) => {
+                    const active = tab === tb.id
+                    return (
+                      <button
+                        key={tb.id}
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setTab(tb.id)}
+                        className={`flex flex-1 items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                          active
+                            ? tb.danger ? 'bg-red-500/80 text-white shadow' : 'bg-primary-500 text-white shadow'
+                            : tb.danger ? 'text-red-300 hover:bg-red-500/15' : 'text-gray-300 hover:bg-white/10'
+                        }`}
+                      >
+                        {tb.icon}
+                        {tb.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
 
+              {tab === 'plan' && plan && <PlanCard usage={plan} />}
+
+              {tab === 'profile' && (<>
               {/* Business Info */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
@@ -475,6 +524,9 @@ export default function AdminSettings() {
                 </div>
               </div>
 
+              </>)}
+
+              {tab === 'location' && (<>
               {/* Location and listing */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
@@ -576,6 +628,9 @@ export default function AdminSettings() {
                 </div>
               </div>
 
+              </>)}
+
+              {tab === 'profile' && (<>
               {/* Appearance */}
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
@@ -635,6 +690,9 @@ export default function AdminSettings() {
                 </div>
               </div>
 
+              </>)}
+
+              {tab === 'team' && (<>
               {/* Staff (scan-only) accounts */}
               {isOwner && (
                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20">
@@ -776,6 +834,9 @@ export default function AdminSettings() {
                 </div>
               )}
 
+              </>)}
+
+              {tab === 'danger' && (<>
               {/* Delete business (owner only) */}
               {isOwner && (
                 <div className="bg-red-500/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-red-500/30">
@@ -911,6 +972,10 @@ export default function AdminSettings() {
                 </div>
               )}
 
+              </>)}
+
+              {(tab === 'profile' || tab === 'location') && (
+              <div className="sticky bottom-3 z-30 space-y-3">
               {/* Error message */}
               {error && (
                 <div className="bg-red-500/20 border border-red-500/50 rounded-xl px-4 py-3 text-red-300 text-sm">
@@ -949,6 +1014,8 @@ export default function AdminSettings() {
                   </>
                 )}
               </button>
+              </div>
+              )}
             </div>
           )}
         </div>

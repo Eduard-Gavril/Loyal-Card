@@ -57,7 +57,7 @@ export default function TenantStatusBanner() {
               'Afacerea ta nu apare încă în lista partenerilor: lipsesc adresa și locația. ',
               'Your business does not appear in the partners list yet: address and location are missing. '
             )}
-            <Link to="/admin/settings" className="underline font-semibold">
+            <Link to="/admin/settings?tab=location" className="underline font-semibold">
               {L('Completa in Impostazioni', 'Completează în Setări', 'Complete it in Settings')}
             </Link>
           </p>

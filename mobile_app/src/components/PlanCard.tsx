@@ -1,5 +1,5 @@
 import React from 'react'
-import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useClientStore } from '@/store'
 import { getTranslation } from '@/lib/i18n'
@@ -66,7 +66,8 @@ export default function PlanCard({ usage }: { usage: PlanUsage }) {
         </Text>
       )}
 
-      {!top && (
+      {/* App Store (guideline 3.1.1): no link to buy/upgrade plans outside the app on iOS; plans are managed on the website. */}
+      {!top && Platform.OS !== 'ios' && (
         <TouchableOpacity style={s.upgradeBtn} onPress={() => Linking.openURL(UPGRADE_URL)} activeOpacity={0.85}>
           <Ionicons name="arrow-up-circle-outline" size={18} color={colors.onPrimary} />
           <Text style={s.upgradeText}>{a.planUpgrade}</Text>

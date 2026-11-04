@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native'
+import { View, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native'
 import { Stack, useRouter } from 'expo-router'
 import * as Location from 'expo-location'
 import { Ionicons } from '@expo/vector-icons'
@@ -534,7 +534,9 @@ export default function AdminSettingsScreen() {
                 />
               </FormGroup>
 
-              {/* Broadcast push notification */}
+              {/* Broadcast push notification.
+                  Hidden on iOS in the first release: App Store guideline 4.5.4 requires explicit in-app opt-in and opt-out for promotional pushes. */}
+              {Platform.OS !== 'ios' && (
               <FormGroup header={a.broadcastTitle} footer={`${a.broadcastDesc} ${a.broadcastLimitHint}.`}>
                 <Field label={a.broadcastTitleLabel} value={broadcastTitle} onChangeText={setBroadcastTitle} placeholder={a.broadcastTitlePlaceholder} maxLength={60} />
                 <Field label={a.broadcastBodyLabel} value={broadcastBody} onChangeText={setBroadcastBody} placeholder={a.broadcastBodyPlaceholder} multiline maxLength={150} />
@@ -552,6 +554,7 @@ export default function AdminSettingsScreen() {
                   onPress={handleSendBroadcast}
                 />
               </FormGroup>
+              )}
 
               {/* Delete business */}
               <FormGroup header={a.deleteBizTitle} footer={deletionScheduledAt ? undefined : a.deleteBizDesc}>

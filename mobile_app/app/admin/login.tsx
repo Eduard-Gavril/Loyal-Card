@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '@/lib/supabase'
 import { useAdminStore, useClientStore } from '@/store'
+import { getTranslation } from '@/lib/i18n'
 import { colors, continuous } from '@/theme'
 import AmbientBackground from '@/components/AmbientBackground'
 import Button from '@/ui/Button'
@@ -18,6 +19,7 @@ export default function AdminLoginScreen() {
   const router = useRouter()
   const { setAuth } = useAdminStore()
   const { language } = useClientStore()
+  const a = getTranslation(language).admin
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,7 +28,7 @@ export default function AdminLoginScreen() {
   const [showPass, setShowPass] = useState(false)
 
   async function handleLogin() {
-    if (!email || !password) { setError('Inserisci email e password'); return }
+    if (!email || !password) { setError(a.loginMissing); return }
     setLoading(true)
     setError('')
     try {
@@ -43,13 +45,13 @@ export default function AdminLoginScreen() {
 
       if (adminError || !admin) {
         await supabase.auth.signOut()
-        throw new Error('Account admin non trovato o non attivo')
+        throw new Error(a.loginNoAdmin)
       }
 
       setAuth(data.user, data.session, admin.tenant_id ?? null, admin.role ?? 'staff')
       router.replace('/admin/dashboard')
     } catch (e: any) {
-      setError(e?.message ?? 'Credenziali non valide')
+      setError(e?.message ?? a.loginInvalid)
     } finally {
       setLoading(false)
     }
@@ -68,10 +70,10 @@ export default function AdminLoginScreen() {
           <Ionicons name="shield-checkmark" size={34} color={colors.onPrimary} />
         </View>
         <Txt v="title1" style={s.center} accessibilityRole="header">
-          Admin Login
+          {a.loginTitle}
         </Txt>
         <Txt v="subhead" tone="secondary" style={[s.center, { marginBottom: 28 }]}>
-          Accesso riservato agli amministratori
+          {a.loginSubtitle}
         </Txt>
 
         <View style={{ gap: 14, alignSelf: 'stretch' }}>
@@ -97,7 +99,7 @@ export default function AdminLoginScreen() {
             returnKeyType="go"
             onSubmitEditing={handleLogin}
             accessory={
-              <PressableScale accessibilityRole="button" accessibilityLabel={showPass ? 'Hide password' : 'Show password'} onPress={() => setShowPass(!showPass)} hitSlop={6} style={s.eye}>
+              <PressableScale accessibilityRole="button" accessibilityLabel={showPass ? a.hidePassword : a.showPassword} onPress={() => setShowPass(!showPass)} hitSlop={6} style={s.eye}>
                 <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.labelSecondary} />
               </PressableScale>
             }
@@ -110,7 +112,7 @@ export default function AdminLoginScreen() {
               </Txt>
             </View>
           ) : null}
-          <Button title="Accedi" loading={loading} onPress={handleLogin} style={{ marginTop: 6 }} />
+          <Button title={a.loginBtn} loading={loading} onPress={handleLogin} style={{ marginTop: 6 }} />
           {SIGNUP_OPEN && (
             <Button
               variant="plain"

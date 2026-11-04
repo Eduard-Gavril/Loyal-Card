@@ -59,6 +59,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] +60% vizite recurente (Bond Brand Loyalty 2023) (2026-10-21)
 - [x] ~~+25% venituri per client (Harvard Business Review)~~ → +5% clienți care revin = +25% până la +95% profit (2026-10-28). L'articolo HBR linkato dal sito (2014, "The Value of Keeping the Right Customers") riporta questo dato di Frederick Reichheld / Bain, non "+25% venituri per client": la frase del sito va corretta
 - [x] ~~+30% valoare pe viață client (Bain & Company)~~: nessuno studio preciso (il link del sito porta alla pagina generica di Bain), non usato. Al suo posto (2026-11-04): un client nou costă de 5–25× mai mult decât păstrarea unuia existent, frase verificata sull'articolo HBR linkato dal sito (Amy Gallo, 29/10/2014)
+- [ ] (backlog da riempire) Nuovi dati solo con fonte aperta e verificabile sulla pagina originale prima dell'uso; in alternativa riusare i 4 dati già fatti in un formato nuovo (es. quiz "Adevărat sau fals?")
 
 **Una funzione in 10 secondi**
 - [ ] ~~Apple Wallet / Google Wallet~~ (in sospeso: nel codice ci sono solo i testi, manca la generazione del pass; non pubblicizzare finché non esiste)

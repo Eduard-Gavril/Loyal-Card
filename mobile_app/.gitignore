@@ -1,1 +1,4 @@
 .expo/
+
+# Google Play service account key (secret)
+google-play-key.json

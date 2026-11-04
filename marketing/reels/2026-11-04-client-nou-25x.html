@@ -1,0 +1,250 @@
+<title>Client nou: 5–25× mai scump</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Il dato". Source checked on the page the site links to (hbr.org/2014/10/the-value-of-keeping-the-right-customers,
+   Amy Gallo, 29 Oct 2014): "Depending on which study you believe, and what industry you're in, acquiring a new customer
+   is anywhere from five to 25 times more expensive than retaining an existing one."
+   Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --night: #101722; --night-2: #18222F; --gold: #F5B544; --gold-2: #C98A1E; --gold-3: #FFE2A0; --ink-2: #9AA6B8; --teal: #2DD4BF; --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --amber: #F5B544; --white: #FFFFFF;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--night); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(16, 23, 34, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--night); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--night); color: var(--white); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--gold) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--gold); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(16, 23, 34, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background:
+  radial-gradient(520px 460px at 30% 70%, rgba(245, 181, 68, .16), transparent 70%),
+  radial-gradient(520px 460px at 85% 15%, rgba(45, 212, 191, .10), transparent 70%),
+  linear-gradient(180deg, var(--night-2), var(--night)); }
+.kick { position: absolute; left: 56px; top: 186px; font-family: var(--f-mono); font-size: 18px; font-weight: 500; letter-spacing: .16em; color: var(--gold); white-space: nowrap; }
+.kick::before { content: ""; display: inline-block; width: 26px; height: 3px; background: var(--gold); vertical-align: middle; margin-right: 12px; }
+.hx { font-weight: 900; letter-spacing: -.04em; line-height: 1.02; }
+.serif { font-family: var(--f-display); font-weight: 400; letter-spacing: -.03em; line-height: .9; }
+.gold { color: var(--gold); }
+.left { position: absolute; left: 56px; width: 608px; }
+
+/* the two stacks (shared by both scenes) */
+#stacks { position: absolute; z-index: 0; left: 0; top: 0; width: 720px; height: 1280px; }
+#floor { position: absolute; left: 56px; width: 608px; top: 860px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, .5); }
+.stk { position: absolute; top: 0; width: 160px; height: 860px; }
+#stkN { left: 120px; } #stkR { left: 440px; }
+.coin { position: absolute; left: 10px; width: 140px; height: 30px; border-radius: 50%; background: radial-gradient(ellipse at 50% 35%, var(--gold-3), var(--gold) 55%, var(--gold-2)); box-shadow: 0 4px 0 #9C6A12, 0 6px 10px rgba(0, 0, 0, .35); }
+.coin.ghost { background: transparent; box-shadow: none; border: 2px dashed rgba(245, 181, 68, .55); box-sizing: border-box; }
+.slab { position: absolute; top: 876px; width: 220px; text-align: center; font-size: 22px; font-weight: 800; line-height: 1.2; }
+#labN { left: 90px; } #labR { left: 410px; }
+.slab small { display: block; font-size: 15px; font-weight: 700; color: var(--ink-2); margin-top: 2px; }
+.mul { position: absolute; font-weight: 900; letter-spacing: -.03em; white-space: nowrap; color: var(--gold); }
+#m1 { left: 440px; width: 160px; text-align: center; top: 772px; font-size: 40px; color: var(--teal); }
+#m5 { left: 290px; top: 760px; font-size: 36px; }
+#m25 { left: 290px; top: 478px; font-size: 36px; }
+#qN, #qR { position: absolute; top: 720px; width: 160px; text-align: center; font-family: var(--f-display); font-size: 120px; color: rgba(255, 255, 255, .85); line-height: 1; }
+#qN { left: 120px; } #qR { left: 440px; }
+
+/* s1 */
+#hook { position: absolute; left: 56px; top: 224px; width: 608px; font-size: 58px; }
+#hook em { font-style: normal; color: var(--gold); }
+#hook b { color: var(--teal); }
+
+/* s2 */
+#ans { position: absolute; left: 56px; top: 224px; width: 608px; }
+#src { position: absolute; left: 56px; top: 950px; width: 608px; font-family: var(--f-mono); font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
+#src b { color: var(--white); font-weight: 500; }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 72px; line-height: 1; letter-spacing: -.045em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · miercuri · 15 s · Cifra</div>
+    <h1>Client nou: 5–25× mai scump</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: un client nou costă de 5 până la 25 de ori mai mult decât păstrarea unuia existent, după Harvard Business Review, 2014">
+      <div id="stage">
+        <div id="bg"></div>
+
+        <div id="stacks">
+          <div id="floor"></div>
+          <div class="stk" id="stkN"></div>
+          <div class="stk" id="stkR"></div>
+          <div class="slab" id="labN">Client nou<small>câștigat de la zero</small></div>
+          <div class="slab" id="labR">Client care revine<small>păstrat</small></div>
+          <div id="qN">?</div><div id="qR">?</div>
+          <div class="mul" id="m1">×1</div>
+          <div class="mul" id="m5">×5</div>
+          <div class="mul" id="m25">×25</div>
+        </div>
+
+        <!-- s1: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="kick">UN STUDIU · O CIFRĂ</div>
+          <div class="hx" id="hook">Ce te costă mai mult: <em>un client nou</em> sau <b>unul care revine?</b></div>
+        </div>
+
+        <!-- s2: the answer -->
+        <div class="scene" id="s2">
+          <div class="kick">RĂSPUNSUL</div>
+          <div id="ans">
+            <div class="hx" id="a1" style="font-size:50px">Un client nou te costă de</div>
+            <div class="serif gold" id="a2" style="font-size:138px;margin-top:6px;white-space:nowrap">5–25×</div>
+            <div class="hx" id="a3" style="font-size:50px;margin-top:4px">mai mult.</div>
+          </div>
+          <div id="src"><b>Sursa:</b> Amy Gallo, Harvard Business Review (2014): „în funcție de studiu și de industrie”.</div>
+        </div>
+
+        <!-- s3: cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:260px">
+            <div id="cta1">Păstrează clienții <em>pe care îi ai.</em></div>
+            <div id="cta2">Un card de fidelitate digital îi aduce înapoi. Începi gratuit cu planul Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  // coins: 14 px per coin, the bottom one sits on the floor (y 860); higher coins cover the ones below
+  const coin = (stack, i, ghost) => { const c = document.createElement('div'); c.className = 'coin' + (ghost ? ' ghost' : ''); c.style.top = `${860 - 30 - i * 14}px`; c.style.zIndex = String(i + 1); stack.appendChild(c); return c; };
+  const N = Array.from({ length: 25 }, (_, i) => coin($('#stkN'), i, i >= 5));
+  const R = coin($('#stkR'), 0, false);
+
+  A($('#bg'), [{ translate: '0px 0px' }, { translate: '-50px 40px' }], 0, D, 'linear');
+
+  // ---------- s1 · the question (on screen at frame 0) ----------
+  scene($('#s1'), -.05, 3.7);
+  A($('#hook'), [{ translate: '0px 10px' }, { translate: '0px 0px' }], 0, .6, OUT);
+  A($('#floor'), [{ scale: '0 1' }, { scale: '1 1' }], 0, .6, IO);
+  ['#labN', '#labR'].forEach((s, i) => A($(s), [{ translate: '0px 10px' }, { translate: '0px 0px' }], .1 + i * .1, .5, OUT));
+  ['#qN', '#qR'].forEach((s, i) => { const q = $(s); A(q, [{ scale: '.4', rotate: '-20deg' }, { scale: '1', rotate: '0deg' }], .2 + i * .15, .5, BACK); A(q, [{ opacity: 1 }, { opacity: 0 }], 3.7, .25, 'linear'); });
+  A($('#qN'), [{ translate: '0px 0px' }, { translate: '0px -10px', offset: .5 }, { translate: '0px 0px' }], 1.4, .6, IO);
+  A($('#qR'), [{ translate: '0px 0px' }, { translate: '0px -10px', offset: .5 }, { translate: '0px 0px' }], 1.7, .6, IO);
+
+  // ---------- s2 · the answer: one coin vs five, up to twenty-five ----------
+  scene($('#s2'), 3.6, 10.8);
+  enter($('#a1'), 3.65, { dy: 24, d: .45 });
+  A($('#a2'), [{ opacity: 0, scale: '.6' }, { opacity: 1, scale: '1' }], 4.0, .55, BACK);
+  enter($('#a3'), 4.35, { dy: 18, d: .4 });
+  A(R, [{ opacity: 0, translate: '0px -260px' }, { opacity: 1, translate: '0px 0px' }], 4.4, .45, 'cubic-bezier(.5,0,.75,0)');
+  A(R, [{ scale: '1 1' }, { scale: '1.08 .85', offset: .3 }, { scale: '1 1' }], 4.85, .25, OUT);
+  enter($('#m1'), 4.9, { dy: 10, d: .35, e: BACK });
+  N.slice(0, 5).forEach((c, i) => A(c, [{ opacity: 0, translate: '0px -300px' }, { opacity: 1, translate: '0px 0px' }], 5.2 + i * .16, .4, 'cubic-bezier(.5,0,.75,0)'));
+  enter($('#m5'), 6.1, { dx: -10, dy: 0, d: .35, e: BACK });
+  N.slice(5).forEach((c, i) => A(c, [{ opacity: 0, translate: '0px -30px' }, { opacity: 1, translate: '0px 0px' }], 6.5 + i * .05, .25, OUT));
+  enter($('#m25'), 7.6, { dx: -10, dy: 0, s: .8, d: .4, e: BACK });
+  enter($('#src'), 7.9, { dy: 12, d: .45 });
+  A($('#a2'), [{ scale: '1' }, { scale: '1.06', offset: .4 }, { scale: '1' }], 8.7, .6, OUT);
+
+  // ---------- s3 · cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 10.7, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)' }], 10.7, .6, IO);
+  stagger(words($('#cta1')), 11.0, .1, { dy: 36, d: .45, e: BACK });
+  enter($('#cta2'), 11.8, { dy: 16, d: .45 });
+  enter($('#brand'), 12.3, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 12.6, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.6, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 9.0 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

@@ -58,7 +58,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] +27% retenție clienți (Accenture 2020) (2026-10-14)
 - [x] +60% vizite recurente (Bond Brand Loyalty 2023) (2026-10-21)
 - [x] ~~+25% venituri per client (Harvard Business Review)~~ → +5% clienți care revin = +25% până la +95% profit (2026-10-28). L'articolo HBR linkato dal sito (2014, "The Value of Keeping the Right Customers") riporta questo dato di Frederick Reichheld / Bain, non "+25% venituri per client": la frase del sito va corretta
-- [ ] +30% valoare pe viață client (Bain & Company): prima di usarlo trovare lo studio preciso, il link del sito porta solo alla pagina generica di Bain sulla fedeltà
+- [x] ~~+30% valoare pe viață client (Bain & Company)~~: nessuno studio preciso (il link del sito porta alla pagina generica di Bain), non usato. Al suo posto (2026-11-04): un client nou costă de 5–25× mai mult decât păstrarea unuia existent, frase verificata sull'articolo HBR linkato dal sito (Amy Gallo, 29/10/2014)
 
 **Una funzione in 10 secondi**
 - [ ] ~~Apple Wallet / Google Wallet~~ (in sospeso: nel codice ci sono solo i testi, manca la generazione del pass; non pubblicizzare finché non esiste)
@@ -128,3 +128,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-01 (dom) | `2026-11-01-gratuit-clienti.html` | L'offerta | Cartellino del prezzo che oscilla "? lei" → "0 lei", tre righe a rullo 0 lei / 0 aplicații / 0 formulare, "Zero bariere pentru clienți", Starter 0€; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-02 (lun) | `2026-11-02-pizzerie.html` | Un settore al giorno | Pizzerie: tovaglia a quadri, "Pizza bună face și vecinul", 8 ordini riempiono le 8 fette sul telefono → Pizza gratuită, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-11-03 (mar) | `2026-11-03-datele-sigure.html` | Domanda e risposta | Fumetto "Datele mele sunt în siguranță?" + scudo, modulo "Card nou" con Nume/Email/Parolă = NU e Telefon OPȚIONAL, poi "Șterge contul meu" → STERG → "Toate datele tale au fost șterse."; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |
+| 2026-11-04 (mer) | `2026-11-04-client-nou-25x.html` | Il dato | Due pile di monete: "Client care revine" ×1 vs "Client nou" ×5 → ×25 (monete tratteggiate), "5–25× mai mult", fonte Amy Gallo HBR 2014; 15 s + taglio 9,3 s | 12:30 (15 s) / Reel di prova (9,3 s) |

@@ -6,12 +6,11 @@ import { colors } from '@/theme'
 import PressableScale from '@/ui/PressableScale'
 import Txt from '@/ui/Txt'
 
-/** Save action in the navigation bar. Only present while there is something to save, so the bar stays empty otherwise. */
+/** Save action in the navigation bar. The layout only mounts it while there is something to save. */
 export default function SettingsSaveButton() {
-  const { dirty, saving, save } = useSettings()
+  const { saving, save } = useSettings()
   const { language } = useClientStore()
   const label = getTranslation(language).admin.save
-  if (!dirty && !saving) return null
   return (
     <PressableScale
       accessibilityRole="button"

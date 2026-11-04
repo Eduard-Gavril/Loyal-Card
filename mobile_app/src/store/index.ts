@@ -110,10 +110,19 @@ export const useClientStore = create<ClientState>()(
           }
           snapshot[qr] = next
         }
+        // Rewards ready to redeem right now, across the cards on this device. Kept here (not only
+        // in the "My cards" screen) so the tab badge updates as soon as any card refreshes.
+        const saved = new Set(get().savedCards.map((c) => c.qrCode))
+        let available = 0
+        for (const [qr, rules] of Object.entries(snapshot)) {
+          if (!saved.has(qr)) continue
+          for (const st of Object.values(rules)) available += st?.rewards ?? 0
+        }
         set({
           loyaltySnapshot: snapshot,
           lifetimeStamps: get().lifetimeStamps + stampsDelta,
           lifetimeRewards: get().lifetimeRewards + rewardsDelta,
+          totalRewards: available,
         })
       },
       clearAll: () => set({

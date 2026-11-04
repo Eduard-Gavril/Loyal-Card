@@ -368,7 +368,7 @@ export default function CardScreen() {
       {header}
       <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>
         {/* The card: tilts in 3D with the phone. QR on a white panel so every scanner reads it. */}
-        <TiltCard style={s.cardBox} opacity={qrOpacity} scale={qrScale}>
+        <TiltCard style={s.cardBox} opacity={qrOpacity} scale={qrScale} radius={28}>
           <LinearGradient colors={['#C97A1E', '#8A4A12', '#5A300C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.cardGradient}>
             <View style={s.cardHeader}>
               <Txt v="caption1" style={s.cardBrand}>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, ReactNode } from 'react'
-import { Animated, StyleSheet, StyleProp, ViewStyle } from 'react-native'
+import { Animated, StyleSheet, StyleProp, View, ViewStyle } from 'react-native'
 import { DeviceMotion } from 'expo-sensors'
 
 interface TiltCardProps {
@@ -10,6 +10,8 @@ interface TiltCardProps {
   /** Optional entrance-animation scale, owned by the caller. */
   scale?: Animated.Value | Animated.AnimatedInterpolation<string | number>
   sheenColor?: string
+  /** Corner radius of the wrapped card: the glossy highlight is clipped to it. */
+  radius?: number
 }
 
 /**
@@ -19,7 +21,7 @@ interface TiltCardProps {
  * movement), not absolute world orientation, and degrades to a static card
  * with no error when the device has no gyroscope.
  */
-export default function TiltCard({ children, style, opacity, scale, sheenColor = 'rgba(255,255,255,0.10)' }: TiltCardProps) {
+export default function TiltCard({ children, style, opacity, scale, sheenColor = 'rgba(255,255,255,0.10)', radius = 26 }: TiltCardProps) {
   const tiltX = useRef(new Animated.Value(0)).current
   const tiltY = useRef(new Animated.Value(0)).current
 
@@ -80,19 +82,22 @@ export default function TiltCard({ children, style, opacity, scale, sheenColor =
       ]}
     >
       {children}
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.sheen,
-          { backgroundColor: sheenColor },
-          { transform: [{ translateX: sheenX }, { translateY: sheenY }] },
-        ]}
-      />
+      {/* The highlight is bigger than the card, so it is clipped to the card's rounded corners. */}
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.clip, { borderRadius: radius }]}>
+        <Animated.View
+          style={[
+            styles.sheen,
+            { backgroundColor: sheenColor },
+            { transform: [{ translateX: sheenX }, { translateY: sheenY }] },
+          ]}
+        />
+      </View>
     </Animated.View>
   )
 }
 
 const styles = StyleSheet.create({
+  clip: { overflow: 'hidden' },
   sheen: {
     position: 'absolute', top: '50%', left: '50%',
     width: 260, height: 260, marginLeft: -130, marginTop: -130,

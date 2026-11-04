@@ -41,7 +41,8 @@ export default function AdminLayout() {
       <Stack.Screen name="clients" options={{ title: a.clients, ...large }} />
       <Stack.Screen name="scan-history" options={{ title: a.history, ...large }} />
       <Stack.Screen name="reports" options={{ title: a.reports, ...large }} />
-      <Stack.Screen name="settings" options={{ title: a.settings, ...large }} />
+      {/* Settings has its own stack (menu + one screen per topic), so the bar is owned by app/admin/settings/_layout.tsx */}
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
     </Stack>
   )
 }

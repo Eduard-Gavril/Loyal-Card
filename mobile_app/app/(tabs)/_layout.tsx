@@ -30,7 +30,8 @@ export default function TabLayout() {
       <NativeTabs.Trigger name="dashboard">
         <NativeTabs.Trigger.Icon sf={{ default: 'creditcard', selected: 'creditcard.fill' }} md="credit_card" />
         <NativeTabs.Trigger.Label>{t.tabs.myCards}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Badge hidden={totalRewards <= 0}>{String(totalRewards)}</NativeTabs.Trigger.Badge>
+        {/* Only rendered with rewards to collect: the `hidden` prop left a red "0" on iOS. */}
+        {totalRewards > 0 ? <NativeTabs.Trigger.Badge>{String(totalRewards)}</NativeTabs.Trigger.Badge> : null}
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="profile">

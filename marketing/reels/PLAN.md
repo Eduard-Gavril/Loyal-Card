@@ -67,8 +67,8 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Dashboard / Rapoarte (2026-10-22: pagina Rapoarte con dati di esempio; non dire "în timp real": i dati si caricano all'apertura, non in diretta)
 - [x] Export Excel (già mostrato nel reel "Prima e dopo" del 2026-10-24: pulsante "Download Report Excel" + file LoyalCard_Clients_*.xlsx; non ripetuto)
 - [x] Parteneri în apropiere (geolocalizare) (2026-10-29: "Alege magazinul tău" chiede la posizione e mostra i 5 negozi più vicini con la distanza "x.x km"; la posizione del negozio la inserisce il team LoyalCard, il titolare non la imposta dalle Setări)
-- [ ] Toate cardurile într-un singur loc
-- [ ] Funcționează și offline
+- [x] Toate cardurile într-un singur loc (2026-11-05: pagina "Cardurile Tale" come nell'app: stelle di avanzamento, "x/y ștampile", badge premio, tap → codice QR)
+- [ ] Funcționează și offline (da provare prima su un telefono vero: la PWA tiene in cache l'interfaccia e per 24 h le risposte di Supabase, ma va verificato che il QR si apra senza rete)
 - [ ] Reguli pe produs sau categorie
 - [ ] White-label: logo-ul tău (planul Business)
 - [ ] Premii pe mai multe niveluri (planul Professional)
@@ -130,3 +130,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-02 (lun) | `2026-11-02-pizzerie.html` | Un settore al giorno | Pizzerie: tovaglia a quadri, "Pizza bună face și vecinul", 8 ordini riempiono le 8 fette sul telefono → Pizza gratuită, 3 vantaggi, Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-11-03 (mar) | `2026-11-03-datele-sigure.html` | Domanda e risposta | Fumetto "Datele mele sunt în siguranță?" + scudo, modulo "Card nou" con Nume/Email/Parolă = NU e Telefon OPȚIONAL, poi "Șterge contul meu" → STERG → "Toate datele tale au fost șterse."; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-11-04 (mer) | `2026-11-04-client-nou-25x.html` | Il dato | Due pile di monete: "Client care revine" ×1 vs "Client nou" ×5 → ×25 (monete tratteggiate), "5–25× mai mult", fonte Amy Gallo HBR 2014; 15 s + taglio 9,3 s | 12:30 (15 s) / Reel di prova (9,3 s) |
+| 2026-11-05 (gio) | `2026-11-05-cardurile-tale.html` | Una funzione | "Unde ține clientul cardul tău?" (portofel/sertar/acasă barrati), pagina "Cardurile Tale" con 3 carte, stelle 5→7/7 → badge premio, tap → Codul tău QR + "1 premiu disponibil!"; 15 s + taglio 11 s | 20:30 (15 s) / Reel di prova (11 s) |

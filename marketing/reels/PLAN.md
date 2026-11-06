@@ -77,7 +77,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] POV: clientul și-a uitat iar cardul de carton acasă (2026-10-16)
 - [x] POV: ai printat 500 de carduri și apoi ți-ai schimbat logo-ul (2026-10-23, Setări → URL Logo, planul Business)
 - [x] Clientul cu 9 carduri de carton în portofel (2026-10-30: 9 tessere generiche escono dal portafoglio, la tua è passata in lavatrice; poi "Cardurile Tale" nel telefono)
-- [ ] Când clientul întreabă „mai am ștampile?”
+- [x] Când clientul întreabă „mai am ștampile?” (2026-11-06: ora di punta, coda che cresce, scatola di tessere; poi la pagina della carta con "5 din 7 achiziții" / "Încă 2 necesari!" come nell'app)
 - [ ] Când ștampila cu pixul e „ușor” falsificată
 
 **Prima e dopo**
@@ -131,3 +131,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-03 (mar) | `2026-11-03-datele-sigure.html` | Domanda e risposta | Fumetto "Datele mele sunt în siguranță?" + scudo, modulo "Card nou" con Nume/Email/Parolă = NU e Telefon OPȚIONAL, poi "Șterge contul meu" → STERG → "Toate datele tale au fost șterse."; 15 s + taglio 9,5 s | 14:30 (15 s) / Reel di prova (9,5 s) |
 | 2026-11-04 (mer) | `2026-11-04-client-nou-25x.html` | Il dato | Due pile di monete: "Client care revine" ×1 vs "Client nou" ×5 → ×25 (monete tratteggiate), "5–25× mai mult", fonte Amy Gallo HBR 2014; 15 s + taglio 9,3 s | 12:30 (15 s) / Reel di prova (9,3 s) |
 | 2026-11-05 (gio) | `2026-11-05-cardurile-tale.html` | Una funzione | "Unde ține clientul cardul tău?" (portofel/sertar/acasă barrati), pagina "Cardurile Tale" con 3 carte, stelle 5→7/7 → badge premio, tap → Codul tău QR + "1 premiu disponibil!"; 15 s + taglio 11 s | 20:30 (15 s) / Reel di prova (11 s) |
+| 2026-11-06 (ven) | `2026-11-06-pov-mai-am-stampile.html` | POV / meme | Ora di punta 08:14→08:23, coda di 7 persone, "Mai am ștampile?", scatola "CARDURI CLIENȚI" che vola via; poi telefono con 5 din 7 achiziții / Încă 2 necesari!, la coda scorre; 15 s + taglio 11 s | 18:00 (15 s) / Reel di prova (11 s) |

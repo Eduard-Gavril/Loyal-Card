@@ -85,7 +85,9 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Ștampila cu pixul vs scanarea QR (2026-10-17)
 - [x] Caietul cu clienți vs dashboard (2026-10-24, export Excel indicato come planul Business)
 - [x] Costul tipăririi cardurilor vs 0€ (2026-10-31: due scontrini; voci di costo della carta con "?" perché non abbiamo prezzi reali di stampa, Starter 0€ con i suoi limiti)
-- [ ] „Cine sunt clienții mei fideli?” fără date vs cu date
+- [x] „Cine sunt clienții mei fideli?” fără date vs cu date (già coperto dal reel del 2026-10-24: "Cine a venit de 5 ori luna asta?" + Excel con Total Scans; nell'app non c'è una classifica clienti da mostrare)
+- [x] Premiul la casă: numeri ștampilele pe carton vs „Răscumpără Premiu” în scanner (2026-11-07)
+- [ ] (backlog da riempire) Nuove idee "prima e dopo", solo flussi verificati nell'app
 
 **L'offerta**
 - [x] Începe GRATUIT: planul Starter (1 locație, 50 clienți activi/lună)
@@ -132,3 +134,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-04 (mer) | `2026-11-04-client-nou-25x.html` | Il dato | Due pile di monete: "Client care revine" ×1 vs "Client nou" ×5 → ×25 (monete tratteggiate), "5–25× mai mult", fonte Amy Gallo HBR 2014; 15 s + taglio 9,3 s | 12:30 (15 s) / Reel di prova (9,3 s) |
 | 2026-11-05 (gio) | `2026-11-05-cardurile-tale.html` | Una funzione | "Unde ține clientul cardul tău?" (portofel/sertar/acasă barrati), pagina "Cardurile Tale" con 3 carte, stelle 5→7/7 → badge premio, tap → Codul tău QR + "1 premiu disponibil!"; 15 s + taglio 11 s | 20:30 (15 s) / Reel di prova (11 s) |
 | 2026-11-06 (ven) | `2026-11-06-pov-mai-am-stampile.html` | POV / meme | Ora di punta 08:14→08:23, coda di 7 persone, "Mai am ștampile?", scatola "CARDURI CLIENȚI" che vola via; poi telefono con 5 din 7 achiziții / Încă 2 necesari!, la coda scorre; 15 s + taglio 11 s | 18:00 (15 s) / Reel di prova (11 s) |
+| 2026-11-07 (sab) | `2026-11-07-premiul-la-casa.html` | Prima e dopo | Cartoncino con 7 timbri + uno sbavato + uno verde, penna che conta "8 sau 9?!", "Sunt 9, sigur!"; tendina → scanner: Cod QR Scanat → Răscumpără Premiu → Cafea gratuită ×1 → Confirmă Răscumpărarea → Premiu Răscumpărat!; 15 s + taglio 10 s | 10:30 (15 s) / Reel di prova (10 s) |

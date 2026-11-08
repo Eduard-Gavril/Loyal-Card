@@ -94,7 +94,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] ~~Gata în 2 minute~~ → "Programul tău de fidelitate în 4 pași" (2026-10-18): ne scrii → produse → regula de premiu → prima scanare
 - [x] Planul Business: reguli nelimitate + logo-ul tău (2026-10-25: €30/lună, €24/lună con pagamento annuale, elenco funzioni da PricingPage)
 - [x] Gratuit pentru clienți (2026-11-01: senza "mereu", il sito non promette "per sempre"; fonti faq.a1, faq.a2, features.step1 "fără înregistrare")
-- [ ] Ce primești gratis în Starter: 1 locație, 50 clienți activi/lună, 1 regulă, scanner QR de bază
+- [x] Ce primești gratis în Starter: 1 locație, 50 clienți activi/lună, 1 regulă, scanner QR de bază (2026-11-08: pacco regalo "0€", 4 voci incluse + "Card cu brandingul LoyalCard"; nota onesta: logo, reguli nelimitate, analytics e export Excel sono nel Business)
 - [ ] Business la plata anuală: €24/lună (€288/an, –20%)
 - [ ] Planul Professional (€60/lună): 3 locații, premii pe mai multe niveluri; prima verificare che i premi multi-livello funzionino nell'app
 
@@ -135,3 +135,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-05 (gio) | `2026-11-05-cardurile-tale.html` | Una funzione | "Unde ține clientul cardul tău?" (portofel/sertar/acasă barrati), pagina "Cardurile Tale" con 3 carte, stelle 5→7/7 → badge premio, tap → Codul tău QR + "1 premiu disponibil!"; 15 s + taglio 11 s | 20:30 (15 s) / Reel di prova (11 s) |
 | 2026-11-06 (ven) | `2026-11-06-pov-mai-am-stampile.html` | POV / meme | Ora di punta 08:14→08:23, coda di 7 persone, "Mai am ștampile?", scatola "CARDURI CLIENȚI" che vola via; poi telefono con 5 din 7 achiziții / Încă 2 necesari!, la coda scorre; 15 s + taglio 11 s | 18:00 (15 s) / Reel di prova (11 s) |
 | 2026-11-07 (sab) | `2026-11-07-premiul-la-casa.html` | Prima e dopo | Cartoncino con 7 timbri + uno sbavato + uno verde, penna che conta "8 sau 9?!", "Sunt 9, sigur!"; tendina → scanner: Cod QR Scanat → Răscumpără Premiu → Cafea gratuită ×1 → Confirmă Răscumpărarea → Premiu Răscumpărat!; 15 s + taglio 10 s | 10:30 (15 s) / Reel di prova (10 s) |
+| 2026-11-08 (dom) | `2026-11-08-starter-gratis.html` | L'offerta | Pacco regalo "0€" che si apre, 5 righe del piano Starter (1 locație, 50 clienți activi/lună, 1 regulă, Scanner QR de bază, branding LoyalCard), nota sul Business, CTA "Scrie-ne"; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |

@@ -36,7 +36,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Frizerie / barbershop: 5 tunsori → a 6-a gratuită (2026-10-19, anche taglio corto da 10 s)
 - [x] Salon de înfrumusețare / unghii: 6 vizite → 20% reducere (2026-10-26, sconto percentuale = reward_type `percentage_discount`; anche taglio da 10 s)
 - [x] Pizzerie: 8 pizza → o pizza gratuită (2026-11-02: la pizza sul telefono si riempie fetta per fetta, "Cumpără 8 → Primești 1"; anche taglio da 10 s)
-- [ ] Patiserie / brutărie: 10 produse → unul gratuit
+- [x] Patiserie / brutărie (2026-11-09): esempio su un solo prodotto, 10 croissante → 1 gratuit, perché nell'app ogni regola è legata a un prodotto (product_id), non a "10 prodotti qualsiasi"; anche taglio da 10 s
 - [ ] Restaurant: 5 meniuri → desert gratuit (esempio del sito: "5 mese principale → desert GRATUIT sau 20% reducere")
 - [ ] Spălătorie auto: 5 spălări → a 6-a gratuită
 - [ ] Florărie: 5 buchete → 15% reducere
@@ -136,3 +136,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-06 (ven) | `2026-11-06-pov-mai-am-stampile.html` | POV / meme | Ora di punta 08:14→08:23, coda di 7 persone, "Mai am ștampile?", scatola "CARDURI CLIENȚI" che vola via; poi telefono con 5 din 7 achiziții / Încă 2 necesari!, la coda scorre; 15 s + taglio 11 s | 18:00 (15 s) / Reel di prova (11 s) |
 | 2026-11-07 (sab) | `2026-11-07-premiul-la-casa.html` | Prima e dopo | Cartoncino con 7 timbri + uno sbavato + uno verde, penna che conta "8 sau 9?!", "Sunt 9, sigur!"; tendina → scanner: Cod QR Scanat → Răscumpără Premiu → Cafea gratuită ×1 → Confirmă Răscumpărarea → Premiu Răscumpărat!; 15 s + taglio 10 s | 10:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-08 (dom) | `2026-11-08-starter-gratis.html` | L'offerta | Pacco regalo "0€" che si apre, 5 righe del piano Starter (1 locație, 50 clienți activi/lună, 1 regulă, Scanner QR de bază, branding LoyalCard), nota sul Business, CTA "Scrie-ne"; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
+| 2026-11-09 (lun) | `2026-11-09-patiserie.html` | Un settore al giorno | Patiserie: croissant che oscilla, "Croissante calde are și vecinul", contatore 0→10 + teglia sul telefono che si riempie → Croissant gratuit, 3 vantaggi (anche "O regulă pentru fiecare produs"), Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |

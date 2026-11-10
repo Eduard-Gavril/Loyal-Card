@@ -49,7 +49,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Trebuie să descarc o aplicație? (2026-10-20)
 - [x] Cum îmi obțin cardul de fidelitate? (2026-10-27: flusso reale loyalcard.net → "Alege magazinul tău" → card creato in automatico → scansione; la risposta del sito `faq.a3` dice che il card si crea alla scansione, nel codice si crea quando il cliente apre la pagina del negozio)
 - [x] Datele mele sunt în siguranță? (2026-11-03: solo fatti verificati: card senza registrazione, telefono facoltativo per il recupero, "Șterge contul meu" con conferma STERG, "nu vindem datele" da faq.a4; NON usati "conformi GDPR" e "criptate" perché non verificabili dal codice)
-- [ ] Ce se întâmplă dacă îmi schimb telefonul?
+- [x] Ce se întâmplă dacă îmi schimb telefonul? (2026-11-10: flusso reale numero di telefono + PIN di 6 cifre → "Recuperează-ți Cardurile" → "Cont recuperat! {n} carduri restaurate". Attenzione, nell'app: "Conturile fără număr de telefon sunt șterse în prima zi a fiecărei luni")
 - [ ] Pot să-l folosesc la orice magazin?
 - [ ] Cum funcționează premiile?
 - [ ] Ce se întâmplă dacă magazinul se închide?
@@ -137,3 +137,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-07 (sab) | `2026-11-07-premiul-la-casa.html` | Prima e dopo | Cartoncino con 7 timbri + uno sbavato + uno verde, penna che conta "8 sau 9?!", "Sunt 9, sigur!"; tendina → scanner: Cod QR Scanat → Răscumpără Premiu → Cafea gratuită ×1 → Confirmă Răscumpărarea → Premiu Răscumpărat!; 15 s + taglio 10 s | 10:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-08 (dom) | `2026-11-08-starter-gratis.html` | L'offerta | Pacco regalo "0€" che si apre, 5 righe del piano Starter (1 locație, 50 clienți activi/lună, 1 regulă, Scanner QR de bază, branding LoyalCard), nota sul Business, CTA "Scrie-ne"; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-09 (lun) | `2026-11-09-patiserie.html` | Un settore al giorno | Patiserie: croissant che oscilla, "Croissante calde are și vecinul", contatore 0→10 + teglia sul telefono che si riempie → Croissant gratuit, 3 vantaggi (anche "O regulă pentru fiecare produs"), Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
+| 2026-11-10 (mar) | `2026-11-10-telefon-nou.html` | Domanda e risposta | Fumetto "Ce se întâmplă dacă îmi schimb telefonul?", telefono vecchio: Protejează-ți cardurile → Adaugă Telefon (numero + PIN) → Telefon asociat; telefono nuovo: Recuperează-ți Cardurile → Verifică → Cont recuperat! 3 carduri restaurate; 15 s + taglio 9,7 s | 14:30 (15 s) / Reel di prova (9,7 s) |

@@ -1,0 +1,244 @@
+<title>Adevărat sau fals?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Il dato", quiz format. Both facts were checked on hbr.org/2014/10/the-value-of-keeping-the-right-customers
+   (Amy Gallo, 29 Oct 2014): new customer 5–25× more expensive than retaining one; +5% retention → +25% to +95% profit
+   (Frederick Reichheld, Bain & Company). Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --show: #0E1640; --show-2: #1B2A6B; --gold: #FFD447; --gold-2: #F5B544; --ink: #0E1640; --true: #16A34A; --false: #DC2626; --white: #FFFFFF;
+  --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --amber: #F5B544;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--show); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(14, 22, 64, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--show); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--show); color: var(--white); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--gold) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--gold); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(14, 22, 64, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background:
+  radial-gradient(360px 640px at 50% 0%, rgba(255, 212, 71, .22), transparent 70%),
+  radial-gradient(600px 520px at 50% 60%, rgba(59, 91, 219, .45), transparent 70%),
+  repeating-conic-gradient(from 0deg at 50% 45%, rgba(255, 255, 255, .03) 0 6deg, transparent 6deg 12deg),
+  linear-gradient(180deg, var(--show-2), var(--show)); }
+#bulbs { position: absolute; left: 40px; right: 40px; top: 150px; height: 14px; background: radial-gradient(circle, var(--gold) 4px, transparent 5px) 0 0 / 32px 14px repeat-x; opacity: .7; }
+#bulbs2 { position: absolute; left: 40px; right: 40px; top: 1010px; height: 14px; background: radial-gradient(circle, var(--gold) 4px, transparent 5px) 16px 0 / 32px 14px repeat-x; opacity: .7; }
+
+/* s0: title */
+#qk { position: absolute; left: 40px; width: 640px; text-align: center; top: 240px; font-family: var(--f-mono); font-size: 20px; letter-spacing: .2em; color: var(--gold); }
+#qt { position: absolute; left: 40px; width: 640px; text-align: center; top: 300px; font-size: 104px; font-weight: 900; letter-spacing: -.05em; line-height: .95; }
+#qt em { font-style: normal; color: var(--gold); }
+#qs { position: absolute; left: 40px; width: 640px; text-align: center; top: 540px; font-size: 32px; font-weight: 800; color: rgba(255, 255, 255, .85); }
+.bigBtn { position: absolute; top: 640px; width: 290px; height: 120px; border-radius: 28px; display: grid; place-items: center; font-size: 38px; font-weight: 900; letter-spacing: .02em; box-shadow: 0 10px 0 rgba(0, 0, 0, .3); }
+
+/* rounds */
+.rk { position: absolute; left: 40px; width: 640px; text-align: center; top: 190px; font-family: var(--f-mono); font-size: 19px; letter-spacing: .18em; color: var(--gold); }
+.card { position: absolute; left: 50px; top: 236px; width: 620px; height: 286px; border-radius: 34px; background: var(--white); color: var(--ink); display: grid; place-items: center; padding: 26px 34px; box-sizing: border-box; text-align: center; font-size: 44px; font-weight: 900; letter-spacing: -.035em; line-height: 1.08; box-shadow: 0 20px 40px rgba(0, 0, 0, .35); }
+.timer { position: absolute; left: 50px; top: 546px; width: 620px; height: 16px; border-radius: 8px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.timer b { position: absolute; inset: 0; border-radius: 8px; background: linear-gradient(90deg, var(--gold), #FF8A3D); transform-origin: 0 50%; }
+.opt { position: absolute; top: 592px; width: 300px; height: 112px; border-radius: 28px; display: grid; place-items: center; font-size: 36px; font-weight: 900; letter-spacing: .02em; box-shadow: 0 10px 0 rgba(0, 0, 0, .3); }
+.oT { left: 50px; background: var(--true); }
+.oF { left: 370px; background: var(--false); }
+.stamp { position: absolute; left: 50px; width: 620px; top: 410px; text-align: center; font-size: 70px; font-weight: 900; letter-spacing: .04em; rotate: -8deg; z-index: 5; }
+.stamp span { display: inline-block; padding: 4px 26px; border: 8px solid currentColor; border-radius: 18px; background: rgba(255, 255, 255, .92); }
+.exp { position: absolute; left: 50px; top: 740px; width: 620px; padding: 22px 26px; box-sizing: border-box; border-radius: 26px; background: rgba(255, 255, 255, .1); border: 1.5px solid rgba(255, 212, 71, .5); font-size: 32px; font-weight: 800; line-height: 1.2; }
+.exp b { color: var(--gold); }
+.src { position: absolute; left: 50px; top: 920px; width: 620px; font-family: var(--f-mono); font-size: 15px; line-height: 1.4; color: rgba(255, 255, 255, .7); }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 70px; line-height: 1.02; letter-spacing: -.045em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · miercuri · 15 s · Quiz</div>
+    <h1>Adevărat sau fals?</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel quiz: un client nou costă mai puțin? Fals, de 5 până la 25 de ori mai mult. +5% clienți care revin pot aduce +25–95% profit? Adevărat. Sursa Harvard Business Review 2014">
+      <div id="stage">
+        <div id="bg"></div><div id="bulbs"></div><div id="bulbs2"></div>
+
+        <!-- s0: title (on screen at frame 0) -->
+        <div class="scene" id="s0">
+          <div id="qk">QUIZ PENTRU PATRONI</div>
+          <div id="qt">Adevărat <em>sau fals?</em></div>
+          <div id="qs">2 întrebări. Răspunde repede.</div>
+          <div class="bigBtn" id="b0T" style="left:50px;background:var(--true)">ADEVĂRAT</div>
+          <div class="bigBtn" id="b0F" style="left:380px;background:var(--false)">FALS</div>
+        </div>
+
+        <!-- round 1 -->
+        <div class="scene" id="r1">
+          <div class="rk">ÎNTREBAREA 1 / 2</div>
+          <div class="card" id="q1">Un client nou te costă mai puțin decât unul care revine.</div>
+          <div class="timer"><b id="tm1"></b></div>
+          <div class="opt oT" id="r1T">ADEVĂRAT</div><div class="opt oF" id="r1F">FALS</div>
+          <div class="stamp" id="st1" style="color:var(--false)"><span>FALS</span></div>
+          <div class="exp" id="e1">Un client nou costă de <b>5 până la 25 de ori mai mult</b> decât păstrarea unuia existent.</div>
+          <div class="src" id="sr1">Sursa: Amy Gallo, Harvard Business Review (2014), „în funcție de studiu și de industrie”.</div>
+        </div>
+
+        <!-- round 2 -->
+        <div class="scene" id="r2">
+          <div class="rk">ÎNTREBAREA 2 / 2</div>
+          <div class="card" id="q2">Cu doar +5% clienți care revin, profitul poate crește cu 25–95%.</div>
+          <div class="timer"><b id="tm2"></b></div>
+          <div class="opt oT" id="r2T">ADEVĂRAT</div><div class="opt oF" id="r2F">FALS</div>
+          <div class="stamp" id="st2" style="color:var(--true)"><span>ADEVĂRAT</span></div>
+          <div class="exp" id="e2">Cercetarea lui <b>Frederick Reichheld</b> (Bain &amp; Company).</div>
+          <div class="src" id="sr2">Sursa: Harvard Business Review (2014).</div>
+        </div>
+
+        <!-- cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:260px">
+            <div id="cta1">Clienții care revin <em>fac diferența.</em></div>
+            <div id="cta2">Adu-i înapoi cu un card de fidelitate digital. Începi gratuit cu planul Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  A($('#bg'), [{ rotate: '0deg' }, { rotate: '10deg' }], 0, D, 'linear');
+  // the marquee bulbs chase
+  A($('#bulbs'), [{ backgroundPositionX: '0px' }, { backgroundPositionX: '320px' }], 0, D, 'linear');
+  A($('#bulbs2'), [{ backgroundPositionX: '16px' }, { backgroundPositionX: '-304px' }], 0, D, 'linear');
+
+  // ---------- s0 · title (on screen at frame 0) ----------
+  scene($('#s0'), -.05, 2.0);
+  A($('#qt'), [{ scale: '.92' }, { scale: '1' }], 0, .6, BACK);
+  enter($('#qs'), .5, { dy: 14, d: .4 });
+  enter($('#b0T'), .8, { dx: -40, dy: 0, d: .4, e: BACK });
+  enter($('#b0F'), .95, { dx: 40, dy: 0, d: .4, e: BACK });
+
+  // a round: card in, timer runs, answer revealed
+  function round(id, t0, tTimer, tReveal, tEnd, right) {
+    const R = $(id);
+    scene(R, t0, tEnd);
+    enter($('.rk', R), t0 + .02, { dy: 0, s: .8, d: .3, e: BACK });
+    enter($('.card', R), t0 + .05, { dy: 40, s: .94, d: .45, e: BACK });
+    enter($('.oT', R), t0 + .25, { dy: 30, d: .35, e: BACK });
+    enter($('.oF', R), t0 + .32, { dy: 30, d: .35, e: BACK });
+    A($('.timer b', R), [{ scale: '1 1' }, { scale: '0 1' }], tTimer, tReveal - tTimer, 'linear');
+    const win = $(right ? '.oT' : '.oF', R), lose = $(right ? '.oF' : '.oT', R);
+    A(win, [{ scale: '1' }, { scale: '1.12', offset: .4 }, { scale: '1.05' }], tReveal, .5, OUT);
+    A(lose, [{ opacity: 1 }, { opacity: .3 }], tReveal, .3, 'linear');
+    A($('.stamp', R), [{ opacity: 0, scale: '2.2' }, { opacity: 1, scale: '1' }], tReveal + .05, .3, IN);
+    A($('.card', R), [{ translate: '0px 0px' }, { translate: '0px 6px', offset: .3 }, { translate: '0px 0px' }], tReveal + .3, .3, OUT);
+    enter($('.exp', R), tReveal + .4, { dy: 20, d: .45 });
+    enter($('.src', R), tReveal + .7, { dy: 10, d: .4 });
+  }
+  round('#r1', 1.9, 2.4, 4.9, 7.1, false);
+  round('#r2', 7.0, 7.5, 9.6, 11.5, true);
+
+  // ---------- s3 · cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 11.4, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(95% at 50% 50%)' }], 11.4, .7, IO);
+  stagger(words($('#cta1')), 11.7, .1, { dy: 36, d: .45, e: BACK });
+  enter($('#cta2'), 12.4, { dy: 16, d: .45 });
+  enter($('#brand'), 12.9, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.2, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 14.1, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 6.0 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

@@ -59,6 +59,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] +60% vizite recurente (Bond Brand Loyalty 2023) (2026-10-21)
 - [x] ~~+25% venituri per client (Harvard Business Review)~~ → +5% clienți care revin = +25% până la +95% profit (2026-10-28). L'articolo HBR linkato dal sito (2014, "The Value of Keeping the Right Customers") riporta questo dato di Frederick Reichheld / Bain, non "+25% venituri per client": la frase del sito va corretta
 - [x] ~~+30% valoare pe viață client (Bain & Company)~~: nessuno studio preciso (il link del sito porta alla pagina generica di Bain), non usato. Al suo posto (2026-11-04): un client nou costă de 5–25× mai mult decât păstrarea unuia existent, frase verificata sull'articolo HBR linkato dal sito (Amy Gallo, 29/10/2014)
+- [x] Quiz „Adevărat sau fals?” (2026-11-11) con i due dati verificati su HBR 2014 (5–25×, +5% → +25–95%)
 - [ ] (backlog da riempire) Nuovi dati solo con fonte aperta e verificabile sulla pagina originale prima dell'uso; in alternativa riusare i 4 dati già fatti in un formato nuovo (es. quiz "Adevărat sau fals?")
 
 **Una funzione in 10 secondi**
@@ -138,3 +139,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-08 (dom) | `2026-11-08-starter-gratis.html` | L'offerta | Pacco regalo "0€" che si apre, 5 righe del piano Starter (1 locație, 50 clienți activi/lună, 1 regulă, Scanner QR de bază, branding LoyalCard), nota sul Business, CTA "Scrie-ne"; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-09 (lun) | `2026-11-09-patiserie.html` | Un settore al giorno | Patiserie: croissant che oscilla, "Croissante calde are și vecinul", contatore 0→10 + teglia sul telefono che si riempie → Croissant gratuit, 3 vantaggi (anche "O regulă pentru fiecare produs"), Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-11-10 (mar) | `2026-11-10-telefon-nou.html` | Domanda e risposta | Fumetto "Ce se întâmplă dacă îmi schimb telefonul?", telefono vecchio: Protejează-ți cardurile → Adaugă Telefon (numero + PIN) → Telefon asociat; telefono nuovo: Recuperează-ți Cardurile → Verifică → Cont recuperat! 3 carduri restaurate; 15 s + taglio 9,7 s | 14:30 (15 s) / Reel di prova (9,7 s) |
+| 2026-11-11 (mer) | `2026-11-11-quiz-adevarat-fals.html` | Il dato | Quiz in stile game show: "Un client nou te costă mai puțin…" → FALS (5–25×), "+5% clienți care revin → profit +25–95%" → ADEVĂRAT, fonte HBR 2014; 15 s + taglio 8 s | 12:30 (15 s) / Reel di prova (8 s) |

@@ -70,7 +70,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Parteneri în apropiere (geolocalizare) (2026-10-29: "Alege magazinul tău" chiede la posizione e mostra i 5 negozi più vicini con la distanza "x.x km"; la posizione del negozio la inserisce il team LoyalCard, il titolare non la imposta dalle Setări)
 - [x] Toate cardurile într-un singur loc (2026-11-05: pagina "Cardurile Tale" come nell'app: stelle di avanzamento, "x/y ștampile", badge premio, tap → codice QR)
 - [ ] Funcționează și offline (da provare prima su un telefono vero: la PWA tiene in cache l'interfaccia e per 24 h le risposte di Supabase, ma va verificato che il QR si apra senza rete)
-- [ ] Reguli pe produs sau categorie
+- [x] Reguli pe produs (2026-11-12: "Gestionează Produse" → pulsante "Reguli" → Nume Regulă / Scanări Necesare / Cantitate Gratuită, anche sconto in %; le categorie raggruppano i prodotti ma le regole sono per prodotto; Starter 1 regola, Business illimitate)
 - [ ] White-label: logo-ul tău (planul Business)
 - [ ] Premii pe mai multe niveluri (planul Professional)
 
@@ -140,3 +140,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-09 (lun) | `2026-11-09-patiserie.html` | Un settore al giorno | Patiserie: croissant che oscilla, "Croissante calde are și vecinul", contatore 0→10 + teglia sul telefono che si riempie → Croissant gratuit, 3 vantaggi (anche "O regulă pentru fiecare produs"), Starter gratuito; 30 s + taglio 10 s | 08:30 (30 s) / Reel di prova (10 s) |
 | 2026-11-10 (mar) | `2026-11-10-telefon-nou.html` | Domanda e risposta | Fumetto "Ce se întâmplă dacă îmi schimb telefonul?", telefono vecchio: Protejează-ți cardurile → Adaugă Telefon (numero + PIN) → Telefon asociat; telefono nuovo: Recuperează-ți Cardurile → Verifică → Cont recuperat! 3 carduri restaurate; 15 s + taglio 9,7 s | 14:30 (15 s) / Reel di prova (9,7 s) |
 | 2026-11-11 (mer) | `2026-11-11-quiz-adevarat-fals.html` | Il dato | Quiz in stile game show: "Un client nou te costă mai puțin…" → FALS (5–25×), "+5% clienți care revin → profit +25–95%" → ADEVĂRAT, fonte HBR 2014; 15 s + taglio 8 s | 12:30 (15 s) / Reel di prova (8 s) |
+| 2026-11-12 (gio) | `2026-11-12-reguli-pe-produs.html` | Una funzione | "Fiecare produs, regula lui" con 3 prodotti; admin "Gestionează Produse": Reguli su Cafea Espresso → modulo (Cafea gratuită, 7, 1) → "Cumpără 7 → Primești 1", poi Desert 20% e Limonadă; nota Starter 1 regulă / Business nelimitate; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |

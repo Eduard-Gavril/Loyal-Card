@@ -79,7 +79,8 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] POV: ai printat 500 de carduri și apoi ți-ai schimbat logo-ul (2026-10-23, Setări → URL Logo, planul Business)
 - [x] Clientul cu 9 carduri de carton în portofel (2026-10-30: 9 tessere generiche escono dal portafoglio, la tua è passata in lavatrice; poi "Cardurile Tale" nel telefono)
 - [x] Când clientul întreabă „mai am ștampile?” (2026-11-06: ora di punta, coda che cresce, scatola di tessere; poi la pagina della carta con "5 din 7 achiziții" / "Încă 2 necesari!" come nell'app)
-- [ ] Când ștampila cu pixul e „ușor” falsificată
+- [x] Când ștampila cu pixul e „ușor” falsificată (2026-11-13: 4 timbri veri + 4 disegnati a penna, lente, "E ștampila voastră!"; poi scanner "Achiziție Înregistrată!" e "Activitate Recentă": la scansione la registra solo lo staff autenticato)
+- [ ] (backlog da riempire) Nuove idee POV, solo situazioni reali del titolare
 
 **Prima e dopo**
 - [x] Carton vs telefon (usato il 2026-10-11 dentro l'offerta)
@@ -141,3 +142,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-10 (mar) | `2026-11-10-telefon-nou.html` | Domanda e risposta | Fumetto "Ce se întâmplă dacă îmi schimb telefonul?", telefono vecchio: Protejează-ți cardurile → Adaugă Telefon (numero + PIN) → Telefon asociat; telefono nuovo: Recuperează-ți Cardurile → Verifică → Cont recuperat! 3 carduri restaurate; 15 s + taglio 9,7 s | 14:30 (15 s) / Reel di prova (9,7 s) |
 | 2026-11-11 (mer) | `2026-11-11-quiz-adevarat-fals.html` | Il dato | Quiz in stile game show: "Un client nou te costă mai puțin…" → FALS (5–25×), "+5% clienți care revin → profit +25–95%" → ADEVĂRAT, fonte HBR 2014; 15 s + taglio 8 s | 12:30 (15 s) / Reel di prova (8 s) |
 | 2026-11-12 (gio) | `2026-11-12-reguli-pe-produs.html` | Una funzione | "Fiecare produs, regula lui" con 3 prodotti; admin "Gestionează Produse": Reguli su Cafea Espresso → modulo (Cafea gratuită, 7, 1) → "Cumpără 7 → Primești 1", poi Desert 20% e Limonadă; nota Starter 1 regulă / Business nelimitate; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
+| 2026-11-13 (ven) | `2026-11-13-pov-stampila-desenata.html` | POV / meme | Cartoncino con 4 timbri veri e 4 "disegnati" (stella, faccina, spunta), lente d'ingrandimento, faccina con aureola "E ștampila voastră!"; poi telefono con Achiziție Înregistrată! e Activitate Recentă; 15 s + taglio 9,3 s | 18:00 (15 s) / Reel di prova (9,3 s) |

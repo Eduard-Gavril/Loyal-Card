@@ -1,0 +1,256 @@
+<title>POV: ștampila desenată</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "POV / meme": stamps "lightly" faked with a ballpoint pen. Facts: register-scan only runs for a logged-in,
+   active staff account ("Admin not found or inactive" otherwise), so a client cannot add stamps; scanner strings
+   "Cod QR Scanat", "Achiziție Înregistrată!", "Puncte adăugate la cardul clientului"; dashboard "Activitate Recentă".
+   Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --desk: #2E3A4A; --desk-2: #1F2833; --paper: #FBF6EA; --ink: #1E2430; --stamp: #6B3FB0; --bic: #2B50C8; --red: #E5484D; --white: #FFFFFF;
+  --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --amber: #F5B544; --mint: #34D399;
+  --f-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--desk-2); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(31, 40, 51, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--desk); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--desk); color: var(--white); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(31, 40, 51, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background: radial-gradient(420px 360px at 50% 52%, rgba(255, 236, 190, .28), transparent 70%), radial-gradient(900px 800px at 50% 50%, transparent 50%, rgba(0, 0, 0, .35)), linear-gradient(180deg, var(--desk), var(--desk-2)); }
+.cap { position: absolute; z-index: 30; left: 40px; top: 176px; width: 640px; padding: 22px 28px; box-sizing: border-box; border-radius: 26px; background: var(--white); color: var(--ink); font-size: 42px; font-weight: 900; letter-spacing: -.035em; line-height: 1.06; box-shadow: 0 16px 36px rgba(0, 0, 0, .35); }
+.cap em { font-style: normal; color: var(--violet); }
+.cap .pov { display: inline-block; margin-right: 8px; padding: 2px 12px; border-radius: 10px; background: var(--ink); color: var(--white); font-size: 34px; vertical-align: 4px; }
+
+/* the suspicious paper card */
+#card { position: absolute; left: 70px; top: 440px; width: 580px; height: 330px; border-radius: 20px; background: var(--paper); color: var(--ink); box-shadow: 0 22px 40px rgba(0, 0, 0, .45); rotate: -2deg; }
+#card .h { position: absolute; left: 26px; top: 20px; font-size: 22px; font-weight: 900; letter-spacing: .06em; }
+#card .r { position: absolute; left: 26px; top: 50px; font-size: 16px; font-weight: 700; color: #6B6458; }
+.slot { position: absolute; width: 84px; height: 84px; border-radius: 50%; border: 2.5px dashed rgba(30, 36, 48, .3); box-sizing: border-box; }
+.real { position: absolute; width: 84px; height: 84px; color: var(--stamp); opacity: .85; }
+.real svg, .fake svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.fake { position: absolute; width: 84px; height: 84px; }
+.fake path, .fake circle { fill: none; stroke: var(--bic); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+#lens { position: absolute; left: 0; top: 0; width: 210px; height: 210px; z-index: 12; }
+#lens .g { position: absolute; inset: 0; border-radius: 50%; border: 12px solid #222; background: rgba(255, 255, 255, .12); box-shadow: inset 0 0 30px rgba(255, 255, 255, .25), 0 12px 24px rgba(0, 0, 0, .4); }
+#lens .h2 { position: absolute; left: 172px; top: 172px; width: 30px; height: 120px; border-radius: 15px; background: #222; rotate: -45deg; transform-origin: 50% 0; }
+#note { position: absolute; left: 200px; top: 818px; font-family: var(--f-hand); font-weight: 700; font-size: 46px; color: #FFD27A; rotate: -6deg; white-space: nowrap; z-index: 13; }
+#face { position: absolute; left: 70px; top: 790px; width: 120px; height: 130px; z-index: 13; }
+#pen { position: absolute; left: 560px; top: 620px; width: 140px; height: 26px; border-radius: 13px; background: linear-gradient(90deg, #E9EEF6 0 70%, var(--bic) 70% 92%, #1C2B66 92%); rotate: -32deg; box-shadow: 0 8px 14px rgba(0, 0, 0, .35); z-index: 11; }
+
+/* s2: the phone */
+#phone { position: absolute; left: 190px; top: 340px; width: 340px; height: 620px; border-radius: 50px; background: #07040F; box-shadow: 0 30px 60px rgba(0, 0, 0, .5), 0 0 0 2px rgba(255, 255, 255, .12); }
+.screen { position: absolute; inset: 12px; border-radius: 40px; overflow: hidden; background: linear-gradient(170deg, #241452, #120A2A); color: var(--white); }
+.notch { position: absolute; left: 50%; top: 10px; width: 90px; height: 24px; margin-left: -45px; border-radius: 13px; background: #07040F; z-index: 3; }
+.sbar { position: absolute; left: 30px; top: 13px; font-size: 13px; font-weight: 700; }
+.okb { position: absolute; left: 16px; right: 16px; border-radius: 18px; background: rgba(52, 211, 153, .14); border: 1px solid rgba(52, 211, 153, .45); padding: 14px; box-sizing: border-box; }
+.okb .a { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 900; color: #A7F3D0; }
+.okb .a i { width: 30px; height: 30px; border-radius: 50%; background: var(--mint); color: #064E3B; display: grid; place-items: center; font-style: normal; font-weight: 900; }
+.okb .b { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, .7); margin-top: 6px; }
+.lt { position: absolute; left: 18px; top: 196px; font-size: 16px; font-weight: 800; }
+.ar { position: absolute; left: 16px; right: 16px; height: 62px; border-radius: 16px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); display: flex; align-items: center; gap: 10px; padding: 0 12px; box-sizing: border-box; }
+.ar .ic { width: 36px; height: 36px; border-radius: 10px; background: #8B5E3C; display: grid; place-items: center; flex: none; }
+.ar .ic svg { width: 20px; height: 20px; }
+.ar .t { flex: 1; font-size: 14px; font-weight: 700; line-height: 1.2; }
+.ar .t small { display: block; font-size: 11.5px; font-weight: 600; color: rgba(255, 255, 255, .6); }
+.ar .tm { font-family: var(--f-mono); font-size: 12px; color: rgba(255, 255, 255, .7); }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 70px; line-height: 1.02; letter-spacing: -.045em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="stampI" viewBox="0 0 84 84"><circle cx="42" cy="42" r="32" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="40 4 22 5 60 3"/><path d="M42 22l5.4 11.6 12.8 1.4-9.6 8.6 2.7 12.6L42 49.9l-11.3 6.3 2.7-12.6-9.6-8.6 12.8-1.4z" fill="currentColor" opacity=".85"/></symbol>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · vineri · 15 s · POV</div>
+    <h1>POV: ștampila desenată</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel POV: clientul aduce un card de carton cu ștampile desenate cu pixul; cu LoyalCard ștampilele apar doar din scanările făcute de personal">
+      <div id="stage">
+        <div id="bg"></div>
+
+        <!-- s1: the card (on screen at frame 0) -->
+        <div class="scene" id="s1">
+          <div id="card"><div class="h">CAFENEAUA TA</div><div class="r">8 ștampile = o cafea gratuită</div><div id="grid"></div></div>
+          <div id="pen"></div>
+          <div id="lens"><div class="g"></div><div class="h2"></div></div>
+          <svg id="face" viewBox="0 0 120 130"><ellipse cx="60" cy="18" rx="34" ry="9" fill="none" stroke="#FFD27A" stroke-width="5"/><circle cx="60" cy="78" r="46" fill="#FFD27A"/><path d="M40 72q6 -6 12 0M68 72q6 -6 12 0" fill="none" stroke="#3A2A10" stroke-width="5" stroke-linecap="round"/><path d="M44 92q16 14 32 0" fill="none" stroke="#3A2A10" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="88" r="7" fill="#F49B7A" opacity=".7"/><circle cx="82" cy="88" r="7" fill="#F49B7A" opacity=".7"/></svg>
+          <div id="note">„E ștampila voastră!”</div>
+          <div class="cap" id="c1"><span class="pov">POV:</span>clientul îți dă cardul de carton… și ceva nu se leagă.</div>
+          <div class="cap" id="c2">Ultimele 4 ștampile? <em>Desenate cu pixul.</em></div>
+        </div>
+
+        <!-- s2: the phone -->
+        <div class="scene" id="s2">
+          <div class="cap" id="c3">Cu LoyalCard, ștampila apare <em>doar când scanezi tu.</em></div>
+          <div id="phone"><div class="screen">
+            <div class="notch"></div><div class="sbar">9:41</div>
+            <div class="okb" id="ok" style="top:54px"><div class="a"><i>✓</i>Achiziție Înregistrată!</div><div class="b">Puncte adăugate la cardul clientului</div></div>
+            <div class="lt">Activitate Recentă</div>
+            <div class="ar" id="a1" style="top:228px"><div class="ic"><svg><use href="#cup"/></svg></div><div class="t">Cafea Espresso<small>Client • #A3F9C2</small></div><div class="tm">09:12</div></div>
+            <div class="ar" id="a2" style="top:298px"><div class="ic"><svg><use href="#cup"/></svg></div><div class="t">Cafea Espresso<small>Client • #7C21D0</small></div><div class="tm">08:57</div></div>
+            <div class="ar" id="a3" style="top:368px"><div class="ic"><svg><use href="#cup"/></svg></div><div class="t">Cafea Espresso<small>Client • #F05B9E</small></div><div class="tm">08:41</div></div>
+          </div></div>
+        </div>
+
+        <!-- s3: cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:270px">
+            <div id="cta1">Ștampile puse doar de tine, <em>la casă.</em></div>
+            <div id="cta2">Fiecare ștampilă vine dintr-o scanare a personalului tău. Începi gratuit cu planul Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  // the card: 4 real ink stamps, then 4 drawn with a ballpoint (each one a little "creative")
+  const grid = $('#grid'), NS = 'http://www.w3.org/2000/svg';
+  const SLOT = i => [26 + (i % 4) * 136, 92 + Math.floor(i / 4) * 116];
+  for (let i = 0; i < 8; i++) { const [x, y] = SLOT(i); const s = document.createElement('div'); s.className = 'slot'; s.style.cssText = `left:${x}px;top:${y}px`; grid.appendChild(s); }
+  [[0, 3, -2, 10], [1, -4, 4, -12], [2, 2, 1, 22], [3, -3, -3, -6]].forEach(([i, dx, dy, r]) => { const [x, y] = SLOT(i); const d = document.createElement('div'); d.className = 'real'; d.style.cssText = `left:${x + dx}px;top:${y + dy}px;rotate:${r}deg`; d.innerHTML = '<svg><use href="#stampI"/></svg>'; grid.appendChild(d); });
+  const FAKES = [
+    'M42 12C24 12 12 26 12 42s12 30 30 30 30-12 30-30S56 11 40 13M42 24l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z',
+    'M42 10c-18 2-31 15-30 32 1 18 15 31 32 30 17-1 29-14 28-31-1-16-14-30-31-30M30 34h.1M54 34h.1M28 52q14 12 28 0',
+    'M40 12C22 14 12 28 13 44s15 28 30 27 28-14 28-30-14-29-31-29M26 44l10 10 22-22',
+    'M42 14c-16 0-28 12-28 28s12 28 28 28 28-12 28-28-12-28-28-28M42 26l4 9 10 1-8 7 2 10-8-5-8 5 2-10-8-7 10-1z M20 20l8 8'
+  ];
+  const fakes = FAKES.map((d, k) => { const i = 4 + k, [x, y] = SLOT(i); const w = document.createElement('div'); w.className = 'fake'; w.style.cssText = `left:${x}px;top:${y}px;rotate:${[-6, 8, -10, 4][k]}deg`; const s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', '0 0 84 84'); const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); s.appendChild(p); w.appendChild(s); grid.appendChild(w); return p; });
+
+  // ---------- s1 · the card (on screen at frame 0) ----------
+  scene($('#s1'), -.05, 5.9);
+  A($('#card'), [{ translate: '0px 30px', rotate: '-6deg' }, { translate: '0px 0px', rotate: '-2deg' }], 0, .7, OUT);
+  A($('#pen'), [{ opacity: 0, translate: '80px 40px' }, { opacity: 1, translate: '0px 0px' }], .4, .5, OUT);
+  // the lens sweeps across the second row
+  const lensAt = (x, y) => `${x - 105}px ${y - 105}px`;
+  A($('#lens'), [{ opacity: 0, translate: lensAt(140, 980) }, { opacity: 1, translate: lensAt(150, 680) }], 1.1, .5, OUT);
+  A($('#lens'), [{ translate: lensAt(150, 680) }, { translate: lensAt(286, 676), offset: .33 }, { translate: lensAt(422, 672), offset: .66 }, { translate: lensAt(558, 668) }], 1.7, 1.6, IO);
+  fakes.forEach((p, k) => { const w = p.parentNode.parentNode; A(w, [{ scale: '1' }, { scale: '1.25', offset: .4 }, { scale: '1' }], 1.85 + k * .53, .45, OUT); });
+  const caps = [['#c1', -.05, 3.1], ['#c2', 3.1, 0]];
+  caps.forEach(([s, a, b]) => { const c = $(s); if (a > 0) A(c, [{ opacity: 0, translate: '0px 16px', scale: '.97' }, { opacity: 1, translate: '0px 0px', scale: '1' }], a, .35, BACK); else A(c, [{ translate: '0px 8px' }, { translate: '0px 0px' }], 0, .5, OUT); if (b) A(c, [{ opacity: 1 }, { opacity: 0 }], b - .2, .2, 'linear'); });
+  A($('#lens'), [{ opacity: 1 }, { opacity: 0 }], 3.4, .3, 'linear');
+  A($('#face'), [{ opacity: 0, scale: '.4', rotate: '-20deg' }, { opacity: 1, scale: '1', rotate: '0deg' }], 3.7, .45, BACK);
+  A($('#note'), [{ opacity: 0, translate: '0px 12px' }, { opacity: 1, translate: '0px 0px' }], 4.0, .4, BACK);
+  A($('#face'), [{ translate: '0px 0px' }, { translate: '0px -8px', offset: .5 }, { translate: '0px 0px' }], 4.5, .6, IO);
+
+  // ---------- s2 · the phone ----------
+  scene($('#s2'), 5.8, 11.4);
+  A($('#c3'), [{ opacity: 0, translate: '0px 16px' }, { opacity: 1, translate: '0px 0px' }], 5.85, .35, BACK);
+  A($('#phone'), [{ opacity: 0, translate: '0px 160px', rotate: '5deg' }, { opacity: 1, translate: '0px 0px', rotate: '0deg' }], 5.9, .6, OUT);
+  A($('#ok'), [{ opacity: 0, scale: '.8' }, { opacity: 1, scale: '1' }], 6.6, .4, BACK);
+  enter($('.lt'), 7.1, { dy: 10, d: .3 });
+  ['#a1', '#a2', '#a3'].forEach((s, i) => enter($(s), 7.3 + i * .18, { dy: 20, d: .4 }));
+  A($('#a1'), [{ scale: '1' }, { scale: '1.04', offset: .4 }, { scale: '1' }], 8.4, .5, OUT);
+
+  // ---------- s3 · cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 11.3, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)' }], 11.3, .6, IO);
+  stagger(words($('#cta1')), 11.6, .08, { dy: 36, d: .45, e: BACK });
+  enter($('#cta2'), 12.4, { dy: 16, d: .45 });
+  enter($('#brand'), 12.9, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.2, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 14.1, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 4.6 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

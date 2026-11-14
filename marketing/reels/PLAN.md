@@ -89,6 +89,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Costul tipăririi cardurilor vs 0€ (2026-10-31: due scontrini; voci di costo della carta con "?" perché non abbiamo prezzi reali di stampa, Starter 0€ con i suoi limiti)
 - [x] „Cine sunt clienții mei fideli?” fără date vs cu date (già coperto dal reel del 2026-10-24: "Cine a venit de 5 ori luna asta?" + Excel con Total Scans; nell'app non c'è una classifica clienti da mostrare)
 - [x] Premiul la casă: numeri ștampilele pe carton vs „Răscumpără Premiu” în scanner (2026-11-07)
+- [x] Cine a dat ștampila? Una sola ștampilă, multe mâini vs conturi de personal + „Scanări pe Angajat” (2026-11-14; Setări → Personal → Creează Cont; Rapoarte = Business)
 - [ ] (backlog da riempire) Nuove idee "prima e dopo", solo flussi verificati nell'app
 
 **L'offerta**
@@ -143,3 +144,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-11 (mer) | `2026-11-11-quiz-adevarat-fals.html` | Il dato | Quiz in stile game show: "Un client nou te costă mai puțin…" → FALS (5–25×), "+5% clienți care revin → profit +25–95%" → ADEVĂRAT, fonte HBR 2014; 15 s + taglio 8 s | 12:30 (15 s) / Reel di prova (8 s) |
 | 2026-11-12 (gio) | `2026-11-12-reguli-pe-produs.html` | Una funzione | "Fiecare produs, regula lui" con 3 prodotti; admin "Gestionează Produse": Reguli su Cafea Espresso → modulo (Cafea gratuită, 7, 1) → "Cumpără 7 → Primești 1", poi Desert 20% e Limonadă; nota Starter 1 regulă / Business nelimitate; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-13 (ven) | `2026-11-13-pov-stampila-desenata.html` | POV / meme | Cartoncino con 4 timbri veri e 4 "disegnati" (stella, faccina, spunta), lente d'ingrandimento, faccina con aureola "E ștampila voastră!"; poi telefono con Achiziție Înregistrată! e Activitate Recentă; 15 s + taglio 9,3 s | 18:00 (15 s) / Reel di prova (9,3 s) |
+| 2026-11-14 (sab) | `2026-11-14-cine-a-scanat.html` | Prima e dopo | Tre turni e un solo timbro di gomma che passa di mano ("O singură ștampilă, multe mâini"); tendina → Setări / Personal (Creează Cont, Cont creat cu succes) → Rapoarte "Scanări pe Angajat" con dati d'esempio e nota Business; 15 s + taglio 11,5 s | 10:30 (15 s) / Reel di prova (11,5 s) |

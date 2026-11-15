@@ -98,7 +98,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Planul Business: reguli nelimitate + logo-ul tău (2026-10-25: €30/lună, €24/lună con pagamento annuale, elenco funzioni da PricingPage)
 - [x] Gratuit pentru clienți (2026-11-01: senza "mereu", il sito non promette "per sempre"; fonti faq.a1, faq.a2, features.step1 "fără înregistrare")
 - [x] Ce primești gratis în Starter: 1 locație, 50 clienți activi/lună, 1 regulă, scanner QR de bază (2026-11-08: pacco regalo "0€", 4 voci incluse + "Card cu brandingul LoyalCard"; nota onesta: logo, reguli nelimitate, analytics e export Excel sono nel Business)
-- [ ] Business la plata anuală: €24/lună (€288/an, –20%)
+- [x] Business la plata anuală: €24/lună (€288/an, –20%) (2026-11-15: interruttore "Lunar/Anual" come sul sito, 12 mesi da €30 a €24, totale €360 → €288, −€72 pe an)
 - [ ] Planul Professional (€60/lună): 3 locații, premii pe mai multe niveluri; prima verificare che i premi multi-livello funzionino nell'app
 
 ## Come si produce un reel
@@ -145,3 +145,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-12 (gio) | `2026-11-12-reguli-pe-produs.html` | Una funzione | "Fiecare produs, regula lui" con 3 prodotti; admin "Gestionează Produse": Reguli su Cafea Espresso → modulo (Cafea gratuită, 7, 1) → "Cumpără 7 → Primești 1", poi Desert 20% e Limonadă; nota Starter 1 regulă / Business nelimitate; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-13 (ven) | `2026-11-13-pov-stampila-desenata.html` | POV / meme | Cartoncino con 4 timbri veri e 4 "disegnati" (stella, faccina, spunta), lente d'ingrandimento, faccina con aureola "E ștampila voastră!"; poi telefono con Achiziție Înregistrată! e Activitate Recentă; 15 s + taglio 9,3 s | 18:00 (15 s) / Reel di prova (9,3 s) |
 | 2026-11-14 (sab) | `2026-11-14-cine-a-scanat.html` | Prima e dopo | Tre turni e un solo timbro di gomma che passa di mano ("O singură ștampilă, multe mâini"); tendina → Setări / Personal (Creează Cont, Cont creat cu succes) → Rapoarte "Scanări pe Angajat" con dati d'esempio e nota Business; 15 s + taglio 11,5 s | 10:30 (15 s) / Reel di prova (11,5 s) |
+| 2026-11-15 (dom) | `2026-11-15-business-anual.html` | L'offerta | Interruttore Lunar → Anual + "Economisești 20%", 12 tessere mese che passano da €30 a €24, totale €360 → €288 e "−€72 pe an", poi 5 funzioni Business e "€24/lună · €288 facturat anual"; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |

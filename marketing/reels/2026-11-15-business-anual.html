@@ -1,0 +1,246 @@
+<title>Business anual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "L'offerta": Business billed yearly. PricingPage.tsx: toggle "Lunar" / "Anual", "Economisești 20%",
+   Business price 30 (monthly) / yearlyPrice 288 → "€24/lună", "€288 facturat anual". 12 × 30 − 288 = 72 (arithmetic).
+   Business features from the same page; "Alege Business" leads to /contact. Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F5F3FA; --fg: #1B1530; --muted: #5E5873; --line: #DCD6EA; --accent: #6D28D9; --surface: #FFFFFF;
+  --night: #120B2A; --night-2: #1F1450; --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --lilac: #DDD3FB; --amber: #F5B544; --green: #34D399; --red: #F87171; --white: #FFFFFF;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0F0B19; --fg: #ECE8F6; --muted: #A39CB8; --line: #2A2340; --accent: #B39DFB; --surface: #18122A; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--night); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(40, 16, 90, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--night); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--night); color: var(--white); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(18, 11, 42, .6); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background:
+  radial-gradient(520px 460px at 50% 30%, rgba(124, 58, 237, .45), transparent 70%),
+  radial-gradient(520px 460px at 50% 95%, rgba(245, 181, 68, .14), transparent 70%),
+  linear-gradient(180deg, var(--night-2), var(--night)); }
+.kick { position: absolute; left: 40px; width: 640px; text-align: center; top: 184px; font-family: var(--f-mono); font-size: 18px; font-weight: 500; letter-spacing: .18em; color: var(--amber); }
+#hook { position: absolute; left: 40px; width: 640px; top: 220px; text-align: center; font-size: 62px; font-weight: 900; letter-spacing: -.045em; line-height: 1.02; }
+#hook em { font-style: normal; color: var(--amber); }
+
+/* toggle like on the pricing page */
+#tog { position: absolute; left: 160px; top: 390px; width: 400px; height: 72px; border-radius: 36px; background: rgba(255, 255, 255, .1); border: 1.5px solid rgba(255, 255, 255, .2); }
+#knob { position: absolute; left: 6px; top: 6px; width: 192px; height: 60px; border-radius: 30px; background: var(--violet-2); box-shadow: 0 6px 16px rgba(124, 58, 237, .5); }
+.tl { position: absolute; top: 0; width: 200px; height: 72px; display: grid; place-items: center; font-size: 24px; font-weight: 800; }
+#save { position: absolute; left: 470px; top: 362px; padding: 6px 12px; border-radius: 12px; background: var(--green); color: #064E3B; font-size: 18px; font-weight: 900; rotate: 6deg; white-space: nowrap; box-shadow: 0 8px 16px rgba(0, 0, 0, .3); }
+
+/* twelve months */
+#grid { position: absolute; left: 75px; top: 494px; width: 570px; height: 358px; }
+.mo { position: absolute; width: 132px; height: 110px; border-radius: 20px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .14); box-sizing: border-box; text-align: center; }
+.mo .m { margin-top: 14px; font-family: var(--f-mono); font-size: 15px; letter-spacing: .14em; color: rgba(255, 255, 255, .65); }
+.mo .p { position: relative; height: 48px; margin-top: 6px; }
+.mo .p span { position: absolute; left: 0; right: 0; font-size: 40px; font-weight: 900; letter-spacing: -.03em; }
+.mo .a { color: var(--white); }
+.mo .b { color: var(--amber); }
+#tot { position: absolute; left: 75px; top: 876px; width: 570px; display: flex; align-items: baseline; justify-content: space-between; }
+#tot .l { font-size: 26px; font-weight: 800; color: rgba(255, 255, 255, .8); }
+#tot .v { font-size: 54px; font-weight: 900; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+#minus { position: absolute; left: 470px; top: 940px; padding: 6px 14px; border-radius: 12px; background: rgba(52, 211, 153, .18); border: 1.5px solid var(--green); color: var(--green); font-size: 22px; font-weight: 900; white-space: nowrap; }
+
+/* features */
+#feat { position: absolute; left: 75px; top: 494px; width: 570px; }
+.ft { display: flex; align-items: center; gap: 14px; height: 64px; margin-bottom: 10px; border-radius: 18px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .14); padding: 0 18px; font-size: 24px; font-weight: 800; }
+.ft i { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--amber); color: #2A1600; display: grid; place-items: center; font-style: normal; font-size: 18px; font-weight: 900; }
+#perm { position: absolute; left: 40px; width: 640px; top: 876px; text-align: center; font-size: 30px; font-weight: 800; }
+#perm b { color: var(--amber); font-size: 44px; font-weight: 900; }
+#perm small { display: block; font-size: 20px; font-weight: 700; color: rgba(255, 255, 255, .7); margin-top: 4px; }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 92px; line-height: 1; letter-spacing: -.05em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · duminică · 15 s · Oferta</div>
+    <h1>Business anual</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: planul Business LoyalCard costă 30 euro pe lună sau 24 euro pe lună cu plata anuală, 288 euro facturat anual, economisești 20%">
+      <div id="stage">
+        <div id="bg"></div>
+
+        <div class="kick">PLANUL BUSINESS</div>
+        <div id="hook">Plătești anual? <em>Economisești 20%.</em></div>
+        <div id="tog"><div id="knob"></div><div class="tl" style="left:0">Lunar</div><div class="tl" style="left:200px">Anual</div></div>
+        <div id="save">Economisești 20%</div>
+
+        <!-- s1: twelve months (on screen at frame 0) -->
+        <div class="scene" id="s1">
+          <div id="grid"></div>
+          <div id="tot"><span class="l">Total pe an</span><span class="v" id="totv">€360</span></div>
+          <div id="minus">−€72 pe an</div>
+        </div>
+
+        <!-- s2: what's in Business -->
+        <div class="scene" id="s2">
+          <div id="feat">
+            <div class="ft"><i>✓</i>Reguli loyalty nelimitate</div>
+            <div class="ft"><i>✓</i>White-label (logo propriu)</div>
+            <div class="ft"><i>✓</i>Scanner multi-produs</div>
+            <div class="ft"><i>✓</i>Analytics + Export Excel</div>
+            <div class="ft"><i>✓</i>300 clienți activi/lună</div>
+          </div>
+          <div id="perm"><b>€24/lună</b> cu plata anuală<small>€288 facturat anual</small></div>
+        </div>
+
+        <!-- s3: cta -->
+        <div class="scene" id="s3">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:280px">
+            <div id="cta1">Alege <em>Business.</em></div>
+            <div id="cta2">€24/lună cu plata anuală, în loc de €30. Scrie-ne pe loyalcard.net.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+
+  // the twelve month tiles: €30 each, flipping to €24 one by one
+  const MONTHS = ['IAN', 'FEB', 'MAR', 'APR', 'MAI', 'IUN', 'IUL', 'AUG', 'SEP', 'OCT', 'NOI', 'DEC'];
+  const tiles = MONTHS.map((m, i) => { const d = document.createElement('div'); d.className = 'mo'; d.style.cssText = `left:${(i % 4) * 146}px;top:${Math.floor(i / 4) * 124}px`; d.innerHTML = `<div class="m">${m}</div><div class="p"><span class="a">€30</span><span class="b">€24</span></div>`; $('#grid').appendChild(d); return d; });
+
+  A($('#bg'), [{ translate: '0px 0px' }, { translate: '-30px 30px' }], 0, D, 'linear');
+
+  // ---------- header (frame 0) ----------
+  A($('#hook'), [{ translate: '0px 10px' }, { translate: '0px 0px' }], 0, .6, OUT);
+  enter($('#tog'), .15, { dy: 16, d: .45 });
+  // the knob slides from "Lunar" to "Anual"
+  A($('#knob'), [{ translate: '0px 0px' }, { translate: '196px 0px' }], 1.6, .45, IO);
+  A($('#save'), [{ opacity: 0, scale: '.4' }, { opacity: 1, scale: '1' }], 2.0, .4, BACK);
+  // header leaves with the months, comes back for the features
+  ['.kick', '#hook', '#tog', '#save'].forEach(s => A($(s), [{ opacity: 1 }, { opacity: 0 }], 10.4, .3, 'linear'));
+
+  // ---------- s1 · twelve months (on screen at frame 0) ----------
+  scene($('#s1'), -.05, 6.4);
+  tiles.forEach((tl, i) => {
+    A(tl, [{ opacity: 0, scale: '.7' }, { opacity: 1, scale: '1' }], .2 + i * .04, .4, BACK);
+    const t0 = 2.3 + i * .16;
+    A($('.a', tl), [{ opacity: 1, translate: '0px 0px' }, { opacity: 0, translate: '0px -30px' }], t0, .25, IN);
+    A($('.b', tl), [{ opacity: 0, translate: '0px 30px' }, { opacity: 1, translate: '0px 0px' }], t0 + .1, .3, BACK);
+    A(tl, [{ borderColor: 'rgba(255,255,255,.14)' }, { borderColor: 'rgba(245,181,68,.6)' }], t0 + .1, .3, 'linear');
+  });
+  enter($('#tot'), .7, { dy: 14, d: .4 });
+  const totv = $('#totv');
+  hooks.push(t => { let n = 0; tiles.forEach((_, i) => { if (t >= 2.4 + i * .16) n++; }); const s = `€${360 - n * 6}`; if (totv.textContent !== s) totv.textContent = s; totv.style.color = n === 12 ? 'var(--amber)' : ''; });
+  A($('#minus'), [{ opacity: 0, scale: '.5' }, { opacity: 1, scale: '1' }], 4.5, .4, BACK);
+  A($('#tot .v'), [{ scale: '1' }, { scale: '1.12', offset: .4 }, { scale: '1' }], 4.4, .5, OUT);
+
+  // ---------- s2 · what you get ----------
+  scene($('#s2'), 6.3, 10.8);
+  $$('#feat .ft').forEach((f, i) => enter(f, 6.4 + i * .18, { dx: -40, dy: 0, d: .45, e: BACK }));
+  enter($('#perm'), 7.6, { dy: 16, d: .45 });
+  A($('#perm b'), [{ scale: '1' }, { scale: '1.12', offset: .4 }, { scale: '1' }], 8.4, .5, OUT);
+
+  // ---------- s3 · cta ----------
+  A($('#s3'), [{ opacity: 0 }, { opacity: 1 }], 10.7, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'circle(0% at 50% 40%)' }, { clipPath: 'circle(95% at 50% 40%)' }], 10.7, .7, IO);
+  stagger(words($('#cta1')), 11.0, .12, { dy: 40, d: .5, e: BACK });
+  enter($('#cta2'), 11.7, { dy: 16, d: .45 });
+  enter($('#brand'), 12.2, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 12.5, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 13.5, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 5.0 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>

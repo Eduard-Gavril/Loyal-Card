@@ -37,7 +37,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Salon de înfrumusețare / unghii: 6 vizite → 20% reducere (2026-10-26, sconto percentuale = reward_type `percentage_discount`; anche taglio da 10 s)
 - [x] Pizzerie: 8 pizza → o pizza gratuită (2026-11-02: la pizza sul telefono si riempie fetta per fetta, "Cumpără 8 → Primești 1"; anche taglio da 10 s)
 - [x] Patiserie / brutărie (2026-11-09): esempio su un solo prodotto, 10 croissante → 1 gratuit, perché nell'app ogni regola è legata a un prodotto (product_id), non a "10 prodotti qualsiasi"; anche taglio da 10 s
-- [ ] Restaurant: 5 meniuri → desert gratuit (esempio del sito: "5 mese principale → desert GRATUIT sau 20% reducere")
+- [x] Restaurant: 5 meniuri → desert gratuit (2026-11-16: regola sul prodotto "Meniul zilei" chiamata "Desert gratuit", come l'esempio della landing page; anche taglio da 10,7 s)
 - [ ] Spălătorie auto: 5 spălări → a 6-a gratuită
 - [ ] Florărie: 5 buchete → 15% reducere
 - [ ] Fast-food / shaorma: 8 meniuri → unul gratuit
@@ -146,3 +146,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-13 (ven) | `2026-11-13-pov-stampila-desenata.html` | POV / meme | Cartoncino con 4 timbri veri e 4 "disegnati" (stella, faccina, spunta), lente d'ingrandimento, faccina con aureola "E ștampila voastră!"; poi telefono con Achiziție Înregistrată! e Activitate Recentă; 15 s + taglio 9,3 s | 18:00 (15 s) / Reel di prova (9,3 s) |
 | 2026-11-14 (sab) | `2026-11-14-cine-a-scanat.html` | Prima e dopo | Tre turni e un solo timbro di gomma che passa di mano ("O singură ștampilă, multe mâini"); tendina → Setări / Personal (Creează Cont, Cont creat cu succes) → Rapoarte "Scanări pe Angajat" con dati d'esempio e nota Business; 15 s + taglio 11,5 s | 10:30 (15 s) / Reel di prova (11,5 s) |
 | 2026-11-15 (dom) | `2026-11-15-business-anual.html` | L'offerta | Interruttore Lunar → Anual + "Economisești 20%", 12 tessere mese che passano da €30 a €24, totale €360 → €288 e "−€72 pe an", poi 5 funzioni Business e "€24/lună · €288 facturat anual"; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
+| 2026-11-16 (lun) | `2026-11-16-restaurant.html` | Un settore al giorno | Restaurant: campana che si alza sul piatto, "Meniul zilei îl are și vecinul", 5 pranzi Luni→Vineri riempiono 5 piatti sul telefono → Desert gratuit, 3 vantaggi, Starter gratuito; 30 s + taglio 10,7 s | 08:30 (30 s) / Reel di prova (10,7 s) |

@@ -50,7 +50,7 @@ Segnare `[x]` quando un tema è stato usato.
 - [x] Cum îmi obțin cardul de fidelitate? (2026-10-27: flusso reale loyalcard.net → "Alege magazinul tău" → card creato in automatico → scansione; la risposta del sito `faq.a3` dice che il card si crea alla scansione, nel codice si crea quando il cliente apre la pagina del negozio)
 - [x] Datele mele sunt în siguranță? (2026-11-03: solo fatti verificati: card senza registrazione, telefono facoltativo per il recupero, "Șterge contul meu" con conferma STERG, "nu vindem datele" da faq.a4; NON usati "conformi GDPR" e "criptate" perché non verificabili dal codice)
 - [x] Ce se întâmplă dacă îmi schimb telefonul? (2026-11-10: flusso reale numero di telefono + PIN di 6 cifre → "Recuperează-ți Cardurile" → "Cont recuperat! {n} carduri restaurate". Attenzione, nell'app: "Conturile fără număr de telefon sunt șterse în prima zi a fiecărei luni")
-- [ ] Pot să-l folosesc la orice magazin?
+- [x] Pot să-l folosesc la orice magazin? → 2026-11-17
 - [ ] Cum funcționează premiile?
 - [ ] Ce se întâmplă dacă magazinul se închide?
 
@@ -147,3 +147,4 @@ Segnare `[x]` quando un tema è stato usato.
 | 2026-11-14 (sab) | `2026-11-14-cine-a-scanat.html` | Prima e dopo | Tre turni e un solo timbro di gomma che passa di mano ("O singură ștampilă, multe mâini"); tendina → Setări / Personal (Creează Cont, Cont creat cu succes) → Rapoarte "Scanări pe Angajat" con dati d'esempio e nota Business; 15 s + taglio 11,5 s | 10:30 (15 s) / Reel di prova (11,5 s) |
 | 2026-11-15 (dom) | `2026-11-15-business-anual.html` | L'offerta | Interruttore Lunar → Anual + "Economisești 20%", 12 tessere mese che passano da €30 a €24, totale €360 → €288 e "−€72 pe an", poi 5 funzioni Business e "€24/lună · €288 facturat anual"; 15 s + taglio 10 s | 20:30 (15 s) / Reel di prova (10 s) |
 | 2026-11-16 (lun) | `2026-11-16-restaurant.html` | Un settore al giorno | Restaurant: campana che si alza sul piatto, "Meniul zilei îl are și vecinul", 5 pranzi Luni→Vineri riempiono 5 piatti sul telefono → Desert gratuit, 3 vantaggi, Starter gratuito; 30 s + taglio 10,7 s | 08:30 (30 s) / Reel di prova (10,7 s) |
+| 2026-11-17 (mar) | `2026-11-17-orice-magazin.html` | FAQ | Bolla "Pot să-l folosesc la orice magazin?" → "La orice magazin participant"; telefono "Cardurile Tale" con Cafeneaua ta 3/7 e Brutărie 2/10, scansione solo sulla prima (+1 → 4/7, Brutărie "neschimbat"), testo dell'app "Fiecare card este specific unui magazin", lucchetto "Ce câștigi la tine, rămâne la tine"; CTA "Programul tău. Regulile tale." + Starter; 15 s + taglio 8,3 s | 14:30 (15 s) / Reel di prova (8,3 s) |

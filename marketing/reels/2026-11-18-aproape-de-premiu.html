@@ -1,0 +1,317 @@
+<title>Aproape de premiu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Libre+Caslon+Display&display=swap">
+<style>
+/* LoyalCard reel · 9:16 · 720×1280 stage (exported at 1080×1920)
+   Series "Il dato". Source, checked on the paper's PDF (Columbia Business School copy):
+   Kivetz, Urminsky & Zheng, "The Goal-Gradient Hypothesis Resurrected", Journal of Marketing Research 43 (2006): 39–58.
+   Café RP "buy ten coffees, get one free": "on average, interpurchase times decrease by 20% or .7 days throughout the program"
+   (949 completed ten-stamp cards). The timeline shrinks its gaps linearly from 1 to 0.8 (illustrative, same 20%).
+   App strings: "Premiile tale", "{n} din {m} achiziții", "Încă {k} necesari!", "Codul tău QR". Safe area: x 40–640, y 170–1000 */
+:root {
+  --bg: #F7F2EC; --fg: #24160F; --muted: #6B5A4E; --line: #E4D8CB; --accent: #A0522D; --surface: #FFFFFF;
+  --roast: #23150E; --roast-2: #3A2418; --cream: #F3E6D3; --cream-2: #E2CDB2; --foam: #FFF8EE; --amber: #F5B544; --amber-2: #FFD27A; --violet: #6D28D9; --violet-2: #7C3AED; --deep: #3B0F7A; --white: #FFFFFF;
+  --f-display: 'Libre Caslon Display', 'Times New Roman', Georgia, serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #140D09; --fg: #F2E8DE; --muted: #B8A595; --line: #33241B; --accent: #E0A47A; --surface: #1D140E; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #140D09; --fg: #F2E8DE; --muted: #B8A595; --line: #33241B; --accent: #E0A47A; --surface: #1D140E; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); }
+.page { max-width: 440px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1.05; }
+
+.player { background: var(--roast); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -24px rgba(35, 21, 14, .5); }
+#wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; background: var(--roast); cursor: pointer; }
+#stage { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; transform-origin: 0 0; overflow: hidden; background: var(--roast); color: var(--cream); font-family: var(--f-body); }
+.controls { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: #fff; }
+.cbtn { flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.cbtn svg { width: 17px; height: 17px; }
+.cbtn:focus-visible, .scrub:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.scrub { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(90deg, var(--amber) 0 var(--p, 0%), rgba(255, 255, 255, .18) var(--p, 0%) 100%); }
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--amber); }
+.time { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+#playhint { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#playhint div { width: 120px; height: 120px; border-radius: 50%; background: rgba(35, 21, 14, .55); display: grid; place-items: center; }
+#playhint svg { width: 46px; height: 46px; margin-left: 6px; }
+
+/* ---------- stage ---------- */
+.scene { position: absolute; inset: 0; }
+.w { display: inline-block; }
+#bg { position: absolute; inset: -160px; background:
+  radial-gradient(560px 480px at 82% 16%, rgba(245, 181, 68, .16), transparent 70%),
+  radial-gradient(560px 480px at 12% 90%, rgba(160, 82, 45, .22), transparent 70%),
+  radial-gradient(circle at 1px 1px, rgba(243, 230, 211, .07) 1.4px, transparent 1.7px) 0 0 / 30px 30px,
+  var(--roast); }
+.kick { font-family: var(--f-mono); font-size: 18px; font-weight: 500; letter-spacing: .14em; color: var(--amber); white-space: nowrap; }
+.kick.c { position: absolute; left: 40px; width: 640px; text-align: center; }
+
+/* s1 · hook */
+#k1 { position: absolute; left: 60px; top: 340px; }
+#h1 { position: absolute; left: 60px; top: 386px; width: 610px; font-size: 68px; font-weight: 900; letter-spacing: -.045em; line-height: 1.02; color: var(--foam); }
+#h1 em { font-style: normal; color: var(--amber); }
+#pbar { position: absolute; left: 60px; top: 740px; width: 600px; display: flex; gap: 8px; align-items: center; }
+#pbar i { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 3px dashed rgba(243, 230, 211, .35); box-sizing: border-box; display: grid; place-items: center; }
+#pbar i.on { border: 0; background: var(--cream); }
+#pbar i svg { width: 26px; height: 26px; }
+#pbar b { margin-left: 8px; font-size: 26px; font-weight: 900; color: var(--amber); white-space: nowrap; }
+
+/* s2 · the study */
+#k2 { top: 196px; }
+#t2 { position: absolute; left: 40px; width: 640px; top: 232px; text-align: center; font-size: 38px; font-weight: 900; letter-spacing: -.03em; line-height: 1.08; color: var(--foam); }
+#card { position: absolute; left: 130px; top: 330px; width: 460px; height: 214px; border-radius: 26px; background: var(--cream); color: var(--roast); box-shadow: 0 24px 50px rgba(0, 0, 0, .4); }
+#card .ct { position: absolute; left: 24px; top: 18px; font-family: var(--f-mono); font-size: 14px; font-weight: 500; letter-spacing: .12em; color: #8A5A3A; }
+#card .rw { position: absolute; right: 24px; top: 15px; font-size: 17px; font-weight: 900; color: var(--roast); }
+#slots { position: absolute; left: 30px; top: 56px; width: 400px; display: grid; grid-template-columns: repeat(5, 64px); gap: 14px 20px; }
+#slots i { position: relative; width: 64px; height: 64px; border-radius: 50%; border: 3px dashed #C9AE8F; box-sizing: border-box; }
+#slots i span { position: absolute; inset: -3px; border-radius: 50%; background: var(--roast-2); display: grid; place-items: center; }
+#slots i svg { width: 34px; height: 34px; }
+#tl { position: absolute; left: 60px; top: 600px; width: 600px; height: 120px; }
+#tlLine { position: absolute; left: 0; top: 58px; width: 600px; height: 4px; border-radius: 2px; background: rgba(243, 230, 211, .25); transform-origin: 0 50%; }
+.tick { position: absolute; top: 44px; width: 32px; height: 32px; margin-left: -16px; border-radius: 50%; background: var(--cream); display: grid; place-items: center; box-shadow: 0 0 0 4px var(--roast); }
+.tick svg { width: 19px; height: 19px; }
+#tlL { position: absolute; left: 0; top: 0; font-size: 18px; font-weight: 700; color: rgba(243, 230, 211, .75); white-space: nowrap; }
+#tlR { position: absolute; right: 0; top: 0; font-size: 18px; font-weight: 700; color: rgba(243, 230, 211, .75); white-space: nowrap; }
+.brk { position: absolute; top: 88px; height: 14px; border: 3px solid var(--amber); border-top: 0; border-radius: 0 0 6px 6px; box-sizing: border-box; }
+.brkL { position: absolute; top: 106px; font-size: 17px; font-weight: 800; color: var(--amber); white-space: nowrap; }
+#big { position: absolute; left: 40px; width: 640px; top: 744px; text-align: center; font-size: 150px; font-weight: 900; letter-spacing: -.06em; line-height: 1; color: var(--amber); }
+#bigSub { position: absolute; left: 40px; width: 640px; top: 900px; text-align: center; font-size: 25px; font-weight: 700; line-height: 1.3; color: var(--foam); }
+#src { position: absolute; left: 60px; width: 600px; top: 978px; text-align: center; font-family: var(--f-mono); font-size: 17px; line-height: 1.45; color: rgba(243, 230, 211, .62); }
+
+/* s3 · LoyalCard */
+#k3 { top: 196px; }
+#t3 { position: absolute; left: 40px; width: 640px; top: 232px; text-align: center; font-size: 46px; font-weight: 900; letter-spacing: -.035em; line-height: 1.05; color: var(--foam); }
+#t3 em { font-style: normal; color: var(--amber); }
+#phone { position: absolute; left: 195px; top: 336px; width: 330px; height: 600px; border-radius: 50px; scale: 1.2; transform-origin: 50% 0; background: #0B0618; box-shadow: 0 30px 60px rgba(0, 0, 0, .5); }
+.screen { position: absolute; inset: 11px; border-radius: 40px; overflow: hidden; background: #F6F3FB; color: #1B1530; }
+.notch { position: absolute; left: 50%; top: 9px; width: 86px; height: 22px; margin-left: -43px; border-radius: 12px; background: #0B0618; z-index: 3; }
+.sbar { position: absolute; left: 28px; top: 11px; font-size: 12px; font-weight: 700; }
+.ph { position: absolute; left: 0; right: 0; top: 0; height: 128px; background: linear-gradient(150deg, var(--violet-2), var(--deep)); color: #fff; }
+.ph .lg { position: absolute; left: 20px; top: 50px; width: 52px; height: 52px; border-radius: 50%; background: #8B5E3C; display: grid; place-items: center; box-shadow: 0 0 0 3px rgba(255, 255, 255, .25); }
+.ph .lg svg { width: 28px; height: 28px; }
+.ph .nm { position: absolute; left: 84px; top: 54px; font-size: 20px; font-weight: 900; }
+.ph .sb { position: absolute; left: 84px; top: 80px; font-size: 13px; font-weight: 600; opacity: .8; }
+.qr { position: absolute; left: 74px; top: 146px; width: 160px; height: 160px; border-radius: 18px; background: #fff; box-shadow: 0 8px 20px rgba(27, 21, 48, .12); display: grid; place-items: center; }
+.qr svg { width: 128px; height: 128px; }
+.qrT { position: absolute; left: 0; right: 0; top: 314px; text-align: center; font-size: 13px; font-weight: 700; color: #5E5873; }
+.rw2 { position: absolute; left: 16px; right: 16px; top: 344px; border-radius: 20px; background: #fff; box-shadow: 0 8px 20px rgba(27, 21, 48, .1); padding: 16px; box-sizing: border-box; height: 214px; }
+.rw2 .h { font-size: 15px; font-weight: 900; }
+.rw2 .r { margin-top: 10px; font-size: 14px; font-weight: 700; color: #5E5873; }
+.rw2 .r b { color: #1B1530; }
+.bar { margin-top: 10px; height: 12px; border-radius: 6px; background: #E9E4F3; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--violet-2), #A78BFA); transform-origin: 0 50%; }
+.rw2 .n { margin-top: 8px; font-size: 13.5px; font-weight: 700; color: #5E5873; }
+#need { margin-top: 12px; display: inline-block; padding: 8px 14px; border-radius: 12px; background: #FEF3C7; color: #92400E; font-size: 17px; font-weight: 900; }
+
+/* cta */
+#ctaBg { position: absolute; inset: 0; background: linear-gradient(160deg, var(--violet-2), var(--deep)); }
+.col { position: absolute; left: 40px; width: 640px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; color: var(--white); }
+#cta1 { font-weight: 900; font-size: 80px; line-height: 1; letter-spacing: -.05em; }
+#cta1 em { font-style: normal; color: var(--amber); }
+#cta2 { font-size: 29px; font-weight: 700; line-height: 1.35; color: #DDD3FB; }
+#brand { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+#brand svg { width: 64px; height: 64px; padding: 8px; border-radius: 18px; background: #fff; }
+#urlpill { font-family: var(--f-mono); font-weight: 500; font-size: 30px; color: #2A1600; padding: 12px 24px; border-radius: 16px; background: var(--amber); }
+#bio { font-size: 26px; font-weight: 800; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="gL"><rect x="104" y="104" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(-251.79 468.22) scale(0.036242 -0.036242)"><path fill="#FAF9F6" d="M10780 9146 c0 -22 5 -23 77 -30 56 -4 88 -13 121 -32 82 -48 77 7 77 -909 l0 -810 -23 -43 c-29 -54 -77 -78 -179 -88 -68 -6 -73 -8 -73 -30 l0 -24 878 0 879 0 17 163 c10 89 26 240 37 335 24 220 24 212 -5 212 -31 0 -37 -10 -70 -110 -100 -307 -243 -453 -471 -481 -51 -7 -159 -9 -252 -6 -182 6 -209 14 -240 77 -17 33 -18 90 -18 825 l0 790 23 42 c31 59 81 82 188 90 80 6 84 7 84 29 l0 24 -525 0 -525 0 0 -24z"/></g></g>
+    <g id="gP"><rect x="272" y="140" width="136" height="64" rx="32" fill="#7C3AED"/><circle cx="298" cy="172" r="9" fill="#FAF9F6"/><circle cx="326" cy="172" r="9" fill="#FAF9F6"/><circle cx="354" cy="172" r="9" fill="#FAF9F6"/><circle cx="382" cy="172" r="9" fill="none" stroke="#FAF9F6" stroke-width="3"/></g>
+    <g id="gQ"><rect x="104" y="272" width="136" height="136" rx="36" fill="#6D28D9"/><g transform="translate(106 275) scale(5.5)"><path fill="#FAF9F6" fill-rule="evenodd" clip-rule="evenodd" d="M21 7.505a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 16.5 3h3A1.5 1.5 0 0 1 21 4.5v3.005zM9 7.5V4.504a1.5 1.5 0 0 0-1.498-1.5l-3-.003A1.5 1.5 0 0 0 3 4.5V7.5A1.5 1.5 0 0 0 4.5 9h3A1.5 1.5 0 0 0 9 7.5zM5 7V5.001l2 .002V7H5zm-.502 8.004 3-.003A1.5 1.5 0 0 1 9 16.5V19.5A1.5 1.5 0 0 1 7.5 21h-3A1.5 1.5 0 0 1 3 19.5v-2.996a1.5 1.5 0 0 1 1.498-1.5zM7 19H5v-1.997l2-.002V19zM19 5v2.005h-2V5h2zm0 11a1 1 0 1 1 2 0v3.5a1.5 1.5 0 0 1-1.498 1.5l-3.5.005a1 1 0 1 1-.003-2L19 19V16zM11 4v7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 1-1V4a1 1 0 1 0-2 0zm2 16a1 1 0 1 1-2 0v-4a1 1 0 1 1 2 0v4zm3-3a1 1 0 0 0 1-1v-3h3a1 1 0 1 0 0-2h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1z"/></g></g>
+    <g id="gC"><rect x="272" y="272" width="136" height="136" rx="36" fill="#7C3AED"/><g transform="translate(152.81 701.39) scale(0.034749 -0.034749)"><path fill="#FAF9F6" d="M5380 11430 c-366 -60 -669 -282 -825 -605 -74 -153 -105 -290 -105 -458 0 -134 12 -215 47 -322 54 -165 133 -294 249 -406 135 -129 281 -204 496 -256 59 -15 114 -18 288 -17 204 0 219 2 303 27 154 47 276 119 398 234 l69 65 0 86 0 85 -107 -104 c-212 -206 -356 -266 -608 -256 -179 7 -279 48 -387 159 -209 212 -287 773 -162 1169 63 201 169 331 336 413 126 62 228 77 363 54 251 -42 437 -221 521 -500 13 -43 18 -48 44 -48 l30 0 0 345 0 345 -28 0 c-25 0 -30 -6 -41 -39 -6 -22 -25 -51 -42 -65 -47 -40 -70 -39 -234 16 -66 22 -158 48 -205 59 -97 22 -316 33 -400 19z"/></g></g>
+    <symbol id="logo" viewBox="104 104 304 304"><use href="#gL"/><use href="#gP"/><use href="#gQ"/><use href="#gC"/></symbol>
+    <symbol id="cupD" viewBox="0 0 24 24"><path fill="none" stroke="#23150E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+    <symbol id="cupL" viewBox="0 0 24 24"><path fill="none" stroke="#F3E6D3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+    <symbol id="cupW" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="head">
+    <div class="eyebrow">Reel LoyalCard · miercuri · 15 s · Datul săptămânii</div>
+    <h1>Aproape de premiu</h1>
+  </header>
+  <section class="player" aria-label="Reel">
+    <div id="wrap" role="img" aria-label="Reel: într-un studiu pe 949 de carduri de cafea, pauza dintre cafele scade în medie cu 20% pe măsură ce clientul se apropie de premiu">
+      <div id="stage">
+        <div id="bg"></div>
+
+        <!-- s1: on screen at frame 0 -->
+        <div class="scene" id="s1">
+          <div class="kick" id="k1">STUDIU · 949 DE CARDURI DE CAFEA</div>
+          <div id="h1">Când premiul e aproape, clientul <em>revine mai repede.</em></div>
+          <div id="pbar"></div>
+        </div>
+
+        <!-- s2: the study -->
+        <div class="scene" id="s2">
+          <div class="kick c" id="k2">CAFENEA · „10 CAFELE → 1 GRATUITĂ”</div>
+          <div id="t2">Ștampilă după ștampilă, pauzele se scurtează.</div>
+          <div id="card"><div class="ct">CARD DE FIDELITATE</div><div class="rw">10 → 1 gratuită</div><div id="slots"></div></div>
+          <div id="tl">
+            <div id="tlL">prima cafea</div><div id="tlR">a 10-a cafea</div>
+            <div id="tlLine"></div>
+            <div class="brk" id="b1"></div><div class="brkL" id="b1L">prima pauză</div>
+            <div class="brk" id="b2"></div><div class="brkL" id="b2L">ultima pauză</div>
+          </div>
+          <div id="big">−20%</div>
+          <div id="bigSub">În medie, pauza dintre două cafele scade<br>cu 20% <span style="white-space:nowrap">(0,7 zile)</span> până la cafeaua gratuită.</div>
+          <div id="src">Sursa: Kivetz, Urminsky &amp; Zheng,<br>Journal of Marketing Research, 2006</div>
+        </div>
+
+        <!-- s3: show the progress -->
+        <div class="scene" id="s3">
+          <div class="kick c" id="k3">CE ÎNSEAMNĂ PENTRU TINE</div>
+          <div id="t3">Arată-i clientului <em>cât de aproape e.</em></div>
+          <div id="phone"><div class="screen">
+            <div class="ph"><div class="lg"><svg><use href="#cupW"/></svg></div><div class="nm">Cafeneaua ta</div><div class="sb">Program de Fidelitate</div></div>
+            <div class="notch"></div><div class="sbar" style="color:#fff">9:41</div>
+            <div class="qr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path id="qrP" fill="#1B1530"/></svg></div>
+            <div class="qrT">Codul tău QR</div>
+            <div class="rw2">
+              <div class="h">Premiile tale</div>
+              <div class="r"><b>Cafea gratuită</b> · Cumpără 10 → Primești 1</div>
+              <div class="bar"><i id="barI"></i></div>
+              <div class="n" id="nOf">7 din 10 achiziții</div>
+              <div id="need">Încă 3 necesari!</div>
+            </div>
+          </div></div>
+        </div>
+
+        <!-- s4: cta -->
+        <div class="scene" id="s4">
+          <div id="ctaBg"></div>
+          <div class="col" style="top:340px">
+            <div id="cta1">Fă premiul <em>vizibil.</em></div>
+            <div id="cta2">Cu LoyalCard, clientul își vede oricând progresul, pe telefon. Începi gratuit cu planul Starter.</div>
+            <div id="brand"><svg><use href="#logo"/></svg><div id="urlpill">loyalcard.net</div></div>
+            <div id="bio">Link în bio</div>
+          </div>
+        </div>
+
+        <div id="playhint" hidden><div><svg viewBox="0 0 24 24"><path fill="#FFFFFF" d="M6 4l14 8-14 8z"/></svg></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="pp" type="button" aria-label="Redă"><svg viewBox="0 0 24 24" id="ppIcon"></svg></button>
+      <input class="scrub" id="scrub" type="range" min="0" max="15000" step="10" value="0" aria-label="Poziția în video">
+      <div class="time" id="time">0:00 / 0:15</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const D = 15;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const OUT = 'cubic-bezier(.16,1,.3,1)', BACK = 'cubic-bezier(.34,1.56,.64,1)', IN = 'cubic-bezier(.55,0,.85,.35)', IO = 'cubic-bezier(.65,0,.35,1)';
+  const anims = [], hooks = [], touched = new WeakMap();
+  // Every effect is a paused Web Animation on one shared clock: seek(t) renders any frame exactly.
+  function A(el, kf, start, dur, easing = OUT) {
+    const props = new Set();
+    kf.forEach(k => Object.keys(k).forEach(p => { if (p !== 'offset' && p !== 'easing') props.add(p); }));
+    const seen = touched.get(el) || new Set();
+    const fresh = [...props].every(p => !seen.has(p));
+    props.forEach(p => seen.add(p)); touched.set(el, seen);
+    const a = el.animate(kf, { delay: start * 1000, duration: Math.max(1, dur * 1000), fill: fresh ? 'both' : 'forwards', easing });
+    a.pause(); if (a.persist) a.persist(); anims.push(a); return a;
+  }
+  const scene = (el, start, end) => { A(el, [{ opacity: 0 }, { opacity: 1 }], start, .01, 'linear'); A(el, [{ opacity: 1 }, { opacity: 0 }], end - .35, .35, IN); };
+  const enter = (el, t, o = {}) => { const { dx = 0, dy = 28, s = 1, r = 0, d = .6, e = OUT } = o; return A(el, [{ opacity: 0, translate: `${dx}px ${dy}px`, scale: `${s}`, rotate: `${r}deg` }, { opacity: 1, translate: '0px 0px', scale: '1', rotate: '0deg' }], t, d, e); };
+  const words = el => { const out = []; [...el.childNodes].forEach(n => { if (n.nodeType === 3) { const frag = document.createDocumentFragment(); n.textContent.split(/(\s+)/).forEach(p => { if (!p) return; if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; } const s = document.createElement('span'); s.className = 'w'; s.textContent = p; frag.appendChild(s); out.push(s); }); el.replaceChild(frag, n); } else if (n.nodeName !== 'BR') { n.classList.add('w'); out.push(n); } }); return out; };
+  const stagger = (els, t, step, o) => els.forEach((el, i) => enter(el, t + i * step, o));
+  const cup = id => `<svg><use href="#${id}"/></svg>`;
+
+  // fake QR (decorative)
+  const qrPath = (n = 25, seed = 7) => { let s = seed; const rnd = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; let d = ''; const finder = (x, y) => x < 7 && y < 7 || x >= n - 7 && y < 7 || x < 7 && y >= n - 7; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { let on; if (finder(x, y)) { const fx = x < 7 ? x : x - (n - 7), fy = y < 7 ? y : y - (n - 7); on = fx === 0 || fx === 6 || fy === 0 || fy === 6 || (fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4); } else on = rnd() < .5; if (on) d += `M${x} ${y}h1v1h-1z`; } return d; };
+  $('#qrP').setAttribute('d', qrPath(25, 1118));
+
+  A($('#bg'), [{ translate: '0px 0px' }, { translate: '-40px 30px' }], 0, D, 'linear');
+
+  // ---------- s1 · hook (on screen at frame 0) ----------
+  scene($('#s1'), -.05, 2.9);
+  const pbar = $('#pbar');
+  for (let i = 0; i < 10; i++) { const d = document.createElement('i'); if (i < 8) { d.className = 'on'; d.innerHTML = cup('cupD'); } pbar.appendChild(d); }
+  const pb = document.createElement('b'); pb.textContent = 'Încă 2!'; pbar.appendChild(pb);
+  A($('#h1'), [{ translate: '0px 14px' }, { translate: '0px 0px' }], 0, .7, OUT);
+  $$('#pbar i').forEach((d, i) => A(d, [{ scale: '1' }, { scale: '1.18', offset: .4 }, { scale: '1' }], .5 + i * .07, .4, OUT));
+  A(pb, [{ scale: '1' }, { scale: '1.25', offset: .4 }, { scale: '1' }], 1.4, .5, BACK);
+
+  // ---------- s2 · the study ----------
+  scene($('#s2'), 2.8, 9.6);
+  enter($('#k2'), 2.85, { dy: 12, d: .4 });
+  enter($('#t2'), 2.95, { dy: 18, d: .45 });
+  A($('#card'), [{ opacity: 0, translate: '0px 60px', rotate: '-3deg' }, { opacity: 1, translate: '0px 0px', rotate: '-1.5deg' }], 3.0, .55, OUT);
+  enter($('#tlL'), 3.3, { dy: 8, d: .35 }); enter($('#tlR'), 3.3, { dy: 8, d: .35 });
+  A($('#tlLine'), [{ scale: '0 1' }, { scale: '1 1' }], 3.3, .5, OUT);
+  // gaps shrink linearly from g0 to 0.8·g0 (the paper's average 20%), 9 gaps across 600px
+  const g0 = 600 / 8.1; const xs = [0]; for (let i = 0; i < 9; i++) xs.push(xs[i] + g0 * (1 - .2 * i / 8));
+  const slots = $('#slots'), tl = $('#tl');
+  const T0 = 3.6, STEP = .26;
+  xs.forEach((x, i) => {
+    const sl = document.createElement('i'); const fill = document.createElement('span'); fill.innerHTML = cup('cupL'); sl.appendChild(fill); slots.appendChild(sl);
+    A(fill, [{ opacity: 0, scale: '1.6', rotate: '-14deg' }, { opacity: 1, scale: '1', rotate: '0deg' }], T0 + i * STEP, .3, BACK);
+    const tk = document.createElement('div'); tk.className = 'tick'; tk.style.left = `${x}px`; tk.innerHTML = cup('cupD'); tl.appendChild(tk);
+    A(tk, [{ opacity: 0, scale: '.3' }, { opacity: 1, scale: '1' }], T0 + i * STEP, .3, BACK);
+  });
+  const placeB = (b, l, a, z) => { b.style.left = `${a + 8}px`; b.style.width = `${z - a - 16}px`; };
+  placeB($('#b1'), null, xs[0], xs[1]); placeB($('#b2'), null, xs[8], xs[9]);
+  $('#b1L').style.left = '0px'; $('#b2L').style.right = '0px';
+  const TB = T0 + 9 * STEP + .25;
+  enter($('#b1'), TB, { dy: -6, d: .3 }); enter($('#b1L'), TB, { dy: -6, d: .3 });
+  enter($('#b2'), TB + .3, { dy: -6, d: .3 }); enter($('#b2L'), TB + .3, { dy: -6, d: .3 });
+  A($('#big'), [{ opacity: 0, scale: '.5' }, { opacity: 1, scale: '1' }], TB + .7, .5, BACK);
+  enter($('#bigSub'), TB + 1.0, { dy: 14, d: .4 });
+  enter($('#src'), TB + 1.2, { dy: 10, d: .4 });
+
+  // ---------- s3 · show the progress ----------
+  scene($('#s3'), 9.5, 12.1);
+  enter($('#k3'), 9.55, { dy: 12, d: .4 });
+  stagger(words($('#t3')), 9.6, .06, { dy: 26, d: .45 });
+  A($('#phone'), [{ opacity: 0, translate: '0px 160px', rotate: '-4deg' }, { opacity: 1, translate: '0px 0px', rotate: '0deg' }], 9.65, .6, OUT);
+  const T_SCAN = 10.6;
+  A($('#barI'), [{ scale: '.7 1' }, { scale: '.8 1' }], T_SCAN, .4, OUT);
+  const nOf = $('#nOf'), need = $('#need');
+  hooks.push(t => { const n = t >= T_SCAN ? 8 : 7; const a = `${n} din 10 achiziții`, b = `Încă ${10 - n} necesari!`; if (nOf.textContent !== a) nOf.textContent = a; if (need.textContent !== b) need.textContent = b; });
+  A(need, [{ scale: '1' }, { scale: '1.2', offset: .35 }, { scale: '1' }], T_SCAN, .55, BACK);
+
+  // ---------- s4 · cta ----------
+  A($('#s4'), [{ opacity: 0 }, { opacity: 1 }], 11.8, .4, 'linear');
+  A($('#ctaBg'), [{ clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(95% at 50% 50%)' }], 11.8, .7, IO);
+  stagger(words($('#cta1')), 12.1, .1, { dy: 40, d: .5, e: BACK });
+  enter($('#cta2'), 12.6, { dy: 16, d: .45 });
+  enter($('#brand'), 13.0, { dy: 18, s: .92, d: .5, e: BACK });
+  enter($('#bio'), 13.3, { dy: 10, d: .35 });
+  A($('#urlpill'), [{ scale: '1' }, { scale: '1.07', offset: .4 }, { scale: '1' }], 14.1, .6, OUT);
+
+  // ---------- clock & preview player ----------
+  const wrap = $('#wrap'), stage = $('#stage'), scrub = $('#scrub'), timeEl = $('#time'), pp = $('#pp'), ppIcon = $('#ppIcon'), hint = $('#playhint');
+  let t = 0, playing = false, lastNow = 0;
+  const fmt = s => { const x = Math.floor(s + 1e-6); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; };
+  function ui() { scrub.value = Math.round(t * 1000); scrub.style.setProperty('--p', `${(t / D) * 100}%`); timeEl.textContent = `${fmt(t)} / ${fmt(D)}`; ppIcon.innerHTML = playing ? '<path fill="currentColor" d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>' : '<path fill="currentColor" d="M7 4.5l12 7.5-12 7.5z"/>'; pp.setAttribute('aria-label', playing ? 'Pauză' : 'Redă'); hint.hidden = playing; }
+  function seek(x) { t = Math.min(D, Math.max(0, x)); const ms = t * 1000; for (const a of anims) a.currentTime = ms; for (const h of hooks) h(t); ui(); }
+  function frame(now) { if (!playing) return; const dt = Math.min(.1, (now - lastNow) / 1000); lastNow = now; let nt = t + dt; if (nt >= D) { nt = D; playing = false; } seek(nt); if (playing) requestAnimationFrame(frame); }
+  function play() { if (t >= D - .01) seek(0); playing = true; lastNow = performance.now(); requestAnimationFrame(frame); ui(); }
+  function pause() { playing = false; ui(); }
+  const toggle = () => playing ? pause() : play();
+  pp.addEventListener('click', toggle); wrap.addEventListener('click', toggle);
+  let was = false;
+  scrub.addEventListener('pointerdown', () => { was = playing; pause(); });
+  scrub.addEventListener('input', () => seek(scrub.value / 1000));
+  scrub.addEventListener('change', () => { if (was) play(); was = false; });
+  const fit = () => { const w = wrap.clientWidth, h = wrap.clientHeight; const s = Math.min(w / 720, h / 1280); stage.style.transform = `translate(${(w - 720 * s) / 2}px, ${(h - 1280 * s) / 2}px) scale(${s})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+  window.__lc = { seek, D, pause };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  seek(reduce ? 8.5 : 0);
+  if (!reduce) (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1200))]) : Promise.resolve()).then(() => { if (!playing && t === 0) play(); });
+})();
+</script>
